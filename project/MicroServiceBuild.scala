@@ -7,6 +7,9 @@ object MicroServiceBuild extends Build with MicroService {
 
   val appName = "voa-property-linking"
 
+
+  override val defaultPort: Int = 9524
+
   override lazy val appDependencies: Seq[ModuleID] = AppDependencies()
 }
 

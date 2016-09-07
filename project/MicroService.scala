@@ -1,5 +1,6 @@
+import play.PlayImport.PlayKeys
 import sbt.Keys._
-import sbt.Tests.{SubProcess, Group}
+import sbt.Tests.{Group, SubProcess}
 import sbt._
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 
@@ -21,6 +22,7 @@ trait MicroService {
   lazy val plugins : Seq[Plugins] = Seq.empty
   lazy val playSettings : Seq[Setting[_]] = Seq.empty
 
+  val defaultPort = 9000
 
   lazy val microservice = Project(appName, file("."))
     .enablePlugins(Seq(play.PlayScala,SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin) ++ plugins : _*)
@@ -28,6 +30,7 @@ trait MicroService {
     .settings(scalaSettings: _*)
     .settings(publishingSettings: _*)
     .settings(defaultSettings(): _*)
+    .settings(PlayKeys.playDefaultPort := defaultPort)
     .settings(
       libraryDependencies ++= appDependencies,
       retrieveManaged := true,
