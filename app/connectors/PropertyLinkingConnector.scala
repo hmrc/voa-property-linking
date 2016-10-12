@@ -32,12 +32,12 @@ class PropertyLinkingConnector(http: HttpGet with HttpPut with HttpPost)(implici
   }
 
   def create(submissionId: String, link: PropertyLink)(implicit hc: HeaderCarrier): Future[Unit] = {
-    val url = baseUrl + s"/${link.uarn}/${link.userId}/${submissionId}"
+    val url = baseUrl + s"/${link.uarn}/${link.userId}/$submissionId"
     http.POST[PropertyLink, Unit](url, link)
   }
 
   def get(userId: String)(implicit hc: HeaderCarrier): Future[Seq[PropertyLink]] = {
-    val url = baseUrl + s"/${userId}"
+    val url = baseUrl + s"/$userId"
     http.GET[Seq[PropertyLink]](url)
   }
 

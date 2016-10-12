@@ -33,12 +33,12 @@ class PropertyRepresentationConnector(http: HttpGet with HttpPut)(implicit ec: E
   }
 
   def get(userId: String, uarn: String)(implicit hc: HeaderCarrier): Future[Seq[PropertyRepresentation]] = {
-    val url = baseUrl + s"/get/${userId}/${uarn}"
+    val url = baseUrl + s"/get/$userId/$uarn"
     http.GET[Seq[PropertyRepresentation]](url)
   }
 
   def forAgent(agentId: String)(implicit hc: HeaderCarrier): Future[Seq[PropertyRepresentation]] = {
-    val url = baseUrl + s"/forAgent/${agentId}"
+    val url = baseUrl + s"/forAgent/$agentId"
     http.GET[Seq[PropertyRepresentation]](url)
   }
 
@@ -48,12 +48,12 @@ class PropertyRepresentationConnector(http: HttpGet with HttpPut)(implicit ec: E
   }
 
   def accept(reprId: String)(implicit hc: HeaderCarrier): Future[Unit] = {
-    val url = baseUrl + s"/accept/${reprId}"
+    val url = baseUrl + s"/accept/$reprId"
     http.PUT[JsValue, Unit](url, JsNull)
   }
 
   def reject(reprId: String)(implicit hc: HeaderCarrier): Future[Unit] = {
-    val url = baseUrl + s"/reject/${reprId}"
+    val url = baseUrl + s"/reject/$reprId"
     http.PUT[JsValue, Unit](url, JsNull)
   }
 
