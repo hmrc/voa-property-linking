@@ -23,13 +23,31 @@ object ServiceContract {
 
   case class PropertyRepresentation(representationId: String, agentId: String, userId: String, uarn: String,
                                     canCheck: Boolean, canChallenge: Boolean, pending: Boolean)
-  case class Account(companyName: String, isAgent:Boolean)
 
-  object Account {
-    implicit val account = Json.format[Account]
-  }
   case class CapacityDeclaration(capacity: String, fromDate: DateTime, toDate: Option[DateTime] = None)
+
   case class PropertyLink(uarn: String, userId: String, capacityDeclaration: CapacityDeclaration,
-                           linkedDate: DateTime, assessmentYears: Seq[Int], pending: Boolean, requestFlag: String)
+                          linkedDate: DateTime, assessmentYears: Seq[Int], pending: Boolean, requestFlag: String)
 
 }
+
+case class Address(line1: String, line2: String, line3: String, postcode: String)
+
+object Address {
+  implicit val formats = Json.format[Address]
+}
+
+case class IndividualAccount(id: String, groupId: String)
+
+object IndividualAccount {
+  implicit val formats = Json.format[IndividualAccount]
+}
+
+case class GroupAccount(id: String, companyName: String, address: Address, email: String, phone: String,
+                        isSmallBusiness: Boolean, isAgent: Boolean)
+
+object GroupAccount {
+  implicit val formats = Json.format[GroupAccount]
+}
+
+

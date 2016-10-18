@@ -16,7 +16,7 @@
 
 package config
 
-import connectors.{AccountConnector, PropertyLinkingConnector, PropertyRepresentationConnector}
+import connectors.{GroupAccountConnector, IndividualAccountConnector, PropertyLinkingConnector, PropertyRepresentationConnector}
 import connectors.ServiceContract.PropertyRepresentation
 import uk.gov.hmrc.play.audit.http.config.LoadAuditingConfig
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
@@ -38,7 +38,8 @@ abstract class Wiring {
   implicit lazy val ec: ExecutionContext = play.api.libs.concurrent.Execution.Implicits.defaultContext
   lazy val propertyRepresentationConnector = new PropertyRepresentationConnector(http)
   lazy val propertyLinkingConnector = new PropertyLinkingConnector(http)
-  lazy val accountConnector = new AccountConnector(http)
+  lazy val individualAccounts = new IndividualAccountConnector(http)
+  lazy val groupAccounts = new GroupAccountConnector(http)
 }
 
 object WSHttp extends WSGet with WSPut with WSPost with WSDelete with WSPatch with AppName {
