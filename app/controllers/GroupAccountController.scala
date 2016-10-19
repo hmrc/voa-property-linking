@@ -17,20 +17,28 @@
 package controllers
 
 import config.Wiring
-import connectors.ServiceContract.Account
+import connectors.GroupAccount
 import play.api.libs.json.Json
 import play.api.mvc.Action
 
-object AccountController extends PropertyLinkingBaseController {
-  val accountConnector = Wiring().accountConnector
+object GroupAccountController extends PropertyLinkingBaseController {
 
-  def create() = Action.async{ implicit request =>
-    val account: Account = request.body.asJson.get.as[Account]
-    accountConnector.create(account).map(x => Created(""))
+  val groups = Wiring().groupAccounts
+
+  def get() = Action.async { implicit request =>
+    groups.get() map { x => Ok(Json.toJson(x)) }
   }
 
-  def get() = Action.async{implicit request =>
-    accountConnector.get().map(x => Ok(Json.toJson(x)))
+  def getById(id: String) = Action.async { implicit request =>
+    groups.get(id) map {
+      case Some(x) => Ok(Json.toJson(x))
+      case None => NotFound
+    }
   }
 
+  def create() = Action.async(parse.json) { implicit request =>
+    withJsonBody[GroupAccount] { acc =>
+      groups.create(acc) map { _ => Created }
+    }
+  }
 }

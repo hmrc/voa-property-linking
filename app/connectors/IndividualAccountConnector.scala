@@ -16,29 +16,25 @@
 
 package connectors
 
-import connectors.ServiceContract.Account
-import serialization.JsonFormats._
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class AccountConnector(http: HttpGet with HttpPut with HttpPost)(implicit ec: ExecutionContext)
+class IndividualAccountConnector(http: HttpGet with HttpPut with HttpPost)(implicit ec: ExecutionContext)
   extends ServicesConfig {
-  lazy val baseUrl: String = baseUrl("external-business-rates-data-platform") + "/accounts"
+  lazy val baseUrl: String = baseUrl("external-business-rates-data-platform") + "/individuals"
 
-  implicit val rds: HttpReads[Unit] = new HttpReads[Unit] {
-    override def read(method: String, url: String, response: HttpResponse): Unit = Unit
+  def create(account: IndividualAccount)(implicit hc: HeaderCarrier): Future[Unit] = {
+    http.POST[IndividualAccount, HttpResponse](baseUrl, account) map { _ => () }
   }
 
-  def create(account: Account)(implicit hc: HeaderCarrier): Future[Unit] = {
-    val url = baseUrl
-    http.POST[Account, Unit](url, account)
+  def get()(implicit hc: HeaderCarrier): Future[Seq[IndividualAccount]] = {
+    http.GET[Seq[IndividualAccount]](baseUrl)
   }
 
-  def get()(implicit hc: HeaderCarrier): Future[Seq[Account]] = {
-    val url = baseUrl
-    http.GET[Seq[Account]](url)
+  def get(id: String)(implicit hc: HeaderCarrier): Future[Option[IndividualAccount]] = {
+    http.GET[Option[IndividualAccount]](s"$baseUrl/$id")
   }
 
 }
