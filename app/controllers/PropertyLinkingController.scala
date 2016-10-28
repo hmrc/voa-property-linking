@@ -19,20 +19,21 @@ package controllers
 import config.Wiring
 import connectors.ServiceContract._
 import play.api.libs.json.Json
-import play.api.mvc.{Action, Request}
+import play.api.mvc.Action
 import serialization.JsonFormats._
+import uk.gov.hmrc.play.http.Upstream5xxResponse
 
 object PropertyLinkingController extends PropertyLinkingBaseController {
   val propLinkConnector = Wiring().propertyLinkingConnector
 
-  def create(uarn: String, accountId: String, submissionId: String) = Action.async { implicit request =>
-    val link: PropertyLink = request.body.asJson.get.as[PropertyLink]
-    propLinkConnector.create(submissionId, link) map (_ => Created)
+  def create(uarn: String, accountId: String, submissionId: String) = Action.async(parse.json) { implicit request =>
+    withJsonBody[PropertyLink] { link =>
+      propLinkConnector.create(submissionId, link) map { _ => Created } recover { case _: Upstream5xxResponse => InternalServerError }
+    }
   }
 
   def get(userId: String) = Action.async{ implicit request =>
     propLinkConnector.get(userId) map (x => Ok(Json.toJson(x)))
   }
-
 
 }

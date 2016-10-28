@@ -27,7 +27,7 @@ object ServiceContract {
   case class CapacityDeclaration(capacity: String, fromDate: DateTime, toDate: Option[DateTime] = None)
 
   case class PropertyLink(uarn: String, userId: String, capacityDeclaration: CapacityDeclaration,
-                          linkedDate: DateTime, assessmentYears: Seq[Int], pending: Boolean, requestFlag: String)
+                          linkedDate: DateTime, pending: Boolean, linkBasis: String)
 
 }
 
