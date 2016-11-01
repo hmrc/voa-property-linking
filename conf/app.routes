@@ -1,8 +1,8 @@
 # microservice specific routes
 
-GET         /property-representations/:userId/:uarn               controllers.PropertyRepresentationController.getPropertyRepresentations(userId: String, uarn: String)
+GET         /property-representations/:userId/:uarn               controllers.PropertyRepresentationController.getPropertyRepresentations(userId, uarn: Long)
 
-GET         /property-representations/:agentId                    controllers.PropertyRepresentationController.getPropertyRepresentationsForAgent(agentId: String)
+GET         /property-representations/:agentId                    controllers.PropertyRepresentationController.getPropertyRepresentationsForAgent(agentId)
 
 PUT         /property-representations/create                      controllers.PropertyRepresentationController.create()
 
@@ -10,8 +10,8 @@ PUT         /property-representations/update                      controllers.Pr
 PUT         /property-representations/accept/:reprId              controllers.PropertyRepresentationController.accept(reprId: String)
 PUT         /property-representations/reject/:reprId              controllers.PropertyRepresentationController.reject(reprId: String)
 
-POST        /property-links/:uarn/:accountId/:submissionId        controllers.PropertyLinkingController.create(uarn: String, accountId: String, submissionId: String)
-GET         /property-links/:userId                               controllers.PropertyLinkingController.get(userId: String)
+POST        /property-links/:uarn/:accountId/:submissionId        controllers.PropertyLinkingController.create(uarn: Long, accountId, submissionId)
+GET         /property-links/:userId                               controllers.PropertyLinkingController.get(userId)
 
 GET         /individuals                                          controllers.IndividualAccountController.get()
 GET         /individuals/:id                                      controllers.IndividualAccountController.getById(id)
@@ -20,3 +20,5 @@ POST        /individuals                                          controllers.In
 GET         /groups                                               controllers.GroupAccountController.get()
 GET         /groups/:id                                           controllers.GroupAccountController.getById(id)
 POST        /groups                                               controllers.GroupAccountController.create()
+
+GET         /properties/:uarn                                     controllers.PropertyDetailsController.getPropertyInfo(uarn: Long)

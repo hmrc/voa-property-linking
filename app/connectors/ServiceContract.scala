@@ -21,12 +21,12 @@ import play.api.libs.json.Json
 
 object ServiceContract {
 
-  case class PropertyRepresentation(representationId: String, agentId: String, userId: String, uarn: String,
+  case class PropertyRepresentation(representationId: String, agentId: String, userId: String, uarn: Long,
                                     canCheck: Boolean, canChallenge: Boolean, pending: Boolean)
 
   case class CapacityDeclaration(capacity: String, fromDate: DateTime, toDate: Option[DateTime] = None)
 
-  case class PropertyLink(uarn: String, userId: String, capacityDeclaration: CapacityDeclaration,
+  case class PropertyLink(uarn: Long, userId: String, capacityDeclaration: CapacityDeclaration,
                           linkedDate: DateTime, linkBasis: String,
                           specialCategoryCode: String, description: String, bulkClassIndicator: String,
                           pending: Boolean)
@@ -37,6 +37,13 @@ case class Address(line1: String, line2: String, line3: String, postcode: String
 
 object Address {
   implicit val formats = Json.format[Address]
+
+  def fromLines(lines: Seq[String], postcode: String) = {
+    def optionalLine(n: Int) = lines.lift(n).getOrElse("")
+
+    require(lines.nonEmpty)
+    Address(lines.head, optionalLine(1), optionalLine(2), postcode)
+  }
 }
 
 case class IndividualAccount(id: String, groupId: String)
@@ -52,4 +59,11 @@ object GroupAccount {
   implicit val formats = Json.format[GroupAccount]
 }
 
+
+case class Property(uarn: Long, billingAuthorityReference: String, address: Address, isSelfCertifiable: Boolean,
+                    specialCategoryCode: String, description: String, bulkClassIndicator: String)
+
+object Property {
+  implicit val formats = Json.format[Property]
+}
 

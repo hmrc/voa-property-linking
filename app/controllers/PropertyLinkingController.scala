@@ -26,7 +26,7 @@ import uk.gov.hmrc.play.http.Upstream5xxResponse
 object PropertyLinkingController extends PropertyLinkingBaseController {
   val propLinkConnector = Wiring().propertyLinkingConnector
 
-  def create(uarn: String, accountId: String, submissionId: String) = Action.async(parse.json) { implicit request =>
+  def create(uarn: Long, accountId: String, submissionId: String) = Action.async(parse.json) { implicit request =>
     withJsonBody[PropertyLink] { link =>
       propLinkConnector.create(submissionId, link) map { _ => Created } recover { case _: Upstream5xxResponse => InternalServerError }
     }

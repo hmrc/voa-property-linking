@@ -25,7 +25,7 @@ import connectors.ServiceContract._
 object PropertyRepresentationController extends PropertyLinkingBaseController {
   val reprConnector = Wiring().propertyRepresentationConnector
 
-  def getPropertyRepresentations(userId: String, uarn: String) = Action.async { implicit request =>
+  def getPropertyRepresentations(userId: String, uarn: Long) = Action.async { implicit request =>
     reprConnector.get(userId, uarn) map (reprs => Ok(Json.toJson(reprs)))
   }
 
