@@ -1,0 +1,51 @@
+/*
+ * Copyright 2016 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package controllers
+
+import config.Wiring
+import connectors.{Address, Property}
+import play.api.libs.functional.syntax._
+import play.api.libs.json._
+import play.api.mvc.Action
+import uk.gov.hmrc.play.config.ServicesConfig
+
+object PropertyDetailsController extends PropertyLinkingBaseController with ServicesConfig {
+
+  val http = Wiring().http
+
+  def getPropertyInfo(uarn: Long) = Action.async { implicit request =>
+    http.GET[JsValue](s"${baseUrl("vmv")}/vmv/rating-listing/api/get-draft-valuation/$uarn") map { r =>
+      propertyReads(uarn).reads(r) match {
+        case JsSuccess(v, _) => Ok(Json.toJson(v))
+        case JsError(errs) => BadRequest(errs.toString)
+      }
+    }
+  }
+
+  private def propertyReads(uarn: Long) = (
+    (__ \ "billingAuthority" \ "reference").read[String] and
+      (__ \ "address" \ "lines" \ "extractedLines").read[Seq[String]] and
+      (__ \ "address" \ "postcode" \ "value").read[String] and
+      (__ \ "description").read[String] and
+      (__ \ "specialCategoryCode").read[String]
+    ) (
+    (baRef, lines, postcode, desc, scat) =>
+      Property(uarn, baRef, Address.fromLines(lines, postcode), isSelfCertifiable(uarn), scat, desc, "BCI")
+  )
+
+  private def isSelfCertifiable(uarn: Long) = uarn % 2 == 0 //TODO until business logic is finalised
+}
