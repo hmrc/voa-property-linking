@@ -27,7 +27,7 @@ object PropertyLinkingController extends PropertyLinkingBaseController {
   val propLinkConnector = Wiring().propertyLinkingConnector
 
   def create(uarn: Long, accountId: String, submissionId: String) = Action.async(parse.json) { implicit request =>
-    withJsonBody[PropertyLink] { link =>
+    withJsonBody[PropertyLinkRequest] { link =>
       propLinkConnector.create(submissionId, link) map { _ => Created } recover { case _: Upstream5xxResponse => InternalServerError }
     }
   }

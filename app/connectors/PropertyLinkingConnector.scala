@@ -16,7 +16,7 @@
 
 package connectors
 
-import connectors.ServiceContract.PropertyLink
+import connectors.ServiceContract._
 import play.api.Logger
 import serialization.JsonFormats._
 import uk.gov.hmrc.play.config.ServicesConfig
@@ -28,9 +28,9 @@ class PropertyLinkingConnector(http: HttpGet with HttpPut with HttpPost)(implici
   extends ServicesConfig {
   lazy val baseUrl: String = baseUrl("external-business-rates-data-platform") + "/property-links"
 
-  def create(submissionId: String, link: PropertyLink)(implicit hc: HeaderCarrier): Future[Unit] = {
-    val url = baseUrl + s"/${link.uarn}/${link.userId}/$submissionId"
-    http.POST[PropertyLink, HttpResponse](url, link) map { _ => () }
+  def create(submissionId: String, linkingRequest: PropertyLinkRequest)(implicit hc: HeaderCarrier): Future[Unit] = {
+    val url = baseUrl + s"/${linkingRequest.uarn}/${linkingRequest.userId}/$submissionId"
+    http.POST[PropertyLinkRequest, HttpResponse](url, linkingRequest) map { _ => () }
   }
 
   def get(userId: String)(implicit hc: HeaderCarrier): Future[Seq[PropertyLink]] = {
