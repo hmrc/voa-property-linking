@@ -25,5 +25,6 @@ object JsonFormats {
   implicit val propertyRepresentationFormat = Json.format[PropertyRepresentation]
   implicit val capacityDeclaration = Json.format[CapacityDeclaration]
   implicit val propertyLink = Json.format[PropertyLink]
+  implicit val propertyLinkRequest = Json.format[PropertyLinkRequest]
 }
 
