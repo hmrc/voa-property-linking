@@ -48,7 +48,13 @@ object Address {
   }
 }
 
-case class IndividualAccount(id: String, groupId: String)
+case class IndividualDetails(firstName: String, lastName: String, email: String, phone1: String, phone2: Option[String])
+
+object IndividualDetails {
+  implicit val formats = Json.format[IndividualDetails]
+}
+
+case class IndividualAccount(id: String, groupId: String, details: IndividualDetails)
 
 object IndividualAccount {
   implicit val formats = Json.format[IndividualAccount]
