@@ -24,6 +24,7 @@ object JsonFormats {
   implicit val dateWrites = Writes.jodaDateWrites("yyyy-MM-dd")
   implicit val propertyRepresentationFormat = Json.format[PropertyRepresentation]
   implicit val capacityDeclaration = Json.format[CapacityDeclaration]
+  implicit val fileInfo = Json.format[FileInfo]
   implicit val propertyLink = Json.format[PropertyLink]
   implicit val propertyLinkRequest = Json.format[PropertyLinkRequest]
 }
