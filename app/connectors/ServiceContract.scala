@@ -26,10 +26,12 @@ object ServiceContract {
 
   case class CapacityDeclaration(capacity: String, fromDate: DateTime, toDate: Option[DateTime] = None)
 
+  case class FileInfo(fileName: String, fileType: String)
   case class PropertyLinkRequest(uarn: Long, userId: String, capacityDeclaration: CapacityDeclaration,
                         linkedDate: DateTime, linkBasis: String,
                         specialCategoryCode: String, description: String, bulkClassIndicator: String,
-                        fileName: String, fileType: String)
+                        fileInfo: Option[FileInfo])
+                        
 
   case class PropertyLink(uarn: Long, userId: String, description: String, capacityDeclaration: CapacityDeclaration,
                           linkedDate: DateTime, pending: Boolean)
