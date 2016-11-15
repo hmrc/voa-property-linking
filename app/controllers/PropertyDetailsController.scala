@@ -17,8 +17,7 @@
 package controllers
 
 import config.Wiring
-import connectors.{Address, Property}
-import play.api.libs.functional.syntax._
+import connectors.VmvConnector
 import play.api.libs.json._
 import play.api.mvc.Action
 import uk.gov.hmrc.play.config.ServicesConfig
@@ -28,24 +27,9 @@ object PropertyDetailsController extends PropertyLinkingBaseController with Serv
   val http = Wiring().http
 
   def getPropertyInfo(uarn: Long) = Action.async { implicit request =>
-    http.GET[JsValue](s"${baseUrl("vmv")}/vmv/rating-listing/api/get-draft-valuation/$uarn") map { r =>
-      propertyReads(uarn).reads(r) match {
-        case JsSuccess(v, _) => Ok(Json.toJson(v))
-        case JsError(errs) => BadRequest(errs.toString)
-      }
+    VmvConnector.getPropertyInfo(uarn) map {
+      case Some(p) => Ok(Json.toJson(p))
+      case None => BadRequest
     }
   }
-
-  private def propertyReads(uarn: Long) = (
-    (__ \ "billingAuthority" \ "reference").read[String] and
-      (__ \ "address" \ "lines" \ "extractedLines").read[Seq[String]] and
-      (__ \ "address" \ "postcode" \ "value").read[String] and
-      (__ \ "description").read[String] and
-      (__ \ "specialCategoryCode").read[String]
-    ) (
-    (baRef, lines, postcode, desc, scat) =>
-      Property(uarn, baRef, Address.fromLines(lines, postcode), isSelfCertifiable(uarn), scat, desc, "BCI")
-  )
-
-  private def isSelfCertifiable(uarn: Long) = uarn % 2 == 0 //TODO until business logic is finalised
 }

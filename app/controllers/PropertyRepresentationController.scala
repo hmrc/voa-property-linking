@@ -21,16 +21,36 @@ import play.api.libs.json.Json
 import play.api.mvc.Action
 import serialization.JsonFormats._
 import connectors.ServiceContract._
+import connectors.VmvConnector
+
+import scala.concurrent.Future
 
 object PropertyRepresentationController extends PropertyLinkingBaseController {
   val reprConnector = Wiring().propertyRepresentationConnector
 
   def getPropertyRepresentations(userId: String, uarn: Long) = Action.async { implicit request =>
-    reprConnector.get(userId, uarn) map (reprs => Ok(Json.toJson(reprs)))
+    for {
+      property <- VmvConnector.getPropertyInfo(uarn)
+      reps <- reprConnector.get(userId, uarn)
+    } yield {
+      property match {
+        case Some(p) => Ok(Json.toJson(reps.map(_.withAddress(p.address))))
+        case None => BadRequest
+      }
+    }
   }
 
   def getPropertyRepresentationsForAgent(agentId: String) = Action.async { implicit request =>
-    reprConnector.forAgent(agentId).map( reprs => Ok(Json.toJson(reprs)))
+    reprConnector.forAgent(agentId) flatMap { reps =>
+      Future.sequence {
+        reps.map { r =>
+          VmvConnector.getPropertyInfo(r.uarn) map {
+            case Some(p) => r.withAddress(p.address)
+            case None => throw new Exception(s"Invalid uarn ${r.uarn}")
+          }
+        }
+      }
+    } map { res => Ok(Json.toJson(res)) }
   }
 
   def create() = Action.async { implicit request =>
