@@ -22,3 +22,7 @@ GET         /groups/:id                                           controllers.Gr
 POST        /groups                                               controllers.GroupAccountController.create()
 
 GET         /properties/:uarn                                     controllers.PropertyDetailsController.getPropertyInfo(uarn: Long)
+
+PUT         /envelopes/:envId                                     controllers.EnvelopeController.create(envId: String)
+GET         /envelopes                                            controllers.EnvelopeController.get()
+GET         /transfer                                             @controllers.FileTransferController.run()
