@@ -21,20 +21,26 @@ import play.api.libs.json.Json
 
 object ServiceContract {
 
-  case class PropertyRepresentation(representationId: String, agentId: String, userId: String, uarn: Long,
-                                    canCheck: Boolean, canChallenge: Boolean, pending: Boolean)
+  case class PropertyRepresentation(representationId: String, agentId: String, agentName: String, groupId: String,
+                                    groupName: String, uarn: Long, canCheck: String, canChallenge: String, pending: Boolean) {
+
+    def withAddress(address: Address) = FrontendPropertyRepresentation(
+      representationId, agentId, agentName, groupId, groupName, uarn, address, canCheck, canChallenge, pending
+    )
+  }
 
   case class CapacityDeclaration(capacity: String, fromDate: DateTime, toDate: Option[DateTime] = None)
 
   case class FileInfo(fileName: String, fileType: String)
+
   case class PropertyLinkRequest(uarn: Long, userId: String, capacityDeclaration: CapacityDeclaration,
-                        linkedDate: DateTime, linkBasis: String,
-                        specialCategoryCode: String, description: String, bulkClassIndicator: String,
-                        fileInfo: Option[FileInfo])
-                        
+                                 linkedDate: DateTime, linkBasis: String,
+                                 specialCategoryCode: String, description: String, bulkClassIndicator: String,
+                                 fileInfo: Option[FileInfo])
 
   case class PropertyLink(uarn: Long, userId: String, description: String, capacityDeclaration: CapacityDeclaration,
                           linkedDate: DateTime, pending: Boolean)
+
 }
 
 case class Address(line1: String, line2: String, line3: String, postcode: String)
@@ -75,5 +81,13 @@ case class Property(uarn: Long, billingAuthorityReference: String, address: Addr
 
 object Property {
   implicit val formats = Json.format[Property]
+}
+
+case class FrontendPropertyRepresentation(representationId: String, agentId: String, agentName: String, groupId: String,
+                                          groupName: String, uarn: Long, address: Address, canCheck: String, canChallenge: String,
+                                          pending: Boolean)
+
+object FrontendPropertyRepresentation {
+  implicit val formats = Json.format[FrontendPropertyRepresentation]
 }
 
