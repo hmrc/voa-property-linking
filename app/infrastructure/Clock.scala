@@ -14,25 +14,17 @@
  * limitations under the License.
  */
 
-package controllers
+package infrastructure
 
-import play.api.mvc.Action
-import javax.inject.Inject
+import java.util.TimeZone
+import org.joda.time.{ DateTime, DateTimeZone, LocalDate, LocalTime }
 
-import repositories.EnvelopeIdRepository
-import services.FileTransferer
-
-class EnvelopeController @Inject()(val repo: EnvelopeIdRepository, val service: FileTransferer)
-  extends PropertyLinkingBaseController {
-
-  def create(envelopeId: String) = Action.async { implicit request =>
-    repo.create(envelopeId).map(_=> Ok(envelopeId))
-  }
-
-  def get() = Action.async { implicit  request =>
-    repo.get().map(seq => Ok(seq.mkString("\n")))
-  }
-
+trait Clock {
+  def now(): DateTime
 }
 
+object SystemClock extends Clock {
+	val gmt = DateTimeZone.forTimeZone(TimeZone.getTimeZone("GMT"))
 
+  def now(): DateTime = LocalDate.now(gmt).toDateTime(new LocalTime(gmt))
+}

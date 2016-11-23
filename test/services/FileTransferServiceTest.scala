@@ -22,6 +22,7 @@ import org.scalatest.mock.MockitoSugar
 import org.scalatest.PrivateMethodTester._
 import org.mockito.Mockito._
 import org.mockito.ArgumentMatchers._
+import org.scalatest.BeforeAndAfterEach
 import play.api.test.Helpers._
 import play.api.mvc.Request
 import play.api.test.FakeRequest
@@ -31,7 +32,7 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class FileTransferServiceTest extends ServicesSpec with MockitoSugar {
+class FileTransferServiceTest extends ServicesSpec with MockitoSugar{
 
   implicit val request = FakeRequest().withSession(token)
   implicit def hc(implicit request: Request[_]): HeaderCarrier = HeaderCarrier.fromHeadersAndSession(request.headers, Some(request.session))
@@ -39,17 +40,15 @@ class FileTransferServiceTest extends ServicesSpec with MockitoSugar {
     val fileUploadConnector = mock[FileUploadConnector]
     val evidenceConnector = mock[EvidenceConnector]
     val envelopeRepo = mock[EnvelopeIdRepository]
-    object TestFileTransferService extends FileTransferService(fileUploadConnector, evidenceConnector) {
-      override val repo = envelopeRepo
-    }
+    val fileTransferService = new FileTransferService(fileUploadConnector, evidenceConnector, envelopeRepo)
+    val fixedHC = hc(request)
 
     val a = Future(Seq[String]("1", "2"))
     when(envelopeRepo.get()) thenReturn(a)
-    val fixedHC = hc(request)
     when(fileUploadConnector.getEnvelopeDetails("1")(fixedHC)) thenReturn (Future(EnvelopeInfo("1", "NOT_EXISTING", "VOA_CCA", "", Nil)))
     when(fileUploadConnector.getEnvelopeDetails("2")(fixedHC)) thenReturn (Future(EnvelopeInfo("2", "NOT_EXISTING", "VOA_CCA", "", Nil)))
 
-    await(TestFileTransferService.justDoIt()(fixedHC))
+    await(fileTransferService.justDoIt()(fixedHC))
     verify(envelopeRepo, times(1)).remove("1")
     verify(envelopeRepo, times(1)).remove("2")
     verify(fileUploadConnector, times(0)).deleteEnvelope(anyString)(anyObject())
@@ -58,18 +57,17 @@ class FileTransferServiceTest extends ServicesSpec with MockitoSugar {
     val fileUploadConnector = mock[FileUploadConnector]
     val evidenceConnector = mock[EvidenceConnector]
     val envelopeRepo = mock[EnvelopeIdRepository]
-    object TestFileTransferService extends FileTransferService(fileUploadConnector, evidenceConnector) {
-      override val repo = envelopeRepo
-    }
+    val fileTransferService = new FileTransferService(fileUploadConnector, evidenceConnector, envelopeRepo)
+    val fixedHC = hc(request)
+
     val a = Future(Seq[String]("1", "2"))
     when(envelopeRepo.get()) thenReturn(a)
-    val fixedHC = hc(request)
     when(fileUploadConnector.getEnvelopeDetails("1")(fixedHC)) thenReturn (Future(EnvelopeInfo("1", "CLOSED", "VOA_CCA", "", Nil)))
     when(fileUploadConnector.getEnvelopeDetails("2")(fixedHC)) thenReturn (Future(EnvelopeInfo("2", "CLOSED", "VOA_CCA", "", Nil)))
     when(fileUploadConnector.deleteEnvelope("1")(fixedHC)) thenReturn (Future.successful(()))
     when(fileUploadConnector.deleteEnvelope("2")(fixedHC)) thenReturn (Future.successful(()))
 
-    await(TestFileTransferService.justDoIt()(fixedHC))
+    await(fileTransferService.justDoIt()(fixedHC))
 
     verify(envelopeRepo, times(1)).remove("1")
     verify(envelopeRepo, times(1)).remove("2")
@@ -80,12 +78,11 @@ class FileTransferServiceTest extends ServicesSpec with MockitoSugar {
     val fileUploadConnector = mock[FileUploadConnector]
     val evidenceConnector = mock[EvidenceConnector]
     val envelopeRepo = mock[EnvelopeIdRepository]
-    object TestFileTransferService extends FileTransferService(fileUploadConnector, evidenceConnector) {
-      override val repo = envelopeRepo
-    }
+    val fileTransferService = new FileTransferService(fileUploadConnector, evidenceConnector, envelopeRepo)
+    val fixedHC = hc(request)
+
     val a = Future(Seq[String]("1", "2"))
     when(envelopeRepo.get()) thenReturn (a)
-    val fixedHC = hc(request)
     Seq("1", "2").map(id => {
       when(fileUploadConnector.getEnvelopeDetails(id)(fixedHC)) thenReturn (
         Future(EnvelopeInfo(id, "CLOSED", "VOA_CCA", "", Seq(FileInfo("id", "status", "name", "contentType", "created", id))))
@@ -96,7 +93,7 @@ class FileTransferServiceTest extends ServicesSpec with MockitoSugar {
 
     })
 
-    await(TestFileTransferService.justDoIt()(fixedHC))
+    await(fileTransferService.justDoIt()(fixedHC))
 
     Seq("1", "2").map(id => {
       verify(fileUploadConnector, times(1)).downloadFile(id)(fixedHC)
@@ -109,14 +106,12 @@ class FileTransferServiceTest extends ServicesSpec with MockitoSugar {
     val fileUploadConnector = mock[FileUploadConnector]
     val evidenceConnector = mock[EvidenceConnector]
     val envelopeRepo = mock[EnvelopeIdRepository]
-    object TestFileTransferService extends FileTransferService(fileUploadConnector, evidenceConnector) {
-      override val repo = envelopeRepo
-    }
-
+    val fileTransferService =  new FileTransferService(fileUploadConnector, evidenceConnector, envelopeRepo)
     val fixedHC = hc(request)
+
     when(fileUploadConnector.downloadFile("1")(fixedHC)) thenReturn (Future("1".toCharArray.map(_.toByte)))
     when(evidenceConnector.uploadFile(fixedHC)) thenReturn ( Future.successful(()))
-    await(TestFileTransferService.transferFile("1")(fixedHC).recover{ case _ => ()})
+    await(fileTransferService.transferFile("1")(fixedHC).recover{ case _ => ()})
     verify(evidenceConnector, times(1)).uploadFile(fixedHC)
   }
 
@@ -124,13 +119,11 @@ class FileTransferServiceTest extends ServicesSpec with MockitoSugar {
     val fileUploadConnector = mock[FileUploadConnector]
     val evidenceConnector = mock[EvidenceConnector]
     val envelopeRepo = mock[EnvelopeIdRepository]
-    object TestFileTransferService extends FileTransferService(fileUploadConnector, evidenceConnector) {
-      override val repo = envelopeRepo
-    }
+    val fileTransferService =  new FileTransferService(fileUploadConnector, evidenceConnector, envelopeRepo)
     val fixedHC = hc(request)
     when(fileUploadConnector.downloadFile("1")(fixedHC)) thenReturn (Future.failed(new Exception(s"File fails")))
     when(evidenceConnector.uploadFile(fixedHC)) thenReturn ( Future.successful(()))
-    await(TestFileTransferService.transferFile("1")(fixedHC).recover{ case _ => ()})
+    await(fileTransferService.transferFile("1")(fixedHC).recover{ case _ => ()})
     verify(evidenceConnector, times(0)).uploadFile(fixedHC)
   }
 
