@@ -29,6 +29,7 @@ private object AppDependencies {
     "uk.gov.hmrc" %% "play-url-binders" % "2.0.0",
     "uk.gov.hmrc" %% "play-config" % "3.0.0",
     "uk.gov.hmrc" %% "logback-json-logger" % "3.0.0",
+    "uk.gov.hmrc" %% "mongo-lock" % "4.0.0",
     "uk.gov.hmrc" %% "domain" % "4.0.0"
   )
 
@@ -43,7 +44,8 @@ private object AppDependencies {
         "uk.gov.hmrc" %% "hmrctest" % "2.0.0" % scope,
         "org.scalatest" %% "scalatest" % "2.2.6" % scope,
         "org.pegdown" % "pegdown" % "1.6.0" % scope,
-        "com.typesafe.play" %% "play-test" % PlayVersion.current % scope
+        "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
+        "org.mockito" % "mockito-core" % "2.2.9"
       )
     }.test
   }
