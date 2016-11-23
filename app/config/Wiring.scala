@@ -18,6 +18,7 @@ package config
 
 import connectors.{GroupAccountConnector, IndividualAccountConnector, PropertyLinkingConnector, PropertyRepresentationConnector}
 import connectors.ServiceContract.PropertyRepresentation
+import connectors.fileUpload.FileUploadConnector
 import uk.gov.hmrc.play.audit.http.config.LoadAuditingConfig
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.auth.microservice.connectors.AuthConnector
