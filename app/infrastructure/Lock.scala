@@ -14,25 +14,17 @@
  * limitations under the License.
  */
 
-package controllers
+package infrastructure
 
-import play.api.mvc.Action
-import javax.inject.Inject
+import javax.inject.{Inject, Named}
 
-import repositories.EnvelopeIdRepository
-import services.FileTransferer
+import org.joda.time.Duration
+import reactivemongo.api.DB
+import uk.gov.hmrc.lock.{LockKeeper, LockMongoRepository, LockRepository}
 
-class EnvelopeController @Inject()(val repo: EnvelopeIdRepository, val service: FileTransferer)
-  extends PropertyLinkingBaseController {
-
-  def create(envelopeId: String) = Action.async { implicit request =>
-    repo.create(envelopeId).map(_=> Ok(envelopeId))
-  }
-
-  def get() = Action.async { implicit  request =>
-    repo.get().map(seq => Ok(seq.mkString("\n")))
-  }
-
+class Lock @Inject() (@Named("lockName") val name: String, @Named("lockTimeout") val timeout: Duration, val db: DB)extends LockKeeper{
+  override def repo: LockRepository = LockMongoRepository(() => db)
+  override def lockId: String = name
+  override val forceLockReleaseAfter: Duration = timeout
 }
-
 

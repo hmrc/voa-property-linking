@@ -21,18 +21,19 @@ import javax.inject.Inject
 import connectors.EvidenceConnector
 import connectors.fileUpload.{EnvelopeInfo, FileUploadConnector}
 import play.api.Logger
-import play.api.mvc.Request
 import play.modules.reactivemongo.MongoDbConnection
 import repositories.EnvelopeIdRepository
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class FileTransferService @Inject() (val fileUploadConnector: FileUploadConnector, val evidenceConnector: EvidenceConnector) extends MongoDbConnection{
+class FileTransferService @Inject() (val fileUploadConnector: FileUploadConnector,
+                                     val evidenceConnector: EvidenceConnector,
+                                     val repo: EnvelopeIdRepository
+                                    )
+  extends MongoDbConnection{
 
-  implicit def hc(implicit request: Request[_]): HeaderCarrier = HeaderCarrier.fromHeadersAndSession(request.headers, Some(request.session))
   implicit val ec: ExecutionContext = play.api.libs.concurrent.Execution.Implicits.defaultContext
-  val repo = new EnvelopeIdRepository()
 
   def justDoIt()(implicit hc: HeaderCarrier) = {
     val envelopeIds = repo.get()

@@ -16,6 +16,8 @@
 
 package repositories
 
+import javax.inject.Inject
+
 import com.google.inject.{ImplementedBy, Singleton}
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
@@ -25,9 +27,11 @@ import reactivemongo.core.errors.{DatabaseException, DetailedDatabaseException, 
 import uk.gov.hmrc.mongo.ReactiveRepository
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext.Implicits.global
 
-class EnvelopeIdRepository(implicit db: () => DB, ec: ExecutionContext)
-  extends  ReactiveRepository[EnvelopeId, String]("envelopeids", db, EnvelopeId.mongoFormat, implicitly[Format[String]]) with
+@Singleton
+class EnvelopeIdRepository @Inject()( db: DB )
+  extends  ReactiveRepository[EnvelopeId, String]("envelopeids", () => db, EnvelopeId.mongoFormat, implicitly[Format[String]]) with
     EnvelopeIdRepo{
 
   override def create(envelopeId: String): Future[Unit] = {

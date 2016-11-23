@@ -14,25 +14,17 @@
  * limitations under the License.
  */
 
-package controllers
+package infrastructure
 
-import play.api.mvc.Action
 import javax.inject.Inject
 
-import repositories.EnvelopeIdRepository
-import services.FileTransferer
+import scala.concurrent.duration.FiniteDuration
 
-class EnvelopeController @Inject()(val repo: EnvelopeIdRepository, val service: FileTransferer)
-  extends PropertyLinkingBaseController {
-
-  def create(envelopeId: String) = Action.async { implicit request =>
-    repo.create(envelopeId).map(_=> Ok(envelopeId))
-  }
-
-  def get() = Action.async { implicit  request =>
-    repo.get().map(seq => Ok(seq.mkString("\n")))
-  }
-
+trait Schedule {
+  def timeUntilNextRun(): FiniteDuration
 }
 
+class RegularSchedule @Inject() (val duration: FiniteDuration) extends Schedule {
+  def timeUntilNextRun(): FiniteDuration = duration
+}
 
