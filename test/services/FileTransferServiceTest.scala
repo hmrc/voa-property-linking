@@ -35,20 +35,19 @@ import scala.concurrent.Future
 class FileTransferServiceTest extends ServicesSpec with MockitoSugar{
 
   implicit val request = FakeRequest().withSession(token)
-  implicit def hc(implicit request: Request[_]): HeaderCarrier = HeaderCarrier.fromHeadersAndSession(request.headers, Some(request.session))
   "justDoIt when an envelopeId only exist in Mongo" should "only remove the envId from mongo" in {
     val fileUploadConnector = mock[FileUploadConnector]
     val evidenceConnector = mock[EvidenceConnector]
     val envelopeRepo = mock[EnvelopeIdRepository]
     val fileTransferService = new FileTransferService(fileUploadConnector, evidenceConnector, envelopeRepo)
-    val fixedHC = hc(request)
+    implicit val hc = new HeaderCarrier()
 
     val a = Future(Seq[String]("1", "2"))
     when(envelopeRepo.get()) thenReturn(a)
-    when(fileUploadConnector.getEnvelopeDetails("1")(fixedHC)) thenReturn (Future(EnvelopeInfo("1", "NOT_EXISTING", "VOA_CCA", "", Nil)))
-    when(fileUploadConnector.getEnvelopeDetails("2")(fixedHC)) thenReturn (Future(EnvelopeInfo("2", "NOT_EXISTING", "VOA_CCA", "", Nil)))
+    when(fileUploadConnector.getEnvelopeDetails("1")) thenReturn (Future(EnvelopeInfo("1", "NOT_EXISTING", "VOA_CCA", "", Nil)))
+    when(fileUploadConnector.getEnvelopeDetails("2")) thenReturn (Future(EnvelopeInfo("2", "NOT_EXISTING", "VOA_CCA", "", Nil)))
 
-    await(fileTransferService.justDoIt()(fixedHC))
+    await(fileTransferService.justDoIt())
     verify(envelopeRepo, times(1)).remove("1")
     verify(envelopeRepo, times(1)).remove("2")
     verify(fileUploadConnector, times(0)).deleteEnvelope(anyString)(anyObject())
@@ -58,47 +57,47 @@ class FileTransferServiceTest extends ServicesSpec with MockitoSugar{
     val evidenceConnector = mock[EvidenceConnector]
     val envelopeRepo = mock[EnvelopeIdRepository]
     val fileTransferService = new FileTransferService(fileUploadConnector, evidenceConnector, envelopeRepo)
-    val fixedHC = hc(request)
+    implicit val hc = new HeaderCarrier()
 
     val a = Future(Seq[String]("1", "2"))
     when(envelopeRepo.get()) thenReturn(a)
-    when(fileUploadConnector.getEnvelopeDetails("1")(fixedHC)) thenReturn (Future(EnvelopeInfo("1", "CLOSED", "VOA_CCA", "", Nil)))
-    when(fileUploadConnector.getEnvelopeDetails("2")(fixedHC)) thenReturn (Future(EnvelopeInfo("2", "CLOSED", "VOA_CCA", "", Nil)))
-    when(fileUploadConnector.deleteEnvelope("1")(fixedHC)) thenReturn (Future.successful(()))
-    when(fileUploadConnector.deleteEnvelope("2")(fixedHC)) thenReturn (Future.successful(()))
+    when(fileUploadConnector.getEnvelopeDetails("1")) thenReturn (Future(EnvelopeInfo("1", "CLOSED", "VOA_CCA", "", Nil)))
+    when(fileUploadConnector.getEnvelopeDetails("2")) thenReturn (Future(EnvelopeInfo("2", "CLOSED", "VOA_CCA", "", Nil)))
+    when(fileUploadConnector.deleteEnvelope("1")) thenReturn (Future.successful(()))
+    when(fileUploadConnector.deleteEnvelope("2")) thenReturn (Future.successful(()))
 
-    await(fileTransferService.justDoIt()(fixedHC))
+    await(fileTransferService.justDoIt())
 
     verify(envelopeRepo, times(1)).remove("1")
     verify(envelopeRepo, times(1)).remove("2")
-    verify(fileUploadConnector, times(1)).deleteEnvelope("1")(fixedHC)
-    verify(fileUploadConnector, times(1)).deleteEnvelope("2")(fixedHC)
+    verify(fileUploadConnector, times(1)).deleteEnvelope("1")
+    verify(fileUploadConnector, times(1)).deleteEnvelope("2")
   }
   "justDoIt when an envelope is CLOSED and has files associated with it" should "download and push all files, and delete envId from FUUAS and mongo" in {
     val fileUploadConnector = mock[FileUploadConnector]
     val evidenceConnector = mock[EvidenceConnector]
     val envelopeRepo = mock[EnvelopeIdRepository]
     val fileTransferService = new FileTransferService(fileUploadConnector, evidenceConnector, envelopeRepo)
-    val fixedHC = hc(request)
+    implicit val hc = new HeaderCarrier()
 
     val a = Future(Seq[String]("1", "2"))
     when(envelopeRepo.get()) thenReturn (a)
     Seq("1", "2").map(id => {
-      when(fileUploadConnector.getEnvelopeDetails(id)(fixedHC)) thenReturn (
+      when(fileUploadConnector.getEnvelopeDetails(id)) thenReturn (
         Future(EnvelopeInfo(id, "CLOSED", "VOA_CCA", "", Seq(FileInfo("id", "status", "name", "contentType", "created", id))))
         )
-      when(fileUploadConnector.downloadFile(id)(fixedHC)) thenReturn (Future(id.toCharArray.map(_.toByte)))
-      when(evidenceConnector.uploadFile(fixedHC)) thenReturn (Future.successful(()))
-      when(fileUploadConnector.deleteEnvelope(id)(fixedHC)) thenReturn (Future.successful(()))
+      when(fileUploadConnector.downloadFile(id)) thenReturn (Future(id.toCharArray.map(_.toByte)))
+      when(evidenceConnector.uploadFile) thenReturn (Future.successful(()))
+      when(fileUploadConnector.deleteEnvelope(id)) thenReturn (Future.successful(()))
 
     })
 
-    await(fileTransferService.justDoIt()(fixedHC))
+    await(fileTransferService.justDoIt())
 
     Seq("1", "2").map(id => {
-      verify(fileUploadConnector, times(1)).downloadFile(id)(fixedHC)
-      verify(evidenceConnector, times(2)).uploadFile(fixedHC)
-      verify(fileUploadConnector, times(1)).deleteEnvelope(id)(fixedHC)
+      verify(fileUploadConnector, times(1)).downloadFile(id)
+      verify(evidenceConnector, times(2)).uploadFile
+      verify(fileUploadConnector, times(1)).deleteEnvelope(id)
       verify(envelopeRepo, times(1)).remove(id)
     })
   }
@@ -107,12 +106,12 @@ class FileTransferServiceTest extends ServicesSpec with MockitoSugar{
     val evidenceConnector = mock[EvidenceConnector]
     val envelopeRepo = mock[EnvelopeIdRepository]
     val fileTransferService =  new FileTransferService(fileUploadConnector, evidenceConnector, envelopeRepo)
-    val fixedHC = hc(request)
+    implicit val hc = new HeaderCarrier()
 
-    when(fileUploadConnector.downloadFile("1")(fixedHC)) thenReturn (Future("1".toCharArray.map(_.toByte)))
-    when(evidenceConnector.uploadFile(fixedHC)) thenReturn ( Future.successful(()))
-    await(fileTransferService.transferFile("1")(fixedHC).recover{ case _ => ()})
-    verify(evidenceConnector, times(1)).uploadFile(fixedHC)
+    when(fileUploadConnector.downloadFile("1")) thenReturn (Future("1".toCharArray.map(_.toByte)))
+    when(evidenceConnector.uploadFile) thenReturn ( Future.successful(()))
+    await(fileTransferService.transferFile("1").recover{ case _ => ()})
+    verify(evidenceConnector, times(1)).uploadFile
   }
 
   it should "not upload a file if the download failed" in {
@@ -120,11 +119,11 @@ class FileTransferServiceTest extends ServicesSpec with MockitoSugar{
     val evidenceConnector = mock[EvidenceConnector]
     val envelopeRepo = mock[EnvelopeIdRepository]
     val fileTransferService =  new FileTransferService(fileUploadConnector, evidenceConnector, envelopeRepo)
-    val fixedHC = hc(request)
-    when(fileUploadConnector.downloadFile("1")(fixedHC)) thenReturn (Future.failed(new Exception(s"File fails")))
-    when(evidenceConnector.uploadFile(fixedHC)) thenReturn ( Future.successful(()))
-    await(fileTransferService.transferFile("1")(fixedHC).recover{ case _ => ()})
-    verify(evidenceConnector, times(0)).uploadFile(fixedHC)
+    implicit val hc = new HeaderCarrier()
+    when(fileUploadConnector.downloadFile("1")) thenReturn (Future.failed(new Exception(s"File fails")))
+    when(evidenceConnector.uploadFile) thenReturn ( Future.successful(()))
+    await(fileTransferService.transferFile("1").recover{ case _ => ()})
+    verify(evidenceConnector, times(0)).uploadFile
   }
 
 }
