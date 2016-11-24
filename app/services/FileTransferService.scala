@@ -50,7 +50,7 @@ class FileTransferService @Inject() (val fileUploadConnector: FileUploadConnecto
         case "CLOSED" if envInfo.files.isEmpty => removeEnvelopes(envInfo)
         case "CLOSED" => processClosedNotEmptyEnvelope(envInfo)
         case "NOT_EXISTING" => repo.remove(envInfo.id)
-        case _ if (!envInfo.files.map(_.status).contains("QUARANTINED")) => processNotYetClosedEnvelopes(envInfo)
+        case _ if !envInfo.files.map(_.status).contains("QUARANTINED") => processNotYetClosedEnvelopes(envInfo)
         case _ => Future.successful(()) //Some files haven't been virus checked yet.
       })
     })
