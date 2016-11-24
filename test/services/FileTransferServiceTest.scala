@@ -19,12 +19,9 @@ package services
 import connectors.EvidenceConnector
 import connectors.fileUpload.{EnvelopeInfo, FileInfo, FileUploadConnector}
 import org.scalatest.mock.MockitoSugar
-import org.scalatest.PrivateMethodTester._
 import org.mockito.Mockito._
 import org.mockito.ArgumentMatchers._
-import org.scalatest.BeforeAndAfterEach
 import play.api.test.Helpers._
-import play.api.mvc.Request
 import play.api.test.FakeRequest
 import repositories.EnvelopeIdRepository
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -82,12 +79,13 @@ class FileTransferServiceTest extends ServicesSpec with MockitoSugar{
 
     val a = Future(Seq[String]("1", "2"))
     when(envelopeRepo.get()) thenReturn (a)
+    val content = "123".toArray.map(_.toByte)
     Seq("1", "2").map(id => {
       when(fileUploadConnector.getEnvelopeDetails(id)) thenReturn (
-        Future(EnvelopeInfo(id, "CLOSED", "VOA_CCA", "", Seq(FileInfo("id", "status", "name", "contentType", "created", id))))
-        )
-      when(fileUploadConnector.downloadFile(id)) thenReturn (Future(id.toCharArray.map(_.toByte)))
-      when(evidenceConnector.uploadFile) thenReturn (Future.successful(()))
+        Future(EnvelopeInfo(id, "CLOSED", "VOA_CCA", "", Seq(FileInfo("id-fileName", "status", "id-fileName", "contentType", "created", id))))
+      )
+      when(fileUploadConnector.downloadFile(id)) thenReturn (Future(content))
+      when(evidenceConnector.uploadFile("id", "FIXME", "id-fileName", "pass", Some(content))) thenReturn (Future.successful(()))
       when(fileUploadConnector.deleteEnvelope(id)) thenReturn (Future.successful(()))
 
     })
@@ -96,7 +94,7 @@ class FileTransferServiceTest extends ServicesSpec with MockitoSugar{
 
     Seq("1", "2").map(id => {
       verify(fileUploadConnector, times(1)).downloadFile(id)
-      verify(evidenceConnector, times(2)).uploadFile
+      verify(evidenceConnector, times(2)).uploadFile("id", "FIXME","id-fileName", "pass", Some(content))
       verify(fileUploadConnector, times(1)).deleteEnvelope(id)
       verify(envelopeRepo, times(1)).remove(id)
     })
@@ -108,10 +106,11 @@ class FileTransferServiceTest extends ServicesSpec with MockitoSugar{
     val fileTransferService =  new FileTransferService(fileUploadConnector, evidenceConnector, envelopeRepo)
     implicit val hc = new HeaderCarrier()
 
-    when(fileUploadConnector.downloadFile("1")) thenReturn (Future("1".toCharArray.map(_.toByte)))
-    when(evidenceConnector.uploadFile) thenReturn ( Future.successful(()))
-    await(fileTransferService.transferFile("1").recover{ case _ => ()})
-    verify(evidenceConnector, times(1)).uploadFile
+    val content = "123".toArray.map(_.toByte)
+    when(fileUploadConnector.downloadFile("1")) thenReturn (Future(content))
+    when(evidenceConnector.uploadFile("id", "FIXME", "id-fileName", "pass", Some(content))) thenReturn (Future.successful(()))
+    await(fileTransferService.transferFile("1", "id-fileName", "pass").recover{ case _ => ()})
+    verify(evidenceConnector, times(1)).uploadFile("id", "FIXME","id-fileName", "pass", Some(content))
   }
 
   it should "not upload a file if the download failed" in {
@@ -120,10 +119,11 @@ class FileTransferServiceTest extends ServicesSpec with MockitoSugar{
     val envelopeRepo = mock[EnvelopeIdRepository]
     val fileTransferService =  new FileTransferService(fileUploadConnector, evidenceConnector, envelopeRepo)
     implicit val hc = new HeaderCarrier()
+    val content = "123".toArray.map(_.toByte)
     when(fileUploadConnector.downloadFile("1")) thenReturn (Future.failed(new Exception(s"File fails")))
-    when(evidenceConnector.uploadFile) thenReturn ( Future.successful(()))
-    await(fileTransferService.transferFile("1").recover{ case _ => ()})
-    verify(evidenceConnector, times(0)).uploadFile
+    when(evidenceConnector.uploadFile("id", "FIXME", "id-fileName", "pass", Some(content))) thenReturn (Future.successful(()))
+    await(fileTransferService.transferFile("1", "fileName", "pass").recover{ case _ => ()})
+    verify(evidenceConnector, times(0)).uploadFile("id", "FIXME","id-fileName", "pass", Some(content))
   }
 
 }

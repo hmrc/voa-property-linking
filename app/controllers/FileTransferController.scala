@@ -28,9 +28,10 @@ import services.FileTransferService
 import scala.concurrent.ExecutionContext
 
 
-class FileTransferController @Inject() (val fileTransferService: FileTransferService) extends PropertyLinkingBaseController {
+class FileTransferController @Inject() (val fileTransferService: FileTransferService,
+                                        val evidenceConnector: EvidenceConnector) extends PropertyLinkingBaseController {
   def run() = Action.async { implicit  request =>
-    fileTransferService.justDoIt().map(_ => Ok("I've just DoneIt"))
+    fileTransferService.justDoIt().map(_ => Ok("File transfer was started manually"))
   }
 }
 
