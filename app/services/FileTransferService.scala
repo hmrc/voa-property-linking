@@ -43,9 +43,6 @@ class FileTransferService @Inject() (val fileUploadConnector: FileUploadConnecto
       .map(x=> Future.sequence(x)).flatMap(identity)
 
     envelopeAndFiles.map(envInfos => {
-      val closed = envInfos.filter(_.status == "CLOSED")
-      val onlyInMongo = envInfos.filter(_.status == "NOT_EXISTING")
-      val other = envInfos.filterNot(_.status == "CLOSED").filterNot(_.status=="NOT_EXISTING")
       envInfos.foreach ( envInfo => envInfo.status match {
         case "CLOSED" if envInfo.files.isEmpty => removeEnvelopes(envInfo)
         case "CLOSED" => processClosedNotEmptyEnvelope(envInfo)
@@ -61,15 +58,21 @@ class FileTransferService @Inject() (val fileUploadConnector: FileUploadConnecto
   }
 
   private def processClosedNotEmptyEnvelope(envelopeInfo: EnvelopeInfo)(implicit hc: HeaderCarrier) = {
-    val fileUrls = envelopeInfo.files.map(_.href)
-    Future.sequence(fileUrls.map( url => {
-      transferFile(url)
+    val fileInfos = envelopeInfo.files
+    Future.sequence(fileInfos.map( fileInfo => {
+      transferFile(fileInfo.href, fileInfo.name, fileInfo.status)
     }))
       .map(_ => removeEnvelopes(envelopeInfo))
   }
 
-  def transferFile(url: String)(implicit hc:HeaderCarrier): Future[Unit] = {
-    fileUploadConnector.downloadFile(url).flatMap(_ => evidenceConnector.uploadFile)
+  def transferFile(url: String, fileName: String, status: String)(implicit hc:HeaderCarrier): Future[Unit] = {
+    fileUploadConnector.downloadFile(url).flatMap(content => {
+      val submissionId = fileName.split("-")(0)
+      evidenceConnector.uploadFile(submissionId, "FIXME",
+        fileName,
+        "pass",
+        if (content.isEmpty) None else Some(content))
+    })
   }
 
   private def processNotYetClosedEnvelopes(envelopeInfo: EnvelopeInfo)(implicit hc: HeaderCarrier) = {
@@ -77,8 +80,9 @@ class FileTransferService @Inject() (val fileUploadConnector: FileUploadConnecto
     Future.sequence(envelopeInfo.files.map(fileInfo =>{
       fileInfo.status match {
         case "ERROR" =>
-          evidenceConnector.uploadFile //TODO - indicate error - should be a param to uploadFile.
-        case _ => transferFile(fileInfo.href)
+          evidenceConnector.uploadFile(fileInfo.name.split("-")(0), "FIXME",
+            fileInfo.name, "fail", None)
+        case _ => transferFile(fileInfo.href, fileInfo.name, "pass")
       }
     })).map(_=> fileUploadConnector.deleteEnvelope(envId)).map(_ => repo.remove(envId))
   }

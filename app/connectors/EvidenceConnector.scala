@@ -18,24 +18,35 @@ package connectors
 
 import javax.inject.Inject
 
+import akka.stream.scaladsl.{FileIO, Source}
+import akka.util.ByteString
 import com.google.inject.{ImplementedBy, Singleton}
 import play.api.libs.ws.WSClient
+import play.api.mvc.MultipartFormData.{DataPart, FilePart}
+import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.HeaderCarrier
-
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @ImplementedBy(classOf[EvidenceConnector])
 trait EvidenceTransfer {
-  def uploadFile(implicit hc: HeaderCarrier): Future[Unit]
+  def uploadFile(submissionId: String, externalId: String, fileName: String, status: String, content: Option[Array[Byte]])(implicit hc: HeaderCarrier): Future[Unit]
 }
 
 @Singleton
-class EvidenceConnector @Inject()(val ws: WSClient) extends EvidenceTransfer {
-  override def uploadFile(implicit hc: HeaderCarrier): Future[Unit] = {
-    //val res = ws.url(url)
-    //  .post(Source(FilePart("fileName", "fileName", Option("contentType"), c ) :: List()))
-    //res
-    //TODO
-    Future.successful(Nil)
+class EvidenceConnector @Inject()(val ws: WSClient) extends EvidenceTransfer with ServicesConfig {
+  override def uploadFile(submissionId: String, externalId: String, fileName: String,
+                          status: String, content: Option[Array[Byte]])(implicit hc: HeaderCarrier): Future[Unit] = {
+    val url =  baseUrl("external-business-rates-data-platform") + "/evidence"
+    val res = ws.url(url)
+      .withHeaders(("X-Requested-With", "VOA_CCA"))
+      .put(Source(
+        content.map(c => List(FilePart("file", fileName, None, Source.single(ByteString(c))))).getOrElse(Nil) ++ (
+          DataPart("customerId", externalId) ::
+          DataPart("filename", fileName) ::
+          DataPart("submissionId", submissionId) ::
+          List())
+      ))
+    res.map(_ => ())
   }
 }
