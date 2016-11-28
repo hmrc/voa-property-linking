@@ -18,7 +18,7 @@ package services
 
 import javax.inject.{Inject, Named}
 
-import akka.actor.{ActorSystem, Scheduler}
+import akka.actor.ActorSystem
 import akka.event.EventStream
 import infrastructure.Lock
 import uk.gov.hmrc.lock.LockKeeper
@@ -28,11 +28,10 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class FileTransferer @Inject() (val lock: Lock,
-                                val transerService: FileTransferService,
-                                val actorSystem: ActorSystem,
-                                @Named("regularSchedule") val schedule: Schedule
-                               )
+class FileTransferScheduler @Inject()(val lock: Lock,
+                                      val transerService: FileTransferService,
+                                      val actorSystem: ActorSystem,
+                                      @Named("regularSchedule") val schedule: Schedule)
   extends LockedJobScheduler[FileTransferComplete](lock, actorSystem)
 {
   val name = "FileTransferer"
@@ -40,5 +39,6 @@ class FileTransferer @Inject() (val lock: Lock,
   implicit val hc = new HeaderCarrier()
   override def runJob()(implicit ec: ExecutionContext) = transerService.justDoIt.map(_ => FileTransferComplete(""))
 }
+
 
 case class FileTransferComplete(msg: String)

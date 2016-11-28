@@ -16,7 +16,10 @@
 
 package infrastructure
 
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+
+import play.api.Configuration
 
 import scala.concurrent.duration.FiniteDuration
 
@@ -24,7 +27,9 @@ trait Schedule {
   def timeUntilNextRun(): FiniteDuration
 }
 
-class RegularSchedule @Inject() (val duration: FiniteDuration) extends Schedule {
-  def timeUntilNextRun(): FiniteDuration = duration
+class RegularSchedule @Inject() (val configuration: Configuration) extends Schedule {
+  def timeUntilNextRun() =
+    new FiniteDuration(configuration.getLong("fileTransfer.frequencySeconds").getOrElse(60L),
+      TimeUnit.SECONDS)
 }
 
