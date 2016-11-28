@@ -27,11 +27,11 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class FileTransferService @Inject() (val fileUploadConnector: FileUploadConnector,
-                                     val evidenceConnector: EvidenceConnector,
-                                     val repo: EnvelopeIdRepository
-                                    )
-  extends MongoDbConnection{
+class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector,
+                                    val evidenceConnector: EvidenceConnector,
+                                    val repo: EnvelopeIdRepository
+                                   )
+  extends MongoDbConnection {
 
   implicit val ec: ExecutionContext = play.api.libs.concurrent.Execution.Implicits.defaultContext
 
@@ -40,17 +40,16 @@ class FileTransferService @Inject() (val fileUploadConnector: FileUploadConnecto
     envelopeIds.foreach(envId => Logger.info(s"Envelope Id: $envId found in mongo"))
 
     val envelopeAndFiles = envelopeIds.map(_.map(envId => fileUploadConnector.getEnvelopeDetails(envId)))
-      .map(x=> Future.sequence(x)).flatMap(identity)
+      .map(x => Future.sequence(x)).flatMap(identity)
 
-    envelopeAndFiles.map(envInfos => {
-      envInfos.foreach ( envInfo => envInfo.status match {
-        case "CLOSED" if envInfo.files.isEmpty => removeEnvelopes(envInfo)
-        case "CLOSED" => processClosedNotEmptyEnvelope(envInfo)
-        case "NOT_EXISTING" => repo.remove(envInfo.id)
-        case _ if !envInfo.files.map(_.status).contains("QUARANTINED") => processNotYetClosedEnvelopes(envInfo)
-        case _ => Future.successful(()) //Some files haven't been virus checked yet.
-      })
+    envelopeAndFiles.map(_.foreach(envInfo => envInfo.status match {
+      case "CLOSED" if envInfo.files.isEmpty => removeEnvelopes(envInfo)
+      case "CLOSED" => processClosedNotEmptyEnvelope(envInfo)
+      case "NOT_EXISTING" => repo.remove(envInfo.id)
+      case _ if !envInfo.files.map(_.status).contains("QUARANTINED") => processNotYetClosedEnvelopes(envInfo)
+      case _ => Future.successful(()) //Some files haven't been virus checked yet.
     })
+    )
   }
 
   private def removeEnvelopes(envInfo: EnvelopeInfo)(implicit hc: HeaderCarrier) = {
@@ -59,13 +58,13 @@ class FileTransferService @Inject() (val fileUploadConnector: FileUploadConnecto
 
   private def processClosedNotEmptyEnvelope(envelopeInfo: EnvelopeInfo)(implicit hc: HeaderCarrier) = {
     val fileInfos = envelopeInfo.files
-    Future.sequence(fileInfos.map( fileInfo => {
+    Future.sequence(fileInfos.map(fileInfo => {
       transferFile(fileInfo.href, fileInfo.name, fileInfo.status)
     }))
       .map(_ => removeEnvelopes(envelopeInfo))
   }
 
-  def transferFile(url: String, fileName: String, status: String)(implicit hc:HeaderCarrier): Future[Unit] = {
+  def transferFile(url: String, fileName: String, status: String)(implicit hc: HeaderCarrier): Future[Unit] = {
     fileUploadConnector.downloadFile(url).flatMap(content => {
       val submissionId = fileName.split("-")(0)
       evidenceConnector.uploadFile(submissionId, "FIXME",
@@ -77,14 +76,14 @@ class FileTransferService @Inject() (val fileUploadConnector: FileUploadConnecto
 
   private def processNotYetClosedEnvelopes(envelopeInfo: EnvelopeInfo)(implicit hc: HeaderCarrier) = {
     val envId = envelopeInfo.id
-    Future.sequence(envelopeInfo.files.map(fileInfo =>{
+    Future.sequence(envelopeInfo.files.map(fileInfo => {
       fileInfo.status match {
         case "ERROR" =>
           evidenceConnector.uploadFile(fileInfo.name.split("-")(0), "FIXME",
             fileInfo.name, "fail", None)
         case _ => transferFile(fileInfo.href, fileInfo.name, "pass")
       }
-    })).map(_=> fileUploadConnector.deleteEnvelope(envId)).map(_ => repo.remove(envId))
+    })).map(_ => fileUploadConnector.deleteEnvelope(envId)).map(_ => repo.remove(envId))
   }
 }
 

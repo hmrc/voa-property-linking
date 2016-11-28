@@ -18,15 +18,14 @@ package connectors
 
 import org.joda.time.DateTime
 import play.api.libs.json._
-import play.api.libs.functional.syntax._
 
 object ServiceContract {
 
-  case class PropertyRepresentation(representationId: String, agentId: String, agentName: String, groupId: String,
+  case class PropertyRepresentation(representationId: String, linkId: String, agentId: String, agentName: String, groupId: String,
                                     groupName: String, uarn: Long, canCheck: String, canChallenge: String, pending: Boolean) {
 
     def withAddress(address: Address) = FrontendPropertyRepresentation(
-      representationId, agentId, agentName, groupId, groupName, uarn, address, canCheck, canChallenge, pending
+      representationId, linkId, agentId, agentName, groupId, groupName, uarn, address, canCheck, canChallenge, pending
     )
   }
 
@@ -34,13 +33,13 @@ object ServiceContract {
 
   case class FileInfo(fileName: String, fileType: String)
 
-  case class PropertyLinkRequest(uarn: Long, userId: String, capacityDeclaration: CapacityDeclaration,
+  case class PropertyLinkRequest(uarn: Long, groupId: String, capacityDeclaration: CapacityDeclaration,
                                  linkedDate: DateTime, linkBasis: String,
                                  specialCategoryCode: String, description: String, bulkClassIndicator: String,
                                  fileInfo: Option[FileInfo])
 
-  case class PropertyLink(uarn: Long, userId: String, description: String, capacityDeclaration: CapacityDeclaration,
-                          linkedDate: DateTime, pending: Boolean)
+  case class PropertyLink(linkId: String, uarn: Long, groupId: String, description: String,
+                          capacityDeclaration: CapacityDeclaration, linkedDate: DateTime, pending: Boolean)
 
 }
 
@@ -84,7 +83,7 @@ object Property {
   implicit val formats = Json.format[Property]
 }
 
-case class FrontendPropertyRepresentation(representationId: String, agentId: String, agentName: String, groupId: String,
+case class FrontendPropertyRepresentation(representationId: String, linkId: String, agentId: String, agentName: String, groupId: String,
                                           groupName: String, uarn: Long, address: Address, canCheck: String, canChallenge: String,
                                           pending: Boolean)
 
