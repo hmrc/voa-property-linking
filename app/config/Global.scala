@@ -22,16 +22,17 @@ import com.google.inject.{AbstractModule, ProvidedBy, Provides}
 import com.google.inject.name.Names
 import com.typesafe.config.Config
 import controllers._
-import infrastructure.{RegularSchedule, Schedule}
+import infrastructure.{LockedJobScheduler, RegularSchedule, Schedule}
 import net.ceedubs.ficus.Ficus._
 import org.joda.time.Duration
+import play.api.libs.concurrent.AkkaGuiceSupport
 import play.api.{Application, Configuration, Play}
 import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.DB
 import uk.gov.hmrc.play.audit.filters.AuditFilter
 import uk.gov.hmrc.play.auth.controllers.AuthParamsControllerConfig
 import uk.gov.hmrc.play.auth.microservice.filters.AuthorisationFilter
-import uk.gov.hmrc.play.config.{AppName, ControllerConfig, RunMode}
+import uk.gov.hmrc.play.config.{AppName, ControllerConfig, RunMode, ServicesConfig}
 import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
 import uk.gov.hmrc.play.http.HttpPut
 import uk.gov.hmrc.play.http.logging.filters.LoggingFilter
@@ -74,10 +75,6 @@ class GuiceModule() extends AbstractModule {
     bind(classOf[DB]).toProvider(classOf[MongoDbProvider])
   }
 
-  @Provides
-  def provideFiniteDuration: FiniteDuration = {
-    new FiniteDuration(5, TimeUnit.SECONDS)
-  }
 }
 
 class MongoDbProvider @Inject() (reactiveMongoComponent: ReactiveMongoComponent) extends Provider[DB] {

@@ -20,9 +20,9 @@ import play.api.mvc.Action
 import javax.inject.Inject
 
 import repositories.EnvelopeIdRepository
-import services.FileTransferer
+import services.FileTransferScheduler
 
-class EnvelopeController @Inject()(val repo: EnvelopeIdRepository, val service: FileTransferer)
+class EnvelopeController @Inject()(val repo: EnvelopeIdRepository, val service: FileTransferScheduler)
   extends PropertyLinkingBaseController {
 
   def create(envelopeId: String) = Action.async { implicit request =>
