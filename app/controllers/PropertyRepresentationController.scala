@@ -17,7 +17,7 @@
 package controllers
 
 import config.Wiring
-import play.api.libs.json.Json
+import play.api.libs.json.{JsArray, Json}
 import play.api.mvc.Action
 import serialization.JsonFormats._
 import connectors.ServiceContract._
@@ -26,22 +26,20 @@ import connectors.VmvConnector
 import scala.concurrent.Future
 
 object PropertyRepresentationController extends PropertyLinkingBaseController {
-  val reprConnector = Wiring().propertyRepresentationConnector
+  val representations = Wiring().propertyRepresentationConnector
 
-  def getPropertyRepresentations(userId: String, uarn: Long) = Action.async { implicit request =>
-    for {
-      property <- VmvConnector.getPropertyInfo(uarn)
-      reps <- reprConnector.get(userId, uarn)
-    } yield {
-      property match {
-        case Some(p) => Ok(Json.toJson(reps.map(_.withAddress(p.address))))
+  def find(linkId: String) = Action.async { implicit request =>
+    representations.find(linkId) flatMap {
+      case Nil => Future.successful(Ok(JsArray()))
+      case r :: rs => VmvConnector.getPropertyInfo(r.uarn) map {
         case None => BadRequest
+        case Some(p) => Ok(Json.toJson(r.withAddress(p.address) :: rs.map(_.withAddress(p.address))))
       }
     }
   }
 
-  def getPropertyRepresentationsForAgent(agentId: String) = Action.async { implicit request =>
-    reprConnector.forAgent(agentId) flatMap { reps =>
+  def forAgent(agentId: String) = Action.async { implicit request =>
+    representations.forAgent(agentId) flatMap { reps =>
       Future.sequence {
         reps.map { r =>
           VmvConnector.getPropertyInfo(r.uarn) map {
@@ -53,22 +51,29 @@ object PropertyRepresentationController extends PropertyLinkingBaseController {
     } map { res => Ok(Json.toJson(res)) }
   }
 
+  def get(representationId: String) = Action.async { implicit request =>
+    representations.get(representationId) map {
+      case Some(r) => Ok(Json.toJson(r))
+      case None => BadRequest
+    }
+  }
+
   def create() = Action.async { implicit request =>
     val reprRequest: PropertyRepresentation = request.body.asJson.get.as[PropertyRepresentation]
-    reprConnector.create(reprRequest).map(x => Ok(""))
+    representations.create(reprRequest).map(x => Ok(""))
   }
 
   def update() = Action.async { implicit request =>
     val reprRequest: PropertyRepresentation = request.body.asJson.get.as[PropertyRepresentation]
-    reprConnector.update(reprRequest).map(x => Ok(""))
+    representations.update(reprRequest).map(x => Ok(""))
   }
 
   def accept(reprId: String) = Action.async { implicit request =>
-    reprConnector.accept(reprId).map(x => Ok(""))
+    representations.accept(reprId).map(x => Ok(""))
   }
 
   def reject(reprId: String) = Action.async { implicit request =>
-    reprConnector.reject(reprId).map(x => Ok(""))
+    representations.reject(reprId).map(x => Ok(""))
   }
 
 }

@@ -30,20 +30,16 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
-class EnvelopeIdRepository @Inject()( db: DB )
-  extends  ReactiveRepository[EnvelopeId, String]("envelopeids", () => db, EnvelopeId.mongoFormat, implicitly[Format[String]]) with
-    EnvelopeIdRepo{
+class EnvelopeIdRepository @Inject()(db: DB)
+  extends ReactiveRepository[EnvelopeId, String]("envelopeids", () => db, EnvelopeId.mongoFormat, implicitly[Format[String]]) with
+    EnvelopeIdRepo {
 
   override def create(envelopeId: String): Future[Unit] = {
     insert(EnvelopeId(envelopeId, envelopeId))
-      .map( _ =>      ())
-      .recover{
-        case exception => {
-          exception match {
-            case e: DatabaseException if e.code == Some(11000) =>
-              Logger.debug(s"EnvelopeId: ${envelopeId} has already been added")
-          }
-        }
+      .map(_ => ())
+      .recover {
+        case e: DatabaseException if e.code.contains(11000) =>
+          Logger.debug(s"EnvelopeId: $envelopeId has already been added")
       }
   }
 
@@ -54,17 +50,20 @@ class EnvelopeIdRepository @Inject()( db: DB )
 
   override def remove(envelopeId: String) = {
     Logger.info(s"Deleting envelopedId: $envelopeId from mongo")
-    removeById(envelopeId).map(_ => () )
+    removeById(envelopeId).map(_ => ())
   }
 }
 
 case class EnvelopeId(envelopeId: String, _id: String)
+
 object EnvelopeId {
   val mongoFormat = Json.format[EnvelopeId]
 }
 
-trait EnvelopeIdRepo{
+trait EnvelopeIdRepo {
   def create(envelopeId: String): Future[Unit]
+
   def get(): Future[Seq[String]]
+
   def remove(envelopeId: String)
 }

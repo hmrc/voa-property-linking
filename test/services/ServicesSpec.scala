@@ -25,6 +25,6 @@ trait ServicesSpec extends FlatSpec with MustMatchers  {
 }
 
 object TestApp {
-  val app = (new GuiceApplicationBuilder()).build()
+  val app = new GuiceApplicationBuilder().build()
   play.api.Play.start(app)
 }

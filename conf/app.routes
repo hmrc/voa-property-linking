@@ -1,28 +1,29 @@
 # microservice specific routes
 
-GET         /property-representations/:userId/:uarn               controllers.PropertyRepresentationController.getPropertyRepresentations(userId, uarn: Long)
+GET         /property-representations/:representationId        controllers.PropertyRepresentationController.get(representationId)
+GET         /property-representations/agent/:agentId           controllers.PropertyRepresentationController.forAgent(agentId)
+GET         /property-representations/linkId/:linkId           controllers.PropertyRepresentationController.find(linkId)
 
-GET         /property-representations/:agentId                    controllers.PropertyRepresentationController.getPropertyRepresentationsForAgent(agentId)
+PUT         /property-representations/create                   controllers.PropertyRepresentationController.create()
 
-PUT         /property-representations/create                      controllers.PropertyRepresentationController.create()
+PUT         /property-representations/update                   controllers.PropertyRepresentationController.update()
+PUT         /property-representations/accept/:reprId           controllers.PropertyRepresentationController.accept(reprId)
+PUT         /property-representations/reject/:reprId           controllers.PropertyRepresentationController.reject(reprId)
 
-PUT         /property-representations/update                      controllers.PropertyRepresentationController.update()
-PUT         /property-representations/accept/:reprId              controllers.PropertyRepresentationController.accept(reprId: String)
-PUT         /property-representations/reject/:reprId              controllers.PropertyRepresentationController.reject(reprId: String)
+POST        /property-links/:submissionId                      controllers.PropertyLinkingController.create(submissionId)
+GET         /property-links/:userId                            controllers.PropertyLinkingController.find(userId)
+GET         /property-link/:linkId                             controllers.PropertyLinkingController.get(linkId)
 
-POST        /property-links/:uarn/:accountId/:submissionId        controllers.PropertyLinkingController.create(uarn: Long, accountId, submissionId)
-GET         /property-links/:userId                               controllers.PropertyLinkingController.get(userId)
+GET         /individuals                                       controllers.IndividualAccountController.get()
+GET         /individuals/:id                                   controllers.IndividualAccountController.getById(id)
+POST        /individuals                                       controllers.IndividualAccountController.create()
 
-GET         /individuals                                          controllers.IndividualAccountController.get()
-GET         /individuals/:id                                      controllers.IndividualAccountController.getById(id)
-POST        /individuals                                          controllers.IndividualAccountController.create()
+GET         /groups                                            controllers.GroupAccountController.get()
+GET         /groups/:id                                        controllers.GroupAccountController.getById(id)
+POST        /groups                                            controllers.GroupAccountController.create()
 
-GET         /groups                                               controllers.GroupAccountController.get()
-GET         /groups/:id                                           controllers.GroupAccountController.getById(id)
-POST        /groups                                               controllers.GroupAccountController.create()
+GET         /properties/:uarn                                  controllers.PropertyDetailsController.getPropertyInfo(uarn: Long)
 
-GET         /properties/:uarn                                     controllers.PropertyDetailsController.getPropertyInfo(uarn: Long)
-
-PUT         /envelopes/:envId                                     @controllers.EnvelopeController.create(envId: String)
-GET         /envelopes                                            @controllers.EnvelopeController.get()
-GET         /transfer                                             @controllers.FileTransferController.run()
+PUT         /envelopes/:envId                                  @controllers.EnvelopeController.create(envId: String)
+GET         /envelopes                                         @controllers.EnvelopeController.get()
+GET         /transfer                                          @controllers.FileTransferController.run()

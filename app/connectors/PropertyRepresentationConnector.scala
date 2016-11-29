@@ -28,8 +28,13 @@ class PropertyRepresentationConnector(http: HttpGet with HttpPut)(implicit ec: E
   extends ServicesConfig {
   lazy val baseUrl: String = baseUrl("external-business-rates-data-platform") + "/property-representations"
 
-  def get(userId: String, uarn: Long)(implicit hc: HeaderCarrier): Future[Seq[PropertyRepresentation]] = {
-    val url = baseUrl + s"/get/$userId/$uarn"
+  def get(representationId: String)(implicit hc: HeaderCarrier): Future[Option[PropertyRepresentation]] = {
+    val url = baseUrl + s"/$representationId"
+    http.GET[Option[PropertyRepresentation]](url)
+  }
+
+  def find(linkId: String)(implicit hc: HeaderCarrier): Future[Seq[PropertyRepresentation]] = {
+    val url = baseUrl + s"/find/$linkId"
     http.GET[Seq[PropertyRepresentation]](url)
   }
 

@@ -24,16 +24,20 @@ import serialization.JsonFormats._
 import uk.gov.hmrc.play.http.Upstream5xxResponse
 
 object PropertyLinkingController extends PropertyLinkingBaseController {
-  val propLinkConnector = Wiring().propertyLinkingConnector
+  val propertyLinks = Wiring().propertyLinkingConnector
 
-  def create(uarn: Long, accountId: String, submissionId: String) = Action.async(parse.json) { implicit request =>
+  def create(submissionId: String) = Action.async(parse.json) { implicit request =>
     withJsonBody[PropertyLinkRequest] { link =>
-      propLinkConnector.create(submissionId, link) map { _ => Created } recover { case _: Upstream5xxResponse => InternalServerError }
+      propertyLinks.create(submissionId, link) map { _ => Created } recover { case _: Upstream5xxResponse => InternalServerError }
     }
   }
 
-  def get(userId: String) = Action.async{ implicit request =>
-    propLinkConnector.get(userId) map (x => Ok(Json.toJson(x)))
+  def find(userId: String) = Action.async { implicit request =>
+    propertyLinks.find(userId) map (x => Ok(Json.toJson(x)))
+  }
+
+  def get(linkId: String) = Action.async { implicit request =>
+    propertyLinks.get(linkId) map { x => Ok(Json.toJson(x)) }
   }
 
 }
