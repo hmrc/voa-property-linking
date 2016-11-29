@@ -20,6 +20,7 @@ POST        /individuals                                       controllers.Indiv
 
 GET         /groups                                            controllers.GroupAccountController.get()
 GET         /groups/:id                                        controllers.GroupAccountController.getById(id)
+GET         /groups/agentCode/:agentCode                       controllers.GroupAccountController.withAgentCode(agentCode)
 POST        /groups                                            controllers.GroupAccountController.create()
 
 GET         /properties/:uarn                                  controllers.PropertyDetailsController.getPropertyInfo(uarn: Long)
