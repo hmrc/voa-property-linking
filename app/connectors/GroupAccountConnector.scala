@@ -25,8 +25,8 @@ class GroupAccountConnector(http: HttpGet with HttpPost)(implicit ec: ExecutionC
 
   lazy val url =  baseUrl("external-business-rates-data-platform") + "/groups"
 
-  def create(account: GroupAccount)(implicit hc: HeaderCarrier): Future[Unit] = {
-    http.POST[GroupAccount, HttpResponse](url, account) map { _ => () }
+  def create(account: GroupAccountSubmission)(implicit hc: HeaderCarrier): Future[Unit] = {
+    http.POST[GroupAccountSubmission, HttpResponse](url, account) map { _ => () }
   }
 
   def get()(implicit hc: HeaderCarrier): Future[Seq[GroupAccount]] = {
@@ -35,5 +35,9 @@ class GroupAccountConnector(http: HttpGet with HttpPost)(implicit ec: ExecutionC
 
   def get(id: String)(implicit hc: HeaderCarrier): Future[Option[GroupAccount]] = {
     http.GET[Option[GroupAccount]](s"$url/$id")
+  }
+
+  def withAgentCode(agentCode: String)(implicit hc: HeaderCarrier): Future[Option[GroupAccount]] = {
+    http.GET[Option[GroupAccount]](s"$url/agentCode/$agentCode")
   }
 }

@@ -68,13 +68,19 @@ object IndividualAccount {
   implicit val formats = Json.format[IndividualAccount]
 }
 
-case class GroupAccount(id: String, companyName: String, address: Address, email: String, phone: String,
-                        isSmallBusiness: Boolean, isAgent: Boolean)
+case class GroupAccountSubmission(id: String, companyName: String, address: Address, email: String, phone: String,
+                                  isSmallBusiness: Boolean, isAgent: Boolean)
 
-object GroupAccount {
-  implicit val formats = Json.format[GroupAccount]
+object GroupAccountSubmission {
+  implicit val formats = Json.format[GroupAccountSubmission]
 }
 
+case class GroupAccount(id: String, companyName: String, address: Address, email: String, phone: String,
+                        isSmallBusiness: Boolean, agentCode: Option[String])
+
+object GroupAccount {
+  implicit val format = Json.format[GroupAccount]
+}
 
 case class Property(uarn: Long, billingAuthorityReference: String, address: Address, isSelfCertifiable: Boolean,
                     specialCategoryCode: String, description: String, bulkClassIndicator: String)

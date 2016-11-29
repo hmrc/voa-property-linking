@@ -17,7 +17,7 @@
 package controllers
 
 import config.Wiring
-import connectors.GroupAccount
+import connectors.GroupAccountSubmission
 import play.api.libs.json.Json
 import play.api.mvc.Action
 
@@ -36,8 +36,15 @@ object GroupAccountController extends PropertyLinkingBaseController {
     }
   }
 
+  def withAgentCode(agentCode: String) = Action.async { implicit request =>
+    groups.withAgentCode(agentCode) map {
+      case Some(a) => Ok(Json.toJson(a))
+      case None => NotFound
+    }
+  }
+
   def create() = Action.async(parse.json) { implicit request =>
-    withJsonBody[GroupAccount] { acc =>
+    withJsonBody[GroupAccountSubmission] { acc =>
       groups.create(acc) map { _ => Created }
     }
   }
