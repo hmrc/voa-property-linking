@@ -18,16 +18,15 @@ package repositories
 
 import javax.inject.Inject
 
-import com.google.inject.{ImplementedBy, Singleton}
-import play.api.libs.json._
-import play.api.libs.functional.syntax._
+import com.google.inject.Singleton
 import play.api.Logger
+import play.api.libs.json._
 import reactivemongo.api.DB
-import reactivemongo.core.errors.{DatabaseException, DetailedDatabaseException, GenericDatabaseException}
+import reactivemongo.core.errors.DatabaseException
 import uk.gov.hmrc.mongo.ReactiveRepository
 
-import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 @Singleton
 class EnvelopeIdRepository @Inject()(db: DB)

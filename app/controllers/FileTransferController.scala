@@ -16,16 +16,11 @@
 
 package controllers
 
-import play.api.mvc.Action
 import javax.inject.Inject
 
 import connectors.EvidenceConnector
-import connectors.fileUpload.FileUploadConnector
-import play.modules.reactivemongo.MongoDbConnection
-import repositories.EnvelopeIdRepository
+import play.api.mvc.Action
 import services.FileTransferService
-
-import scala.concurrent.ExecutionContext
 
 
 class FileTransferController @Inject() (val fileTransferService: FileTransferService,
