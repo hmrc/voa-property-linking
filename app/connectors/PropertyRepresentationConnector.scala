@@ -17,6 +17,7 @@
 package connectors
 
 import connectors.ServiceContract.PropertyRepresentation
+import models.UpdatedRepresentation
 import play.api.libs.json.{JsNull, JsValue}
 import serialization.JsonFormats._
 import uk.gov.hmrc.play.config.ServicesConfig
@@ -58,9 +59,9 @@ class PropertyRepresentationConnector(http: HttpGet with HttpPut)(implicit ec: E
     http.PUT[JsValue, HttpResponse](url, JsNull) map { _ => () }
   }
 
-  def update(reprRequest: PropertyRepresentation)(implicit hc: HeaderCarrier): Future[Unit] = {
+  def update(reprRequest: UpdatedRepresentation)(implicit hc: HeaderCarrier): Future[Unit] = {
     val url = baseUrl + s"/update"
-    http.PUT[PropertyRepresentation, HttpResponse](url, reprRequest) map { _ => () }
+    http.PUT[UpdatedRepresentation, HttpResponse](url, reprRequest) map { _ => () }
   }
 
 }
