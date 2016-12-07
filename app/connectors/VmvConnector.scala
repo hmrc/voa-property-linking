@@ -17,6 +17,7 @@
 package connectors
 
 import config.Wiring
+import connectors.ServiceContract.{Address, Property}
 import controllers.PropertyDetailsController._
 import play.api.libs.functional.syntax._
 import play.api.libs.json._

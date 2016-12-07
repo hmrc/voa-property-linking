@@ -17,7 +17,7 @@
 package controllers
 
 import config.Wiring
-import connectors.IndividualAccount
+import connectors.ServiceContract.IndividualAccount
 import play.api.libs.json.Json
 import play.api.mvc.Action
 

@@ -16,6 +16,7 @@
 
 package connectors
 
+import connectors.ServiceContract.{GroupAccount, GroupAccountSubmission}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet, HttpPost, HttpResponse}
 
