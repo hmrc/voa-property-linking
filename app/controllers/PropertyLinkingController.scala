@@ -18,10 +18,13 @@ package controllers
 
 import config.Wiring
 import connectors.ServiceContract._
+import connectors.VmvConnector
 import play.api.libs.json.Json
 import play.api.mvc.Action
-import serialization.JsonFormats._
 import uk.gov.hmrc.play.http.Upstream5xxResponse
+import serialization.JsonFormats._
+
+import scala.concurrent.Future
 
 object PropertyLinkingController extends PropertyLinkingBaseController {
   val propertyLinks = Wiring().propertyLinkingConnector
@@ -33,7 +36,18 @@ object PropertyLinkingController extends PropertyLinkingBaseController {
   }
 
   def find(userId: String) = Action.async { implicit request =>
-    propertyLinks.find(userId) map (x => Ok(Json.toJson(x)))
+    val a:Future[Seq[DetailedPropertyLinkWrite]] = propertyLinks.find(userId).map(_.map(prop => {
+      VmvConnector.getPropertyInfo(prop.uarn)
+        .flatMap(_.map(_.address).getOrElse(Address("No address found", "", "", ""))
+          .map(DetailedPropertyLinkWrite(prop.linkId, prop.uarn, prop.groupId, prop.description, prop.agentNames,prop.canAppointAgent,
+            _, prop.capacityDeclaration, prop.linkedDate, prop.pending))
+        )
+    }))
+      .map(x => Future.sequence(x))
+      .flatMap(identity)
+    a.map( x=>
+      Ok(Json.toJson(x))
+    )
   }
 
   def get(linkId: String) = Action.async { implicit request =>

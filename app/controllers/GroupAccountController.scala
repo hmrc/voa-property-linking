@@ -17,7 +17,7 @@
 package controllers
 
 import config.Wiring
-import connectors.GroupAccountSubmission
+import connectors.ServiceContract.GroupAccountSubmission
 import play.api.libs.json.Json
 import play.api.mvc.Action
 

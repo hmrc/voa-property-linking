@@ -16,6 +16,7 @@
 
 package connectors
 
+import connectors.ServiceContract.IndividualAccount
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
 
