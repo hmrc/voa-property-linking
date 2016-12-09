@@ -14,27 +14,16 @@
  * limitations under the License.
  */
 
-package controllers
+package models
 
-import config.Wiring
-import models.IndividualAccount
+import org.joda.time.DateTime
 import play.api.libs.json.Json
-import play.api.mvc.Action
 
-object IndividualAccountController extends PropertyLinkingBaseController {
-  val individuals = Wiring().individualAccounts
+case class PropertyLinkRequest(uarn: Long, groupId: String, capacityDeclaration: CapacityDeclaration,
+                               linkedDate: DateTime, linkBasis: String,
+                               specialCategoryCode: String, description: String, bulkClassIndicator: String,
+                               fileInfo: Option[FileInfo])
 
-  def create() = Action.async(parse.json) { implicit request =>
-    withJsonBody[IndividualAccount] { acc =>
-      individuals.create(acc) map { Created(_) }
-    }
-  }
-
-  def getById(id: String) = Action.async { implicit request =>
-    individuals.findByGGID(id) map {
-      case Some(x) => Ok(Json.toJson(x))
-      case None => NotFound
-    }
-  }
-
+object PropertyLinkRequest {
+  implicit val propertyLinkRequest = Json.format[PropertyLinkRequest]
 }

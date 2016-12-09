@@ -14,27 +14,18 @@
  * limitations under the License.
  */
 
-package controllers
+package models
 
-import config.Wiring
-import models.IndividualAccount
 import play.api.libs.json.Json
-import play.api.mvc.Action
 
-object IndividualAccountController extends PropertyLinkingBaseController {
-  val individuals = Wiring().individualAccounts
+case class PropertyRepresentation(representationId: String, linkId: String, agentId: String, agentName: String, groupId: String,
+                                  groupName: String, uarn: Long, canCheck: String, canChallenge: String, pending: Boolean) {
 
-  def create() = Action.async(parse.json) { implicit request =>
-    withJsonBody[IndividualAccount] { acc =>
-      individuals.create(acc) map { Created(_) }
-    }
-  }
+  def withAddress(address: Address) = DetailedPropertyRepresentation(
+    representationId, linkId, agentId, agentName, groupId, groupName, uarn, address, canCheck, canChallenge, pending
+  )
+}
 
-  def getById(id: String) = Action.async { implicit request =>
-    individuals.findByGGID(id) map {
-      case Some(x) => Ok(Json.toJson(x))
-      case None => NotFound
-    }
-  }
-
+object PropertyRepresentation {
+  implicit val propertyRepresentationFormat = Json.format[PropertyRepresentation]
 }

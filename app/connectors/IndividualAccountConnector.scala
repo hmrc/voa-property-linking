@@ -16,7 +16,8 @@
 
 package connectors
 
-import connectors.ServiceContract.IndividualAccount
+import models.{APIDetailedIndividualAccount, APIIndividualAccount, IndividualAccount}
+import play.api.libs.json.JsValue
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
 
@@ -24,19 +25,18 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class IndividualAccountConnector(http: HttpGet with HttpPut with HttpPost)(implicit ec: ExecutionContext)
   extends ServicesConfig {
-  lazy val baseUrl: String = baseUrl("external-business-rates-data-platform") + "/individuals"
+  lazy val baseUrl: String = baseUrl("external-business-rates-data-platform") + "/person"
 
-  def create(account: IndividualAccount)(implicit hc: HeaderCarrier): Future[Unit] = {
-    http.POST[IndividualAccount, HttpResponse](baseUrl, account) map { _ => () }
+  def create(account: IndividualAccount)(implicit hc: HeaderCarrier): Future[JsValue] = {
+    http.POST[APIIndividualAccount, JsValue](baseUrl, account.toAPIIndividualAccount)
   }
 
-  def get()(implicit hc: HeaderCarrier): Future[Seq[IndividualAccount]] = {
-    http.GET[Seq[IndividualAccount]](baseUrl)
+  def get(id: Int)(implicit hc: HeaderCarrier): Future[Option[IndividualAccount]] = {
+    http.GET[Option[APIDetailedIndividualAccount]](s"$baseUrl?personId=$id") map { _.map { _.toIndividualAccount }}
   }
 
-  def get(id: String)(implicit hc: HeaderCarrier): Future[Option[IndividualAccount]] = {
-    http.GET[Option[IndividualAccount]](s"$baseUrl/$id")
+  def findByGGID(ggId: String)(implicit hc: HeaderCarrier): Future[Option[IndividualAccount]] = {
+    http.GET[Option[APIDetailedIndividualAccount]](s"$baseUrl?governmentGatewayExternalId=$ggId") map { _.map { _.toIndividualAccount }}
   }
 
 }
-

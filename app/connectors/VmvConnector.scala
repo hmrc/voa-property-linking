@@ -17,8 +17,8 @@
 package connectors
 
 import config.Wiring
-import connectors.ServiceContract.{Address, Property}
 import controllers.PropertyDetailsController._
+import models.{Address, Property}
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import uk.gov.hmrc.play.config.ServicesConfig

@@ -16,10 +16,8 @@
 
 package connectors
 
-import connectors.ServiceContract.PropertyRepresentation
-import models.UpdatedRepresentation
+import models.{PropertyRepresentation, UpdatedRepresentation}
 import play.api.libs.json.{JsNull, JsValue}
-import serialization.JsonFormats._
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
 

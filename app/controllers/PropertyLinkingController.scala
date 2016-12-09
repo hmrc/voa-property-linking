@@ -17,12 +17,11 @@
 package controllers
 
 import config.Wiring
-import connectors.ServiceContract._
 import connectors.VmvConnector
+import models.{Address, DetailedPropertyLinkWrite, PropertyLinkRequest}
 import play.api.libs.json.Json
 import play.api.mvc.Action
 import uk.gov.hmrc.play.http.Upstream5xxResponse
-import serialization.JsonFormats._
 
 import scala.concurrent.Future
 

@@ -14,27 +14,12 @@
  * limitations under the License.
  */
 
-package controllers
+package models
 
-import config.Wiring
-import models.IndividualAccount
 import play.api.libs.json.Json
-import play.api.mvc.Action
 
-object IndividualAccountController extends PropertyLinkingBaseController {
-  val individuals = Wiring().individualAccounts
+case class FileInfo(fileName: String, fileType: String)
 
-  def create() = Action.async(parse.json) { implicit request =>
-    withJsonBody[IndividualAccount] { acc =>
-      individuals.create(acc) map { Created(_) }
-    }
-  }
-
-  def getById(id: String) = Action.async { implicit request =>
-    individuals.findByGGID(id) map {
-      case Some(x) => Ok(Json.toJson(x))
-      case None => NotFound
-    }
-  }
-
+object FileInfo {
+  implicit val fileInfo = Json.format[FileInfo]
 }

@@ -19,10 +19,7 @@ package services
 import javax.inject.{Inject, Named}
 
 import akka.actor.ActorSystem
-import akka.event.EventStream
-import infrastructure.Lock
-import uk.gov.hmrc.lock.LockKeeper
-import infrastructure.{LockedJobScheduler, Schedule}
+import infrastructure.{Lock, LockedJobScheduler, Schedule}
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext

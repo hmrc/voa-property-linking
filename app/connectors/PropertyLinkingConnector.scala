@@ -16,7 +16,7 @@
 
 package connectors
 
-import connectors.ServiceContract._
+import models.{DetailedPropertyLinkRead, PropertyLink, PropertyLinkRequest}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
 

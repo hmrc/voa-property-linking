@@ -17,20 +17,15 @@
 package controllers
 
 import config.Wiring
-import connectors.ServiceContract.GroupAccountSubmission
+import models.GroupAccountSubmission
 import play.api.libs.json.Json
 import play.api.mvc.Action
 
 object GroupAccountController extends PropertyLinkingBaseController {
-
   val groups = Wiring().groupAccounts
 
-  def get() = Action.async { implicit request =>
-    groups.get() map { x => Ok(Json.toJson(x)) }
-  }
-
   def getById(id: String) = Action.async { implicit request =>
-    groups.get(id) map {
+    groups.findByGGID(id) map {
       case Some(x) => Ok(Json.toJson(x))
       case None => NotFound
     }
@@ -45,7 +40,7 @@ object GroupAccountController extends PropertyLinkingBaseController {
 
   def create() = Action.async(parse.json) { implicit request =>
     withJsonBody[GroupAccountSubmission] { acc =>
-      groups.create(acc) map { _ => Created }
+      groups.create(acc) map { Created(_) }
     }
   }
 }
