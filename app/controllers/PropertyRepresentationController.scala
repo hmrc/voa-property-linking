@@ -17,12 +17,10 @@
 package controllers
 
 import config.Wiring
+import connectors.VmvConnector
+import models.{PropertyRepresentation, UpdatedRepresentation}
 import play.api.libs.json.{JsArray, Json}
 import play.api.mvc.Action
-import serialization.JsonFormats._
-import connectors.ServiceContract._
-import connectors.VmvConnector
-import models.UpdatedRepresentation
 
 import scala.concurrent.Future
 
@@ -59,9 +57,10 @@ object PropertyRepresentationController extends PropertyLinkingBaseController {
     }
   }
 
-  def create() = Action.async { implicit request =>
-    val reprRequest: PropertyRepresentation = request.body.asJson.get.as[PropertyRepresentation]
-    representations.create(reprRequest).map(x => Ok(""))
+  def create() = Action.async(parse.json) { implicit request =>
+    withJsonBody[PropertyRepresentation] { reprRequest =>
+      representations.create(reprRequest).map(x => Ok(""))
+    }
   }
 
   def update() = Action.async(parse.json) { implicit request =>

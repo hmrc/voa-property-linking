@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package serialization
+package models
 
-import play.api.libs.json._
+import play.api.libs.json.Json
 
-object JsonFormats {
-  implicit val dateReads = Reads.jodaDateReads("yyyy-MM-dd")
-  implicit val dateWrites = Writes.jodaDateWrites("yyyy-MM-dd")
+case class DetailedPropertyRepresentation(representationId: String, linkId: String, agentId: String, agentName: String, groupId: String,
+                                          groupName: String, uarn: Long, address: Address, canCheck: String, canChallenge: String,
+                                          pending: Boolean)
+
+object DetailedPropertyRepresentation {
+  implicit val formats = Json.format[DetailedPropertyRepresentation]
 }
-

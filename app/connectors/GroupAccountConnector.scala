@@ -16,29 +16,30 @@
 
 package connectors
 
-import connectors.ServiceContract.{GroupAccount, GroupAccountSubmission}
+import models.{APIDetailedGroupAccount, APIGroupAccount, GroupAccount, GroupAccountSubmission}
+import play.api.libs.json.JsValue
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet, HttpPost, HttpResponse}
+import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet, HttpPost}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class GroupAccountConnector(http: HttpGet with HttpPost)(implicit ec: ExecutionContext) extends ServicesConfig {
 
-  lazy val url =  baseUrl("external-business-rates-data-platform") + "/groups"
+  lazy val url =  baseUrl("external-business-rates-data-platform") + "/organisation"
 
-  def create(account: GroupAccountSubmission)(implicit hc: HeaderCarrier): Future[Unit] = {
-    http.POST[GroupAccountSubmission, HttpResponse](url, account) map { _ => () }
+  def create(account: GroupAccountSubmission)(implicit hc: HeaderCarrier): Future[JsValue] = {
+    http.POST[APIGroupAccount, JsValue](url, account.toApiAccount)
   }
 
-  def get()(implicit hc: HeaderCarrier): Future[Seq[GroupAccount]] = {
-    http.GET[Seq[GroupAccount]](url)
+  def get(id: Int)(implicit hc: HeaderCarrier): Future[Option[GroupAccount]] = {
+    http.GET[Option[APIDetailedGroupAccount]](s"$url?organisationId=$id") map { _.map { _.toGroupAccount }}
   }
 
-  def get(id: String)(implicit hc: HeaderCarrier): Future[Option[GroupAccount]] = {
-    http.GET[Option[GroupAccount]](s"$url/$id")
+  def findByGGID(ggId: String)(implicit hc: HeaderCarrier): Future[Option[GroupAccount]] = {
+    http.GET[Option[APIDetailedGroupAccount]](s"$url?governmentGatewayExternalId=$ggId") map { _.map { _.toGroupAccount }}
   }
 
   def withAgentCode(agentCode: String)(implicit hc: HeaderCarrier): Future[Option[GroupAccount]] = {
-    http.GET[Option[GroupAccount]](s"$url/agentCode/$agentCode")
+    http.GET[Option[APIDetailedGroupAccount]](s"$url?representativeCode=$agentCode") map { _.map { _.toGroupAccount }}
   }
 }

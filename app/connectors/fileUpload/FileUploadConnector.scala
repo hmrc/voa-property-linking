@@ -16,20 +16,16 @@
 
 package connectors.fileUpload
 
-import java.io.File
-import java.time.LocalDate
 import javax.inject.Inject
 
-import akka.stream.scaladsl._
 import com.google.inject.{ImplementedBy, Singleton}
 import config.Wiring
 import play.api.Logger
-import play.api.libs.json.{JsPath, JsValue, Json, Reads}
 import play.api.libs.functional.syntax._
-import play.api.libs.ws.{WSClient, WSResponse}
-import play.api.mvc.MultipartFormData.FilePart
+import play.api.libs.json.{JsPath, Json, Reads}
+import play.api.libs.ws.WSClient
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http.{HttpException, HttpResponse, _}
+import uk.gov.hmrc.play.http._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
@@ -92,7 +88,7 @@ class FileUploadConnector @Inject()(val ws: WSClient)(implicit ec: ExecutionCont
 
   override def getEnvelopeIds()(implicit hc: HeaderCarrier):Future[Seq[String]]  = {
     val url = s"${baseUrl("file-upload-backend")}/file-transfer/envelopes"
-    val res = http.GET(url)
+    val res = http.GET[HttpResponse](url)
     res.map { resp =>
       (resp.json \ "_embedded" \ "envelopes" \\ "id").map(_.toString)
     }
@@ -117,7 +113,7 @@ class FileUploadConnector @Inject()(val ws: WSClient)(implicit ec: ExecutionCont
   override def deleteEnvelope(envelopeId: String)(implicit hc: HeaderCarrier):Future[Unit] = {
     val url = s"${baseUrl("file-upload-backend")}/file-upload/envelopes/$envelopeId"
     Logger.info(s"Deleting envelopedId: $envelopeId from FUAAS")
-    http.DELETE(url).map(_ => ())
+    http.DELETE[HttpResponse](url).map(_ => ())
   }
 }
 

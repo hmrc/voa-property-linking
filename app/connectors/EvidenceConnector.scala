@@ -18,13 +18,14 @@ package connectors
 
 import javax.inject.Inject
 
-import akka.stream.scaladsl.{FileIO, Source}
+import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.google.inject.{ImplementedBy, Singleton}
 import play.api.libs.ws.WSClient
 import play.api.mvc.MultipartFormData.{DataPart, FilePart}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.HeaderCarrier
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 

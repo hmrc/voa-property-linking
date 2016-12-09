@@ -16,13 +16,13 @@
 
 package infrastructure
 
-import scala.concurrent.{ExecutionContext, Future}
-import scala.concurrent.duration._
 import akka.actor.{ActorSystem, Scheduler}
-import akka.event.EventStream
 import akka.util.Timeout
 import play.api.Logger
 import uk.gov.hmrc.lock.LockKeeper
+
+import scala.concurrent.duration._
+import scala.concurrent.{ExecutionContext, Future}
 
 abstract class LockedJobScheduler[Event <: AnyRef](lock: LockKeeper, actorSystem: ActorSystem) {
   implicit val t: Timeout = 1 hour

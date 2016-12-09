@@ -14,27 +14,23 @@
  * limitations under the License.
  */
 
-package controllers
+package models
 
-import config.Wiring
-import models.IndividualAccount
 import play.api.libs.json.Json
-import play.api.mvc.Action
 
-object IndividualAccountController extends PropertyLinkingBaseController {
-  val individuals = Wiring().individualAccounts
+case class Address(line1: String, line2: String, line3: String, postcode: String) {
+  def id = 1 //TODO integrate with address api
+}
 
-  def create() = Action.async(parse.json) { implicit request =>
-    withJsonBody[IndividualAccount] { acc =>
-      individuals.create(acc) map { Created(_) }
-    }
+object Address {
+  implicit val formats = Json.format[Address]
+
+  def fromLines(lines: Seq[String], postcode: String) = {
+    def optionalLine(n: Int) = lines.lift(n).getOrElse("")
+
+    require(lines.nonEmpty)
+    Address(lines.head, optionalLine(1), optionalLine(2), postcode)
   }
 
-  def getById(id: String) = Action.async { implicit request =>
-    individuals.findByGGID(id) map {
-      case Some(x) => Ok(Json.toJson(x))
-      case None => NotFound
-    }
-  }
-
+  def fakeAddress = Address("Line 1", "Line 2", "Line 3", "AA11 1AA")
 }
