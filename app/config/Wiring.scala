@@ -16,7 +16,7 @@
 
 package config
 
-import connectors.{GroupAccountConnector, IndividualAccountConnector, PropertyLinkingConnector, PropertyRepresentationConnector}
+import connectors._
 import uk.gov.hmrc.play.audit.http.config.LoadAuditingConfig
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.auth.microservice.connectors.AuthConnector
@@ -39,6 +39,7 @@ abstract class Wiring {
   lazy val propertyLinkingConnector = new PropertyLinkingConnector(http)
   lazy val individualAccounts = new IndividualAccountConnector(http)
   lazy val groupAccounts = new GroupAccountConnector(http)
+  lazy val addresses = new AddressConnector(http)
 }
 
 object WSHttp extends WSGet with WSPut with WSPost with WSDelete with WSPatch with AppName {

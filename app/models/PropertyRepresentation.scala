@@ -21,7 +21,7 @@ import play.api.libs.json.Json
 case class PropertyRepresentation(representationId: String, linkId: String, agentId: String, agentName: String, groupId: String,
                                   groupName: String, uarn: Long, canCheck: String, canChallenge: String, pending: Boolean) {
 
-  def withAddress(address: Address) = DetailedPropertyRepresentation(
+  def withAddress(address: PropertyAddress) = DetailedPropertyRepresentation(
     representationId, linkId, agentId, agentName, groupId, groupName, uarn, address, canCheck, canChallenge, pending
   )
 }

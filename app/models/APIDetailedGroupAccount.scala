@@ -22,8 +22,8 @@ import play.api.libs.json.Json
 case class APIDetailedGroupAccount(id: Int, governmentGatewayId: String, representativeCode: Option[Int], organisationLatestDetail: GroupDetails,
                                    persons: Seq[IndividualSummary]) {
 
-  def toGroupAccount = {
-    GroupAccount(id, governmentGatewayId, organisationLatestDetail.organisationName, Address.fakeAddress,
+  def toGroupAccount(address: SimpleAddress) = {
+    GroupAccount(id, governmentGatewayId, organisationLatestDetail.organisationName, address,
       organisationLatestDetail.organisationEmailAddress, organisationLatestDetail.organisationPhoneNumber,
       organisationLatestDetail.smallBusinessFlag, representativeCode.map(_.toString))
   }

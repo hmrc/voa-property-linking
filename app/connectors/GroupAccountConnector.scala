@@ -16,6 +16,7 @@
 
 package connectors
 
+import config.Wiring
 import models.{APIDetailedGroupAccount, APIGroupAccount, GroupAccount, GroupAccountSubmission}
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.play.config.ServicesConfig
@@ -25,21 +26,45 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class GroupAccountConnector(http: HttpGet with HttpPost)(implicit ec: ExecutionContext) extends ServicesConfig {
 
+  val addresses = Wiring().addresses
   lazy val url =  baseUrl("external-business-rates-data-platform") + "/organisation"
 
   def create(account: GroupAccountSubmission)(implicit hc: HeaderCarrier): Future[JsValue] = {
-    http.POST[APIGroupAccount, JsValue](url, account.toApiAccount)
+    account.address.addressUnitId match {
+      case Some(id) => http.POST[APIGroupAccount, JsValue](url, account.toApiAccount(id))
+      case None => addresses.create(account.address) flatMap { id =>
+        http.POST[APIGroupAccount, JsValue](url, account.toApiAccount(id))
+      }
+    }
   }
 
   def get(id: Int)(implicit hc: HeaderCarrier): Future[Option[GroupAccount]] = {
-    http.GET[Option[APIDetailedGroupAccount]](s"$url?organisationId=$id") map { _.map { _.toGroupAccount }}
+    http.GET[Option[APIDetailedGroupAccount]](s"$url?organisationId=$id") flatMap {
+      case Some(a) => addresses.get(a.organisationLatestDetail.addressUnitId) map {
+        case Some(address) => Some(a.toGroupAccount(address.simplify))
+        case None => None
+      }
+      case None => Future.successful(None)
+    }
   }
 
   def findByGGID(ggId: String)(implicit hc: HeaderCarrier): Future[Option[GroupAccount]] = {
-    http.GET[Option[APIDetailedGroupAccount]](s"$url?governmentGatewayExternalId=$ggId") map { _.map { _.toGroupAccount }}
+    http.GET[Option[APIDetailedGroupAccount]](s"$url?governmentGatewayExternalId=$ggId") flatMap {
+      case Some(a) => addresses.get(a.organisationLatestDetail.addressUnitId) map {
+        case Some(address) => Some(a.toGroupAccount(address.simplify))
+        case None => None
+      }
+      case None => Future.successful(None)
+    }
   }
 
   def withAgentCode(agentCode: String)(implicit hc: HeaderCarrier): Future[Option[GroupAccount]] = {
-    http.GET[Option[APIDetailedGroupAccount]](s"$url?representativeCode=$agentCode") map { _.map { _.toGroupAccount }}
+    http.GET[Option[APIDetailedGroupAccount]](s"$url?representativeCode=$agentCode") flatMap {
+      case Some(a) => addresses.get(a.organisationLatestDetail.addressUnitId) map {
+        case Some(address) => Some(a.toGroupAccount(address.simplify))
+        case None => None
+      }
+      case None => Future.successful(None)
+    }
   }
 }

@@ -26,3 +26,7 @@ GET         /properties/:uarn                                  controllers.Prope
 PUT         /envelopes/:envId                                  @controllers.EnvelopeController.create(envId: String)
 GET         /envelopes                                         @controllers.EnvelopeController.get()
 GET         /transfer                                          @controllers.FileTransferController.run()
+
+GET         /address                                           controllers.AddressLookup.find(postcode)
+GET         /address/:id                                       controllers.AddressLookup.get(id: Int)
+POST        /address                                           controllers.AddressLookup.create
