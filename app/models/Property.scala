@@ -18,7 +18,7 @@ package models
 
 import play.api.libs.json.Json
 
-case class Property(uarn: Long, billingAuthorityReference: String, address: Address, isSelfCertifiable: Boolean,
+case class Property(uarn: Long, billingAuthorityReference: String, address: PropertyAddress, isSelfCertifiable: Boolean,
                     specialCategoryCode: String, description: String, bulkClassIndicator: String)
 
 object Property {

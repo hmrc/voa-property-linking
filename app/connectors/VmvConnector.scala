@@ -18,7 +18,7 @@ package connectors
 
 import config.Wiring
 import controllers.PropertyDetailsController._
-import models.{Address, Property}
+import models.{DetailedAddress$, Property, PropertyAddress}
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import uk.gov.hmrc.play.config.ServicesConfig
@@ -45,7 +45,7 @@ object VmvConnector extends ServicesConfig {
       (__ \ "specialCategoryCode").read[String]
     ) (
     (baRef, lines, postcode, desc, scat) =>
-      Property(uarn, baRef, Address.fromLines(lines, postcode), isSelfCertifiable(uarn), scat, desc, "BCI")
+      Property(uarn, baRef, PropertyAddress(lines, postcode), isSelfCertifiable(uarn), scat, desc, "BCI")
   )
 
   private def isSelfCertifiable(uarn: Long) = uarn % 2 == 0 //TODO until business logic is finalised

@@ -18,19 +18,8 @@ package models
 
 import play.api.libs.json.Json
 
-case class Address(line1: String, line2: String, line3: String, postcode: String) {
-  def id = 1 //TODO integrate with address api
-}
+case class PropertyAddress(lines: Seq[String], postcode: String)
 
-object Address {
-  implicit val formats = Json.format[Address]
-
-  def fromLines(lines: Seq[String], postcode: String) = {
-    def optionalLine(n: Int) = lines.lift(n).getOrElse("")
-
-    require(lines.nonEmpty)
-    Address(lines.head, optionalLine(1), optionalLine(2), postcode)
-  }
-
-  def fakeAddress = Address("Line 1", "Line 2", "Line 3", "AA11 1AA")
+object PropertyAddress {
+  implicit val format = Json.format[PropertyAddress]
 }

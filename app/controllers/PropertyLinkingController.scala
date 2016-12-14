@@ -18,7 +18,7 @@ package controllers
 
 import config.Wiring
 import connectors.VmvConnector
-import models.{Address, DetailedPropertyLinkWrite, PropertyLinkRequest}
+import models.{DetailedAddress$, DetailedPropertyLinkWrite, PropertyAddress, PropertyLinkRequest}
 import play.api.libs.json.Json
 import play.api.mvc.Action
 import uk.gov.hmrc.play.http.Upstream5xxResponse
@@ -37,13 +37,11 @@ object PropertyLinkingController extends PropertyLinkingBaseController {
   def find(userId: String) = Action.async { implicit request =>
     val a:Future[Seq[DetailedPropertyLinkWrite]] = propertyLinks.find(userId).map(_.map(prop => {
       VmvConnector.getPropertyInfo(prop.uarn)
-        .flatMap(_.map(_.address).getOrElse(Address("No address found", "", "", ""))
+        .flatMap(_.map(_.address).getOrElse(PropertyAddress(Seq("No address found"), ""))
           .map(DetailedPropertyLinkWrite(prop.linkId, prop.uarn, prop.groupId, prop.description, prop.agentNames,prop.canAppointAgent,
             _, prop.capacityDeclaration, prop.linkedDate, prop.pending))
         )
-    }))
-      .map(x => Future.sequence(x))
-      .flatMap(identity)
+    })).flatMap(x => Future.sequence(x))
     a.map( x=>
       Ok(Json.toJson(x))
     )
