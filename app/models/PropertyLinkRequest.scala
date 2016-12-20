@@ -19,7 +19,8 @@ package models
 import org.joda.time.DateTime
 import play.api.libs.json.Json
 
-case class PropertyLinkRequest(uarn: Long, groupId: String, capacityDeclaration: CapacityDeclaration,
+case class PropertyLinkRequest(uarn: Long, groupId: String, individualId: Int,
+                               capacityDeclaration: CapacityDeclaration,
                                linkedDate: DateTime, linkBasis: String,
                                specialCategoryCode: String, description: String, bulkClassIndicator: String,
                                fileInfo: Option[FileInfo])

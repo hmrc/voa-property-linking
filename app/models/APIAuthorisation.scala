@@ -29,7 +29,7 @@ case class APIAuthorisation(
                              authorisationMethod: String,
                              authorisationOwnerCapacity: String,
                              startDate: DateTime,
-                             endDate: DateTime,
+                             endDate: Option[DateTime],
                              submissionId: String,
                              parties: Seq[APIAuthorisedParty]
 )
@@ -45,7 +45,7 @@ object APIAuthorisation {
         (JsPath \ "authorisationMethod").read[String] and
         (JsPath \ "authorisationOwnerCapacity").read[String] and
         (JsPath \ "startDate").read[DateTime] and
-        (JsPath \ "endDate").read[DateTime] and
+        (JsPath \ "endDate").readNullable[DateTime] and
         (JsPath \ "submissionId").read[String] and
           (JsPath \ "parties").read[Seq[APIAuthorisedParty]]
       )(APIAuthorisation.apply _)

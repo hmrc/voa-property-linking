@@ -23,7 +23,7 @@ case class APIDetailedIndividualAccount(id: Int, governmentGatewayExternalId: St
                                         organisationId: Int, organisationLatestDetail: GroupDetails) {
 
   def toIndividualAccount(address: SimpleAddress) = {
-    IndividualAccount(governmentGatewayExternalId, personLatestDetail.identityVerificationId, organisationId,
+    IndividualAccount(governmentGatewayExternalId, personLatestDetail.identityVerificationId, organisationId, id,
       IndividualDetails(personLatestDetail.firstName, personLatestDetail.lastName, personLatestDetail.emailAddress,
         personLatestDetail.phoneNumber, personLatestDetail.mobileNumber, address)
     )

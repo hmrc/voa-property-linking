@@ -17,7 +17,7 @@
 package controllers
 
 import config.Wiring
-import models.IndividualAccount
+import models.{IndividualAccount, IndividualAccountWrite}
 import play.api.libs.json.Json
 import play.api.mvc.Action
 
@@ -25,13 +25,13 @@ object IndividualAccountController extends PropertyLinkingBaseController {
   val individuals = Wiring().individualAccounts
 
   def create() = Action.async(parse.json) { implicit request =>
-    withJsonBody[IndividualAccount] { acc =>
+    withJsonBody[IndividualAccountWrite] { acc =>
       individuals.create(acc) map { Created(_) }
     }
   }
 
-  def getById(id: String) = Action.async { implicit request =>
-    individuals.findByGGID(id) map {
+  def getByGGId(ggId: String) = Action.async { implicit request =>
+    individuals.findByGGID(ggId) map {
       case Some(x) => Ok(Json.toJson(x))
       case None => NotFound
     }

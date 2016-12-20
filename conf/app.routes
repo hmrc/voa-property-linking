@@ -14,7 +14,7 @@ POST        /property-links/:submissionId                      controllers.Prope
 GET         /property-links/:userId                            controllers.PropertyLinkingController.find(userId)
 GET         /property-link/:linkId                             controllers.PropertyLinkingController.get(linkId)
 
-GET         /individuals/:id                                   controllers.IndividualAccountController.getById(id)
+GET         /individuals/:ggId                                 controllers.IndividualAccountController.getByGGId(ggId)
 POST        /individuals                                       controllers.IndividualAccountController.create()
 
 GET         /groups/:id                                        controllers.GroupAccountController.getById(id)

@@ -17,7 +17,7 @@
 package connectors
 
 import config.Wiring
-import models.{APIDetailedIndividualAccount, APIIndividualAccount, IndividualAccount}
+import models.{APIDetailedIndividualAccount, APIIndividualAccount, IndividualAccount, IndividualAccountWrite}
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
@@ -30,7 +30,7 @@ class IndividualAccountConnector(http: HttpGet with HttpPut with HttpPost)(impli
   lazy val baseUrl: String = baseUrl("external-business-rates-data-platform") + "/person"
   val addresses = Wiring().addresses
 
-  def create(account: IndividualAccount)(implicit hc: HeaderCarrier): Future[JsValue] = {
+  def create(account: IndividualAccountWrite)(implicit hc: HeaderCarrier): Future[JsValue] = {
     account.details.address.addressUnitId match {
       case Some(id) => http.POST[APIIndividualAccount, JsValue](baseUrl, account.toAPIIndividualAccount(id))
       case None => addresses.create(account.details.address) flatMap { id =>

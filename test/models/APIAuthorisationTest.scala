@@ -27,7 +27,7 @@ class APIAuthorisationTest extends FlatSpec with MustMatchers {
     println(authorisation)
     authorisation mustBe APIAuthorisation(1001, 10001, 20001, "APPROVED", "RATES_BILL", "OWNER",
       new DateTime(2016, 11, 1, 0, 0, 0),
-      new DateTime(2016, 12, 31, 0, 0, 0),
+      Some(new DateTime(2016, 12, 31, 0, 0, 0)),
     "ABC99001",
       Seq(APIAuthorisedParty(10051, "AGENT", "APPROVED"),
         APIAuthorisedParty(10052, "AGENT", "REVOKED"))
