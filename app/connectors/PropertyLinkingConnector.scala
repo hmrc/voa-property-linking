@@ -16,7 +16,9 @@
 
 package connectors
 
-import models.{DetailedPropertyLinkRead, PropertyLink, PropertyLinkRequest}
+import java.net.URLEncoder
+
+import models.{APIAuthorisation, PropertyLink, PropertyLinkRequest}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
 
@@ -31,9 +33,11 @@ class PropertyLinkingConnector(http: HttpGet with HttpPut with HttpPost)(implici
     http.POST[PropertyLinkRequest, HttpResponse](url, linkingRequest) map { _ => () }
   }
 
-  def find(groupId: String)(implicit hc: HeaderCarrier): Future[Seq[DetailedPropertyLinkRead]] = {
-    val url = baseUrl + s"/dashboard/properties/$groupId"
-    http.GET[Seq[DetailedPropertyLinkRead]](url)
+  def find(organisationId: String)(implicit hc: HeaderCarrier): Future[Seq[APIAuthorisation]] = {
+    val startPoint=1
+    val params = URLEncoder.encode(s"""{"authorisationOwnerOrganisationId": $organisationId}""")
+    val url = baseUrl + s"/authorisation?startPoint=${startPoint}&searchparams=$params"
+    http.GET[Seq[APIAuthorisation]](url)
   }
 
   def get(linkId: String)(implicit hc: HeaderCarrier): Future[Option[PropertyLink]] = {

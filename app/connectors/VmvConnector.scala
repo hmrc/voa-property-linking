@@ -18,7 +18,7 @@ package connectors
 
 import config.Wiring
 import controllers.PropertyDetailsController._
-import models.{DetailedAddress$, Property, PropertyAddress}
+import models.{APIValuationHistory, Property, PropertyAddress}
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import uk.gov.hmrc.play.config.ServicesConfig
@@ -35,6 +35,12 @@ object VmvConnector extends ServicesConfig {
         case JsError(errs) => None
       }
     }
+  }
+
+  def getValuationHistory(uarn: Long)(implicit hc: HeaderCarrier) = {
+    http.GET[JsValue](s"${baseUrl("external-business-rates-data-platform")}/ndrlist/valuation_history/$uarn").map(js =>{
+      (js \ "NDRListValuationHistoryItems").as[Seq[APIValuationHistory]]
+    } )
   }
 
   private def propertyReads(uarn: Long) = (

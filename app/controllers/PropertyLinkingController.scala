@@ -18,7 +18,7 @@ package controllers
 
 import config.Wiring
 import connectors.VmvConnector
-import models.{DetailedAddress$, DetailedPropertyLinkWrite, PropertyAddress, PropertyLinkRequest}
+import models._
 import play.api.libs.json.Json
 import play.api.mvc.Action
 import uk.gov.hmrc.play.http.Upstream5xxResponse
@@ -27,6 +27,7 @@ import scala.concurrent.Future
 
 object PropertyLinkingController extends PropertyLinkingBaseController {
   val propertyLinks = Wiring().propertyLinkingConnector
+  val propAuthConnector= Wiring().propertyLinkingConnector
 
   def create(submissionId: String) = Action.async(parse.json) { implicit request =>
     withJsonBody[PropertyLinkRequest] { link =>
@@ -34,16 +35,18 @@ object PropertyLinkingController extends PropertyLinkingBaseController {
     }
   }
 
-  def find(userId: String) = Action.async { implicit request =>
-    val a:Future[Seq[DetailedPropertyLinkWrite]] = propertyLinks.find(userId).map(_.map(prop => {
+  def find(organisationId: String) = Action.async { implicit request =>
+    propertyLinks.find(organisationId).map(_.map(prop => {
       VmvConnector.getPropertyInfo(prop.uarn)
         .flatMap(_.map(_.address).getOrElse(PropertyAddress(Seq("No address found"), ""))
-          .map(DetailedPropertyLinkWrite(prop.linkId, prop.uarn, prop.groupId, prop.description, prop.agentNames,prop.canAppointAgent,
-            _, prop.capacityDeclaration, prop.linkedDate, prop.pending))
+          .map(DetailedPropertyLinkWrite(prop.submissionId, prop.uarn, prop.authorisationOwnerOrganisationId.toString, "DESCRIPTION", Nil,
+            true, //TODO - canAppointAgent
+            _, CapacityDeclaration(prop.authorisationOwnerCapacity, prop.startDate, prop.endDate), prop.createDateTime,
+            if (prop.authorisationStatus == "PENDING") true else false))
         )
-    })).flatMap(x => Future.sequence(x))
-    a.map( x=>
-      Ok(Json.toJson(x))
+    }))
+      .flatMap(x => Future.sequence(x))
+      .map(x=> Ok(Json.toJson(x))
     )
   }
 

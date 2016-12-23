@@ -28,10 +28,11 @@ case class APIAuthorisation(
                              authorisationStatus: String,
                              authorisationMethod: String,
                              authorisationOwnerCapacity: String,
+                             createDateTime: DateTime,
                              startDate: DateTime,
                              endDate: Option[DateTime],
-                             submissionId: String,
-                             parties: Seq[APIAuthorisedParty]
+                             submissionId: String
+         //                    parties: Seq[APIAuthorisedParty]
 )
 
 object APIAuthorisation {
@@ -44,10 +45,11 @@ object APIAuthorisation {
         (JsPath \ "authorisationStatus").read[String] and
         (JsPath \ "authorisationMethod").read[String] and
         (JsPath \ "authorisationOwnerCapacity").read[String] and
+        (JsPath \ "createDatetime").read[DateTime] and
         (JsPath \ "startDate").read[DateTime] and
         (JsPath \ "endDate").readNullable[DateTime] and
-        (JsPath \ "submissionId").read[String] and
-          (JsPath \ "parties").read[Seq[APIAuthorisedParty]]
+        (JsPath \ "submissionId").read[String]
+        //  (JsPath \ "parties").read[Seq[APIAuthorisedParty]]
       )(APIAuthorisation.apply _)
   }
 }

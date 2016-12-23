@@ -24,13 +24,13 @@ class APIAuthorisationTest extends FlatSpec with MustMatchers {
 
   "APIAuthorisation" should "be deserialised property" in {
     val authorisation = Json.parse(DummyData.testData).as[APIAuthorisation]
-    println(authorisation)
     authorisation mustBe APIAuthorisation(1001, 10001, 20001, "APPROVED", "RATES_BILL", "OWNER",
+      new DateTime(2016, 10, 19, 9, 35, 16),
       new DateTime(2016, 11, 1, 0, 0, 0),
       Some(new DateTime(2016, 12, 31, 0, 0, 0)),
-    "ABC99001",
-      Seq(APIAuthorisedParty(10051, "AGENT", "APPROVED"),
-        APIAuthorisedParty(10052, "AGENT", "REVOKED"))
+    "ABC99001"
+      //Seq(APIAuthorisedParty(10051, "AGENT", "APPROVED"),
+        //APIAuthorisedParty(10052, "AGENT", "REVOKED"))
     )
   }
 }

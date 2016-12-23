@@ -24,7 +24,7 @@ import play.api.mvc.Action
 object GroupAccountController extends PropertyLinkingBaseController {
   val groups = Wiring().groupAccounts
 
-  def getById(id: String) = Action.async { implicit request =>
+  def getByGGId(id: String) = Action.async { implicit request =>
     groups.findByGGID(id) map {
       case Some(x) => Ok(Json.toJson(x))
       case None => NotFound

@@ -11,13 +11,13 @@ PUT         /property-representations/accept/:reprId           controllers.Prope
 PUT         /property-representations/reject/:reprId           controllers.PropertyRepresentationController.reject(reprId)
 
 POST        /property-links/:submissionId                      controllers.PropertyLinkingController.create(submissionId)
-GET         /property-links/:userId                            controllers.PropertyLinkingController.find(userId)
+GET         /property-links/:organisationId                    controllers.PropertyLinkingController.find(organisationId)
 GET         /property-link/:linkId                             controllers.PropertyLinkingController.get(linkId)
 
 GET         /individuals/:ggId                                 controllers.IndividualAccountController.getByGGId(ggId)
 POST        /individuals                                       controllers.IndividualAccountController.create()
 
-GET         /groups/:id                                        controllers.GroupAccountController.getById(id)
+GET         /groups/:id                                        controllers.GroupAccountController.getByGGId(id)
 GET         /groups/agentCode/:agentCode                       controllers.GroupAccountController.withAgentCode(agentCode)
 POST        /groups                                            controllers.GroupAccountController.create()
 

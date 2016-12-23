@@ -17,14 +17,17 @@
 package models
 
 import org.joda.time.DateTime
+import play.api.data.format.Formats
 import play.api.libs.json.Json
 
-case class PropertyLinkRequest(uarn: Long, organisationId: Int, individualId: Int,
-                               capacityDeclaration: CapacityDeclaration,
-                               linkedDate: DateTime, linkBasis: String,
-                               specialCategoryCode: String, description: String, bulkClassIndicator: String,
-                               fileInfo: Option[FileInfo])
+case class APIValuationHistory (
+                                 asstRef: Long,
+                                 listYear: String,
+                                 uarn:Long,
+                                 effectiveDate:DateTime,
+                                 rateableValue:Long
+                               )
 
-object PropertyLinkRequest {
-  implicit val propertyLinkRequest = Json.format[PropertyLinkRequest]
+object APIValuationHistory {
+  implicit val formats = Json.format[APIValuationHistory]
 }
