@@ -35,8 +35,8 @@ class PropertyLinkingConnector(http: HttpGet with HttpPut with HttpPost)(implici
 
   def find(organisationId: String)(implicit hc: HeaderCarrier): Future[Seq[APIAuthorisation]] = {
     val startPoint=1
-    val params = URLEncoder.encode(s"""{"authorisationOwnerOrganisationId": $organisationId}""")
-    val url = baseUrl + s"/authorisation?startPoint=${startPoint}&searchparams=$params"
+    val params = URLEncoder.encode(s"""{"authorisationOwnerOrganisationId": $organisationId}""", "UTF-8")
+    val url = baseUrl + s"/authorisation?startPoint=$startPoint&searchParameters=$params"
     http.GET[Seq[APIAuthorisation]](url)
   }
 
