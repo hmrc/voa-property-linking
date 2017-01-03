@@ -20,7 +20,6 @@ import org.joda.time.DateTime
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
-
 case class APIAuthorisation(
                              uarn: Long,
                              authorisationOwnerOrganisationId: Long,
@@ -32,7 +31,6 @@ case class APIAuthorisation(
                              startDate: DateTime,
                              endDate: Option[DateTime],
                              submissionId: String
-         //                    parties: Seq[APIAuthorisedParty]
 )
 
 object APIAuthorisation {
@@ -49,7 +47,6 @@ object APIAuthorisation {
         (JsPath \ "startDate").read[DateTime] and
         (JsPath \ "endDate").readNullable[DateTime] and
         (JsPath \ "submissionId").read[String]
-        //  (JsPath \ "parties").read[Seq[APIAuthorisedParty]]
       )(APIAuthorisation.apply _)
   }
 }
