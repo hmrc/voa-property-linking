@@ -40,10 +40,6 @@ class AddressConnector(http: HttpGet with HttpPost with HttpPut)(implicit ec: Ex
     http.GET[Option[DetailedAddress]](s"$url/$addressUnitId")
   }
 
-  def create(address: DetailedAddress)(implicit hc: HeaderCarrier): Future[Unit] = {
-    http.POST[DetailedAddress, HttpResponse](s"$url/non_standard_address", address) map { _ => () }
-  }
-
   def create(address: SimpleAddress)(implicit hc: HeaderCarrier): Future[Int] = {
     http.POST[DetailedAddress, JsValue](s"$url/non_standard_address", address.toDetailedAddress) map { js =>
       js \ "addressUnitId" match {

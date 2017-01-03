@@ -17,7 +17,7 @@
 package controllers
 
 import config.Wiring
-import models.DetailedAddress
+import models.SimpleAddress
 import play.api.libs.json.Json
 import play.api.mvc.Action
 
@@ -37,8 +37,8 @@ object AddressLookup extends PropertyLinkingBaseController {
   }
 
   def create = Action.async(parse.json) { implicit request =>
-    withJsonBody[DetailedAddress] { address =>
-      addresses.create(address) map { _ => Created }
+    withJsonBody[SimpleAddress] { address =>
+      addresses.create(address) map { x => Created(Json.obj("id" -> x)) }
     }
   }
 }
