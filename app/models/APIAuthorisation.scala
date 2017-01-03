@@ -22,8 +22,8 @@ import play.api.libs.json._
 
 case class APIAuthorisation(
                              uarn: Long,
-                             authorisationOwnerOrganisationId: Long,
-                             authorisationOwnerPersonId: Long,
+                             authorisationOwnerOrganisationId: Int,
+                             authorisationOwnerPersonId: Int,
                              authorisationStatus: String,
                              authorisationMethod: String,
                              authorisationOwnerCapacity: String,
@@ -38,12 +38,12 @@ object APIAuthorisation {
   implicit val reads: Reads[APIAuthorisation] =  {
     (
       (JsPath \ "uarn").read[Long] and
-        (JsPath \ "authorisationOwnerOrganisationId").read[Long] and
-        (JsPath \ "authorisationOwnerPersonId").read[Long] and
+        (JsPath \ "authorisationOwnerOrganisationId").read[Int] and
+        (JsPath \ "authorisationOwnerPersonId").read[Int] and
         (JsPath \ "authorisationStatus").read[String] and
         (JsPath \ "authorisationMethod").read[String] and
         (JsPath \ "authorisationOwnerCapacity").read[String] and
-        (JsPath \ "createDatetime").read[DateTime] and
+        (JsPath \ "createDateTime").read[DateTime] and
         (JsPath \ "startDate").read[DateTime] and
         (JsPath \ "endDate").readNullable[DateTime] and
         (JsPath \ "submissionId").read[String]

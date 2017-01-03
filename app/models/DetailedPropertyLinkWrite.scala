@@ -19,7 +19,7 @@ package models
 import org.joda.time.DateTime
 import play.api.libs.json.Json
 
-case class DetailedPropertyLinkWrite(linkId: String, uarn: Long, groupId: String, description: String,
+case class DetailedPropertyLinkWrite(linkId: String, uarn: Long, organisationId: Int, description: String,
                                      agentNames: Seq[String], canAppointAgent: Boolean,
                                      address: PropertyAddress,
                                      capacityDeclaration: CapacityDeclaration, linkedDate: DateTime, pending: Boolean)

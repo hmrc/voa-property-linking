@@ -18,7 +18,7 @@ package models
 
 import play.api.libs.json.Json
 
-case class PropertyRepresentation(representationId: String, linkId: String, agentId: String, agentName: String, groupId: String,
+case class PropertyRepresentation(representationId: String, linkId: String, agentId: String, agentName: String, groupId: Int,
                                   groupName: String, uarn: Long, canCheck: String, canChallenge: String, pending: Boolean) {
 
   def withAddress(address: PropertyAddress) = DetailedPropertyRepresentation(

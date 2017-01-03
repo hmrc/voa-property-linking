@@ -44,7 +44,7 @@ object DummyData {
                    |      "authorisationStatus": "APPROVED",
                    |      "authorisationMethod": "RATES_BILL",
                    |      "authorisationOwnerCapacity": "OWNER",
-                   |      "createDatetime": "2016-11-19T08:35:16.000+0000",
+                   |      "createDateTime": "2016-11-19T08:35:16.000+0000",
                    |      "startDate": "2016-11-01T00:00:00.000+0000",
                    |      "endDate": "2016-12-31T00:00:00.000+0000",
                    |      "submissionId": "ABC99001",

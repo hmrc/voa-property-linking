@@ -39,7 +39,7 @@ object PropertyLinkingController extends PropertyLinkingBaseController {
     propertyLinks.find(organisationId).map(_.map(prop => {
       VmvConnector.getPropertyInfo(prop.uarn)
         .flatMap(_.map(_.address).getOrElse(PropertyAddress(Seq("No address found"), ""))
-          .map(DetailedPropertyLinkWrite(prop.submissionId, prop.uarn, prop.authorisationOwnerOrganisationId.toString, "DESCRIPTION", Nil,
+          .map(DetailedPropertyLinkWrite(prop.submissionId, prop.uarn, prop.authorisationOwnerOrganisationId, "DESCRIPTION", Nil,
             true, //TODO - canAppointAgent
             _, CapacityDeclaration(prop.authorisationOwnerCapacity, prop.startDate, prop.endDate), prop.createDateTime,
             if (prop.authorisationStatus == "PENDING") true else false))
