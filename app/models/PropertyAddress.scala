@@ -22,4 +22,9 @@ case class PropertyAddress(lines: Seq[String], postcode: String)
 
 object PropertyAddress {
   implicit val format = Json.format[PropertyAddress]
+
+  def fromString(address: String)  = {
+    val tmp = address.split(",")
+    PropertyAddress(tmp.reverse.tail.reverse, tmp.last)
+  }
 }

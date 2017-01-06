@@ -18,7 +18,8 @@ package connectors
 
 import java.net.URLEncoder
 
-import models.{APIAuthorisation, PropertyLink, PropertyLinkRequest}
+import models._
+import play.api.libs.json.JsValue
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
 
@@ -33,15 +34,23 @@ class PropertyLinkingConnector(http: HttpGet with HttpPut with HttpPost)(implici
     http.POST[PropertyLinkRequest, HttpResponse](url, linkingRequest) map { _ => () }
   }
 
-  def find(organisationId: String)(implicit hc: HeaderCarrier): Future[Seq[APIAuthorisation]] = {
-    val startPoint=1
-    val params = URLEncoder.encode(s"""{"authorisationOwnerOrganisationId": $organisationId}""", "UTF-8")
-    val url = baseUrl + s"/authorisation?startPoint=$startPoint&searchParameters=$params"
-    http.GET[Seq[APIAuthorisation]](url)
+  def find(organisationId: Int)(implicit hc: HeaderCarrier): Future[Seq[APIAuthorisation]] = {
+    val url = baseUrl + s"/mdtp_dashboard/properties_view/${organisationId}"
+    http.GET[JsValue](url).map(js =>{
+      (js \ "authorisations").as[Seq[APIAuthorisation]]
+    })
   }
 
   def get(linkId: String)(implicit hc: HeaderCarrier): Future[Option[PropertyLink]] = {
     val url = baseUrl + s"/property-links/$linkId"
     http.GET[Option[PropertyLink]](url)
+  }
+
+  def getAssessment(uarn: Long)(implicit hc: HeaderCarrier) = {
+    val url = baseUrl + s"/mdtp_dashboard/view_assessment/${uarn}"
+    http.GET[JsValue](url).map(js =>{
+      val pLink = (js \ "authorisations").as[APIAuthorisation]
+      pLink.valuationHistory.map(assessment => Assessment.fromAPIValuationHistory(assessment, CapacityDeclaration(pLink.authorisationOwnerCapacity, pLink.startDate, pLink.endDate)))
+    })
   }
 }

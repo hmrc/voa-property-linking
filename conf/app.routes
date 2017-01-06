@@ -11,8 +11,9 @@ PUT         /property-representations/accept/:reprId           controllers.Prope
 PUT         /property-representations/reject/:reprId           controllers.PropertyRepresentationController.reject(reprId)
 
 POST        /property-links/:submissionId                      controllers.PropertyLinkingController.create(submissionId)
-GET         /property-links/:organisationId                    controllers.PropertyLinkingController.find(organisationId)
+GET         /property-links/:organisationId                    controllers.PropertyLinkingController.find(organisationId: Int)
 GET         /property-link/:linkId                             controllers.PropertyLinkingController.get(linkId)
+GET         /dashboard/assessments/:uarn                       controllers.PropertyLinkingController.assessments(uarn: Long)
 
 GET         /individuals/:ggId                                 controllers.IndividualAccountController.getByGGId(ggId)
 POST        /individuals                                       controllers.IndividualAccountController.create()
