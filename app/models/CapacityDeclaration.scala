@@ -16,10 +16,10 @@
 
 package models
 
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, LocalDate}
 import play.api.libs.json.Json
 
-case class CapacityDeclaration(capacity: String, fromDate: DateTime, toDate: Option[DateTime] = None)
+case class CapacityDeclaration(capacity: String, fromDate: LocalDate, toDate: Option[LocalDate] = None)
 
 object CapacityDeclaration {
   implicit val capacityDeclaration = Json.format[CapacityDeclaration]

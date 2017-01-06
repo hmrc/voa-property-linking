@@ -16,7 +16,7 @@
 
 package models
 
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, LocalDate}
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
@@ -28,13 +28,15 @@ case class APIAuthorisation(
                              authorisationMethod: String,
                              authorisationOwnerCapacity: String,
                              createDateTime: DateTime,
-                             startDate: DateTime,
-                             endDate: Option[DateTime],
-                             submissionId: String
+                             startDate: LocalDate,
+                             endDate: Option[LocalDate],
+                             submissionId: String,
+                             valuationHistory: Seq[APIValuationHistory]
 )
 
 object APIAuthorisation {
-  implicit val yourJodaDateReads: Reads[DateTime] = Reads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+  implicit val yourJodaDateTimeReads: Reads[DateTime] = Reads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+  implicit val yourJodaDateReads: Reads[LocalDate] = Reads.jodaLocalDateReads("yyyy-MM-dd")
   implicit val reads: Reads[APIAuthorisation] =  {
     (
       (JsPath \ "uarn").read[Long] and
@@ -43,10 +45,11 @@ object APIAuthorisation {
         (JsPath \ "authorisationStatus").read[String] and
         (JsPath \ "authorisationMethod").read[String] and
         (JsPath \ "authorisationOwnerCapacity").read[String] and
-        (JsPath \ "createDateTime").read[DateTime] and
-        (JsPath \ "startDate").read[DateTime] and
-        (JsPath \ "endDate").readNullable[DateTime] and
-        (JsPath \ "submissionId").read[String]
+        (JsPath \ "createDatetime").read[DateTime] and
+        (JsPath \ "startDate").read[LocalDate] and
+        (JsPath \ "endDate").readNullable[LocalDate] and
+        (JsPath \ "submissionId").read[String] and
+        (JsPath \ "NDRListValuationHistoryItems").read[Seq[APIValuationHistory]]
       )(APIAuthorisation.apply _)
   }
 }

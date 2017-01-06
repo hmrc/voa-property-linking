@@ -35,23 +35,24 @@ object PropertyLinkingController extends PropertyLinkingBaseController {
     }
   }
 
-  def find(organisationId: String) = Action.async { implicit request =>
+  def find(organisationId: Int) = Action.async { implicit request =>
     propertyLinks.find(organisationId).map(_.map(prop => {
-      VmvConnector.getPropertyInfo(prop.uarn)
-        .flatMap(_.map(_.address).getOrElse(PropertyAddress(Seq("No address found"), ""))
-          .map(DetailedPropertyLinkWrite(prop.submissionId, prop.uarn, prop.authorisationOwnerOrganisationId, "DESCRIPTION", Nil,
-            true, //TODO - canAppointAgent
-            _, CapacityDeclaration(prop.authorisationOwnerCapacity, prop.startDate, prop.endDate), prop.createDateTime,
-            if (prop.authorisationStatus == "PENDING") true else false))
-        )
+      val capacityDeclaration = CapacityDeclaration(prop.authorisationOwnerCapacity, prop.startDate, prop.endDate)
+      DetailedPropertyLinkWrite(prop.submissionId, prop.uarn, prop.authorisationOwnerOrganisationId, "DESCRIPTION", Nil,
+        false, //TODO - canAppointAgent
+        prop.valuationHistory.headOption.map(x => PropertyAddress.fromString(x.address)).getOrElse(PropertyAddress(Seq("No address found"), "")),
+        capacityDeclaration, prop.createDateTime,
+        if (prop.authorisationStatus == "PENDING") true else false,
+        prop.valuationHistory.map( x => Assessment.fromAPIValuationHistory(x, capacityDeclaration)))
     }))
-      .flatMap(x => Future.sequence(x))
-      .map(x=> Ok(Json.toJson(x))
-    )
+      .map(x=> Ok(Json.toJson(x)))
   }
 
   def get(linkId: String) = Action.async { implicit request =>
     propertyLinks.get(linkId) map { x => Ok(Json.toJson(x)) }
   }
 
+  def assessments(uarn: Long) = Action.async { implicit request =>
+    propertyLinks.getAssessment(uarn) map { x => Ok(Json.toJson(x)) }
+  }
 }

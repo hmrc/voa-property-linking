@@ -16,7 +16,7 @@
 
 package models
 
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, LocalDate}
 import org.scalatest.{FlatSpec, MustMatchers}
 import play.api.libs.json.Json
 
@@ -24,11 +24,33 @@ class APIAuthorisationTest extends FlatSpec with MustMatchers {
 
   "APIAuthorisation" should "be deserialised property" in {
     val authorisation = Json.parse(DummyData.testData).as[APIAuthorisation]
-    authorisation mustBe APIAuthorisation(1001, 10001, 20001, "APPROVED", "RATES_BILL", "OWNER",
-      new DateTime(2016, 11, 19, 8, 35, 16),
-      new DateTime(2016, 11, 1, 0, 0, 0),
-      Some(new DateTime(2016, 12, 31, 0, 0, 0)),
-      "ABC99001"
+    authorisation mustBe APIAuthorisation(146440182, 2, 2, "MORE_EVIDENCE_REQUIRED", "OTHER", "OWNER_OCCUPIER",
+      new DateTime(2016, 3, 1, 12, 53, 51),
+      new LocalDate(2016, 5, 7),
+      Some(new LocalDate(2016, 11, 12)),
+    "ABC99003", Seq(
+        APIValuationHistory(
+          6505006000L,
+          "2005",
+          146440182,
+          new DateTime(2005,3, 1, 0, 0, 0),
+          16500,
+          "4, HERON ROAD IND UNITS, EXETER, EX2 7LL"),
+        APIValuationHistory(
+          14345902000L,
+          "2010",
+          146440182,
+          new DateTime(2010,3, 1, 0, 0, 0),
+          17750,
+          "4, HERON ROAD IND UNITS, EXETER, EX2 7LL"),
+        APIValuationHistory(
+          10176424000L,
+          "2010",
+          146440182,
+          new DateTime(2010,3, 1, 0, 0, 0),
+          20000,
+          "4, HERON ROAD IND UNITS, EXETER, EX2 7LL")
+      )
     )
   }
 }
@@ -37,82 +59,105 @@ object DummyData {
 
   val testData = """
                    |    {
-                   |      "id": 101,
-                   |      "uarn": 1001,
-                   |      "authorisationOwnerOrganisationId": 10001,
-                   |      "authorisationOwnerPersonId": 20001,
-                   |      "authorisationStatus": "APPROVED",
-                   |      "authorisationMethod": "RATES_BILL",
-                   |      "authorisationOwnerCapacity": "OWNER",
-                   |      "createDateTime": "2016-11-19T08:35:16.000+0000",
-                   |      "startDate": "2016-11-01T00:00:00.000+0000",
-                   |      "endDate": "2016-12-31T00:00:00.000+0000",
-                   |      "submissionId": "ABC99001",
-                   |      "selfCertificationDeclarationFlag": true,
-                   |      "parties": [
+                   |      "NDRListValuationHistoryItems": [
                    |        {
-                   |          "id": 1,
-                   |          "authorisedPartyOrganisationId": 10051,
-                   |          "authorisedPartyCapacity": "AGENT",
-                   |          "authorisedPartyStatus": "APPROVED",
-                   |          "startDate": "2016-11-01T00:00:00.000+0000",
-                   |          "endDate": "2017-03-04T00:00:00.000+0000",
-                   |          "caseLinks": [],
-                   |          "permissions": [
-                   |            {
-                   |              "id": 2,
-                   |              "permissionLevel": "UPDATE",
-                   |              "endDate": "2016-01-05T00:00:00.000+0000"
-                   |            },
-                   |            {
-                   |              "id": 1,
-                   |              "permissionLevel": "VIEW",
-                   |              "endDate": "2016-11-01T00:00:00.000+0000"
-                   |            }
-                   |          ]
+                   |          "address": "4, HERON ROAD IND UNITS, EXETER, EX2 7LL",
+                   |          "asstRef": 6505006000,
+                   |          "billingAuthorityReference": "70305000400",
+                   |          "compositeProperty": "N",
+                   |          "costPerM2": 65,
+                   |          "deletedIndicator": false,
+                   |          "description": "WAREHOUSE AND PREMISES",
+                   |          "effectiveDate": "2005-03-01T00:00:00.000+0000",
+                   |          "listYear": "2005",
+                   |          "numberOfPreviousProposals": 1,
+                   |          "origCasenoSeq": 6731412182,
+                   |          "rateableValue": 16500,
+                   |          "specialCategoryCode": "096G",
+                   |          "totalAreaM2": 252.99,
+                   |          "uarn": 146440182,
+                   |          "valuationDetailsAvailable": true
                    |        },
                    |        {
-                   |          "id": 2,
-                   |          "authorisedPartyOrganisationId": 10052,
-                   |          "authorisedPartyCapacity": "AGENT",
-                   |          "authorisedPartyStatus": "REVOKED",
-                   |          "startDate": "2016-01-05T00:00:00.000+0000",
-                   |          "endDate": "2016-04-21T23:00:00.000+0000",
-                   |          "caseLinks": [
-                   |            {
-                   |              "id": 2,
-                   |              "caseId": 98301,
-                   |              "ccaCaseRef": "CCA99912346",
-                   |              "startDate": "2016-05-05T23:00:00.000+0000",
-                   |              "endDate": "2016-09-09T23:00:00.000+0000"
-                   |            },
-                   |            {
-                   |              "id": 1,
-                   |              "caseId": 98300,
-                   |              "ccaCaseRef": "CCA99912345",
-                   |              "startDate": "2016-03-04T00:00:00.000+0000",
-                   |              "endDate": "2017-07-07T23:00:00.000+0000"
-                   |            }
-                   |          ],
-                   |          "permissions": []
+                   |          "address": "4, HERON ROAD IND UNITS, EXETER, EX2 7LL",
+                   |          "asstRef": 14345902000,
+                   |          "billingAuthorityReference": "70305000400",
+                   |          "compositeProperty": "N",
+                   |          "costPerM2": 66.5,
+                   |          "deletedIndicator": false,
+                   |          "description": "WAREHOUSE AND PREMISES",
+                   |          "effectiveDate": "2010-03-01T00:00:00.000+0000",
+                   |          "listAlterationDate": "2012-12-17T00:00:00.000+0000",
+                   |          "listYear": "2010",
+                   |          "numberOfPreviousProposals": 1,
+                   |          "origCasenoSeq": 19314744537,
+                   |          "rateableValue": 17750,
+                   |          "settlementCode": "A",
+                   |          "specialCategoryCode": "096G",
+                   |          "totalAreaM2": 269.04,
+                   |          "transitionalCertificate": false,
+                   |          "uarn": 146440182,
+                   |          "valuationDetailsAvailable": true
+                   |        },
+                   |        {
+                   |          "address": "4, HERON ROAD IND UNITS, EXETER, EX2 7LL",
+                   |          "asstRef": 10176424000,
+                   |          "billingAuthorityReference": "70305000400",
+                   |          "compositeProperty": "N",
+                   |          "deletedIndicator": false,
+                   |          "description": "WAREHOUSE AND PREMISES",
+                   |          "effectiveDate": "2010-03-01T00:00:00.000+0000",
+                   |          "listYear": "2010",
+                   |          "numberOfPreviousProposals": 1,
+                   |          "origCasenoSeq": 12312194182,
+                   |          "rateableValue": 20000,
+                   |          "specialCategoryCode": "1",
+                   |          "transitionalCertificate": false,
+                   |          "uarn": 146440182,
+                   |          "valuationDetailsAvailable": true
                    |        }
                    |      ],
-                   |      "uploadedFiles": [
-                   |        "supporting_evidence.docx",
-                   |        "rates_bill_2016.pdf"
-                   |      ],
+                   |      "authorisationMethod": "OTHER",
                    |      "authorisationNotes": [
                    |        {
-                   |          "id": 2,
-                   |          "createdBy": "BSMITH",
-                   |          "createDatetime": "2016-05-05T23:00:00.000+0000",
-                   |          "content": "This is a second note"
+                   |          "content": "TestAuthorisationNote",
+                   |          "createDatetime": "2016-12-17T10:08:20.000+0000",
+                   |          "createdBy": "TestUser",
+                   |          "id": 3
+                   |        }
+                   |      ],
+                   |      "authorisationOwnerCapacity": "OWNER_OCCUPIER",
+                   |      "authorisationOwnerOrganisationId": 2,
+                   |      "authorisationOwnerPersonId": 2,
+                   |      "authorisationStatus": "MORE_EVIDENCE_REQUIRED",
+                   |      "createDatetime": "2016-03-01T12:53:51.000+0000",
+                   |      "endDate": "2016-11-12",
+                   |      "id": 112,
+                   |      "parties": [
+                   |        {
+                   |          "authorisedPartyCapacity": "AGENT",
+                   |          "authorisedPartyOrganisationId": 1,
+                   |          "authorisedPartyStatus": "REVOKED",
+                   |          "caseLinks": [],
+                   |          "id": 3,
+                   |          "permissions": [],
+                   |          "startDate": "2016-09-11"
+                   |        }
+                   |      ],
+                   |      "reasonForDecision": "enim nisi sit",
+                   |      "ruleResults": [],
+                   |      "selfCertificationDeclarationFlag": true,
+                   |      "startDate": "2016-05-07",
+                   |      "submissionId": "ABC99003",
+                   |      "uarn": 146440182,
+                   |      "uploadedFiles": [
+                   |        {
+                   |          "createDatetime": "2016-12-17T10:07:58.000+0000",
+                   |          "name": "test.pdf"
                    |        },
                    |        {
-                   |          "id": 1,
-                   |          "createdBy": "ABLOGGS",
-                   |          "createDatetime": "2016-03-04T00:00:00.000+0000",
-                   |          "content": "This is a note"
+                   |          "createDatetime": "2016-12-17T10:07:58.000+0000",
+                   |          "name": "test.docx"
                    |        }
                    |      ]
                    |    }

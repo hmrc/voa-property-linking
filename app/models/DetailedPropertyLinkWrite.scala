@@ -22,7 +22,8 @@ import play.api.libs.json.Json
 case class DetailedPropertyLinkWrite(linkId: String, uarn: Long, organisationId: Int, description: String,
                                      agentNames: Seq[String], canAppointAgent: Boolean,
                                      address: PropertyAddress,
-                                     capacityDeclaration: CapacityDeclaration, linkedDate: DateTime, pending: Boolean)
+                                     capacityDeclaration: CapacityDeclaration, linkedDate: DateTime, pending: Boolean,
+                                     assessment: Seq[Assessment])
 
 object DetailedPropertyLinkWrite {
   implicit val formats = Json.format[DetailedPropertyLinkWrite]
