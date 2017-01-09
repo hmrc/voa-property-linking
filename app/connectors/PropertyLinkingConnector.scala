@@ -46,10 +46,10 @@ class PropertyLinkingConnector(http: HttpGet with HttpPut with HttpPost)(implici
     http.GET[Option[PropertyLink]](url)
   }
 
-  def getAssessment(uarn: Long)(implicit hc: HeaderCarrier) = {
-    val url = baseUrl + s"/mdtp_dashboard/view_assessment/${uarn}"
-    http.GET[JsValue](url).map(js =>{
-      val pLink = (js \ "authorisations").as[APIAuthorisation]
+  def getAssessment(authorisationId: Long)(implicit hc: HeaderCarrier) = {
+    val listYear = 2017
+    val url = baseUrl + s"/mdtp_dashboard/view_assessment?listYear=${listYear}&authorisationId=${authorisationId}"
+    http.GET[APIAuthorisation](url).map(pLink =>{
       pLink.valuationHistory.map(assessment => Assessment.fromAPIValuationHistory(assessment, CapacityDeclaration(pLink.authorisationOwnerCapacity, pLink.startDate, pLink.endDate)))
     })
   }
