@@ -28,6 +28,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class PropertyLinkingConnector(http: HttpGet with HttpPut with HttpPost)(implicit ec: ExecutionContext)
   extends ServicesConfig {
   lazy val baseUrl: String = baseUrl("external-business-rates-data-platform")
+  val listYear = 2017
 
   def create(linkId: String, linkingRequest: PropertyLinkRequest)(implicit hc: HeaderCarrier): Future[Unit] = {
     val url = baseUrl + s"/property-links/$linkId"
@@ -35,7 +36,7 @@ class PropertyLinkingConnector(http: HttpGet with HttpPut with HttpPost)(implici
   }
 
   def find(organisationId: Int)(implicit hc: HeaderCarrier): Future[Seq[APIAuthorisation]] = {
-    val url = baseUrl + s"/mdtp_dashboard/properties_view/${organisationId}"
+    val url = baseUrl + s"/mdtp_dashboard/properties_view?listYear=${listYear}&organisationId=${organisationId}"
     http.GET[JsValue](url).map(js =>{
       (js \ "authorisations").as[Seq[APIAuthorisation]]
     })
@@ -47,7 +48,6 @@ class PropertyLinkingConnector(http: HttpGet with HttpPut with HttpPost)(implici
   }
 
   def getAssessment(authorisationId: Long)(implicit hc: HeaderCarrier) = {
-    val listYear = 2017
     val url = baseUrl + s"/mdtp_dashboard/view_assessment?listYear=${listYear}&authorisationId=${authorisationId}"
     http.GET[APIAuthorisation](url).map(pLink =>{
       pLink.valuationHistory.map(assessment => Assessment.fromAPIValuationHistory(assessment, CapacityDeclaration(pLink.authorisationOwnerCapacity, pLink.startDate, pLink.endDate)))
