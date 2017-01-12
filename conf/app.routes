@@ -15,10 +15,11 @@ GET         /property-links/:organisationId                    controllers.Prope
 GET         /property-link/:linkId                             controllers.PropertyLinkingController.get(linkId)
 GET         /dashboard/assessments/:uarn                       controllers.PropertyLinkingController.assessments(uarn: Long)
 
-GET         /individuals/:ggId                                 controllers.IndividualAccountController.getByGGId(ggId)
+GET         /individuals/:personId                             controllers.IndividualAccountController.get(personId: Int)
 POST        /individuals                                       controllers.IndividualAccountController.create()
 
-GET         /groups/:id                                        controllers.GroupAccountController.getByGGId(id)
+GET         /groups/:organisationId                            controllers.GroupAccountController.get(organisationId: Int)
+GET         /groups                                            controllers.GroupAccountController.withGroupId(groupId)
 GET         /groups/agentCode/:agentCode                       controllers.GroupAccountController.withAgentCode(agentCode)
 POST        /groups                                            controllers.GroupAccountController.create()
 

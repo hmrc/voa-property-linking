@@ -17,7 +17,7 @@
 package controllers
 
 import config.Wiring
-import models.{IndividualAccount, IndividualAccountWrite}
+import models.IndividualAccountWrite
 import play.api.libs.json.Json
 import play.api.mvc.Action
 
@@ -30,8 +30,8 @@ object IndividualAccountController extends PropertyLinkingBaseController {
     }
   }
 
-  def getByGGId(ggId: String) = Action.async { implicit request =>
-    individuals.findByGGID(ggId) map {
+  def get(personId: Int) = Action.async { implicit request =>
+    individuals.get(personId) map {
       case Some(x) => Ok(Json.toJson(x))
       case None => NotFound
     }
