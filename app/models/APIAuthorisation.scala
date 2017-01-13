@@ -21,6 +21,7 @@ import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
 case class APIAuthorisation(
+                             authorisationId: Int,
                              uarn: Long,
                              authorisationOwnerOrganisationId: Int,
                              authorisationOwnerPersonId: Int,
@@ -39,7 +40,8 @@ object APIAuthorisation {
   implicit val yourJodaDateReads: Reads[LocalDate] = Reads.jodaLocalDateReads("yyyy-MM-dd")
   implicit val reads: Reads[APIAuthorisation] =  {
     (
-      (JsPath \ "uarn").read[Long] and
+      (JsPath \ "authorisationId").read[Int] and
+        (JsPath \ "uarn").read[Long] and
         (JsPath \ "authorisationOwnerOrganisationId").read[Int] and
         (JsPath \ "authorisationOwnerPersonId").read[Int] and
         (JsPath \ "authorisationStatus").read[String] and

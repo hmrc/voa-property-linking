@@ -26,7 +26,8 @@ case class APIValuationHistory (
                                  uarn:Long,
                                  effectiveDate:DateTime,
                                  rateableValue:Long,
-                                 address: String
+                                 address: String,
+                                 billingAuthorityReference:String
                                )
 
 object APIValuationHistory {

@@ -13,7 +13,7 @@ PUT         /property-representations/reject/:reprId           controllers.Prope
 POST        /property-links/:submissionId                      controllers.PropertyLinkingController.create(submissionId)
 GET         /property-links/:organisationId                    controllers.PropertyLinkingController.find(organisationId: Int)
 GET         /property-link/:linkId                             controllers.PropertyLinkingController.get(linkId)
-GET         /dashboard/assessments/:uarn                       controllers.PropertyLinkingController.assessments(uarn: Long)
+GET         /dashboard/assessments/:authorisationId            controllers.PropertyLinkingController.assessments(authorisationId: Int)
 
 GET         /individuals/:personId                             controllers.IndividualAccountController.get(personId: Int)
 POST        /individuals                                       controllers.IndividualAccountController.create()
