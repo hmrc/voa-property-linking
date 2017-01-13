@@ -21,12 +21,14 @@ import org.joda.time.{DateTime, LocalDate}
 import play.api.libs.json.{Json, Reads}
 
 case class Assessment(
+                       linkId: Int,
                        asstRef: Long,
                        listYear: String,
                        uarn:Long,
                        effectiveDate:LocalDate,
                        rateableValue:Long,
                        address: String,
+                       billingAuthorityReference:String,
                        capacity: CapacityDeclaration
                      )
 
@@ -34,14 +36,16 @@ object Assessment {
   implicit val yourJodaDateTimeReads: Reads[DateTime] = Reads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
   implicit val formats = Json.format[Assessment]
 
-  def fromAPIValuationHistory(valuationHistory: APIValuationHistory, capacityDeclaration: CapacityDeclaration) = {
+  def fromAPIValuationHistory(valuationHistory: APIValuationHistory, linkId: Int, capacityDeclaration: CapacityDeclaration) = {
     Assessment(
+      linkId,
       valuationHistory.asstRef,
       valuationHistory.listYear,
       valuationHistory.uarn,
       valuationHistory.effectiveDate.toLocalDate,
       valuationHistory.rateableValue,
       valuationHistory.address,
+      valuationHistory.billingAuthorityReference,
       capacityDeclaration
     )
   }
