@@ -19,6 +19,7 @@ package controllers
 import config.Wiring
 import connectors.VmvConnector
 import models._
+import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.Action
 import uk.gov.hmrc.play.http.Upstream5xxResponse
@@ -38,14 +39,17 @@ object PropertyLinkingController extends PropertyLinkingBaseController {
   def find(organisationId: Int) = Action.async { implicit request =>
     propertyLinks.find(organisationId).map(_.map(prop => {
       val capacityDeclaration = CapacityDeclaration(prop.authorisationOwnerCapacity, prop.startDate, prop.endDate)
-      DetailedPropertyLinkWrite(prop.authorisationId, prop.uarn, prop.authorisationOwnerOrganisationId, "DESCRIPTION", Nil,
+      DetailedPropertyLink(prop.authorisationId, prop.uarn, prop.authorisationOwnerOrganisationId, "DESCRIPTION", Nil,
         true, //TODO - canAppointAgent
         prop.valuationHistory.headOption.map(x => PropertyAddress.fromString(x.address)).getOrElse(PropertyAddress(Seq("No address found"), "")),
         capacityDeclaration, prop.createDateTime,
-        if (prop.authorisationStatus == "PENDING") true else false,
+        if (prop.authorisationStatus == "APPROVED") false else true,
         prop.valuationHistory.map( x => Assessment.fromAPIValuationHistory(x, prop.authorisationId, capacityDeclaration)))
     }))
-      .map(x=> Ok(Json.toJson(x)))
+      .map(x=> {
+        Logger.info(s"Json: ${Json.toJson(x)}")
+        Ok(Json.toJson(x))
+      })
   }
 
   def get(linkId: String) = Action.async { implicit request =>

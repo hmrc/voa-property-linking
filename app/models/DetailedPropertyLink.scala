@@ -19,12 +19,12 @@ package models
 import org.joda.time.DateTime
 import play.api.libs.json.Json
 
-case class DetailedPropertyLinkWrite(linkId: Int, uarn: Long, organisationId: Int, description: String,
-                                     agentNames: Seq[String], canAppointAgent: Boolean,
-                                     address: PropertyAddress,
-                                     capacityDeclaration: CapacityDeclaration, linkedDate: DateTime, pending: Boolean,
-                                     assessment: Seq[Assessment])
+case class DetailedPropertyLink(linkId: Int, uarn: Long, organisationId: Int, description: String,
+                                agentNames: Seq[String], canAppointAgent: Boolean,
+                                address: PropertyAddress,
+                                capacityDeclaration: CapacityDeclaration, linkedDate: DateTime, pending: Boolean,
+                                assessment: Seq[Assessment])
 
-object DetailedPropertyLinkWrite {
-  implicit val formats = Json.format[DetailedPropertyLinkWrite]
+object DetailedPropertyLink {
+  implicit val formats = Json.format[DetailedPropertyLink]
 }

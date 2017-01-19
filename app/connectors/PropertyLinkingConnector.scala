@@ -39,7 +39,10 @@ class PropertyLinkingConnector(http: HttpGet with HttpPut with HttpPost)(implici
     val url = baseUrl + s"/mdtp_dashboard/properties_view?listYear=${listYear}&organisationId=${organisationId}"
     http.GET[JsValue](url).map(js =>{
       (js \ "authorisations").as[Seq[APIAuthorisation]]
-    })
+    }).map( _
+        .filterNot(_.authorisationStatus.toUpperCase == "REVOKED")
+        .filterNot(_.authorisationStatus.toUpperCase == "DECLINED")
+      )
   }
 
   def get(linkId: String)(implicit hc: HeaderCarrier): Future[Option[PropertyLink]] = {
