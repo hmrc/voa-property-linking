@@ -41,10 +41,12 @@ private object AppDependencies {
   object Test {
     def apply() = new TestDependencies {
       override lazy val test = Seq(
-        "uk.gov.hmrc" %% "hmrctest" % "2.0.0" % scope,
+        "uk.gov.hmrc" %% "hmrctest" % "2.2.0" % scope,
         "org.scalatest" %% "scalatest" % "2.2.6" % scope,
+        "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % scope,
         "org.pegdown" % "pegdown" % "1.6.0" % scope,
         "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
+        "com.github.tomakehurst" % "wiremock" % "1.58" % "test",
         "org.mockito" % "mockito-core" % "2.2.9"
       )
     }.test
