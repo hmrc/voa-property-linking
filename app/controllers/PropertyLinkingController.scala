@@ -17,14 +17,11 @@
 package controllers
 
 import config.Wiring
-import connectors.VmvConnector
 import models._
 import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.Action
 import uk.gov.hmrc.play.http.Upstream5xxResponse
-
-import scala.concurrent.Future
 
 object PropertyLinkingController extends PropertyLinkingBaseController {
   val propertyLinks = Wiring().propertyLinkingConnector

@@ -32,3 +32,5 @@ GET         /transfer                                          @controllers.File
 GET         /address                                           controllers.AddressLookup.find(postcode)
 GET         /address/:id                                       controllers.AddressLookup.get(id: Int)
 POST        /address                                           controllers.AddressLookup.create
+
+POST        /betalogin                                         controllers.PrivateBetaLoginController.login
