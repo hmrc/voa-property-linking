@@ -16,7 +16,7 @@
 
 package controllers
 
-import config.AppConfig
+import config.ApplicationConfig
 import org.joda.time.DateTime
 import play.api.Logger
 import play.api.libs.json.Json
@@ -29,7 +29,7 @@ import scala.concurrent.Future
 
 trait PrivateBetaLoginController extends PropertyLinkingBaseController {
 
-  val config: AppConfig
+  val config: ApplicationConfig
   val repo: LoginAttemptsRepo
   lazy val privateBetaPassword = config.privateBetaPassword
 
@@ -62,6 +62,6 @@ trait PrivateBetaLoginController extends PropertyLinkingBaseController {
 }
 
 object PrivateBetaLoginController extends PrivateBetaLoginController with MongoDbConnection {
-  override val config = AppConfig
+  override val config = ApplicationConfig
   override val repo = new LoginAttemptsMongoRepo(db)
 }

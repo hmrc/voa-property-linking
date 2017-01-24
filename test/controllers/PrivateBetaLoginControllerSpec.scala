@@ -16,7 +16,7 @@
 
 package controllers
 
-import config.AppConfig
+import config.ApplicationConfig
 import org.joda.time.DateTime
 import play.api.libs.json.Json
 import play.api.test.Helpers._
@@ -28,7 +28,7 @@ class PrivateBetaLoginControllerSpec extends ControllerSpec {
 
   private object TestPrivateBetaLoginController extends PrivateBetaLoginController {
     override val repo = StubLoginAttemptsRepo
-    override val config = new AppConfig {
+    override val config = new ApplicationConfig {
       override val passwordValidationEnabled = true
       override val maxAttempts = 5
       override val privateBetaPassword = "CCAisFun"

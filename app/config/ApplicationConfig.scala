@@ -17,11 +17,19 @@
 package config
 
 import play.api.Play._
-import uk.gov.hmrc.play.config.RunMode
-import uk.gov.hmrc.play.config.ServicesConfig
 
-object ApplicationConfig extends RunMode with ServicesConfig {
+trait ApplicationConfig {
+  val privateBetaPassword: String
+  val passwordValidationEnabled: Boolean
+  val lockoutHours: Int
+  val maxAttempts: Int
+}
 
+object ApplicationConfig extends ApplicationConfig {
+  val privateBetaPassword = getConfig("betaLogin.password")
+  val passwordValidationEnabled = getConfig("betaLogin.validationRequired").toBoolean //disable locally as trueClientIP is not available
+  val lockoutHours = getConfig("betaLogin.lockoutHours").toInt
+  val maxAttempts = getConfig("betaLogin.maxAttempts").toInt
   val apiConfigSubscriptionKeyHeader = getConfig("voaApi.subscriptionKeyHeader")
   val apiConfigTraceHeader = getConfig("voaApi.traceHeader")
 

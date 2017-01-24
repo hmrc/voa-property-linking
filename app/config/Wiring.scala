@@ -50,38 +50,39 @@ object WSHttp extends WSGet with WSPut with WSPost with WSDelete with WSPatch wi
 
 object VOABackendWSHttp extends WSHttp with ServicesConfig {
   override val hooks: Seq[HttpHook] = NoneRequired
+
   override def doGet(url: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     super.doGet(url)(hc.withExtraHeaders(
-        ("Ocp-Apim-Subscription-Key" , ApplicationConfig.apiConfigSubscriptionKeyHeader),
-        ("Ocp-Apim-Trace" , ApplicationConfig.apiConfigTraceHeader)
+      ("Ocp-Apim-Subscription-Key", ApplicationConfig.apiConfigSubscriptionKeyHeader),
+      ("Ocp-Apim-Trace", ApplicationConfig.apiConfigTraceHeader)
     ))
   }
 
   override def doDelete(url: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     super.doDelete(url)(hc.withExtraHeaders(
-      ("Ocp-Apim-Subscription-Key" , ApplicationConfig.apiConfigSubscriptionKeyHeader),
-      ("Ocp-Apim-Trace" , ApplicationConfig.apiConfigTraceHeader)
+      ("Ocp-Apim-Subscription-Key", ApplicationConfig.apiConfigSubscriptionKeyHeader),
+      ("Ocp-Apim-Trace", ApplicationConfig.apiConfigTraceHeader)
     ))
   }
 
   override def doPatch[A](url: String, body: A)(implicit rds: Writes[A], hc: HeaderCarrier): Future[HttpResponse] = {
     super.doPatch(url, body)(rds, hc.withExtraHeaders(
-      ("Ocp-Apim-Subscription-Key" , ApplicationConfig.apiConfigSubscriptionKeyHeader),
-      ("Ocp-Apim-Trace" , ApplicationConfig.apiConfigTraceHeader)
+      ("Ocp-Apim-Subscription-Key", ApplicationConfig.apiConfigSubscriptionKeyHeader),
+      ("Ocp-Apim-Trace", ApplicationConfig.apiConfigTraceHeader)
     ))
   }
 
   override def doPut[A](url: String, body: A)(implicit rds: Writes[A], hc: HeaderCarrier): Future[HttpResponse] = {
     super.doPut(url, body)(rds, hc.withExtraHeaders(
-      ("Ocp-Apim-Subscription-Key" , ApplicationConfig.apiConfigSubscriptionKeyHeader),
-      ("Ocp-Apim-Trace" , ApplicationConfig.apiConfigTraceHeader)
+      ("Ocp-Apim-Subscription-Key", ApplicationConfig.apiConfigSubscriptionKeyHeader),
+      ("Ocp-Apim-Trace", ApplicationConfig.apiConfigTraceHeader)
     ))
   }
 
   override def doPost[A](url: String, body: A, headers: Seq[(String, String)])(implicit rds: Writes[A], hc: HeaderCarrier): Future[HttpResponse] = {
     super.doPost(url, body, headers)(rds, hc.withExtraHeaders(
-      ("Ocp-Apim-Subscription-Key" , ApplicationConfig.apiConfigSubscriptionKeyHeader),
-      ("Ocp-Apim-Trace" , ApplicationConfig.apiConfigTraceHeader)
+      ("Ocp-Apim-Subscription-Key", ApplicationConfig.apiConfigSubscriptionKeyHeader),
+      ("Ocp-Apim-Trace", ApplicationConfig.apiConfigTraceHeader)
     ))
   }
 
