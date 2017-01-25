@@ -20,7 +20,7 @@ import org.joda.time.LocalDate
 import play.api.libs.json.Json
 
 case class APIIndividualAccount(identityVerificationId: String, firstName: String, lastName: String,
-                                organisationId: Int, addressUnitId: Int, phoneNumber: String, mobileNumber: Option[String],
+                                organisationId: Int, addressUnitId: Int, telephoneNumber: String, mobileNumber: Option[String],
                                 emailAddress: String, governmentGatewayExternalId: String, effectiveFrom: LocalDate)
 
 object APIIndividualAccount {

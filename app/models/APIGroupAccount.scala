@@ -20,7 +20,7 @@ import org.joda.time.LocalDate
 import play.api.libs.json.Json
 
 case class APIGroupAccount(governmentGatewayGroupId: String, organisationName: String, addressUnitId: Int,
-                           organisationEmailAddress: String, organisationPhoneNumber: String,
+                           organisationEmailAddress: String, organisationTelephoneNumber: String,
                            smallBusinessFlag: Boolean, representativeFlag: Boolean,
                            representativeCode: Option[Int], effectiveFrom: LocalDate)
 

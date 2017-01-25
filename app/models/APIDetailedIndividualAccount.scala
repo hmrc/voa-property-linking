@@ -25,12 +25,12 @@ case class APIDetailedIndividualAccount(id: Int, governmentGatewayExternalId: St
   def toIndividualAccount(address: SimpleAddress) = {
     IndividualAccount(governmentGatewayExternalId, personLatestDetail.identityVerificationId, organisationId, id,
       IndividualDetails(personLatestDetail.firstName, personLatestDetail.lastName, personLatestDetail.emailAddress,
-        personLatestDetail.phoneNumber, personLatestDetail.mobileNumber, address)
+        personLatestDetail.telephoneNumber, personLatestDetail.mobileNumber, address)
     )
   }
 }
 
-case class APIIndividualDetails(addressUnitId: Int, firstName: String, lastName: String, emailAddress: String, phoneNumber: String,
+case class APIIndividualDetails(addressUnitId: Int, firstName: String, lastName: String, emailAddress: String, telephoneNumber: String,
                              mobileNumber: Option[String], identityVerificationId: String, effectiveFrom: LocalDate)
 
 object APIIndividualDetails {
