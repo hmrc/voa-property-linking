@@ -37,12 +37,6 @@ object VmvConnector extends ServicesConfig {
     }
   }
 
-  def getValuationHistory(uarn: Long)(implicit hc: HeaderCarrier) = {
-    http.GET[JsValue](s"${baseUrl("external-business-rates-data-platform")}/ndrlist/valuation_history/$uarn").map(js =>{
-      (js \ "NDRListValuationHistoryItems").as[Seq[APIValuationHistory]]
-    } )
-  }
-
   private def propertyReads(uarn: Long) = (
     (__ \ "billingAuthority" \ "reference").read[String] and
       (__ \ "address" \ "lines" \ "extractedLines").read[Seq[String]] and
