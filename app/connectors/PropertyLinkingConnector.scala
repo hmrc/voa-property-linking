@@ -30,9 +30,9 @@ class PropertyLinkingConnector(http: HttpGet with HttpPut with HttpPost)(implici
   lazy val baseUrl: String = baseUrl("external-business-rates-data-platform")
   val listYear = 2017
 
-  def create(linkId: String, linkingRequest: PropertyLinkRequest)(implicit hc: HeaderCarrier): Future[Unit] = {
-    val url = baseUrl + s"/property-links/$linkId"
-    http.POST[PropertyLinkRequest, HttpResponse](url, linkingRequest) map { _ => () }
+  def create(linkingRequest: APIPropertyLinkRequest)(implicit hc: HeaderCarrier): Future[Unit] = {
+    val url = baseUrl + s"/property-management-api/property/save_property_link"
+    http.POST[APIPropertyLinkRequest, HttpResponse](url, linkingRequest) map { _ => () }
   }
 
   def find(organisationId: Int)(implicit hc: HeaderCarrier): Future[Seq[APIAuthorisation]] = {

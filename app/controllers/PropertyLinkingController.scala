@@ -24,17 +24,19 @@ import play.api.mvc.Action
 import uk.gov.hmrc.play.http.Upstream5xxResponse
 
 object PropertyLinkingController extends PropertyLinkingBaseController {
-  val propertyLinks = Wiring().propertyLinkingConnector
+  val propertyLinksConnector = Wiring().propertyLinkingConnector
   val propAuthConnector= Wiring().propertyLinkingConnector
 
-  def create(submissionId: String) = Action.async(parse.json) { implicit request =>
-    withJsonBody[PropertyLinkRequest] { link =>
-      propertyLinks.create(submissionId, link) map { _ => Created } recover { case _: Upstream5xxResponse => InternalServerError }
+  def create() = Action.async(parse.json) { implicit request =>
+    withJsonBody[PropertyLinkRequest] { linkRequest =>
+      propertyLinksConnector.create(APIPropertyLinkRequest.fromPropertyLinkRequest(linkRequest))
+        .map { _ => Created }
+        .recover { case _: Upstream5xxResponse => InternalServerError }
     }
   }
 
   def find(organisationId: Int) = Action.async { implicit request =>
-    propertyLinks.find(organisationId).map(_.map(prop => {
+    propertyLinksConnector.find(organisationId).map(_.map(prop => {
       val capacityDeclaration = CapacityDeclaration(prop.authorisationOwnerCapacity, prop.startDate, prop.endDate)
       DetailedPropertyLink(prop.authorisationId, prop.uarn, prop.authorisationOwnerOrganisationId, "DESCRIPTION", Nil,
         true, //TODO - canAppointAgent
@@ -50,10 +52,10 @@ object PropertyLinkingController extends PropertyLinkingBaseController {
   }
 
   def get(linkId: String) = Action.async { implicit request =>
-    propertyLinks.get(linkId) map { x => Ok(Json.toJson(x)) }
+    propertyLinksConnector.get(linkId) map { x => Ok(Json.toJson(x)) }
   }
 
   def assessments(authorisationId: Int) = Action.async { implicit request =>
-    propertyLinks.getAssessment(authorisationId) map { x => Ok(Json.toJson(x)) }
+    propertyLinksConnector.getAssessment(authorisationId) map { x => Ok(Json.toJson(x)) }
   }
 }

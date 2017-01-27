@@ -16,7 +16,7 @@
 
 package models
 
-import org.joda.time.{DateTime, LocalDate}
+import org.joda.time.LocalDate
 import play.api.libs.json.Json
 
 case class CapacityDeclaration(capacity: String, fromDate: LocalDate, toDate: Option[LocalDate] = None)
