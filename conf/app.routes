@@ -10,7 +10,7 @@ PUT         /property-representations/update                   controllers.Prope
 PUT         /property-representations/accept/:reprId           controllers.PropertyRepresentationController.accept(reprId)
 PUT         /property-representations/reject/:reprId           controllers.PropertyRepresentationController.reject(reprId)
 
-POST        /property-links/:submissionId                      controllers.PropertyLinkingController.create(submissionId)
+POST        /property-links                                    controllers.PropertyLinkingController.create()
 GET         /property-links/:organisationId                    controllers.PropertyLinkingController.find(organisationId: Int)
 GET         /property-link/:linkId                             controllers.PropertyLinkingController.get(linkId)
 GET         /dashboard/assessments/:authorisationId            controllers.PropertyLinkingController.assessments(authorisationId: Int)

@@ -19,11 +19,14 @@ package models
 import org.joda.time.DateTime
 import play.api.libs.json.Json
 
-case class PropertyLinkRequest(uarn: Long, organisationId: Int, individualId: Int,
+case class PropertyLinkRequest(uarn: Long,
+                               organisationId: Int,
+                               individualId: Int,
                                capacityDeclaration: CapacityDeclaration,
-                               linkedDate: DateTime, linkBasis: String,
-                               specialCategoryCode: String, description: String, bulkClassIndicator: String,
-                               fileInfo: Option[FileInfo])
+                               linkedDate: DateTime,
+                               linkBasis: String,
+                               fileInfo: Seq[FileInfo],
+                               submissionId: String)
 
 object PropertyLinkRequest {
   implicit val propertyLinkRequest = Json.format[PropertyLinkRequest]
