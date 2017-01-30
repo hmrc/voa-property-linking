@@ -17,7 +17,7 @@
 package models
 
 
-import org.joda.time.{DateTime, LocalDate}
+import org.joda.time.{DateTime, DateTimeZone, LocalDate}
 import play.api.libs.json.{Json, Reads}
 
 case class Assessment(
@@ -42,7 +42,7 @@ object Assessment {
       valuationHistory.asstRef,
       valuationHistory.listYear,
       valuationHistory.uarn,
-      valuationHistory.effectiveDate.toLocalDate,
+      valuationHistory.effectiveDate.toDateTime(DateTimeZone.forID("Europe/London")).toLocalDate,
       valuationHistory.rateableValue,
       PropertyAddress.fromString(valuationHistory.address),
       valuationHistory.billingAuthorityReference,
