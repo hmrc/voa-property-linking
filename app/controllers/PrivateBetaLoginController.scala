@@ -18,7 +18,6 @@ package controllers
 
 import config.ApplicationConfig
 import org.joda.time.DateTime
-import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.{Action, Result}
 import play.modules.reactivemongo.MongoDbConnection
