@@ -49,7 +49,7 @@ class GroupAccountConnector(http: HttpGet with HttpPost)(implicit ec: ExecutionC
   }
 
   def findByGGID(ggId: String)(implicit hc: HeaderCarrier): Future[Option[GroupAccount]] = {
-    http.GET[Option[APIDetailedGroupAccount]](s"$url?governmentGatewayExternalId=$ggId") flatMap {
+    http.GET[Option[APIDetailedGroupAccount]](s"$url?governmentGatewayGroupId=$ggId") flatMap {
       case Some(a) => addresses.get(a.organisationLatestDetail.addressUnitId) map {
         case Some(address) => Some(a.toGroupAccount(address.simplify))
         case None => None
