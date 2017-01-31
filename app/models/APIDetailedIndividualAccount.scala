@@ -23,7 +23,7 @@ case class APIDetailedIndividualAccount(id: Int, governmentGatewayExternalId: St
                                         organisationId: Int, organisationLatestDetail: GroupDetails) {
 
   def toIndividualAccount(address: SimpleAddress) = {
-    IndividualAccount(governmentGatewayExternalId, personLatestDetail.identityVerificationId, organisationId, id,
+    IndividualAccount(governmentGatewayExternalId, personLatestDetail.identifyVerificationId, organisationId, id,
       IndividualDetails(personLatestDetail.firstName, personLatestDetail.lastName, personLatestDetail.emailAddress,
         personLatestDetail.telephoneNumber, personLatestDetail.mobileNumber, address)
     )
@@ -31,7 +31,7 @@ case class APIDetailedIndividualAccount(id: Int, governmentGatewayExternalId: St
 }
 
 case class APIIndividualDetails(addressUnitId: Int, firstName: String, lastName: String, emailAddress: String, telephoneNumber: String,
-                             mobileNumber: Option[String], identityVerificationId: String, effectiveFrom: LocalDate)
+                             mobileNumber: Option[String], identifyVerificationId: String, effectiveFrom: LocalDate)
 
 object APIIndividualDetails {
   implicit val format = Json.format[APIIndividualDetails]

@@ -39,7 +39,7 @@ class AddressConnector(http: HttpGet with HttpPost with HttpPut)(implicit ec: Ex
 
   def create(address: SimpleAddress)(implicit hc: HeaderCarrier): Future[Int] = {
     http.POST[DetailedAddress, JsValue](s"$url/non_standard_address", address.toDetailedAddress) map { js =>
-      js \ "addressUnitId" match {
+      js \ "id" match {
         case JsDefined(JsNumber(n)) => n.toInt
         case _ => throw new Exception(s"Failed to create record for address $address")
       }
