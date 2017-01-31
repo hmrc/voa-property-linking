@@ -16,7 +16,7 @@
 
 package connectors
 
-import models.{DetailedAddress, SimpleAddress}
+import models.{APIAddressLookupResult, DetailedAddress, SimpleAddress}
 import play.api.libs.json.{JsArray, JsDefined, JsNumber, JsValue}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
@@ -28,16 +28,13 @@ class AddressConnector(http: HttpGet with HttpPost with HttpPut)(implicit ec: Ex
   val url = baseUrl("external-business-rates-data-platform") + "/address-management-api/address"
 
   def find(postcode: String)(implicit hc: HeaderCarrier): Future[Seq[SimpleAddress]] = {
-    http.GET[JsValue](s"""$url?pageSize=100&startPoint=1&searchparams={"postcode": "$postcode"}""") map { js =>
-      js \ "addressDetails" match {
-        case JsDefined(a@JsArray(_)) => a.as[Seq[DetailedAddress]].map(_.simplify)
-        case _ => Nil
-      }
+    http.GET[APIAddressLookupResult](s"""$url?pageSize=100&startPoint=1&searchparams={"postcode": "$postcode"}""") map { res =>
+      res.addressDetails.map(_.simplify)
     }
   }
 
   def get(addressUnitId: Int)(implicit hc: HeaderCarrier): Future[Option[DetailedAddress]] = {
-    http.GET[Option[DetailedAddress]](s"$url/$addressUnitId")
+    http.GET[APIAddressLookupResult](s"$url/$addressUnitId") map { _.addressDetails.headOption }
   }
 
   def create(address: SimpleAddress)(implicit hc: HeaderCarrier): Future[Int] = {
