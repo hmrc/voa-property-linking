@@ -40,7 +40,7 @@ class PropertyLinkingConnectorSpec
         override lazy val baseUrl: String = mockServerUrl
       }
       val organisationId = 123
-      stubFor(get(urlEqualTo(s"/mdtp_dashboard/properties_view?listYear=2017&organisationId=${organisationId}"))
+      stubFor(get(urlEqualTo(s"/mdtp-dashboard-management-api/mdtp_dashboard/properties_view?listYear=2017&organisationId=${organisationId}"))
         .willReturn(aResponse
           .withStatus(200)
           .withHeader("Content-Type", JSON)
