@@ -17,7 +17,8 @@
 package models
 
 import org.joda.time.LocalDate
-import play.api.libs.json.Json
+import play.api.libs.json._
+import play.api.libs.functional.syntax._
 
 case class APIDetailedIndividualAccount(id: Int, governmentGatewayExternalId: String, personLatestDetail: APIIndividualDetails,
                                         organisationId: Int, organisationLatestDetail: GroupDetails) {
@@ -31,10 +32,18 @@ case class APIDetailedIndividualAccount(id: Int, governmentGatewayExternalId: St
 }
 
 case class APIIndividualDetails(addressUnitId: Int, firstName: String, lastName: String, emailAddress: String, telephoneNumber: String,
-                             mobileNumber: Option[String], identifyVerificationId: String, effectiveFrom: LocalDate)
+                                mobileNumber: Option[String], identifyVerificationId: String, effectiveFrom: LocalDate)
 
 object APIIndividualDetails {
-  implicit val format = Json.format[APIIndividualDetails]
+  private def withDefault[A](key: String, default: A)(implicit wrts: Writes[A]): Reads[JsObject] = {
+    __.json.update((__ \ key).json.copyFrom((__ \ key).json.pick orElse Reads.pure(Json.toJson(default))))
+  }
+
+  implicit val format = new Format[APIIndividualDetails] {
+    override def writes(o: APIIndividualDetails) = Json.writes[APIIndividualDetails].writes(o)
+
+    override def reads(json: JsValue) = Json.reads[APIIndividualDetails].compose(withDefault("identifyVerificationId", "")).reads(json)
+  }
 }
 
 object APIDetailedIndividualAccount {
