@@ -24,7 +24,7 @@ case class DetailedAddress(addressUnitId: Option[Int] = None, nonAbpAddressId: O
                            doubleDependentLocality: Option[String] = None, dependentLocality: Option[String] = None, postTown: String, postcode: String) {
 
   def simplify = {
-    val lines = Seq(subBuildingName, buildingName, buildingNumber, dependentThoroughfareName, thoroughFareName, dependentLocality).filter(_.nonEmpty)
+    val lines = Seq(subBuildingName, buildingName, buildingNumber, dependentThoroughfareName, thoroughFareName, dependentLocality).filter(_.exists(_.nonEmpty))
     SimpleAddress(addressUnitId, lines.headOption.flatten.getOrElse(""), lines.lift(1).flatten.getOrElse(""), lines.lift(2).flatten.getOrElse(""), postTown, postcode)
   }
 }
