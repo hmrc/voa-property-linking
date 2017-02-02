@@ -32,7 +32,7 @@ class PrivateBetaLoginControllerSpec extends ControllerSpec {
       override val passwordValidationEnabled = true
       override val maxAttempts = 5
       override val privateBetaPassword = "CCAisFun"
-      override val lockoutHours = 24
+      override val lockoutMinutes = 1
     }
   }
 

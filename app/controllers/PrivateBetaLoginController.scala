@@ -42,7 +42,7 @@ trait PrivateBetaLoginController extends PropertyLinkingBaseController {
   }
 
   private def verify(ip: String, password: String): Future[Result] = {
-    repo.mostRecent(ip, config.maxAttempts, DateTime.now.minusHours(config.lockoutHours)) flatMap { failures =>
+    repo.mostRecent(ip, config.maxAttempts, DateTime.now.minusMinutes(config.lockoutMinutes)) flatMap { failures =>
       (config.passwordValidationEnabled, failures.length, password) match {
         case (false, _, _) => Ok(Json.obj())
         case (_, l, _) if l >= config.maxAttempts => handleFailure(ip, Some("LOCKED_OUT"))
