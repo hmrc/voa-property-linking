@@ -19,13 +19,13 @@ package models
 import org.joda.time.LocalDate
 import play.api.libs.json.Json
 
-case class APIDetailedGroupAccount(id: Int, governmentGatewayGroupId: String, representativeCode: Option[Int], organisationLatestDetail: GroupDetails,
+case class APIDetailedGroupAccount(id: Int, governmentGatewayGroupId: String, representativeCode: Int, organisationLatestDetail: GroupDetails,
                                    persons: Seq[IndividualSummary]) {
 
   def toGroupAccount(address: SimpleAddress) = {
     GroupAccount(id, governmentGatewayGroupId, organisationLatestDetail.organisationName, address,
       organisationLatestDetail.organisationEmailAddress, organisationLatestDetail.organisationTelephoneNumber,
-      organisationLatestDetail.smallBusinessFlag, representativeCode.map(_.toString))
+      organisationLatestDetail.smallBusinessFlag, organisationLatestDetail.representativeFlag, representativeCode.toString)
   }
 }
 
