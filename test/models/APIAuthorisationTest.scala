@@ -24,30 +24,30 @@ class APIAuthorisationTest extends FlatSpec with MustMatchers {
 
   "APIAuthorisation" should "be deserialised property" in {
     val authorisation = Json.parse(DummyData.testData).as[APIAuthorisation]
-    authorisation mustBe APIAuthorisation(112, 146440182, 2, 2, "MORE_EVIDENCE_REQUIRED", "OTHER", "OWNER_OCCUPIER",
+    authorisation mustBe APIAuthorisation(112, 146440182, 2, "MORE_EVIDENCE_REQUIRED", "OTHER", "OWNER_OCCUPIER",
       new DateTime(2016, 3, 1, 12, 53, 51),
       new LocalDate(2016, 5, 7),
       Some(new LocalDate(2016, 11, 12)),
-    "ABC99003", Seq(
+      "ABC99003", Seq(
         APIValuationHistory(
           6505006000L,
           "2005",
           146440182,
-          new DateTime(2005,3, 1, 0, 0, 0),
+          new DateTime(2005, 3, 1, 0, 0, 0),
           16500,
           "4, HERON ROAD IND UNITS, EXETER, EX2 7LL", "70305000400"),
         APIValuationHistory(
           14345902000L,
           "2010",
           146440182,
-          new DateTime(2010,3, 1, 0, 0, 0),
+          new DateTime(2010, 3, 1, 0, 0, 0),
           17750,
           "4, HERON ROAD IND UNITS, EXETER, EX2 7LL", "70305000400"),
         APIValuationHistory(
           10176424000L,
           "2010",
           146440182,
-          new DateTime(2010,3, 1, 0, 0, 0),
+          new DateTime(2010, 3, 1, 0, 0, 0),
           20000,
           "4, HERON ROAD IND UNITS, EXETER, EX2 7LL", "70305000400"))
 
@@ -128,7 +128,6 @@ object DummyData {
                    |      ],
                    |      "authorisationOwnerCapacity": "OWNER_OCCUPIER",
                    |      "authorisationOwnerOrganisationId": 2,
-                   |      "authorisationOwnerPersonId": 2,
                    |      "authorisationStatus": "MORE_EVIDENCE_REQUIRED",
                    |      "createDatetime": "2016-03-01T12:53:51.000+0000",
                    |      "endDate": "2016-11-12",

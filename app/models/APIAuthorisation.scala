@@ -24,7 +24,6 @@ case class APIAuthorisation(
                              authorisationId: Long,
                              uarn: Long,
                              authorisationOwnerOrganisationId: Int,
-                             authorisationOwnerPersonId: Int,
                              authorisationStatus: String,
                              authorisationMethod: String,
                              authorisationOwnerCapacity: String,
@@ -43,7 +42,6 @@ object APIAuthorisation {
       (JsPath \ "authorisationId").read[Long] and
         (JsPath \ "uarn").read[Long] and
         (JsPath \ "authorisationOwnerOrganisationId").read[Int] and
-        (JsPath \ "authorisationOwnerPersonId").read[Int] and
         (JsPath \ "authorisationStatus").read[String] and
         (JsPath \ "authorisationMethod").read[String] and
         (JsPath \ "authorisationOwnerCapacity").read[String] and

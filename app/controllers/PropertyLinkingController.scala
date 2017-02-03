@@ -24,7 +24,7 @@ import uk.gov.hmrc.play.http.Upstream5xxResponse
 
 object PropertyLinkingController extends PropertyLinkingBaseController {
   val propertyLinksConnector = Wiring().propertyLinkingConnector
-  val propAuthConnector= Wiring().propertyLinkingConnector
+  val propAuthConnector = Wiring().propertyLinkingConnector
 
   def create() = Action.async(parse.json) { implicit request =>
     withJsonBody[PropertyLinkRequest] { linkRequest =>
