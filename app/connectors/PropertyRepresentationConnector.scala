@@ -16,49 +16,56 @@
 
 package connectors
 
-import models.{PropertyRepresentation, UpdatedRepresentation}
+import models._
 import play.api.libs.json.{JsNull, JsValue}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class PropertyRepresentationConnector(http: HttpGet with HttpPut)(implicit ec: ExecutionContext)
+class PropertyRepresentationConnector(http: HttpGet with HttpPut with HttpPost)(implicit ec: ExecutionContext)
   extends ServicesConfig {
-  lazy val baseUrl: String = baseUrl("external-business-rates-data-platform") + "/property-representations"
+  lazy val baseUrl: String = baseUrl("external-business-rates-data-platform")
+
+  def validateAgentCode(agentCode:Long, authorisationId: Long)(implicit hc: HeaderCarrier): Future[Long] = {
+    val url = baseUrl  + s"/authorisation-management-api/agent/validate_agent_code/$agentCode/$authorisationId"
+    http.GET[JsValue](url) .map(js =>{
+      (js \ "organisationId").as[Long]
+    })
+  }
 
   def get(representationId: String)(implicit hc: HeaderCarrier): Future[Option[PropertyRepresentation]] = {
-    val url = baseUrl + s"/$representationId"
+    val url = baseUrl  + "/property-representations"+ s"/$representationId"
     http.GET[Option[PropertyRepresentation]](url)
   }
 
   def find(linkId: String)(implicit hc: HeaderCarrier): Future[Seq[PropertyRepresentation]] = {
-    val url = baseUrl + s"/find/$linkId"
+    val url = baseUrl  + "/property-representations"+ s"/find/$linkId"
     http.GET[Seq[PropertyRepresentation]](url)
   }
 
-  def forAgent(agentId: String)(implicit hc: HeaderCarrier): Future[Seq[PropertyRepresentation]] = {
-    val url = baseUrl + s"/forAgent/$agentId"
-    http.GET[Seq[PropertyRepresentation]](url)
+  def forAgent(status: String, organisationId: Long)(implicit hc: HeaderCarrier): Future[PropertyRepresentations] = {
+    val params=s"status=$status&organisationId=$organisationId&startPoint=1"
+    val url = baseUrl + s"/mdtp-dashboard-management-api/mdtp_dashboard/agent_representation_requests?$params"
+    http.GET[APIPropertyRepresentations](url).map( x => {
+      PropertyRepresentations(
+        x.totalPendingRequests,
+        x.requests.map(_.toPropertyRepresentation))
+    })
   }
 
-  def create(reprRequest: PropertyRepresentation)(implicit hc: HeaderCarrier): Future[Unit] = {
-    val url = baseUrl + s"/create"
-    http.PUT[PropertyRepresentation, HttpResponse](url, reprRequest) map { _ => () }
+  def create(reprRequest: APIRepresentationRequest)(implicit hc: HeaderCarrier): Future[Unit] = {
+    val url = baseUrl  + s"/authorisation-management-api/agent/submit_agent_representation"
+    http.POST[APIRepresentationRequest, HttpResponse](url, reprRequest) map { _ => () }
   }
 
-  def accept(reprId: String)(implicit hc: HeaderCarrier): Future[Unit] = {
-    val url = baseUrl + s"/accept/$reprId"
-    http.PUT[JsValue, HttpResponse](url, JsNull) map { _ => () }
-  }
-
-  def reject(reprId: String)(implicit hc: HeaderCarrier): Future[Unit] = {
-    val url = baseUrl + s"/reject/$reprId"
-    http.PUT[JsValue, HttpResponse](url, JsNull) map { _ => () }
+  def response(representationResponse: APIRepresentationResponse)(implicit hc: HeaderCarrier): Future[Unit] = {
+    val url = baseUrl  + s"/authorisation-management-api/agent/submit_agent_rep_reponse"
+    http.PUT[APIRepresentationResponse, HttpResponse](url, representationResponse) map { _ => () }
   }
 
   def update(reprRequest: UpdatedRepresentation)(implicit hc: HeaderCarrier): Future[Unit] = {
-    val url = baseUrl + s"/update"
+    val url = baseUrl  + "/property-representations"+ s"/update"
     http.PUT[UpdatedRepresentation, HttpResponse](url, reprRequest) map { _ => () }
   }
 

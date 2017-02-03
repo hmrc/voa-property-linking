@@ -1,14 +1,13 @@
 # microservice specific routes
 
+GET         /property-representations/validate-agent-code/:agentCode/:authorisationId      controllers.PropertyRepresentationController.validateAgentCode(agentCode:Long, authorisationId: Long)
 GET         /property-representations/:representationId        controllers.PropertyRepresentationController.get(representationId)
-GET         /property-representations/agent/:agentId           controllers.PropertyRepresentationController.forAgent(agentId)
-GET         /property-representations/linkId/:linkId           controllers.PropertyRepresentationController.find(linkId)
+GET         /property-representations/agent/:status/:organisationId    controllers.PropertyRepresentationController.forAgent(status: String, organisationId: Long)
 
-PUT         /property-representations/create                   controllers.PropertyRepresentationController.create()
+POST         /property-representations/create                   controllers.PropertyRepresentationController.create()
 
 PUT         /property-representations/update                   controllers.PropertyRepresentationController.update()
-PUT         /property-representations/accept/:reprId           controllers.PropertyRepresentationController.accept(reprId)
-PUT         /property-representations/reject/:reprId           controllers.PropertyRepresentationController.reject(reprId)
+PUT         /property-representations/response                 controllers.PropertyRepresentationController.response()
 
 POST        /property-links                                    controllers.PropertyLinkingController.create()
 GET         /property-links/:organisationId                    controllers.PropertyLinkingController.find(organisationId: Int)

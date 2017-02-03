@@ -19,18 +19,16 @@ package models
 import org.joda.time.DateTime
 import play.api.libs.json.Json
 
-case class PropertyRepresentation(representationId: Long,
+case class RepresentationRequest(
+                                  authorisationId: Long,
+                                  agentOrganisationId: Long,
+                                  individualId: Long,
                                   submissionId: String,
-                                  organisationId: Long,
-                                  organisationName: String,
-                                  address: String,
                                   checkPermission: String,
                                   challengePermission: String,
-                                  createDatetime: DateTime,
-                                  status: String) {
+                                  createDatetime: DateTime
+                                )
 
-}
-
-object PropertyRepresentation {
-  implicit val propertyRepresentationFormat = Json.format[PropertyRepresentation]
+object RepresentationRequest {
+  implicit val format = Json.format[RepresentationRequest]
 }
