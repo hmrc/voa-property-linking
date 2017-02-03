@@ -18,7 +18,6 @@ package controllers
 
 import config.Wiring
 import models._
-import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.Action
 import uk.gov.hmrc.play.http.Upstream5xxResponse
@@ -46,7 +45,6 @@ object PropertyLinkingController extends PropertyLinkingBaseController {
         prop.valuationHistory.map( x => Assessment.fromAPIValuationHistory(x, prop.authorisationId, capacityDeclaration)))
     }))
       .map(x=> {
-        Logger.info(s"Json: ${Json.toJson(x)}")
         Ok(Json.toJson(x))
       })
   }
