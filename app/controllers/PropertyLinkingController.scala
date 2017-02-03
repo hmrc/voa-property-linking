@@ -53,7 +53,7 @@ object PropertyLinkingController extends PropertyLinkingBaseController {
     propertyLinksConnector.get(linkId) map { x => Ok(Json.toJson(x)) }
   }
 
-  def assessments(authorisationId: Int) = Action.async { implicit request =>
+  def assessments(authorisationId: Long) = Action.async { implicit request =>
     propertyLinksConnector.getAssessment(authorisationId) map { x => Ok(Json.toJson(x)) }
   }
 }

@@ -17,7 +17,7 @@
 package models
 
 import org.joda.time.DateTime
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, Reads}
 
 case class APIPropertyRepresentation(representationId: Long,
                                      submissionId: String,
@@ -42,5 +42,6 @@ case class APIPropertyRepresentation(representationId: Long,
 }
 
 object APIPropertyRepresentation {
+  implicit val yourJodaDateTimeReads: Reads[DateTime] = Reads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
   implicit val formats = Json.format[APIPropertyRepresentation]
 }

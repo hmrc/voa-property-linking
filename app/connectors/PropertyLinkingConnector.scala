@@ -19,7 +19,7 @@ package connectors
 import java.net.URLEncoder
 
 import models._
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
 
@@ -50,7 +50,7 @@ class PropertyLinkingConnector(http: HttpGet with HttpPut with HttpPost)(implici
     http.GET[Option[PropertyLink]](url)
   }
 
-  def getAssessment(authorisationId: Int)(implicit hc: HeaderCarrier) = {
+  def getAssessment(authorisationId: Long)(implicit hc: HeaderCarrier) = {
     val url = baseUrl + s"/mdtp-dashboard-management-api/mdtp_dashboard/view_assessment?listYear=$listYear&authorisationId=$authorisationId"
     http.GET[APIAuthorisation](url).map(pLink => {
       pLink.valuationHistory.map(assessment => Assessment.fromAPIValuationHistory(assessment, authorisationId, CapacityDeclaration(pLink.authorisationOwnerCapacity, pLink.startDate, pLink.endDate)))
