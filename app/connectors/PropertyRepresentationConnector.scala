@@ -28,7 +28,7 @@ class PropertyRepresentationConnector(http: HttpGet with HttpPut with HttpPost)(
   lazy val baseUrl: String = baseUrl("external-business-rates-data-platform")
 
   def validateAgentCode(agentCode:Long, authorisationId: Long)(implicit hc: HeaderCarrier): Future[Long] = {
-    val url = baseUrl  + s"/authorisation-management-api/agent/validate_agent_code/$agentCode/$authorisationId"
+    val url = baseUrl  + s"/authorisation-management-api/agent/validate_agent_code?agentCode=$agentCode&authorisationId=$authorisationId"
     http.GET[JsValue](url) .map(js =>{
       (js \ "organisationId").as[Long]
     })
