@@ -30,7 +30,6 @@ class AddressConnector(http: HttpGet with HttpPost with HttpPut)(implicit ec: Ex
 
   def find(postcode: String)(implicit hc: HeaderCarrier): Future[Seq[SimpleAddress]] = {
     http.GET[APIAddressLookupResult](s"""$url?pageSize=100&startPoint=1&searchparams={"postcode": "$postcode"}""") map { res =>
-      Logger.info(s"lookup results $res")
       res.addressDetails.map(_.simplify)
     }
   }

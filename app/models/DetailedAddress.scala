@@ -20,11 +20,11 @@ import play.api.libs.json.Json
 
 case class DetailedAddress(addressUnitId: Option[Int] = None, nonAbpAddressId: Option[Int] = None, organisationName: Option[String] = None,
                            departmentName: Option[String] = None, subBuildingName: Option[String] = None, buildingName: Option[String] = None,
-                           buildingNumber: Option[String] = None, dependentThoroughfareName: Option[String] = None, thoroughFareName: Option[String] = None,
+                           buildingNumber: Option[String] = None, dependentThoroughfareName: Option[String] = None, thoroughfareName: Option[String] = None,
                            doubleDependentLocality: Option[String] = None, dependentLocality: Option[String] = None, postTown: String, postcode: String) {
 
   def simplify = {
-    val lines = Seq(subBuildingName, buildingName, buildingNumber, dependentThoroughfareName, thoroughFareName, dependentLocality).filter(_.exists(_.nonEmpty))
+    val lines = Seq(subBuildingName, buildingName, buildingNumber, dependentThoroughfareName, thoroughfareName, dependentLocality).filter(_.exists(_.nonEmpty))
     SimpleAddress(addressUnitId, lines.headOption.flatten.getOrElse(""), lines.lift(1).flatten.getOrElse(""), lines.lift(2).flatten.getOrElse(""), postTown, postcode)
   }
 }
