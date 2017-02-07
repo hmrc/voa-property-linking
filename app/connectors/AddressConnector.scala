@@ -17,6 +17,7 @@
 package connectors
 
 import models.{APIAddressLookupResult, DetailedAddress, SimpleAddress}
+import play.api.Logger
 import play.api.libs.json.{JsArray, JsDefined, JsNumber, JsValue}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
@@ -29,6 +30,7 @@ class AddressConnector(http: HttpGet with HttpPost with HttpPut)(implicit ec: Ex
 
   def find(postcode: String)(implicit hc: HeaderCarrier): Future[Seq[SimpleAddress]] = {
     http.GET[APIAddressLookupResult](s"""$url?pageSize=100&startPoint=1&searchparams={"postcode": "$postcode"}""") map { res =>
+      Logger.info(s"lookup results $res")
       res.addressDetails.map(_.simplify)
     }
   }
