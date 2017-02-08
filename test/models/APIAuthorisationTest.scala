@@ -49,7 +49,8 @@ class APIAuthorisationTest extends FlatSpec with MustMatchers {
           146440182,
           new DateTime(2010, 3, 1, 0, 0, 0),
           20000,
-          "4, HERON ROAD IND UNITS, EXETER, EX2 7LL", "70305000400"))
+          "4, HERON ROAD IND UNITS, EXETER, EX2 7LL", "70305000400")),
+      Nil
 
     )
   }
@@ -133,15 +134,6 @@ object DummyData {
                    |      "endDate": "2016-11-12",
                    |      "authorisationId": 112,
                    |      "parties": [
-                   |        {
-                   |          "authorisedPartyCapacity": "AGENT",
-                   |          "authorisedPartyOrganisationId": 1,
-                   |          "authorisedPartyStatus": "REVOKED",
-                   |          "caseLinks": [],
-                   |          "id": 3,
-                   |          "permissions": [],
-                   |          "startDate": "2016-09-11"
-                   |        }
                    |      ],
                    |      "reasonForDecision": "enim nisi sit",
                    |      "ruleResults": [],

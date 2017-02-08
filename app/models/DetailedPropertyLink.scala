@@ -23,7 +23,7 @@ case class DetailedPropertyLink(authorisationId: Long, uarn: Long, organisationI
                                 agentNames: Seq[String], canAppointAgent: Boolean,
                                 address: PropertyAddress,
                                 capacityDeclaration: CapacityDeclaration, linkedDate: DateTime, pending: Boolean,
-                                assessment: Seq[Assessment])
+                                assessment: Seq[Assessment], agents:Seq[PropertyRepresentation])
 
 object DetailedPropertyLink {
   implicit val formats = Json.format[DetailedPropertyLink]

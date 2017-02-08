@@ -27,29 +27,16 @@ case class APIAuthorisation(
                              authorisationStatus: String,
                              authorisationMethod: String,
                              authorisationOwnerCapacity: String,
-                             createDateTime: DateTime,
+                             createDatetime: DateTime,
                              startDate: LocalDate,
                              endDate: Option[LocalDate],
                              submissionId: String,
-                             valuationHistory: Seq[APIValuationHistory]
-)
+                             NDRListValuationHistoryItems: Seq[APIValuationHistory],
+                             parties: Seq[APIPropertyRepresentation]
+                           )
 
 object APIAuthorisation {
   implicit val yourJodaDateTimeReads: Reads[DateTime] = Reads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
   implicit val yourJodaDateReads: Reads[LocalDate] = Reads.jodaLocalDateReads("yyyy-MM-dd")
-  implicit val reads: Reads[APIAuthorisation] =  {
-    (
-      (JsPath \ "authorisationId").read[Long] and
-        (JsPath \ "uarn").read[Long] and
-        (JsPath \ "authorisationOwnerOrganisationId").read[Int] and
-        (JsPath \ "authorisationStatus").read[String] and
-        (JsPath \ "authorisationMethod").read[String] and
-        (JsPath \ "authorisationOwnerCapacity").read[String] and
-        (JsPath \ "createDatetime").read[DateTime] and
-        (JsPath \ "startDate").read[LocalDate] and
-        (JsPath \ "endDate").readNullable[LocalDate] and
-        (JsPath \ "submissionId").read[String] and
-        (JsPath \ "NDRListValuationHistoryItems").read[Seq[APIValuationHistory]]
-      )(APIAuthorisation.apply _)
-  }
+  implicit val reads: Reads[APIAuthorisation] =  Json.reads[APIAuthorisation]
 }
