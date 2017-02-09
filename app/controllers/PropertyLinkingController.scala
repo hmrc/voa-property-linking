@@ -39,10 +39,12 @@ object PropertyLinkingController extends PropertyLinkingBaseController {
       val capacityDeclaration = CapacityDeclaration(prop.authorisationOwnerCapacity, prop.startDate, prop.endDate)
       DetailedPropertyLink(prop.authorisationId, prop.uarn, prop.authorisationOwnerOrganisationId, "DESCRIPTION", Nil,
         true, //TODO - canAppointAgent
-        prop.valuationHistory.headOption.map(x => PropertyAddress.fromString(x.address)).getOrElse(PropertyAddress(Seq("No address found"), "")),
-        capacityDeclaration, prop.createDateTime,
+        prop.NDRListValuationHistoryItems.headOption.map(x => PropertyAddress.fromString(x.address)).getOrElse(PropertyAddress(Seq("No address found"), "")),
+        capacityDeclaration, prop.createDatetime,
         if (prop.authorisationStatus == "APPROVED") false else true,
-        prop.valuationHistory.map( x => Assessment.fromAPIValuationHistory(x, prop.authorisationId, capacityDeclaration)))
+        prop.NDRListValuationHistoryItems.map(x => Assessment.fromAPIValuationHistory(x, prop.authorisationId, capacityDeclaration)),
+        prop.parties.map(_.toPropertyRepresentation)
+      )
     }))
       .map(x=> {
         Ok(Json.toJson(x))

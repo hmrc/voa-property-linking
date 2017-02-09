@@ -94,15 +94,6 @@ class PropertyLinkingConnectorSpec
       |      "endDate": "2016-11-12",
       |      "authorisationId": 112,
       |      "parties": [
-      |        {
-      |          "authorisedPartyCapacity": "AGENT",
-      |          "authorisedPartyOrganisationId": 1,
-      |          "authorisedPartyStatus": "REVOKED",
-      |          "caseLinks": [],
-      |          "id": 3,
-      |          "permissions": [],
-      |          "startDate": "2016-09-11"
-      |        }
       |      ],
       |      "reasonForDecision": "enim nisi sit",
       |      "ruleResults": [],
@@ -159,15 +150,6 @@ class PropertyLinkingConnectorSpec
       |      "endDate": "2016-11-12",
       |      "authorisationId": 112,
       |      "parties": [
-      |        {
-      |          "authorisedPartyCapacity": "AGENT",
-      |          "authorisedPartyOrganisationId": 1,
-      |          "authorisedPartyStatus": "REVOKED",
-      |          "caseLinks": [],
-      |          "id": 3,
-      |          "permissions": [],
-      |          "startDate": "2016-09-11"
-      |        }
       |      ],
       |      "reasonForDecision": "enim nisi sit",
       |      "ruleResults": [],
