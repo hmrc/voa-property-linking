@@ -27,8 +27,11 @@ object PropertyRepresentationController extends PropertyLinkingBaseController {
   val representations = Wiring().propertyRepresentationConnector
 
   def validateAgentCode(agentCode:Long, authorisationId: Long) = Action.async { implicit request =>
-    representations.validateAgentCode(agentCode, authorisationId).map( orgId =>
-      Ok(s"""{"organisationId": $orgId}""")
+    representations.validateAgentCode(agentCode, authorisationId).map(
+      _.fold(
+        orgId => Ok(s"""{"organisationId": $orgId}"""),
+        errorString => Ok(s"""{"failureCode": "$errorString"}""")
+      )
     )
   }
 

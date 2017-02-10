@@ -17,7 +17,7 @@
 package config
 
 import connectors._
-import play.api.libs.json.Writes
+import play.api.libs.json.{JsDefined, JsString, JsValue, Writes}
 import uk.gov.hmrc.play.audit.http.config.LoadAuditingConfig
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.auth.microservice.connectors.AuthConnector
@@ -27,6 +27,8 @@ import uk.gov.hmrc.play.http.ws._
 import uk.gov.hmrc.play.http._
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.Try
 
 object Wiring {
   def apply() = play.api.Play.current.global.asInstanceOf[MicroserviceGlobal].wiring
@@ -51,11 +53,23 @@ object WSHttp extends WSGet with WSPut with WSPost with WSDelete with WSPatch wi
 object VOABackendWSHttp extends WSHttp with ServicesConfig {
   override val hooks: Seq[HttpHook] = NoneRequired
 
+  private def hasJsonBody(res: HttpResponse) = Try { res.json }.isSuccess
+
+  case class InvalidAgentCode(status: Int, body: JsValue) extends Exception
+
   override def doGet(url: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     super.doGet(url)(hc.withExtraHeaders(
       ("Ocp-Apim-Subscription-Key", ApplicationConfig.apiConfigSubscriptionKeyHeader),
       ("Ocp-Apim-Trace", ApplicationConfig.apiConfigTraceHeader)
-    ))
+    )) map { res =>
+      res.status match {
+        case 404 if hasJsonBody(res) => res.json \ "failureCode" match {
+          case JsDefined(JsString(err)) => throw InvalidAgentCode(res.status, res.json)
+          case _ => res
+        }
+        case _ => res
+      }
+    }
   }
 
   override def doDelete(url: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
