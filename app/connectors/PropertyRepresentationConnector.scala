@@ -34,7 +34,14 @@ class PropertyRepresentationConnector(http: HttpGet with HttpPut with HttpPost)(
     http.GET[JsValue](url).map( js => {
       Left((js \ "organisationId").as[Long])
     }) recover {
-      case b: InvalidAgentCode => Right((b.body \ "failureCode").as[String])
+      case b: InvalidAgentCode => {
+        val code = (b.body \ "failureCode").as[String]
+        Right(
+          code match {
+            case "NO_AGENT_FLAG" => "INVALID_CODE"
+            case _ => code
+          })
+      }
     }
   }
 
