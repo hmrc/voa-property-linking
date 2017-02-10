@@ -11,7 +11,7 @@ PUT         /property-representations/response                 controllers.Prope
 
 POST        /property-links                                    controllers.PropertyLinkingController.create()
 GET         /property-links/:organisationId                    controllers.PropertyLinkingController.find(organisationId: Int)
-GET         /property-link/:linkId                             controllers.PropertyLinkingController.get(linkId)
+GET         /property-link/:authorisationId                    controllers.PropertyLinkingController.get(authorisationId: Long)
 GET         /dashboard/assessments/:authorisationId            controllers.PropertyLinkingController.assessments(authorisationId: Long)
 
 GET         /individuals/:personId                             controllers.IndividualAccountController.get(personId: Int)
