@@ -16,8 +16,10 @@
 
 package connectors
 
+import config.VOABackendWSHttp.InvalidAgentCode
 import models._
 import play.api.libs.json.{JsNull, JsValue}
+import play.api.libs.ws.WSClient
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
 
@@ -27,11 +29,20 @@ class PropertyRepresentationConnector(http: HttpGet with HttpPut with HttpPost)(
   extends ServicesConfig {
   lazy val baseUrl: String = baseUrl("external-business-rates-data-platform")
 
-  def validateAgentCode(agentCode:Long, authorisationId: Long)(implicit hc: HeaderCarrier): Future[Long] = {
+  def validateAgentCode(agentCode:Long, authorisationId: Long)(implicit hc: HeaderCarrier): Future[Either[Long, String]] = {
     val url = baseUrl  + s"/authorisation-management-api/agent/validate_agent_code?agentCode=$agentCode&authorisationId=$authorisationId"
-    http.GET[JsValue](url) .map(js =>{
-      (js \ "organisationId").as[Long]
-    })
+    http.GET[JsValue](url).map( js => {
+      Left((js \ "organisationId").as[Long])
+    }) recover {
+      case b: InvalidAgentCode => {
+        val code = (b.body \ "failureCode").as[String]
+        Right(
+          code match {
+            case "NO_AGENT_FLAG" => "INVALID_CODE"
+            case _ => code
+          })
+      }
+    }
   }
 
   def get(representationId: String)(implicit hc: HeaderCarrier): Future[Option[PropertyRepresentation]] = {
