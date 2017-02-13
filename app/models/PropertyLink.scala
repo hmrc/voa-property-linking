@@ -19,7 +19,7 @@ package models
 import org.joda.time.DateTime
 import play.api.libs.json.Json
 
-case class PropertyLink(linkId: String, uarn: Long, organisationId: Int, description: String,
+case class PropertyLink(authorisationId: String, uarn: Long, organisationId: Int, description: String,
                         capacityDeclaration: CapacityDeclaration, linkedDate: DateTime, pending: Boolean)
 
 object PropertyLink {

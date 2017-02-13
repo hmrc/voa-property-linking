@@ -45,8 +45,8 @@ class PropertyLinkingConnector(http: HttpGet with HttpPut with HttpPost)(implici
       )
   }
 
-  def get(linkId: String)(implicit hc: HeaderCarrier): Future[Option[PropertyLink]] = {
-    val url = baseUrl + s"/property-links/$linkId"
+  def get(authorisationId: Long)(implicit hc: HeaderCarrier): Future[Option[PropertyLink]] = {
+    val url = baseUrl + s"/property-links/$authorisationId"
     http.GET[Option[PropertyLink]](url)
   }
 

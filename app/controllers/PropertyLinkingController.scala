@@ -41,7 +41,7 @@ object PropertyLinkingController extends PropertyLinkingBaseController {
         true, //TODO - canAppointAgent
         prop.NDRListValuationHistoryItems.headOption.map(x => PropertyAddress.fromString(x.address)).getOrElse(PropertyAddress(Seq("No address found"), "")),
         capacityDeclaration, prop.createDatetime,
-        if (prop.authorisationStatus == "APPROVED") false else true,
+        prop.authorisationStatus != "APPROVED",
         prop.NDRListValuationHistoryItems.map(x => Assessment.fromAPIValuationHistory(x, prop.authorisationId, capacityDeclaration)),
         prop.parties.map(_.toPropertyRepresentation)
       )
@@ -51,8 +51,8 @@ object PropertyLinkingController extends PropertyLinkingBaseController {
       })
   }
 
-  def get(linkId: String) = Action.async { implicit request =>
-    propertyLinksConnector.get(linkId) map { x => Ok(Json.toJson(x)) }
+  def get(authorisationId: Long) = Action.async { implicit request =>
+    propertyLinksConnector.get(authorisationId) map { x => Ok(Json.toJson(x)) }
   }
 
   def assessments(authorisationId: Long) = Action.async { implicit request =>
