@@ -16,17 +16,11 @@
 
 package models
 
-import org.joda.time.DateTime
 import play.api.libs.json.Json
 
-case class DetailedPropertyLink(authorisationId: Long, uarn: Long, organisationId: Int, description: String,
-                                agentNames: Seq[String], canAppointAgent: Boolean,
-                                address: PropertyAddress,
-                                capacityDeclaration: CapacityDeclaration, linkedDate: DateTime, pending: Boolean,
-                                assessment: Seq[Assessment], agents:Seq[Party]) {
-}
+case class Party (agentCode: Long,
+                  organisationName: String)
 
-
-object DetailedPropertyLink {
-  implicit val formats = Json.format[DetailedPropertyLink]
+object Party {
+  implicit val format = Json.format[Party]
 }
