@@ -22,9 +22,12 @@ import play.api.libs.json.Json
 import play.api.mvc.Action
 import uk.gov.hmrc.play.http.Upstream5xxResponse
 
+import scala.concurrent.Future
+
 object PropertyLinkingController extends PropertyLinkingBaseController {
   val propertyLinksConnector = Wiring().propertyLinkingConnector
   val propAuthConnector = Wiring().propertyLinkingConnector
+  val groupAccountsConnector = Wiring().groupAccounts
 
   def create() = Action.async(parse.json) { implicit request =>
     withJsonBody[PropertyLinkRequest] { linkRequest =>
@@ -34,21 +37,19 @@ object PropertyLinkingController extends PropertyLinkingBaseController {
     }
   }
 
-  def find(organisationId: Int) = Action.async { implicit request =>
-    propertyLinksConnector.find(organisationId).map(_.map(prop => {
-      val capacityDeclaration = CapacityDeclaration(prop.authorisationOwnerCapacity, prop.startDate, prop.endDate)
-      DetailedPropertyLink(prop.authorisationId, prop.uarn, prop.authorisationOwnerOrganisationId, "DESCRIPTION", Nil,
-        true, //TODO - canAppointAgent
-        prop.NDRListValuationHistoryItems.headOption.map(x => PropertyAddress.fromString(x.address)).getOrElse(PropertyAddress(Seq("No address found"), "")),
-        capacityDeclaration, prop.createDatetime,
-        prop.authorisationStatus != "APPROVED",
-        prop.NDRListValuationHistoryItems.map(x => Assessment.fromAPIValuationHistory(x, prop.authorisationId, capacityDeclaration)),
-        prop.parties.map(_.toPropertyRepresentation)
-      )
-    }))
-      .map(x=> {
-        Ok(Json.toJson(x))
+  def find(organisationId: Int) = Action.async { implicit request => {
+    (for {
+      props <- propertyLinksConnector.find(organisationId)
+      res <- Future.traverse(props)(prop => {
+        for {
+          optionalGroupAccounts <- Future.traverse(prop.parties)(party => groupAccountsConnector.get(party.id.toInt))
+          groupAccounts = optionalGroupAccounts.flatten
+        } yield DetailedPropertyLink.fromAPIAuthorisation(prop, groupAccounts)
       })
+    } yield {
+      res
+    }).map(x => Ok(Json.toJson(x)))
+  }
   }
 
   def get(authorisationId: Long) = Action.async { implicit request =>

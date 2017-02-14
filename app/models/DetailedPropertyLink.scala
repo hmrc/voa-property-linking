@@ -19,12 +19,29 @@ package models
 import org.joda.time.DateTime
 import play.api.libs.json.Json
 
-case class DetailedPropertyLink(authorisationId: Long, uarn: Long, organisationId: Int, description: String,
-                                agentNames: Seq[String], canAppointAgent: Boolean,
+case class DetailedPropertyLink(authorisationId: Long,
+                                uarn: Long,
+                                organisationId: Int,
                                 address: PropertyAddress,
-                                capacityDeclaration: CapacityDeclaration, linkedDate: DateTime, pending: Boolean,
-                                assessment: Seq[Assessment], agents:Seq[PropertyRepresentation])
+                                capacityDeclaration: CapacityDeclaration,
+                                linkedDate: DateTime,
+                                pending: Boolean,
+                                assessment: Seq[Assessment],
+                                agents:Seq[Party]) {
+}
+
 
 object DetailedPropertyLink {
   implicit val formats = Json.format[DetailedPropertyLink]
+
+  def fromAPIAuthorisation(prop: APIAuthorisation, groupAccounts: Seq[GroupAccount]) = {
+    val capacityDeclaration = CapacityDeclaration(prop.authorisationOwnerCapacity, prop.startDate, prop.endDate)
+    DetailedPropertyLink(prop.authorisationId, prop.uarn, prop.authorisationOwnerOrganisationId,
+      prop.NDRListValuationHistoryItems.headOption.map(x => PropertyAddress.fromString(x.address)).getOrElse(PropertyAddress(Seq("No address found"), "")),
+      capacityDeclaration, prop.createDatetime,
+      prop.authorisationStatus != "APPROVED",
+      prop.NDRListValuationHistoryItems.map(x => Assessment.fromAPIValuationHistory(x, prop.authorisationId, capacityDeclaration)),
+      groupAccounts.map(x=> Party(x.agentCode.toLong, x.companyName))
+    )
+  }
 }

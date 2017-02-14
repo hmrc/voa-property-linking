@@ -32,7 +32,7 @@ case class APIAuthorisation(
                              endDate: Option[LocalDate],
                              submissionId: String,
                              NDRListValuationHistoryItems: Seq[APIValuationHistory],
-                             parties: Seq[APIPropertyRepresentation]
+                             parties: Seq[APIParty]
                            )
 
 object APIAuthorisation {
