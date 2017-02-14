@@ -41,7 +41,7 @@ object DetailedPropertyLink {
       capacityDeclaration, prop.createDatetime,
       prop.authorisationStatus != "APPROVED",
       prop.NDRListValuationHistoryItems.map(x => Assessment.fromAPIValuationHistory(x, prop.authorisationId, capacityDeclaration)),
-      groupAccounts.map(x=> Party(x.agentCode.toLong, x.companyName))
+      groupAccounts.map(x=> Party(x.agentCode, x.companyName))
     )
   }
 }
