@@ -37,31 +37,19 @@ object PropertyLinkingController extends PropertyLinkingBaseController {
     }
   }
 
-  def find(organisationId: Int) = Action.async { implicit request =>
-    val tmp = propertyLinksConnector.find(organisationId).flatMap(_.map(prop => {
-      val a = Future.sequence(prop.parties.map(x => {
-        val b = groupAccountsConnector.get(x.id.toInt).map(x=>x.map(y => {
-          Party(y.agentCode.toLong, y.companyName)
-        }))
-        b
-      })).map(_.flatten).map(parties => {
-        val capacityDeclaration = CapacityDeclaration(prop.authorisationOwnerCapacity, prop.startDate, prop.endDate)
-        DetailedPropertyLink(prop.authorisationId, prop.uarn, prop.authorisationOwnerOrganisationId, "DESCRIPTION", Nil,
-          true, //TODO - canAppointAgent
-          prop.NDRListValuationHistoryItems.headOption.map(x => PropertyAddress.fromString(x.address)).getOrElse(PropertyAddress(Seq("No address found"), "")),
-          capacityDeclaration, prop.createDatetime,
-          prop.authorisationStatus != "APPROVED",
-          prop.NDRListValuationHistoryItems.map(x => Assessment.fromAPIValuationHistory(x, prop.authorisationId, capacityDeclaration)),
-          parties
-          //prop.parties.map(_.toPropertyRepresentation)
-        )
+  def find(organisationId: Int) = Action.async { implicit request => {
+    (for {
+      props <- propertyLinksConnector.find(organisationId)
+      res <- Future.traverse(props)(prop => {
+        for {
+          optionalGroupAccounts <- Future.traverse(prop.parties)(party => groupAccountsConnector.get(party.id.toInt))
+          groupAccounts = optionalGroupAccounts.flatten
+        } yield DetailedPropertyLink.fromAPIAuthorisation(prop, groupAccounts)
       })
-      a
-    }))
-    val tmp2 = tmp.flatMap(x => Future.sequence(x))
-      tmp2.map(x=> {
-        Ok(Json.toJson(x))
-      })
+    } yield {
+      res
+    }).map(x => Ok(Json.toJson(x)))
+  }
   }
 
   def get(authorisationId: Long) = Action.async { implicit request =>
