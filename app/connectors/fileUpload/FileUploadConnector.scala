@@ -106,7 +106,7 @@ class FileUploadConnector @Inject()(val ws: WSClient)(implicit ec: ExecutionCont
   }
 
   override def downloadFile(href: String)(implicit hc: HeaderCarrier): Future[Array[Byte]] = {
-    val url = s"${baseUrl("file-upload-backend")}/$href"
+    val url = s"${baseUrl("file-upload-backend")}$href"
     http.GET[Array[Byte]](url)
   }
 

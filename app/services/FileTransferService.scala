@@ -53,7 +53,8 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
   }
 
   private def removeEnvelopes(envInfo: EnvelopeInfo)(implicit hc: HeaderCarrier) = {
-    fileUploadConnector.deleteEnvelope(envInfo.id).map(_ => repo.remove(envInfo.id))
+//    fileUploadConnector.deleteEnvelope(envInfo.id).map(_ => repo.remove(envInfo.id)) TODO work out which endpoint to call
+    repo.remove(envInfo.id)
   }
 
   private def processClosedNotEmptyEnvelope(envelopeInfo: EnvelopeInfo)(implicit hc: HeaderCarrier) = {
