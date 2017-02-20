@@ -17,7 +17,7 @@
 package models
 
 import org.joda.time.DateTime
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, Writes}
 
 case class APIRepresentationRequest(
                                           authorisationId: Long,
@@ -30,6 +30,7 @@ case class APIRepresentationRequest(
                                         )
 
 object APIRepresentationRequest {
+  implicit val yourJodaDateTimeReads: Writes[DateTime] = Writes.jodaDateWrites("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
   implicit val format = Json.format[APIRepresentationRequest]
   def fromRepresentationRequest(reprRequest: RepresentationRequest) = APIRepresentationRequest(
     reprRequest.authorisationId,
