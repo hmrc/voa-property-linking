@@ -33,3 +33,5 @@ GET         /address/:id                                       controllers.Addre
 POST        /address                                           controllers.AddressLookup.create
 
 POST        /betalogin                                         controllers.PrivateBetaLoginController.login
+
+GET         /submissionId/:prefix                              @controllers.SubmissionIdController.get(prefix: String)
