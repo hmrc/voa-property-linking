@@ -16,12 +16,11 @@
 
 package connectors
 
-import core.connectors.WireMockSpec
 import com.github.tomakehurst.wiremock.client.WireMock._
 import config.Wiring
-import org.scalatestplus.play.OneAppPerSuite
+import core.connectors.WireMockSpec
+import org.scalatestplus.play.OneAppPerTest
 import play.api.http.ContentTypes
-import play.api.libs.json.Json
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
 
@@ -29,7 +28,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class PropertyLinkingConnectorSpec
   extends UnitSpec
-    with OneAppPerSuite
+    with OneAppPerTest
     with ContentTypes
     with WireMockSpec {
 
