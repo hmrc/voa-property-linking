@@ -18,18 +18,13 @@ package connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import config.Wiring
-import core.connectors.WireMockSpec
-import org.scalatestplus.play.OneAppPerTest
 import play.api.http.ContentTypes
 import uk.gov.hmrc.play.http.HeaderCarrier
-import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class PropertyLinkingConnectorSpec
-  extends UnitSpec
-    with OneAppPerTest
-    with ContentTypes
+  extends ContentTypes
     with WireMockSpec {
 
   "PropertyLinkingConnector.find" should {

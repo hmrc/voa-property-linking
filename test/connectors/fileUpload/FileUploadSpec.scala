@@ -17,16 +17,13 @@
 package connectors.fileUpload
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import core.connectors.WireMockSpec
-import org.scalatestplus.play.OneAppPerTest
+import connectors.WireMockSpec
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.ws.ahc.AhcWSClient
 import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
 import uk.gov.hmrc.play.http.HeaderCarrier
-import uk.gov.hmrc.play.test.UnitSpec
 
-class FileUploadSpec extends UnitSpec
-  with OneAppPerTest with WireMockSpec with MicroserviceFilterSupport {
+class FileUploadSpec extends WireMockSpec with MicroserviceFilterSupport {
 
   "FileUploadConnector" should {
     "be able to download files from the file upload service" in {
