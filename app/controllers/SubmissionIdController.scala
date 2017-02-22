@@ -16,28 +16,28 @@
 
 package controllers
 
-import java.time.Instant
 import javax.inject.Inject
 
 import play.api.libs.json.Json
 import play.api.mvc.Action
+import repositories.SequenceGeneratorMongoRepository
 
-import scala.concurrent.Future
-import scala.util.Random
-
-class SubmissionIdController @Inject()()
+class SubmissionIdController @Inject()(val sequenceGenerator: SequenceGeneratorMongoRepository)
   extends PropertyLinkingBaseController {
 
   def get(prefix: String) = Action.async { implicit  request =>
-    val subId = prefix + genSubmissionId
-    Future.successful(Ok(Json.toJson(subId)))
+    for {
+      id <- sequenceGenerator.getNextSequenceId(prefix)
+      strId = formatId(id)
+    } yield {
+      Ok(Json.toJson(prefix + strId))
+    }
   }
 
-  private def genSubmissionId: String = {
-    val maxLength = 9
-    val randomRange = 1000
+  private def formatId(id: Long) = {
     val charMapping= Map(
       // we have 26 alpha numeric character as input, i.e. 0-9, A-P
+      // we convert is to 0-9A-X with the following chars omitted:a, c, e, f, i, k, o
       'a' -> 'q',
       'c' -> 'r',
       'e' -> 'v',
@@ -47,14 +47,7 @@ class SubmissionIdController @Inject()()
       'o' -> 'z'
       //no mapping for s, t, u as they are not allowed.
     )
-    val millis = Instant.now.toEpochMilli * randomRange
-    val rand = Random.nextInt(randomRange).toLong
-
-    val strId = BigInt(millis + rand).toString(26).reverse
-      .padTo(maxLength, '0')    //pad if less than 9 chars
-      .substring(0, maxLength)  //only keep the first 9 chars (overflow protection)
-      .reverse.toUpperCase
-    strId.map(x => charMapping.getOrElse(x, x))
+    BigInt(id).toString(26).map(x => charMapping.getOrElse(x, x))
   }
 
 }
