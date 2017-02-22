@@ -18,7 +18,7 @@ package models
 
 import play.api.libs.json.Json
 
-case class FileInfo(fileName: String, fileType: String)
+case class FileInfo(name: String, evidenceType: String)
 
 object FileInfo {
   implicit val fileInfo = Json.format[FileInfo]
