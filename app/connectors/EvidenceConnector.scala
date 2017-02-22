@@ -21,26 +21,31 @@ import javax.inject.Inject
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.google.inject.{ImplementedBy, Singleton}
+import config.ApplicationConfig
 import play.api.libs.ws.WSClient
 import play.api.mvc.MultipartFormData.{DataPart, FilePart}
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.play.http.{HeaderCarrier, Upstream4xxResponse, Upstream5xxResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @ImplementedBy(classOf[EvidenceConnector])
 trait EvidenceTransfer {
-  def uploadFile(submissionId: String, externalId: String, fileName: String, status: String, content: Option[Array[Byte]])(implicit hc: HeaderCarrier): Future[Unit]
+  def uploadFile(submissionId: String, externalId: String, fileName: String, content: Option[Array[Byte]])(implicit hc: HeaderCarrier): Future[Unit]
 }
 
 @Singleton
 class EvidenceConnector @Inject()(val ws: WSClient) extends EvidenceTransfer with ServicesConfig {
-  override def uploadFile(submissionId: String, externalId: String, fileName: String,
-                          status: String, content: Option[Array[Byte]])(implicit hc: HeaderCarrier): Future[Unit] = {
-    val url =  baseUrl("external-business-rates-data-platform") + "/evidence"
-    val res = ws.url(url)
-      .withHeaders(("X-Requested-With", "VOA_CCA"))
+
+  val url = baseUrl("external-business-rates-data-platform")
+  override def uploadFile(submissionId: String, externalId: String, fileName: String, content: Option[Array[Byte]])(implicit hc: HeaderCarrier): Future[Unit] = {
+    val endpoint = "/customer-management-api/customer/evidence"
+    val res = ws.url(url + endpoint)
+      .withHeaders(
+        ("Ocp-Apim-Subscription-Key", ApplicationConfig.apiConfigSubscriptionKeyHeader),
+        ("Ocp-Apim-Trace", ApplicationConfig.apiConfigTraceHeader)
+      )
       .put(Source(
         content.map(c => List(FilePart("file", fileName, None, Source.single(ByteString(c))))).getOrElse(Nil) ++ (
           DataPart("customerId", externalId) ::
@@ -48,6 +53,10 @@ class EvidenceConnector @Inject()(val ws: WSClient) extends EvidenceTransfer wit
           DataPart("submissionId", submissionId) ::
           List())
       ))
-    res.map(_ => ())
+    res.map { r => r.status match {
+      case s if s >= 400 && s <= 499 => throw Upstream4xxResponse(s"PUT $endpoint failed with status $s. Response body: ${r.body}", s, s)
+      case s if s >= 500 && s <= 599 => throw Upstream5xxResponse(s"PUT $endpoint failed with status $s. Response body: ${r.body}", s, s)
+      case _ => ()
+    }}
   }
 }

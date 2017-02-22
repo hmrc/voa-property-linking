@@ -70,7 +70,6 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
       val submissionId = fileName.split("-")(0)
       evidenceConnector.uploadFile(submissionId, "FIXME",
         fileName,
-        "pass",
         if (content.isEmpty) None else Some(content))
     })
   }
@@ -81,7 +80,7 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
       fileInfo.status match {
         case "ERROR" =>
           evidenceConnector.uploadFile(fileInfo.name.split("-")(0), "FIXME",
-            fileInfo.name, "fail", None)
+            fileInfo.name, None)
         case _ => transferFile(fileInfo.href, fileInfo.name, "pass")
       }
     })).map(_ => fileUploadConnector.deleteEnvelope(envId)).map(_ => repo.remove(envId))
