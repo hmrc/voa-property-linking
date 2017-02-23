@@ -100,6 +100,7 @@ class FileUploadConnector @Inject()(ws: WSClient)(implicit ec: ExecutionContext)
   }
 
   override def downloadFile(href: String)(implicit hc: HeaderCarrier): Future[Array[Byte]] = {
+    Logger.info(s"Downloading file from $url$href")
     val res = ws.url(s"$url$href").get()
 
     handleErrors(res, s"$url$href") map { _.body.getBytes }

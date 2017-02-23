@@ -22,6 +22,7 @@ import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.google.inject.{ImplementedBy, Singleton}
 import config.ApplicationConfig
+import play.api.Logger
 import play.api.libs.ws.WSClient
 import play.api.mvc.MultipartFormData.{DataPart, FilePart}
 import uk.gov.hmrc.play.config.ServicesConfig
@@ -41,6 +42,9 @@ class EvidenceConnector @Inject()(val ws: WSClient) extends EvidenceTransfer wit
   val url = baseUrl("external-business-rates-data-platform")
   override def uploadFile(submissionId: String, externalId: String, fileName: String, content: Option[Array[Byte]])(implicit hc: HeaderCarrier): Future[Unit] = {
     val endpoint = "/customer-management-api/customer/evidence"
+
+    Logger.info(s"Uploading file $fileName to /customer/evidence")
+
     val res = ws.url(url + endpoint)
       .withHeaders(
         ("Ocp-Apim-Subscription-Key", ApplicationConfig.apiConfigSubscriptionKeyHeader),
@@ -53,6 +57,6 @@ class EvidenceConnector @Inject()(val ws: WSClient) extends EvidenceTransfer wit
           DataPart("submissionId", submissionId) ::
           List())
       ))
-    handleErrors(res, endpoint) map { _ => () }
+    handleErrors(res, endpoint) map { r => Logger.info(s"Response from API manager: $r") }
   }
 }

@@ -67,6 +67,7 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
 
   def transferFile(url: String, fileName: String, status: String)(implicit hc: HeaderCarrier): Future[Unit] = {
     fileUploadConnector.downloadFile(url).flatMap(content => {
+      Logger.info(s"Downloaded file $fileName")
       val submissionId = fileName.split("-")(0)
       evidenceConnector.uploadFile(submissionId, "FIXME",
         fileName,
