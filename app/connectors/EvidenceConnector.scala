@@ -25,7 +25,7 @@ import config.ApplicationConfig
 import play.api.libs.ws.WSClient
 import play.api.mvc.MultipartFormData.{DataPart, FilePart}
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http.{HeaderCarrier, Upstream4xxResponse, Upstream5xxResponse}
+import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -36,7 +36,7 @@ trait EvidenceTransfer {
 }
 
 @Singleton
-class EvidenceConnector @Inject()(val ws: WSClient) extends EvidenceTransfer with ServicesConfig {
+class EvidenceConnector @Inject()(val ws: WSClient) extends EvidenceTransfer with ServicesConfig with HandleErrors {
 
   val url = baseUrl("external-business-rates-data-platform")
   override def uploadFile(submissionId: String, externalId: String, fileName: String, content: Option[Array[Byte]])(implicit hc: HeaderCarrier): Future[Unit] = {
@@ -53,10 +53,6 @@ class EvidenceConnector @Inject()(val ws: WSClient) extends EvidenceTransfer wit
           DataPart("submissionId", submissionId) ::
           List())
       ))
-    res.map { r => r.status match {
-      case s if s >= 400 && s <= 499 => throw Upstream4xxResponse(s"PUT $endpoint failed with status $s. Response body: ${r.body}", s, s)
-      case s if s >= 500 && s <= 599 => throw Upstream5xxResponse(s"PUT $endpoint failed with status $s. Response body: ${r.body}", s, s)
-      case _ => ()
-    }}
+    handleErrors(res, endpoint) map { _ => () }
   }
 }

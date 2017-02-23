@@ -40,7 +40,7 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
     envelopeIds.foreach(envId => Logger.info(s"Envelope Id: $envId found in mongo"))
 
     val envelopeAndFiles = envelopeIds.map(_.map(envId => fileUploadConnector.getEnvelopeDetails(envId)))
-      .map(x => Future.sequence(x)).flatMap(identity)
+      .flatMap(x => Future.sequence(x))
 
     envelopeAndFiles.map(_.foreach(envInfo => envInfo.status match {
       case "CLOSED" if envInfo.files.isEmpty => removeEnvelopes(envInfo)
