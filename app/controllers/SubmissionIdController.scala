@@ -30,7 +30,7 @@ class SubmissionIdController @Inject()(val sequenceGenerator: SequenceGeneratorM
       id <- sequenceGenerator.getNextSequenceId(prefix)
       strId = formatId(id)
     } yield {
-      Ok(Json.toJson(prefix + strId))
+      Ok(Json.toJson(prefix.toUpperCase + strId))
     }
   }
 
@@ -47,7 +47,7 @@ class SubmissionIdController @Inject()(val sequenceGenerator: SequenceGeneratorM
       'o' -> 'z'
       //no mapping for s, t, u as they are not allowed.
     )
-    BigInt(id).toString(26).map(x => charMapping.getOrElse(x, x))
+    BigInt(id).toString(26).map(x => charMapping.getOrElse(x, x)).toUpperCase
   }
 
 }
