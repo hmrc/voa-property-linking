@@ -20,6 +20,7 @@ import javax.inject.Inject
 
 import com.google.inject.{ImplementedBy, Singleton}
 import config.Wiring
+import connectors.HandleErrors
 import play.api.Logger
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{JsPath, Json, Reads}
@@ -85,7 +86,7 @@ trait FileUpload {
 }
 
 @Singleton
-class FileUploadConnector @Inject()(ws: WSClient)(implicit ec: ExecutionContext) extends FileUpload with ServicesConfig with JsonHttpReads {
+class FileUploadConnector @Inject()(ws: WSClient)(implicit ec: ExecutionContext) extends FileUpload with ServicesConfig with HandleErrors {
   lazy val http = Wiring().http
   lazy val url = baseUrl("file-upload-backend")
 
@@ -99,9 +100,9 @@ class FileUploadConnector @Inject()(ws: WSClient)(implicit ec: ExecutionContext)
   }
 
   override def downloadFile(href: String)(implicit hc: HeaderCarrier): Future[Array[Byte]] = {
-    ws.url(s"$url$href").get() map {
-      _.body.getBytes
-    }
+    val res = ws.url(s"$url$href").get()
+
+    handleErrors(res, s"$url$href") map { _.body.getBytes }
   }
 
   override def deleteEnvelope(envelopeId: String)(implicit hc: HeaderCarrier): Future[Unit] = {
