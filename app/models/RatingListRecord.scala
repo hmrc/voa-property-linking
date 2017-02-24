@@ -14,22 +14,12 @@
  * limitations under the License.
  */
 
-package controllers
+package models
 
-import config.Wiring
-import connectors.VmvConnector
-import play.api.libs.json._
-import play.api.mvc.Action
-import uk.gov.hmrc.play.config.ServicesConfig
+import play.api.libs.json.Json
 
-object PropertyDetailsController extends PropertyLinkingBaseController with ServicesConfig {
+case class RatingListRecord(uarn: Long, billingAuthorityReference: String, address: String, specialCategoryCode: String)
 
-  val http = Wiring().http
-
-  def getPropertyInfo(uarn: Long, postcode: String) = Action.async { implicit request =>
-    VmvConnector.getPropertyInfo(uarn, postcode) map {
-      case Some(p) => Ok(Json.toJson(p))
-      case None => BadRequest
-    }
-  }
+object RatingListRecord {
+  implicit val format = Json.format[RatingListRecord]
 }

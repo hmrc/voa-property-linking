@@ -18,8 +18,8 @@ package models
 
 import play.api.libs.json.Json
 
-case class Property(uarn: Long, billingAuthorityReference: String, address: PropertyAddress, isSelfCertifiable: Boolean,
-                    specialCategoryCode: String, description: String, bulkClassIndicator: String)
+case class Property(uarn: Long, billingAuthorityReference: String, address: PropertyAddress,
+                    specialCategoryCode: String, description: String)
 
 object Property {
   implicit val formats = Json.format[Property]

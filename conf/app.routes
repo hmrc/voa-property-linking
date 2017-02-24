@@ -22,7 +22,7 @@ GET         /groups                                            controllers.Group
 GET         /groups/agentCode/:agentCode                       controllers.GroupAccountController.withAgentCode(agentCode)
 POST        /groups                                            controllers.GroupAccountController.create()
 
-GET         /properties/:uarn                                  controllers.PropertyDetailsController.getPropertyInfo(uarn: Long)
+GET         /properties/:uarn                                  controllers.PropertyDetailsController.getPropertyInfo(uarn: Long, postcode)
 
 PUT         /envelopes/:envId                                  @controllers.EnvelopeController.create(envId: String)
 GET         /envelopes                                         @controllers.EnvelopeController.get()
