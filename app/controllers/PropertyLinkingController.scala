@@ -37,7 +37,7 @@ object PropertyLinkingController extends PropertyLinkingBaseController {
     }
   }
 
-  def find(organisationId: Int) = Action.async { implicit request => {
+  def find(organisationId: Int) = Action.async { implicit request =>
     (for {
       props <- propertyLinksConnector.find(organisationId)
       res <- Future.traverse(props)(prop => {
@@ -49,11 +49,6 @@ object PropertyLinkingController extends PropertyLinkingBaseController {
     } yield {
       res
     }).map(x => Ok(Json.toJson(x)))
-  }
-  }
-
-  def get(authorisationId: Long) = Action.async { implicit request =>
-    propertyLinksConnector.get(authorisationId) map { x => Ok(Json.toJson(x)) }
   }
 
   def assessments(authorisationId: Long) = Action.async { implicit request =>

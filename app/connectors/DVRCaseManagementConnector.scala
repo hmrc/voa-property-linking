@@ -16,25 +16,17 @@
 
 package connectors
 
-import config.Wiring
-import controllers.PropertyDetailsController._
-import models.RatingListRecord
-import play.api.libs.json.{JsArray, JsDefined, JsValue}
+import models.DetailedValuationRequest
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.play.http.{HeaderCarrier, HttpPost, HttpResponse}
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 import scala.concurrent.Future
 
-object VmvConnector extends ServicesConfig {
+class DVRCaseManagementConnector(http: HttpPost) extends ServicesConfig {
+  val url = baseUrl("external-business-rates-data-platform") + "/dvr-case-management-api"
 
-  val http = Wiring().http
-
-  def getPropertyInfo(uarn: Long, postcode: String)(implicit hc: HeaderCarrier): Future[Option[RatingListRecord]] = {
-    http.GET[JsValue](s"${baseUrl("vmv")}/vmv/rating-listing/api/search-by-postcode?postcode=$postcode&pageSize=100") map { js =>
-      js \ "ratings" match {
-        case JsDefined(a@JsArray(_)) => a.as[Seq[RatingListRecord]].find(_.uarn == uarn)
-        case _ => None
-      }
-    }
+  def requestDetailedValuation(request: DetailedValuationRequest)(implicit hc: HeaderCarrier): Future[Unit] = {
+    http.POST[DetailedValuationRequest, HttpResponse](url + "/dvr_case/create_dvr_case", request) map { _ => () }
   }
 }

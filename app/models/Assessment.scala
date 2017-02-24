@@ -36,7 +36,8 @@ object Assessment {
   implicit val yourJodaDateTimeReads: Reads[DateTime] = Reads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
   implicit val formats = Json.format[Assessment]
 
-  def fromAPIValuationHistory(valuationHistory: APIValuationHistory, authorisationId: Long, capacityDeclaration: CapacityDeclaration) = {
+  def fromAPIValuationHistory(valuationHistory: APIValuationHistory, authorisationId: Long,
+                              capacityDeclaration: CapacityDeclaration) = {
     Assessment(
       authorisationId,
       valuationHistory.asstRef,

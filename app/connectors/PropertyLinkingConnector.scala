@@ -16,10 +16,8 @@
 
 package connectors
 
-import java.net.URLEncoder
-
 import models._
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.JsValue
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
 
@@ -43,11 +41,6 @@ class PropertyLinkingConnector(http: HttpGet with HttpPut with HttpPost)(implici
         .filterNot(_.authorisationStatus.toUpperCase == "REVOKED")
         .filterNot(_.authorisationStatus.toUpperCase == "DECLINED")
       )
-  }
-
-  def get(authorisationId: Long)(implicit hc: HeaderCarrier): Future[Option[PropertyLink]] = {
-    val url = baseUrl + s"/property-links/$authorisationId"
-    http.GET[Option[PropertyLink]](url)
   }
 
   def getAssessment(authorisationId: Long)(implicit hc: HeaderCarrier): Future[Seq[Assessment]] = {
