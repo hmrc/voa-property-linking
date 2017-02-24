@@ -20,15 +20,15 @@ import org.joda.time.DateTime
 import play.api.data.format.Formats
 import play.api.libs.json.{Json, Reads}
 
-case class APIValuationHistory (
-                                 asstRef: Long,
-                                 listYear: String,
-                                 uarn:Long,
-                                 effectiveDate:DateTime,
-                                 rateableValue:Long,
-                                 address: String,
-                                 billingAuthorityReference:String
-                               )
+case class APIValuationHistory(
+                                asstRef: Long,
+                                listYear: String,
+                                uarn: Long,
+                                effectiveDate: DateTime,
+                                rateableValue: Long,
+                                address: String,
+                                billingAuthorityReference: String
+                              )
 
 object APIValuationHistory {
   implicit val yourJodaDateTimeReads: Reads[DateTime] = Reads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")

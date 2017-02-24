@@ -22,7 +22,7 @@ import play.api.libs.json.Json
 case class DetailedPropertyLink(authorisationId: Long,
                                 uarn: Long,
                                 organisationId: Int,
-                                address: PropertyAddress,
+                                address: String,
                                 capacityDeclaration: CapacityDeclaration,
                                 linkedDate: DateTime,
                                 pending: Boolean,
@@ -37,7 +37,7 @@ object DetailedPropertyLink {
   def fromAPIAuthorisation(prop: APIAuthorisation, groupAccounts: Seq[GroupAccount]) = {
     val capacityDeclaration = CapacityDeclaration(prop.authorisationOwnerCapacity, prop.startDate, prop.endDate)
     DetailedPropertyLink(prop.authorisationId, prop.uarn, prop.authorisationOwnerOrganisationId,
-      prop.NDRListValuationHistoryItems.headOption.map(x => PropertyAddress.fromString(x.address)).getOrElse(PropertyAddress(Seq("No address found"), "")),
+      prop.NDRListValuationHistoryItems.headOption.map(_.address).getOrElse("No address found"),
       capacityDeclaration, prop.createDatetime,
       prop.authorisationStatus != "APPROVED",
       prop.NDRListValuationHistoryItems.map(x => Assessment.fromAPIValuationHistory(x, prop.authorisationId, capacityDeclaration)),

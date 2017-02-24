@@ -24,11 +24,11 @@ case class Assessment(
                        authorisationId: Long,
                        assessmentRef: Long,
                        listYear: String,
-                       uarn:Long,
-                       effectiveDate:LocalDate,
-                       rateableValue:Long,
+                       uarn: Long,
+                       effectiveDate: LocalDate,
+                       rateableValue: Long,
                        address: PropertyAddress,
-                       billingAuthorityReference:String,
+                       billingAuthorityReference: String,
                        capacity: CapacityDeclaration
                      )
 
