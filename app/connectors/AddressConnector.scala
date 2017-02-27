@@ -23,6 +23,7 @@ import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Success, Failure}
 
 class AddressConnector(http: HttpGet with HttpPost with HttpPut)(implicit ec: ExecutionContext) extends ServicesConfig {
 
@@ -35,7 +36,9 @@ class AddressConnector(http: HttpGet with HttpPost with HttpPut)(implicit ec: Ex
   }
 
   def get(addressUnitId: Int)(implicit hc: HeaderCarrier): Future[Option[DetailedAddress]] = {
-    http.GET[APIAddressLookupResult](s"$url/$addressUnitId") map { _.addressDetails.headOption }
+    http.GET[APIAddressLookupResult](s"$url/$addressUnitId").map(_.addressDetails.headOption).recover {
+      case _ => None
+    }
   }
 
   def create(address: SimpleAddress)(implicit hc: HeaderCarrier): Future[Int] = {

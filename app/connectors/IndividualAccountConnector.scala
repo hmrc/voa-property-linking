@@ -17,7 +17,7 @@
 package connectors
 
 import config.Wiring
-import models.{APIDetailedIndividualAccount, APIIndividualAccount, IndividualAccount, IndividualAccountWrite}
+import models._
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
@@ -43,7 +43,7 @@ class IndividualAccountConnector(http: HttpGet with HttpPut with HttpPost)(impli
     http.GET[Option[APIDetailedIndividualAccount]](s"$baseUrl?personId=$id") flatMap {
       case Some(a) => addresses.get(a.personLatestDetail.addressUnitId) map {
         case Some(address) => Some(a.toIndividualAccount(address.simplify))
-        case None => None
+        case None => Some(a.toIndividualAccount(SimpleAddress(None, "", "", "", "", "")))
       }
       case None => Future.successful(None)
     }
