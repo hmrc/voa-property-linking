@@ -24,7 +24,7 @@ case class APIDetailedGroupAccount(id: Int, governmentGatewayGroupId: String, re
 
   def toGroupAccount(address: SimpleAddress) = {
     GroupAccount(id, governmentGatewayGroupId, organisationLatestDetail.organisationName, address,
-      organisationLatestDetail.organisationEmailAddress, organisationLatestDetail.organisationTelephoneNumber,
+      organisationLatestDetail.organisationEmailAddress, organisationLatestDetail.organisationTelephoneNumber.getOrElse("not set"),
       organisationLatestDetail.smallBusinessFlag, organisationLatestDetail.representativeFlag, representativeCode)
   }
 }
@@ -32,7 +32,7 @@ case class APIDetailedGroupAccount(id: Int, governmentGatewayGroupId: String, re
 case class IndividualSummary(personLatestDetail: APIIndividualDetails)
 
 case class GroupDetails(addressUnitId: Int, representativeFlag: Boolean, smallBusinessFlag: Boolean, organisationName: String,
-                        organisationEmailAddress: String, organisationTelephoneNumber: String, effectiveFrom: LocalDate)
+                        organisationEmailAddress: String, organisationTelephoneNumber: Option[String], effectiveFrom: LocalDate)
 
 object GroupDetails {
   implicit val format = Json.format[GroupDetails]
