@@ -44,6 +44,7 @@ abstract class Wiring {
   lazy val individualAccounts = new IndividualAccountConnector(backendHttp)
   lazy val groupAccounts = new GroupAccountConnector(backendHttp)
   lazy val addresses = new AddressConnector(backendHttp)
+  lazy val dvrCaseManagement = new DVRCaseManagementConnector(backendHttp)
 }
 
 object WSHttp extends WSGet with WSPut with WSPost with WSDelete with WSPatch with AppName {
@@ -99,7 +100,6 @@ object VOABackendWSHttp extends WSHttp with ServicesConfig {
       ("Ocp-Apim-Trace", ApplicationConfig.apiConfigTraceHeader)
     ))
   }
-
 }
 
 object MicroserviceAuditConnector extends AuditConnector with RunMode {
