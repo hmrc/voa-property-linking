@@ -54,15 +54,18 @@ object WSHttp extends WSGet with WSPut with WSPost with WSDelete with WSPatch wi
 object VOABackendWSHttp extends WSHttp with ServicesConfig {
   override val hooks: Seq[HttpHook] = NoneRequired
 
-  private def hasJsonBody(res: HttpResponse) = Try { res.json }.isSuccess
+  private def hasJsonBody(res: HttpResponse) = Try {
+    res.json
+  }.isSuccess
 
   case class InvalidAgentCode(status: Int, body: JsValue) extends Exception
 
+  def buildHeaderCarrier(hc: HeaderCarrier): HeaderCarrier = HeaderCarrier(requestId = hc.requestId, sessionId = hc.sessionId)
+    .withExtraHeaders(("Ocp-Apim-Subscription-Key", ApplicationConfig.apiConfigSubscriptionKeyHeader), ("Ocp-Apim-Trace", ApplicationConfig.apiConfigTraceHeader))
+    .withExtraHeaders(hc.extraHeaders: _*)
+
   override def doGet(url: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
-    super.doGet(url)(hc.withExtraHeaders(
-      ("Ocp-Apim-Subscription-Key", ApplicationConfig.apiConfigSubscriptionKeyHeader),
-      ("Ocp-Apim-Trace", ApplicationConfig.apiConfigTraceHeader)
-    )) map { res =>
+    super.doGet(url)(buildHeaderCarrier(hc)) map { res =>
       res.status match {
         case 404 if hasJsonBody(res) => res.json \ "failureCode" match {
           case JsDefined(JsString(err)) => throw InvalidAgentCode(res.status, res.json)
@@ -74,31 +77,19 @@ object VOABackendWSHttp extends WSHttp with ServicesConfig {
   }
 
   override def doDelete(url: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
-    super.doDelete(url)(hc.withExtraHeaders(
-      ("Ocp-Apim-Subscription-Key", ApplicationConfig.apiConfigSubscriptionKeyHeader),
-      ("Ocp-Apim-Trace", ApplicationConfig.apiConfigTraceHeader)
-    ))
+    super.doDelete(url)(buildHeaderCarrier(hc))
   }
 
   override def doPatch[A](url: String, body: A)(implicit rds: Writes[A], hc: HeaderCarrier): Future[HttpResponse] = {
-    super.doPatch(url, body)(rds, hc.withExtraHeaders(
-      ("Ocp-Apim-Subscription-Key", ApplicationConfig.apiConfigSubscriptionKeyHeader),
-      ("Ocp-Apim-Trace", ApplicationConfig.apiConfigTraceHeader)
-    ))
+    super.doPatch(url, body)(rds, buildHeaderCarrier(hc))
   }
 
   override def doPut[A](url: String, body: A)(implicit rds: Writes[A], hc: HeaderCarrier): Future[HttpResponse] = {
-    super.doPut(url, body)(rds, hc.withExtraHeaders(
-      ("Ocp-Apim-Subscription-Key", ApplicationConfig.apiConfigSubscriptionKeyHeader),
-      ("Ocp-Apim-Trace", ApplicationConfig.apiConfigTraceHeader)
-    ))
+    super.doPut(url, body)(rds, buildHeaderCarrier(hc))
   }
 
   override def doPost[A](url: String, body: A, headers: Seq[(String, String)])(implicit rds: Writes[A], hc: HeaderCarrier): Future[HttpResponse] = {
-    super.doPost(url, body, headers)(rds, hc.withExtraHeaders(
-      ("Ocp-Apim-Subscription-Key", ApplicationConfig.apiConfigSubscriptionKeyHeader),
-      ("Ocp-Apim-Trace", ApplicationConfig.apiConfigTraceHeader)
-    ))
+    super.doPost(url, body, headers)(rds, buildHeaderCarrier(hc))
   }
 }
 
