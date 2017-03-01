@@ -42,7 +42,7 @@ object PropertyLinkingController extends PropertyLinkingBaseController {
       props <- propertyLinksConnector.find(organisationId)
       res <- Future.traverse(props)(prop => {
         for {
-          optionalGroupAccounts <- Future.traverse(prop.parties)(party => groupAccountsConnector.get(party.id.toInt))
+          optionalGroupAccounts <- Future.traverse(prop.parties)(party => groupAccountsConnector.get(party.authorisedPartyOrganisationId))
           groupAccounts = optionalGroupAccounts.flatten
         } yield DetailedPropertyLink.fromAPIAuthorisation(prop, groupAccounts)
       })

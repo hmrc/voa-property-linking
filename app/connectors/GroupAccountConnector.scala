@@ -38,7 +38,7 @@ class GroupAccountConnector(http: HttpGet with HttpPost)(implicit ec: ExecutionC
     }
   }
 
-  def get(id: Int)(implicit hc: HeaderCarrier): Future[Option[GroupAccount]] = {
+  def get(id: Long)(implicit hc: HeaderCarrier): Future[Option[GroupAccount]] = {
     http.GET[Option[APIDetailedGroupAccount]](s"$url?organisationId=$id") flatMap {
       case Some(a) => addresses.get(a.organisationLatestDetail.addressUnitId) map {
         case Some(address) => Some(a.toGroupAccount(address.simplify))

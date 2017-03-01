@@ -19,7 +19,7 @@ package models
 import play.api.libs.json.Json
 
 case class APIParty(
-                     id: Long
+                     authorisedPartyOrganisationId: Long
                    )
 
 object APIParty {
