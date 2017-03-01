@@ -17,7 +17,7 @@
 package connectors
 
 import config.Wiring
-import models.{APIDetailedGroupAccount, APIGroupAccount, GroupAccount, GroupAccountSubmission}
+import models._
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet, HttpPost}
@@ -42,7 +42,7 @@ class GroupAccountConnector(http: HttpGet with HttpPost)(implicit ec: ExecutionC
     http.GET[Option[APIDetailedGroupAccount]](s"$url?organisationId=$id") flatMap {
       case Some(a) => addresses.get(a.organisationLatestDetail.addressUnitId) map {
         case Some(address) => Some(a.toGroupAccount(address.simplify))
-        case None => None
+        case None => Some(a.toGroupAccount(SimpleAddress(None, "", "", "", "", "")))
       }
       case None => Future.successful(None)
     }
