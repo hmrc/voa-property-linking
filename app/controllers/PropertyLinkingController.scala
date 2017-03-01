@@ -26,7 +26,6 @@ import scala.concurrent.Future
 
 object PropertyLinkingController extends PropertyLinkingBaseController {
   val propertyLinksConnector = Wiring().propertyLinkingConnector
-  val propAuthConnector = Wiring().propertyLinkingConnector
   val groupAccountsConnector = Wiring().groupAccounts
 
   def create() = Action.async(parse.json) { implicit request =>
@@ -37,7 +36,7 @@ object PropertyLinkingController extends PropertyLinkingBaseController {
     }
   }
 
-  def find(organisationId: Int) = Action.async { implicit request =>
+  def find(organisationId: Long) = Action.async { implicit request => {
     (for {
       props <- propertyLinksConnector.find(organisationId)
       res <- Future.traverse(props)(prop => {
@@ -49,6 +48,24 @@ object PropertyLinkingController extends PropertyLinkingBaseController {
     } yield {
       res
     }).map(x => Ok(Json.toJson(x)))
+  }
+  }
+
+  def clientProperties(userOrgId: Long, agentOrgId: Long) = Action.async {implicit request => {
+    (for {
+      props <- propertyLinksConnector.find(userOrgId)
+      filterProps = props.filter(_.parties.map(_.authorisedPartyOrganisationId).contains(agentOrgId))
+      userAccount <- groupAccountsConnector.get(props.head.authorisationOwnerOrganisationId)
+      res <- Future.traverse(filterProps)(prop => {
+        for {
+          optionalGroupAccounts <- Future.traverse(prop.parties.filter(_.authorisedPartyOrganisationId == agentOrgId))(party => groupAccountsConnector.get(party.authorisedPartyOrganisationId))
+          groupAccounts = optionalGroupAccounts.flatten
+        } yield ClientProperties.build(prop, groupAccounts, userAccount)
+      })
+    } yield {
+      res
+    }).map(x => Ok(Json.toJson(x)))
+  }
   }
 
   def assessments(authorisationId: Long) = Action.async { implicit request =>

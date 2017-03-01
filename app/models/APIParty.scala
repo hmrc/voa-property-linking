@@ -18,8 +18,16 @@ package models
 
 import play.api.libs.json.Json
 
+case class Permissions(
+                        checkPermission: String,
+                        challengePermission:String
+                      )
+object Permissions{
+  implicit val format = Json.format[Permissions]
+}
 case class APIParty(
-                     authorisedPartyOrganisationId: Long
+                     authorisedPartyOrganisationId: Long,
+                     permissions: Seq[Permissions]
                    )
 
 object APIParty {
