@@ -33,17 +33,19 @@ import scala.concurrent.Future
 
 @ImplementedBy(classOf[EvidenceConnector])
 trait EvidenceTransfer {
-  def uploadFile(submissionId: String, externalId: String, fileName: String, content: Option[Array[Byte]])(implicit hc: HeaderCarrier): Future[Unit]
+  def uploadFile(file: String, content: Option[Array[Byte]])(implicit hc: HeaderCarrier): Future[Unit]
 }
 
 @Singleton
 class EvidenceConnector @Inject()(val ws: WSClient) extends EvidenceTransfer with ServicesConfig with HandleErrors {
 
   val url = baseUrl("external-business-rates-data-platform")
-  override def uploadFile(submissionId: String, externalId: String, fileName: String, content: Option[Array[Byte]])(implicit hc: HeaderCarrier): Future[Unit] = {
+  override def uploadFile(file: String, content: Option[Array[Byte]])(implicit hc: HeaderCarrier): Future[Unit] = {
     val endpoint = "/customer-management-api/customer/evidence"
 
-    Logger.info(s"Uploading file $fileName to /customer/evidence")
+    val (submissionId, personId, fileName) = getMetadata(file)
+
+    Logger.info(s"Uploading file $file to /customer/evidence")
 
     val res = ws.url(url + endpoint)
       .withHeaders(
@@ -52,11 +54,18 @@ class EvidenceConnector @Inject()(val ws: WSClient) extends EvidenceTransfer wit
       )
       .put(Source(
         content.map(c => List(FilePart("file", fileName, None, Source.single(ByteString(c))))).getOrElse(Nil) ++ (
-          DataPart("customerId", externalId) ::
-          DataPart("filename", fileName) ::
+          DataPart("customerId", personId) ::
+          DataPart("filename", file) ::
           DataPart("submissionId", submissionId) ::
           List())
       ))
     handleErrors(res, endpoint) map { r => Logger.info(s"Response from API manager: $r") }
+  }
+
+  private def getMetadata(fileName: String): (String, String, String) = {
+    fileName.split("-").toList match {
+      case submissionId :: personId :: Seq(xs) => (submissionId, personId, xs.mkString("-"))
+      case _ => throw new Exception(s"File $fileName does not match the format submissionId-personId-filename")
+    }
   }
 }

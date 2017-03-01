@@ -41,7 +41,7 @@ class EvidenceConnectorSpec extends WireMockSpec with MicroserviceFilterSupport 
         .withRequestBody(containing(file))
         .willReturn(aResponse().withStatus(200)))
 
-      noException should be thrownBy await(connector.uploadFile("SubmissionId", "ExternalId", "FileName", Some(file.getBytes)))
+      noException should be thrownBy await(connector.uploadFile("SubmissionId-ExternalId-FileName", Some(file.getBytes)))
     }
   }
 }
