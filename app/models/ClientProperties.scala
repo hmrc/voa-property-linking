@@ -20,6 +20,7 @@ import play.api.libs.json.Json
 
 case class ClientProperties (
                               clientOrganisationName: String,
+                              uarn: Long,
                               billingAuthorityReference: String,
                               checkPermission: String,
                               challengePermission: String,
@@ -28,9 +29,10 @@ case class ClientProperties (
 object ClientProperties {
   implicit val format = Json.format[ClientProperties]
 
-  def build(prop: APIAuthorisation, agentAccounts: Seq[GroupAccount], userAccount: Option[GroupAccount]) = {
+  def build(prop: APIAuthorisation, userAccount: Option[GroupAccount]) = {
     ClientProperties(
       userAccount.map(_.companyName).getOrElse("Name not found"),
+      prop.uarn,
       prop.NDRListValuationHistoryItems.headOption.map(_.billingAuthorityReference).getOrElse("BARef not found"),
       prop.parties.head.permissions.head.checkPermission,
       prop.parties.head.permissions.head.challengePermission,
