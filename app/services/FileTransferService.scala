@@ -68,10 +68,7 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
   def transferFile(url: String, fileName: String, status: String)(implicit hc: HeaderCarrier): Future[Unit] = {
     fileUploadConnector.downloadFile(url).flatMap(content => {
       Logger.info(s"Downloaded file $fileName")
-      val submissionId = fileName.split("-")(0)
-      evidenceConnector.uploadFile(submissionId, "FIXME",
-        fileName,
-        if (content.isEmpty) None else Some(content))
+      evidenceConnector.uploadFile(fileName, if (content.isEmpty) None else Some(content))
     })
   }
 
@@ -80,8 +77,7 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
     Future.sequence(envelopeInfo.files.map(fileInfo => {
       fileInfo.status match {
         case "ERROR" =>
-          evidenceConnector.uploadFile(fileInfo.name.split("-")(0), "FIXME",
-            fileInfo.name, None)
+          evidenceConnector.uploadFile(fileInfo.name, None)
         case _ => transferFile(fileInfo.href, fileInfo.name, "pass")
       }
     })).map(_ => fileUploadConnector.deleteEnvelope(envId)).map(_ => repo.remove(envId))
