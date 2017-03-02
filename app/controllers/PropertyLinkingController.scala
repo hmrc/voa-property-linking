@@ -24,9 +24,8 @@ import uk.gov.hmrc.play.http.Upstream5xxResponse
 
 import scala.concurrent.Future
 
-object PropertyLinkingController extends PropertyLinkingBaseController {
+trait PropertyLinkingController extends PropertyLinkingBaseController {
   val propertyLinksConnector = Wiring().propertyLinkingConnector
-  val propAuthConnector = Wiring().propertyLinkingConnector
   val groupAccountsConnector = Wiring().groupAccounts
 
   def create() = Action.async(parse.json) { implicit request =>
@@ -37,7 +36,7 @@ object PropertyLinkingController extends PropertyLinkingBaseController {
     }
   }
 
-  def find(organisationId: Int) = Action.async { implicit request =>
+  def find(organisationId: Long) = Action.async { implicit request => {
     (for {
       props <- propertyLinksConnector.find(organisationId)
       res <- Future.traverse(props)(prop => {
@@ -50,8 +49,22 @@ object PropertyLinkingController extends PropertyLinkingBaseController {
       res
     }).map(x => Ok(Json.toJson(x)))
   }
+  }
+
+  def clientProperties(userOrgId: Long, agentOrgId: Long) = Action.async {implicit request => {
+    (for {
+      props <- propertyLinksConnector.find(userOrgId)
+      filterProps = props.filter(_.parties.map(_.authorisedPartyOrganisationId).contains(agentOrgId))
+      userAccount <- groupAccountsConnector.get(props.head.authorisationOwnerOrganisationId)
+    } yield {
+      filterProps.map(x => ClientProperties.build(x, userAccount))
+    }).map(x => Ok(Json.toJson(x)))
+  }
+  }
 
   def assessments(authorisationId: Long) = Action.async { implicit request =>
     propertyLinksConnector.getAssessment(authorisationId) map { x => Ok(Json.toJson(x)) }
   }
 }
+
+object PropertyLinkingController extends PropertyLinkingController

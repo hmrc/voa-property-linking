@@ -19,7 +19,8 @@ package models
 import play.api.libs.json.Json
 
 case class Party (agentCode: Long,
-                  organisationName: String)
+                  organisationName: String,
+                  organisationId: Long)
 
 object Party {
   implicit val format = Json.format[Party]

@@ -37,6 +37,8 @@ case class APIAuthorisation(
 
 object APIAuthorisation {
   implicit val yourJodaDateTimeReads: Reads[DateTime] = Reads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+  implicit val yourJodaDateTimeWrites: Writes[DateTime] = Writes.jodaDateWrites("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
   implicit val yourJodaDateReads: Reads[LocalDate] = Reads.jodaLocalDateReads("yyyy-MM-dd")
-  implicit val reads: Reads[APIAuthorisation] =  Json.reads[APIAuthorisation]
+  implicit val yourJodaDateWrites: Writes[LocalDate] = Writes.jodaLocalDateWrites("yyyy-MM-dd")
+  implicit val format: Format[APIAuthorisation] =  Json.format[APIAuthorisation]
 }
