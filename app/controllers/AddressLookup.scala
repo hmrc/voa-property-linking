@@ -20,13 +20,19 @@ import config.Wiring
 import models.SimpleAddress
 import play.api.libs.json.Json
 import play.api.mvc.Action
+import util.PostcodeValidator
+
+import scala.concurrent.Future
 
 object AddressLookup extends PropertyLinkingBaseController {
 
   val addresses = Wiring().addresses
 
   def find(postcode: String) = Action.async { implicit request =>
-    addresses.find(postcode) map { x => Ok(Json.toJson(x)) }
+    PostcodeValidator.validateAndFormat(postcode) match {
+      case Some(s) => addresses.find(s).map(r => Ok(Json.toJson(r)))
+      case None => Future.successful(BadRequest)
+    }
   }
 
   def get(addressUnitId: Int) = Action.async { implicit request =>
