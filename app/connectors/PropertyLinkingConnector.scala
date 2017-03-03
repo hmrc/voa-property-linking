@@ -36,6 +36,11 @@ class PropertyLinkingConnector @Inject() (http: VOABackendWSHttp)(implicit ec: E
     http.POST[APIPropertyLinkRequest, HttpResponse](url, linkingRequest) map { _ => () }
   }
 
+  def setEnd(authorisationId:String, endRequest: APIPropertyLinkEndDateRequest)(implicit hc: HeaderCarrier): Future[Unit] = {
+    val url = baseUrl + s"/authorisation-management-api/authorisation/${authorisationId}"
+    http.PATCH[APIPropertyLinkEndDateRequest, HttpResponse](url, endRequest) map { _ => () }
+  }
+
   def find(organisationId: Long)(implicit hc: HeaderCarrier): Future[Seq[APIAuthorisation]] = {
     val url = baseUrl + s"/mdtp-dashboard-management-api/mdtp_dashboard/properties_view?listYear=$listYear&organisationId=$organisationId"
     val props = http.GET[JsValue](url).map(js =>{

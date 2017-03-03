@@ -40,6 +40,20 @@ class PropertyLinkingController @Inject() (
     }
   }
 
+  def setEnd() = Action.async(parse.json) { implicit request =>
+    withJsonBody[PropertyLinkEndDateRequest] { endRequest =>
+      NotImplemented
+      /*if(This user has permission to manage this property link) {*/
+      /*propertyLinksConnector.setEnd(endRequest.authorisationId, APIPropertyLinkEndDateRequest.fromPropertyLinkEndDateRequest(endRequest))
+        .map { _ => NoContent }
+        .recover { case _: Upstream5xxResponse => InternalServerError }
+      }
+      else {
+        Unauthorized
+      }  */
+    }
+  }
+
   private def getProperties(organisationId: Long)(implicit  hc: HeaderCarrier): Future[Seq[DetailedPropertyLink]] = {
     for {
       props <- propertyLinksConnector.find(organisationId)
