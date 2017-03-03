@@ -17,7 +17,7 @@
 package connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import config.Wiring
+import config.VOABackendWSHttp
 import play.api.http.ContentTypes
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -30,7 +30,8 @@ class PropertyLinkingConnectorSpec
   "PropertyLinkingConnector.find" should {
     "filter properties that are revoked, or declined" in {
       implicit val hc = HeaderCarrier()
-      val connector = new PropertyLinkingConnector(Wiring().http) {
+      val http = app.injector.instanceOf[VOABackendWSHttp]
+      val connector = new PropertyLinkingConnector(http) {
         override lazy val baseUrl: String = mockServerUrl
       }
       val organisationId = 123

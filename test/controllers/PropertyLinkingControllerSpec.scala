@@ -16,9 +16,9 @@
 
 package controllers
 
-import config.Wiring
-import connectors.{GroupAccountConnector, PropertyLinkingConnector, PropertyRepresentationConnector, WireMockSpec}
 import com.github.tomakehurst.wiremock.client.WireMock._
+import config.VOABackendWSHttp
+import connectors._
 import models._
 import org.joda.time.{DateTime, LocalDate}
 import play.api.http.ContentTypes
@@ -26,24 +26,29 @@ import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
+import scala.concurrent.ExecutionContext.Implicits.global
 
-class PropertyLinkingControllerSpec //extends ControllerSpec
+class PropertyLinkingControllerSpec
   extends ContentTypes
   with WireMockSpec{
 
   implicit val request = FakeRequest()
 
-  object TestPropertyLinkingController extends PropertyLinkingController {
-    override val propertyLinksConnector = new PropertyLinkingConnector(Wiring().http) {
-      override lazy val baseUrl: String = mockServerUrl
-    }
-    override val groupAccountsConnector: GroupAccountConnector = new GroupAccountConnector(Wiring().http) {
-      override lazy val baseUrl: String = mockServerUrl
-    }
-    override val representationsConnector = new PropertyRepresentationConnector(Wiring().http) {
-      override lazy val baseUrl: String = mockServerUrl
-    }
+  play.api.Play.start(app)
+  val http = app.injector.instanceOf[VOABackendWSHttp]
+  val propertyLinksConnector = new PropertyLinkingConnector(http) {
+    override lazy val baseUrl: String = mockServerUrl
   }
+  val addressesConnector = new AddressConnector(http)
+
+  val groupAccountsConnector: GroupAccountConnector = new GroupAccountConnector(addressesConnector, http) {
+    override lazy val baseUrl: String = mockServerUrl
+  }
+  val representationsConnector = new PropertyRepresentationConnector(http) {
+    override lazy val baseUrl: String = mockServerUrl
+  }
+  val testPropertyLinkingController  = new PropertyLinkingController(propertyLinksConnector, groupAccountsConnector, representationsConnector)
+
 
   "clientProperties" should {
     "only show the properties assigned to an agent" in {
@@ -100,7 +105,7 @@ class PropertyLinkingControllerSpec //extends ControllerSpec
           .withBody(Json.toJson(dummyAgentGroupAccount).toString)
         )
       )
-      val res = TestPropertyLinkingController.clientProperties(userOrgId, agentOrgId)(FakeRequest())
+      val res = testPropertyLinkingController.clientProperties(userOrgId, agentOrgId)(FakeRequest())
       status(res) shouldBe OK
       val uarns = Json.parse(contentAsString(res)).as[Seq[ClientProperties]].map(_.uarn)
        uarns shouldBe Seq(2, 4)
@@ -131,13 +136,13 @@ class PropertyLinkingControllerSpec //extends ControllerSpec
           .withBody(Json.toJson(APIPropertyRepresentations(0, Nil)).toString)
         )
       )
-      val res = TestPropertyLinkingController.find(userOrgId)(FakeRequest())
+      val res = testPropertyLinkingController.find(userOrgId)(FakeRequest())
       status(res) shouldBe OK
       val uarns = Json.parse(contentAsString(res)).as[Seq[DetailedPropertyLink]].map(_.uarn)
       uarns shouldBe Seq(101, 102)
     }
   }
-  "find2" should {
+  it should {
     "return the user's own properties, and the properties it is managing" in {
       val userAgentOrgId = 111
       val otherUserOrgId = 222
@@ -225,7 +230,7 @@ class PropertyLinkingControllerSpec //extends ControllerSpec
       )
 
 
-      val res = TestPropertyLinkingController.find(userAgentOrgId)(FakeRequest())
+      val res = testPropertyLinkingController.find(userAgentOrgId)(FakeRequest())
       status(res) shouldBe OK
       val uarns = Json.parse(contentAsString(res)).as[Seq[DetailedPropertyLink]].map(_.uarn)
       uarns.sorted shouldBe Seq(101, 102, 201, 202).sorted

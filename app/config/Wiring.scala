@@ -25,33 +25,19 @@ import uk.gov.hmrc.play.config.{AppName, RunMode, ServicesConfig}
 import uk.gov.hmrc.play.http.hooks.HttpHook
 import uk.gov.hmrc.play.http.ws._
 import uk.gov.hmrc.play.http._
+import javax.inject.Singleton
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Try
 
-object Wiring {
-  def apply() = play.api.Play.current.global.asInstanceOf[MicroserviceGlobal].wiring
-}
-
-abstract class Wiring {
-  val http: HttpGet with HttpPut with HttpDelete with HttpPost
-  val backendHttp: HttpGet with HttpPut with HttpDelete with HttpPost
-
-  implicit lazy val ec: ExecutionContext = play.api.libs.concurrent.Execution.Implicits.defaultContext
-  lazy val propertyRepresentationConnector = new PropertyRepresentationConnector(backendHttp)
-  lazy val propertyLinkingConnector = new PropertyLinkingConnector(backendHttp)
-  lazy val individualAccounts = new IndividualAccountConnector(backendHttp)
-  lazy val groupAccounts = new GroupAccountConnector(backendHttp)
-  lazy val addresses = new AddressConnector(backendHttp)
-  lazy val dvrCaseManagement = new DVRCaseManagementConnector(backendHttp)
-}
-
-object WSHttp extends WSGet with WSPut with WSPost with WSDelete with WSPatch with AppName {
+@Singleton
+class WSHttp extends WSGet with WSPut with WSPost with WSDelete with WSPatch with AppName {
   override val hooks: Seq[HttpHook] = NoneRequired
 }
 
-object VOABackendWSHttp extends WSHttp with ServicesConfig {
+@Singleton
+class VOABackendWSHttp extends WSHttp with ServicesConfig {
   override val hooks: Seq[HttpHook] = NoneRequired
 
   private def hasJsonBody(res: HttpResponse) = Try {

@@ -16,7 +16,9 @@
 
 package controllers
 
-import config.Wiring
+import javax.inject.Inject
+
+import connectors.AddressConnector
 import models.SimpleAddress
 import play.api.libs.json.Json
 import play.api.mvc.Action
@@ -24,9 +26,7 @@ import util.PostcodeValidator
 
 import scala.concurrent.Future
 
-object AddressLookup extends PropertyLinkingBaseController {
-
-  val addresses = Wiring().addresses
+class AddressLookup @Inject() (addresses: AddressConnector) extends PropertyLinkingBaseController {
 
   def find(postcode: String) = Action.async { implicit request =>
     PostcodeValidator.validateAndFormat(postcode) match {

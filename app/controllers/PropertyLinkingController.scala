@@ -16,7 +16,9 @@
 
 package controllers
 
-import config.Wiring
+import javax.inject.Inject
+
+import connectors.{GroupAccountConnector, PropertyLinkingConnector, PropertyRepresentationConnector}
 import models._
 import play.api.libs.json.Json
 import play.api.mvc.Action
@@ -24,10 +26,11 @@ import uk.gov.hmrc.play.http.{HeaderCarrier, Upstream5xxResponse}
 
 import scala.concurrent.Future
 
-trait PropertyLinkingController extends PropertyLinkingBaseController {
-  val propertyLinksConnector = Wiring().propertyLinkingConnector
-  val groupAccountsConnector = Wiring().groupAccounts
-  val representationsConnector = Wiring().propertyRepresentationConnector
+class PropertyLinkingController @Inject() (
+                                            propertyLinksConnector: PropertyLinkingConnector,
+                                            groupAccountsConnector: GroupAccountConnector,
+                                            representationsConnector: PropertyRepresentationConnector
+                                          ) extends PropertyLinkingBaseController {
 
   def create() = Action.async(parse.json) { implicit request =>
     withJsonBody[PropertyLinkRequest] { linkRequest =>
@@ -97,4 +100,3 @@ trait PropertyLinkingController extends PropertyLinkingBaseController {
   }
 }
 
-object PropertyLinkingController extends PropertyLinkingController
