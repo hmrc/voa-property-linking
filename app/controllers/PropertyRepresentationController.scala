@@ -16,15 +16,16 @@
 
 package controllers
 
-import config.Wiring
+import javax.inject.Inject
+
+import connectors.PropertyRepresentationConnector
 import models._
 import play.api.libs.json.{JsArray, Json}
 import play.api.mvc.Action
 
 import scala.concurrent.Future
 
-object PropertyRepresentationController extends PropertyLinkingBaseController {
-  val representations = Wiring().propertyRepresentationConnector
+class PropertyRepresentationController @Inject() (representations: PropertyRepresentationConnector) extends PropertyLinkingBaseController {
 
   def validateAgentCode(agentCode:Long, authorisationId: Long) = Action.async { implicit request =>
     representations.validateAgentCode(agentCode, authorisationId).map(

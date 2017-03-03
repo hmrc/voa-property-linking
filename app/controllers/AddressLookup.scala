@@ -16,14 +16,14 @@
 
 package controllers
 
-import config.Wiring
+import javax.inject.Inject
+
+import connectors.AddressConnector
 import models.SimpleAddress
 import play.api.libs.json.Json
 import play.api.mvc.Action
 
-object AddressLookup extends PropertyLinkingBaseController {
-
-  val addresses = Wiring().addresses
+class AddressLookup @Inject() (addresses: AddressConnector) extends PropertyLinkingBaseController {
 
   def find(postcode: String) = Action.async { implicit request =>
     addresses.find(postcode) map { x => Ok(Json.toJson(x)) }

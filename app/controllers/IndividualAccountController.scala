@@ -16,13 +16,14 @@
 
 package controllers
 
-import config.Wiring
+import javax.inject.Inject
+
+import connectors.IndividualAccountConnector
 import models.IndividualAccountWrite
 import play.api.libs.json.Json
 import play.api.mvc.Action
 
-object IndividualAccountController extends PropertyLinkingBaseController {
-  val individuals = Wiring().individualAccounts
+class IndividualAccountController @Inject() (individuals: IndividualAccountConnector) extends PropertyLinkingBaseController {
 
   def create() = Action.async(parse.json) { implicit request =>
     withJsonBody[IndividualAccountWrite] { acc =>

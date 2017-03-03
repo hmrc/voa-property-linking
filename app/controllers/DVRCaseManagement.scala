@@ -16,18 +16,20 @@
 
 package controllers
 
-import config.Wiring
+import javax.inject.Inject
+
+import connectors.DVRCaseManagementConnector
 import models.DetailedValuationRequest
 import play.api.mvc.Action
 
-trait DVRCaseManagement extends PropertyLinkingBaseController {
-  val dvrCaseManagement = Wiring().dvrCaseManagement
+class DVRCaseManagement @Inject() (dvrCaseManagement: DVRCaseManagementConnector)
+  extends PropertyLinkingBaseController {
 
   def requestDetailedValuation = Action.async(parse.json) { implicit request =>
     withJsonBody[DetailedValuationRequest] { dvr =>
       dvrCaseManagement.requestDetailedValuation(dvr) map { _ => Ok }
     }
   }
+
 }
 
-object DVRCaseManagement extends DVRCaseManagement

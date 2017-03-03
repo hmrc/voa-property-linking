@@ -16,6 +16,9 @@
 
 package connectors
 
+import javax.inject.Inject
+
+import config.VOABackendWSHttp
 import models.{APIAddressLookupResult, DetailedAddress, SimpleAddress}
 import play.api.Logger
 import play.api.libs.json.{JsArray, JsDefined, JsNumber, JsValue}
@@ -23,9 +26,9 @@ import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Success, Failure}
+import scala.util.{Failure, Success}
 
-class AddressConnector(http: HttpGet with HttpPost with HttpPut)(implicit ec: ExecutionContext) extends ServicesConfig {
+class AddressConnector @Inject() (http: VOABackendWSHttp)(implicit ec: ExecutionContext) extends ServicesConfig {
 
   val url = baseUrl("external-business-rates-data-platform") + "/address-management-api/address"
 

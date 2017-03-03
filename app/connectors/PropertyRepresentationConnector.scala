@@ -16,16 +16,17 @@
 
 package connectors
 
-import config.VOABackendWSHttp.InvalidAgentCode
+import javax.inject.Inject
+
+import config.VOABackendWSHttp
 import models._
-import play.api.libs.json.{JsNull, JsValue, Json}
-import play.api.libs.ws.WSClient
+import play.api.libs.json.JsValue
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class PropertyRepresentationConnector(http: HttpGet with HttpPut with HttpPost)(implicit ec: ExecutionContext)
+class PropertyRepresentationConnector @Inject()(http: VOABackendWSHttp)(implicit ec: ExecutionContext)
   extends ServicesConfig {
   lazy val baseUrl: String = baseUrl("external-business-rates-data-platform")
 

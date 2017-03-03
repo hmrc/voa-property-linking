@@ -16,17 +16,21 @@
 
 package connectors
 
-import config.Wiring
+import javax.inject.Inject
+
+import config.VOABackendWSHttp
 import models._
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet, HttpPost}
+import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class GroupAccountConnector(http: HttpGet with HttpPost)(implicit ec: ExecutionContext) extends ServicesConfig {
+class GroupAccountConnector@Inject()(
+                                       addresses: AddressConnector,
+                                       http: VOABackendWSHttp)(implicit ec: ExecutionContext)
+  extends ServicesConfig {
 
-  val addresses = Wiring().addresses
   lazy val baseUrl: String = baseUrl("external-business-rates-data-platform")
   lazy val url =  baseUrl + "/customer-management-api/organisation"
 

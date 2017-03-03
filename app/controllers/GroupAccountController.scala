@@ -16,13 +16,14 @@
 
 package controllers
 
-import config.Wiring
+import javax.inject.Inject
+
+import connectors.GroupAccountConnector
 import models.GroupAccountSubmission
 import play.api.libs.json.Json
 import play.api.mvc.Action
 
-object GroupAccountController extends PropertyLinkingBaseController {
-  val groups = Wiring().groupAccounts
+class GroupAccountController @Inject() (groups: GroupAccountConnector) extends PropertyLinkingBaseController {
 
   def get(organisationId: Int) = Action.async { implicit request =>
     groups.get(organisationId) map {

@@ -16,6 +16,7 @@
 
 package connectors
 
+import config.VOABackendWSHttp
 import models.DetailedValuationRequest
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpPost, HttpResponse}
@@ -23,7 +24,7 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 import scala.concurrent.Future
 
-class DVRCaseManagementConnector(http: HttpPost) extends ServicesConfig {
+class DVRCaseManagementConnector(http: VOABackendWSHttp) extends ServicesConfig {
   val url = baseUrl("external-business-rates-data-platform") + "/dvr-case-management-api"
 
   def requestDetailedValuation(request: DetailedValuationRequest)(implicit hc: HeaderCarrier): Future[Unit] = {

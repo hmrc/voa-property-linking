@@ -16,7 +16,9 @@
 
 package connectors
 
-import config.Wiring
+import javax.inject.Inject
+
+import config.VOABackendWSHttp
 import models._
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.play.config.ServicesConfig
@@ -24,11 +26,12 @@ import uk.gov.hmrc.play.http._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class IndividualAccountConnector(http: HttpGet with HttpPut with HttpPost)(implicit ec: ExecutionContext)
+class IndividualAccountConnector @Inject() (
+                                             addresses: AddressConnector,
+                                             http: VOABackendWSHttp)(implicit ec: ExecutionContext)
   extends ServicesConfig {
 
   lazy val baseUrl: String = baseUrl("external-business-rates-data-platform") + "/customer-management-api/person"
-  val addresses = Wiring().addresses
 
   def create(account: IndividualAccountWrite)(implicit hc: HeaderCarrier): Future[JsValue] = {
     account.details.address.addressUnitId match {

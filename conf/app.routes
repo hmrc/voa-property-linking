@@ -1,37 +1,37 @@
 # microservice specific routes
 
-GET         /property-representations/validate-agent-code/:agentCode/:authorisationId        controllers.PropertyRepresentationController.validateAgentCode(agentCode:Long, authorisationId: Long)
-GET         /property-representations/:representationId                                      controllers.PropertyRepresentationController.get(representationId)
-GET         /property-representations/agent/:status/:organisationId                          controllers.PropertyRepresentationController.forAgent(status: String, organisationId: Long)
+GET         /property-representations/validate-agent-code/:agentCode/:authorisationId        @controllers.PropertyRepresentationController.validateAgentCode(agentCode:Long, authorisationId: Long)
+GET         /property-representations/:representationId                                      @controllers.PropertyRepresentationController.get(representationId)
+GET         /property-representations/agent/:status/:organisationId                          @controllers.PropertyRepresentationController.forAgent(status: String, organisationId: Long)
 
-POST        /property-representations/create                                                 controllers.PropertyRepresentationController.create()
+POST        /property-representations/create                                                 @controllers.PropertyRepresentationController.create()
 
-PUT         /property-representations/update                                                 controllers.PropertyRepresentationController.update()
-PUT         /property-representations/response                                               controllers.PropertyRepresentationController.response()
+PUT         /property-representations/update                                                 @controllers.PropertyRepresentationController.update()
+PUT         /property-representations/response                                               @controllers.PropertyRepresentationController.response()
 
-POST        /property-links                                                                  controllers.PropertyLinkingController.create()
-GET         /property-links/:organisationId                                                  controllers.PropertyLinkingController.find(organisationId: Int)
-GET         /dashboard/assessments/:authorisationId                                          controllers.PropertyLinkingController.assessments(authorisationId: Long)
-GET         /property-links/client-properties/:userId/:agentId                               controllers.PropertyLinkingController.clientProperties(userId: Long, agentId: Long)
+POST        /property-links                                                                  @controllers.PropertyLinkingController.create()
+GET         /property-links/:organisationId                                                  @controllers.PropertyLinkingController.find(organisationId: Int)
+GET         /dashboard/assessments/:authorisationId                                          @controllers.PropertyLinkingController.assessments(authorisationId: Long)
+GET         /property-links/client-properties/:userId/:agentId                               @controllers.PropertyLinkingController.clientProperties(userId: Long, agentId: Long)
 
-GET         /individuals/:personId                                                           controllers.IndividualAccountController.get(personId: Int)
-POST        /individuals                                                                     controllers.IndividualAccountController.create()
+GET         /individuals/:personId                                                           @controllers.IndividualAccountController.get(personId: Int)
+POST        /individuals                                                                     @controllers.IndividualAccountController.create()
 
-GET         /groups/:organisationId                                                          controllers.GroupAccountController.get(organisationId: Int)
-GET         /groups                                                                          controllers.GroupAccountController.withGroupId(groupId)
-GET         /groups/agentCode/:agentCode                                                     controllers.GroupAccountController.withAgentCode(agentCode)
-POST        /groups                                                                          controllers.GroupAccountController.create()
+GET         /groups/:organisationId                                                          @controllers.GroupAccountController.get(organisationId: Int)
+GET         /groups                                                                          @controllers.GroupAccountController.withGroupId(groupId)
+GET         /groups/agentCode/:agentCode                                                     @controllers.GroupAccountController.withAgentCode(agentCode)
+POST        /groups                                                                          @controllers.GroupAccountController.create()
 
 PUT         /envelopes/:envId                                                                @controllers.EnvelopeController.create(envId: String)
 GET         /envelopes                                                                       @controllers.EnvelopeController.get()
 GET         /transfer                                                                        @controllers.FileTransferController.run()
 
-GET         /address                                                                         controllers.AddressLookup.find(postcode)
-GET         /address/:id                                                                     controllers.AddressLookup.get(id: Int)
-POST        /address                                                                         controllers.AddressLookup.create
+GET         /address                                                                         @controllers.AddressLookup.find(postcode)
+GET         /address/:id                                                                     @controllers.AddressLookup.get(id: Int)
+POST        /address                                                                         @controllers.AddressLookup.create
 
 POST        /betalogin                                                                       controllers.PrivateBetaLoginController.login
 
 GET         /submissionId/:prefix                                                            @controllers.SubmissionIdController.get(prefix: String)
 
-POST        /request-detailed-valuation                                                      controllers.DVRCaseManagement.requestDetailedValuation
+POST        /request-detailed-valuation                                                      @controllers.DVRCaseManagement.requestDetailedValuation

@@ -31,7 +31,6 @@ import uk.gov.hmrc.play.auth.controllers.AuthParamsControllerConfig
 import uk.gov.hmrc.play.auth.microservice.filters.AuthorisationFilter
 import uk.gov.hmrc.play.config.{AppName, ControllerConfig, RunMode}
 import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
-import uk.gov.hmrc.play.http.{HttpDelete, HttpGet, HttpPost, HttpPut}
 import uk.gov.hmrc.play.http.logging.filters.LoggingFilter
 import uk.gov.hmrc.play.microservice.bootstrap.DefaultMicroserviceGlobal
 
@@ -73,10 +72,6 @@ class MongoDbProvider @Inject() (reactiveMongoComponent: ReactiveMongoComponent)
 }
 
 object Global extends MicroserviceGlobal {
-  override val wiring: Wiring = new Wiring {
-    override val http = WSHttp
-    override val backendHttp =  VOABackendWSHttp
-  }
 
 }
 
@@ -91,5 +86,4 @@ trait MicroserviceGlobal extends DefaultMicroserviceGlobal with RunMode {
 
   override val authFilter = Some(MicroserviceAuthFilter)
 
-  val wiring: Wiring
 }
