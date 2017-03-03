@@ -17,7 +17,7 @@
 package controllers
 
 import config.Wiring
-import connectors.{GroupAccountConnector, PropertyLinkingConnector, WireMockSpec}
+import connectors.{GroupAccountConnector, PropertyLinkingConnector, PropertyRepresentationConnector, WireMockSpec}
 import com.github.tomakehurst.wiremock.client.WireMock._
 import models._
 import org.joda.time.{DateTime, LocalDate}
@@ -38,6 +38,9 @@ class PropertyLinkingControllerSpec //extends ControllerSpec
       override lazy val baseUrl: String = mockServerUrl
     }
     override val groupAccountsConnector: GroupAccountConnector = new GroupAccountConnector(Wiring().http) {
+      override lazy val baseUrl: String = mockServerUrl
+    }
+    override val representationsConnector = new PropertyRepresentationConnector(Wiring().http) {
       override lazy val baseUrl: String = mockServerUrl
     }
   }
@@ -101,9 +104,133 @@ class PropertyLinkingControllerSpec //extends ControllerSpec
       status(res) shouldBe OK
       val uarns = Json.parse(contentAsString(res)).as[Seq[ClientProperties]].map(_.uarn)
        uarns shouldBe Seq(2, 4)
-      println(uarns)
     }
   }
 
+  "find" should {
+    "only return the users properties if he is not an agent" in {
+      val userOrgId = 111
+
+      val dummyProperties = Seq (
+        APIAuthorisation(101, 101, userOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
+          Nil),
+        APIAuthorisation(102, 102, userOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
+          Nil)
+      )
+      stubFor(get(urlEqualTo(s"/mdtp-dashboard-management-api/mdtp_dashboard/properties_view?listYear=2017&organisationId=${userOrgId}"))
+        .willReturn(aResponse
+          .withStatus(200)
+          .withHeader("Content-Type", JSON)
+          .withBody(s"""{"authorisations": ${Json.toJson(dummyProperties).toString}}""")
+        )
+      )
+      stubFor(get(urlEqualTo(s"/mdtp-dashboard-management-api/mdtp_dashboard/agent_representation_requests?status=APPROVED&organisationId=$userOrgId&startPoint=1"))
+        .willReturn(aResponse
+          .withStatus(200)
+          .withHeader("Content-Type", JSON)
+          .withBody(Json.toJson(APIPropertyRepresentations(0, Nil)).toString)
+        )
+      )
+      val res = TestPropertyLinkingController.find(userOrgId)(FakeRequest())
+      status(res) shouldBe OK
+      val uarns = Json.parse(contentAsString(res)).as[Seq[DetailedPropertyLink]].map(_.uarn)
+      uarns shouldBe Seq(101, 102)
+    }
+  }
+  "find2" should {
+    "return the user's own properties, and the properties it is managing" in {
+      val userAgentOrgId = 111
+      val otherUserOrgId = 222
+      val anotherAgentOrgId = 333
+
+      val usersOwnProperties = Seq (
+        APIAuthorisation(1, 101, userAgentOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
+          Nil),
+        APIAuthorisation(2, 102, userAgentOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
+          Nil)
+        )
+
+      //userAgent is representing 2 properties from  otherUser
+      //otherUser has 3 properties
+      val otherUsersProperties = Seq (
+        //1 is managed by userAgentOnly,
+        APIAuthorisation(3, 201, otherUserOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
+          Seq(APIParty(userAgentOrgId, Nil))),
+        //1 is managed by both userAgent and anotherAgent
+        APIAuthorisation(4, 202, otherUserOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
+          Seq(APIParty(userAgentOrgId, Nil),APIParty(anotherAgentOrgId, Nil))),
+        //1 is not managed all all
+        APIAuthorisation(5, 203, otherUserOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
+          Nil)
+      )
+
+      val propertyRepresentations = APIPropertyRepresentations(
+        0,
+        Seq(
+          APIPropertyRepresentation(1, "", otherUserOrgId, "Client1Ltd", "", "", "", LocalDate.now(), "APPROVED"),
+          APIPropertyRepresentation(2, "", otherUserOrgId, "Client1Ltd", "", "", "", LocalDate.now(), "APPROVED")
+        )
+      )
+      val dummyUserGroupAccount = APIDetailedGroupAccount(
+        userAgentOrgId, "123", 1234, GroupDetails(1, true, true, "UserCompany", "aaa@aaa.com", None, LocalDate.now()), Nil
+      )
+      val dummyAgentGroupAccount = APIDetailedGroupAccount(
+        otherUserOrgId, "123", 1234, GroupDetails(1, true, true, "UserCompany", "aaa@aaa.com", None, LocalDate.now()), Nil
+      )
+      val dummyOtherAgentGroupAccount = APIDetailedGroupAccount(
+        anotherAgentOrgId, "123", 1234, GroupDetails(1, true, true, "UserCompany", "aaa@aaa.com", None, LocalDate.now()), Nil
+      )
+
+      stubFor(get(urlEqualTo(s"/customer-management-api/organisation?organisationId=${userAgentOrgId}"))
+        .willReturn(aResponse
+          .withStatus(200)
+          .withHeader("Content-Type", JSON)
+          .withBody(Json.toJson(dummyUserGroupAccount).toString)
+        )
+      )
+      stubFor(get(urlEqualTo(s"/customer-management-api/organisation?organisationId=${otherUserOrgId}"))
+        .willReturn(aResponse
+          .withStatus(200)
+          .withHeader("Content-Type", JSON)
+          .withBody(Json.toJson(dummyAgentGroupAccount).toString)
+        )
+      )
+      stubFor(get(urlEqualTo(s"/customer-management-api/organisation?organisationId=${otherUserOrgId}"))
+        .willReturn(aResponse
+          .withStatus(200)
+          .withHeader("Content-Type", JSON)
+          .withBody(Json.toJson(dummyOtherAgentGroupAccount).toString)
+        )
+      )
+      stubFor(get(urlEqualTo(s"/mdtp-dashboard-management-api/mdtp_dashboard/properties_view?listYear=2017&organisationId=${userAgentOrgId}"))
+        .willReturn(aResponse
+          .withStatus(200)
+          .withHeader("Content-Type", JSON)
+          .withBody(s"""{"authorisations": ${Json.toJson(usersOwnProperties).toString}}""")
+        )
+      )
+      stubFor(get(urlEqualTo(s"/mdtp-dashboard-management-api/mdtp_dashboard/properties_view?listYear=2017&organisationId=${otherUserOrgId}"))
+        .willReturn(aResponse
+          .withStatus(200)
+          .withHeader("Content-Type", JSON)
+          .withBody(s"""{"authorisations": ${Json.toJson(otherUsersProperties).toString}}""")
+        )
+      )
+      stubFor(get(urlEqualTo(s"/mdtp-dashboard-management-api/mdtp_dashboard/agent_representation_requests?status=APPROVED&organisationId=$userAgentOrgId&startPoint=1"))
+        .willReturn(aResponse
+          .withStatus(200)
+          .withHeader("Content-Type", JSON)
+          .withBody(Json.toJson(propertyRepresentations).toString)
+        )
+      )
+
+
+      val res = TestPropertyLinkingController.find(userAgentOrgId)(FakeRequest())
+      status(res) shouldBe OK
+      val uarns = Json.parse(contentAsString(res)).as[Seq[DetailedPropertyLink]].map(_.uarn)
+      uarns.sorted shouldBe Seq(101, 102, 201, 202).sorted
+
+    }
+  }
 
 }
