@@ -20,13 +20,14 @@ import config.Wiring
 import models._
 import play.api.libs.json.Json
 import play.api.mvc.Action
-import uk.gov.hmrc.play.http.Upstream5xxResponse
+import uk.gov.hmrc.play.http.{HeaderCarrier, Upstream5xxResponse}
 
 import scala.concurrent.Future
 
 trait PropertyLinkingController extends PropertyLinkingBaseController {
   val propertyLinksConnector = Wiring().propertyLinkingConnector
   val groupAccountsConnector = Wiring().groupAccounts
+  val representationsConnector = Wiring().propertyRepresentationConnector
 
   def create() = Action.async(parse.json) { implicit request =>
     withJsonBody[PropertyLinkRequest] { linkRequest =>
@@ -36,8 +37,8 @@ trait PropertyLinkingController extends PropertyLinkingBaseController {
     }
   }
 
-  def find(organisationId: Long) = Action.async { implicit request => {
-    (for {
+  private def getProperties(organisationId: Long)(implicit  hc: HeaderCarrier): Future[Seq[DetailedPropertyLink]] = {
+    for {
       props <- propertyLinksConnector.find(organisationId)
       res <- Future.traverse(props)(prop => {
         for {
@@ -47,11 +48,40 @@ trait PropertyLinkingController extends PropertyLinkingBaseController {
       })
     } yield {
       res
-    }).map(x => Ok(Json.toJson(x)))
-  }
+    }
   }
 
-  def clientProperties(userOrgId: Long, agentOrgId: Long) = Action.async {implicit request => {
+  private def getPropertiesWithAgent(organisationId: Long, agentOrgId: Long)(implicit  hc: HeaderCarrier): Future[Seq[DetailedPropertyLink]] = {
+    for {
+      props <- getProperties(organisationId)
+      filterProps = props
+        .map(p => p.copy(agents= p.agents.filter(_.organisationId == agentOrgId)))
+        .filter(_.agents.nonEmpty)
+    } yield {
+      filterProps
+    }
+  }
+
+  def find(organisationId: Long) = Action.async { implicit request =>
+    val eventualUserProps = getProperties(organisationId)
+    val eventualNominations = representationsConnector.forAgent("APPROVED", organisationId)
+
+    val allProps = for {
+      userProps <- eventualUserProps
+      nominations <- eventualNominations
+      clientOrgIds = nominations.propertyRepresentations.map({
+        _.organisationId
+      }).distinct
+      res <- Future.traverse(clientOrgIds) (userOrgId => getPropertiesWithAgent(userOrgId, organisationId))
+      managedProperties = res.flatten
+    } yield {
+      managedProperties ++  userProps
+    }
+
+    allProps.map(x => Ok(Json.toJson(x)))
+  }
+
+  def clientProperties(userOrgId: Long, agentOrgId: Long) = Action.async { implicit request => {
     (for {
       props <- propertyLinksConnector.find(userOrgId)
       filterProps = props.filter(_.parties.map(_.authorisedPartyOrganisationId).contains(agentOrgId))
