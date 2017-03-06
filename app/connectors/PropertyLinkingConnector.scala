@@ -59,6 +59,17 @@ class PropertyLinkingConnector @Inject() (http: VOABackendWSHttp)(implicit ec: E
     }))
   }
 
+  def find(organisationId: Long, uarn: Long)(implicit hc: HeaderCarrier): Future[Seq[APIAuthorisation]] = {
+    val url = baseUrl + s"/mdtp-dashboard-management-api/mdtp_dashboard/properties_view?listYear=$listYear&organisationId=$organisationId&uarn=$uarn"
+    http.GET[JsValue](url).map(js =>{
+      (js \ "authorisations").as[Seq[APIAuthorisation]]
+    }).map( _
+      .filterNot(_.authorisationStatus.toUpperCase == "REVOKED")
+      .filterNot(_.authorisationStatus.toUpperCase == "DECLINED")
+    )
+  }
+
+
   def getAssessment(authorisationId: Long)(implicit hc: HeaderCarrier): Future[Seq[Assessment]] = {
     val url = baseUrl + s"/mdtp-dashboard-management-api/mdtp_dashboard/view_assessment?listYear=$listYear&authorisationId=$authorisationId"
     http.GET[APIAuthorisation](url).map(pLink => {

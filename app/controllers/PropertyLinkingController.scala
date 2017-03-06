@@ -101,6 +101,10 @@ class PropertyLinkingController @Inject() (
     allProps.map(x => Ok(Json.toJson(x)))
   }
 
+ def findFor(organisationId: Long, uarn:Long) = Action.async { implicit request => {
+    propertyLinksConnector.find(organisationId, uarn).map(x => Ok(Json.toJson(x)))
+  }}
+
   def clientProperties(userOrgId: Long, agentOrgId: Long) = Action.async { implicit request => {
     (for {
       props <- propertyLinksConnector.find(userOrgId)
