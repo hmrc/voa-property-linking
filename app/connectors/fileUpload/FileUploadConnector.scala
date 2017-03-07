@@ -19,6 +19,7 @@ package connectors.fileUpload
 import javax.inject.Inject
 
 import com.google.inject.{ImplementedBy, Singleton}
+import config.WSHttp
 import connectors.HandleErrors
 import play.api.Logger
 import play.api.libs.functional.syntax._
@@ -85,7 +86,7 @@ trait FileUpload {
 }
 
 @Singleton
-class FileUploadConnector @Inject()(ws: WSClient, http:HttpGet with HttpDelete)(implicit ec: ExecutionContext) extends FileUpload with ServicesConfig with HandleErrors {
+class FileUploadConnector @Inject()(ws: WSClient, http:WSHttp)(implicit ec: ExecutionContext) extends FileUpload with ServicesConfig with HandleErrors {
   lazy val url = baseUrl("file-upload-backend")
 
   override def getEnvelopeDetails(envelopeId: String)(implicit hc: HeaderCarrier): Future[EnvelopeInfo] = {
