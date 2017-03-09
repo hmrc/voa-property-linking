@@ -38,4 +38,11 @@ class IndividualAccountController @Inject() (individuals: IndividualAccountConne
     }
   }
 
+  def withExternalId(externalId: String) = Action.async { implicit request =>
+    individuals.findByGGID(externalId) map {
+      case Some(x) => Ok(Json.toJson(x))
+      case None => NotFound
+    }
+  }
+
 }

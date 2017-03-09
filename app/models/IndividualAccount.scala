@@ -25,11 +25,7 @@ object IndividualDetails {
   implicit val formats = Json.format[IndividualDetails]
 }
 
-case class IndividualAccount(externalId: String, trustId: String, organisationId: Int, individualId: Int, details: IndividualDetails) {
-  def toAPIIndividualAccount(addressId: Int) = {
-    APIIndividualAccount(trustId, details.firstName, details.lastName, organisationId, addressId, details.phone1, details.phone2, details.email, externalId, LocalDate.now)
-  }
-}
+case class IndividualAccount(externalId: String, trustId: String, organisationId: Int, individualId: Int, details: IndividualDetails)
 
 object IndividualAccount {
   implicit val formats = Json.format[IndividualAccount]

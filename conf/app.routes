@@ -15,6 +15,7 @@ GET         /dashboard/assessments/:authorisationId                             
 GET         /property-links/client-properties/:userId/:agentId                               @controllers.PropertyLinkingController.clientProperties(userId: Long, agentId: Long)
 
 GET         /individuals/:personId                                                           @controllers.IndividualAccountController.get(personId: Int)
+GET         /individuals                                                                     @controllers.IndividualAccountController.withExternalId(externalId)
 POST        /individuals                                                                     @controllers.IndividualAccountController.create()
 
 GET         /groups/:organisationId                                                          @controllers.GroupAccountController.get(organisationId: Int)
