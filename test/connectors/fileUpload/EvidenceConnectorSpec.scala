@@ -16,13 +16,12 @@
 
 package connectors.fileUpload
 
-import connectors.{EvidenceConnector, WireMockSpec}
-import play.api.libs.ws.ahc.AhcWSClient
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import uk.gov.hmrc.play.http.HeaderCarrier
 import com.github.tomakehurst.wiremock.client.WireMock._
 import config.ApplicationConfig
+import connectors.{EvidenceConnector, WireMockSpec}
+import play.api.libs.ws.ahc.AhcWSClient
 import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
+import uk.gov.hmrc.play.http.HeaderCarrier
 
 class EvidenceConnectorSpec extends WireMockSpec with MicroserviceFilterSupport {
 
@@ -34,14 +33,17 @@ class EvidenceConnectorSpec extends WireMockSpec with MicroserviceFilterSupport 
 
       implicit val fakeHc = HeaderCarrier()
       val file = getClass.getResource("/document.pdf").getFile
+      val metadata = EnvelopeMetadata("aSubmissionId", 12345)
 
       stubFor(put(urlEqualTo("/customer-management-api/customer/evidence"))
         .withHeader("Ocp-Apim-Subscription-Key", matching(ApplicationConfig.apiConfigSubscriptionKeyHeader))
         .withHeader("Ocp-Apim-Trace", matching(ApplicationConfig.apiConfigTraceHeader))
         .withRequestBody(containing(file))
+        .withRequestBody(containing("aSubmissionId"))
+        .withRequestBody(containing("12345"))
         .willReturn(aResponse().withStatus(200)))
 
-      noException should be thrownBy await(connector.uploadFile("SubmissionId-ExternalId-FileName", Some(file.getBytes)))
+      noException should be thrownBy await(connector.uploadFile("FileName", Some(file.getBytes), metadata))
     }
   }
 }

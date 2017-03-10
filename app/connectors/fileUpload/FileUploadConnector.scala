@@ -23,7 +23,7 @@ import config.WSHttp
 import connectors.HandleErrors
 import play.api.Logger
 import play.api.libs.functional.syntax._
-import play.api.libs.json.{JsPath, Json, Reads}
+import play.api.libs.json._
 import play.api.libs.ws.WSClient
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
@@ -31,12 +31,19 @@ import uk.gov.hmrc.play.http._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
+case class EnvelopeMetadata(submissionId: String, personId: Long)
+
+object EnvelopeMetadata {
+  implicit val format: Format[EnvelopeMetadata] = Json.format[EnvelopeMetadata]
+}
+
 case class EnvelopeInfo(
                          id: String,
                          status: String,
                          destination: String,
                          application: String,
-                         files: Seq[FileInfo]
+                         files: Seq[FileInfo],
+                         metadata: EnvelopeMetadata
                        )
 
 case class FileInfo(
@@ -54,18 +61,13 @@ object FileInfo {
 
 object EnvelopeInfo {
   implicit lazy val envelopeInfo: Reads[EnvelopeInfo] = (
-    (JsPath \ "id").read[String] and
-      (JsPath \ "status").read[String] and
-      (JsPath \ "destination").read[String] and
-      (JsPath \ "application").read[String] and
-      (JsPath \ "files").readNullable[Seq[FileInfo]].map(x => x.getOrElse(Nil))
+    (__ \ "id").read[String] and
+      (__ \ "status").read[String] and
+      (__ \ "destination").read[String] and
+      (__ \ "application").read[String] and
+      (__ \ "files").readNullable[Seq[FileInfo]].map(x => x.getOrElse(Nil)) and
+      (__ \ "metadata").read[EnvelopeMetadata]
     ) (EnvelopeInfo.apply _)
-}
-
-case class NewEnvelope(envelopeId: String)
-
-object NewEnvelope {
-  implicit lazy val newEnvelope = Json.format[NewEnvelope]
 }
 
 case class RoutingRequest(envelopeId: String, application: String = "application/json", destination: String = "VOA_CCA")
@@ -86,12 +88,12 @@ trait FileUpload {
 }
 
 @Singleton
-class FileUploadConnector @Inject()(ws: WSClient, http:WSHttp)(implicit ec: ExecutionContext) extends FileUpload with ServicesConfig with HandleErrors {
+class FileUploadConnector @Inject()(ws: WSClient, http: WSHttp)(implicit ec: ExecutionContext) extends FileUpload with ServicesConfig with HandleErrors {
   lazy val url = baseUrl("file-upload-backend")
 
   override def getEnvelopeDetails(envelopeId: String)(implicit hc: HeaderCarrier): Future[EnvelopeInfo] = {
     http.GET[EnvelopeInfo](s"$url/file-upload/envelopes/$envelopeId")
-      .recover { case _ => EnvelopeInfo(envelopeId, "NOT_EXISTING", "VOA_CCA", "", Nil) }
+      .recover { case _ => EnvelopeInfo(envelopeId, "NOT_EXISTING", "VOA_CCA", "", Nil, EnvelopeMetadata("nosubmissionid", 0)) }
   }
 
   override def getFilesInEnvelope(envelopeId: String)(implicit hc: HeaderCarrier): Future[Seq[String]] = {
