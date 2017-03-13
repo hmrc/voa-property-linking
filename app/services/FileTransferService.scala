@@ -19,7 +19,7 @@ package services
 import javax.inject.Inject
 
 import connectors.EvidenceConnector
-import connectors.fileUpload.{EnvelopeInfo, FileUploadConnector}
+import connectors.fileUpload.{EnvelopeInfo, EnvelopeMetadata, FileInfo, FileUploadConnector}
 import play.api.Logger
 import play.modules.reactivemongo.MongoDbConnection
 import repositories.EnvelopeIdRepository
@@ -35,21 +35,23 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
 
   implicit val ec: ExecutionContext = play.api.libs.concurrent.Execution.Implicits.defaultContext
 
-  def justDoIt()(implicit hc: HeaderCarrier) = {
+  def justDoIt()(implicit hc: HeaderCarrier): Future[Unit] = {
     val envelopeIds = repo.get()
     envelopeIds.foreach(envId => Logger.info(s"Envelope Id: $envId found in mongo"))
 
     val envelopeAndFiles = envelopeIds.map(_.map(envId => fileUploadConnector.getEnvelopeDetails(envId)))
       .flatMap(x => Future.sequence(x))
 
-    envelopeAndFiles.map(_.foreach(envInfo => envInfo.status match {
-      case "CLOSED" if envInfo.files.isEmpty => removeEnvelopes(envInfo)
-      case "CLOSED" => processClosedNotEmptyEnvelope(envInfo)
-      case "NOT_EXISTING" => repo.remove(envInfo.id)
-      case _ if !envInfo.files.map(_.status).contains("QUARANTINED") => processNotYetClosedEnvelopes(envInfo)
-      case _ => Future.successful(()) //Some files haven't been virus checked yet.
-    })
-    )
+    envelopeAndFiles.flatMap { es => Future.sequence {
+        es.map(envInfo => envInfo.status match {
+          case "CLOSED" if envInfo.files.isEmpty => Future.successful(removeEnvelopes(envInfo))
+          case "CLOSED" => processClosedNotEmptyEnvelope(envInfo)
+          case "NOT_EXISTING" => Future.successful(repo.remove(envInfo.id))
+          case _ if !envInfo.files.map(_.status).contains("QUARANTINED") => processNotYetClosedEnvelopes(envInfo)
+          case _ => Future.successful(()) //Some files haven't been virus checked yet.
+        })
+      }
+    } map { _ => () }
   }
 
   private def removeEnvelopes(envInfo: EnvelopeInfo)(implicit hc: HeaderCarrier) = {
@@ -60,16 +62,17 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
   private def processClosedNotEmptyEnvelope(envelopeInfo: EnvelopeInfo)(implicit hc: HeaderCarrier) = {
     val fileInfos = envelopeInfo.files
     Future.sequence(fileInfos.map(fileInfo => {
-      transferFile(fileInfo.href, fileInfo.name, fileInfo.status)
+      transferFile(fileInfo, envelopeInfo.metadata)
     }))
       .map(_ => removeEnvelopes(envelopeInfo))
   }
 
-  def transferFile(url: String, fileName: String, status: String)(implicit hc: HeaderCarrier): Future[Unit] = {
-    fileUploadConnector.downloadFile(url).flatMap(content => {
-      Logger.info(s"Downloaded file $fileName")
-      evidenceConnector.uploadFile(fileName, if (content.isEmpty) None else Some(content))
-    })
+  def transferFile(fileInfo: FileInfo, metadata: EnvelopeMetadata)(implicit hc: HeaderCarrier): Future[Unit] = {
+    for {
+      file <- fileUploadConnector.downloadFile(fileInfo.href)
+      _ = Logger.info(s"Downloaded file ${fileInfo.name}")
+      _ <- evidenceConnector.uploadFile(fileInfo.name, if (file.isEmpty) None else Some(file), metadata)
+    } yield ()
   }
 
   private def processNotYetClosedEnvelopes(envelopeInfo: EnvelopeInfo)(implicit hc: HeaderCarrier) = {
@@ -77,9 +80,9 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
     Future.sequence(envelopeInfo.files.map(fileInfo => {
       fileInfo.status match {
         case "ERROR" =>
-          evidenceConnector.uploadFile(fileInfo.name, None)
-        case _ => transferFile(fileInfo.href, fileInfo.name, "pass")
+          evidenceConnector.uploadFile(fileInfo.name, None, envelopeInfo.metadata)
+        case _ => transferFile(fileInfo, envelopeInfo.metadata)
       }
-    })).map(_ => fileUploadConnector.deleteEnvelope(envId)).map(_ => repo.remove(envId))
+    })).map(_ => removeEnvelopes(envelopeInfo))
   }
 }

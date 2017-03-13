@@ -26,6 +26,7 @@ class EnvelopeInfoTest extends FlatSpec with MustMatchers {
     envelope.status mustBe "OPEN"
     envelope.files.map(_.id) mustBe Seq("index.jpeg", "index2.jpeg")
   }
+
   "EnvelopeInfo.files" should "be optional" in {
     val envelope = Json.parse(DummyData.envelopeWithNoFiles).as[EnvelopeInfo]
     envelope.status mustBe "OPEN"
@@ -59,8 +60,11 @@ class EnvelopeInfoTest extends FlatSpec with MustMatchers {
         |      "metadata": {},
         |      "href": "/file-upload/envelopes/8d227d24-4330-49b1-b405-145196a975b9/files/index2.jpeg/content"
         |    }
-        |
-        |  ]
+        |  ],
+        |  "metadata": {
+        |     "submissionId": "aSubmissionId",
+        |     "personId": 12345
+        |  }
         |}
       """.stripMargin
     val envelopeWithNoFiles =
@@ -68,7 +72,11 @@ class EnvelopeInfoTest extends FlatSpec with MustMatchers {
         |  "id": "8d227d24-4330-49b1-b405-145196a975b9",
         |  "status": "OPEN",
         |  "destination": "VOA_CCA",
-        |  "application": "application/json"
+        |  "application": "application/json",
+        |  "metadata": {
+        |     "submissionId": "aSubmissionId",
+        |     "personId": 12345
+        |  }
         |}
       """.stripMargin
     val envelopesData = """
