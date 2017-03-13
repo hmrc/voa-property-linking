@@ -40,8 +40,6 @@ object EnvelopeMetadata {
 case class EnvelopeInfo(
                          id: String,
                          status: String,
-                         destination: String,
-                         application: String,
                          files: Seq[FileInfo],
                          metadata: EnvelopeMetadata
                        )
@@ -63,8 +61,6 @@ object EnvelopeInfo {
   implicit lazy val envelopeInfo: Reads[EnvelopeInfo] = (
     (__ \ "id").read[String] and
       (__ \ "status").read[String] and
-      (__ \ "destination").read[String] and
-      (__ \ "application").read[String] and
       (__ \ "files").readNullable[Seq[FileInfo]].map(x => x.getOrElse(Nil)) and
       (__ \ "metadata").read[EnvelopeMetadata]
     ) (EnvelopeInfo.apply _)
@@ -93,7 +89,7 @@ class FileUploadConnector @Inject()(ws: WSClient, http: WSHttp)(implicit ec: Exe
 
   override def getEnvelopeDetails(envelopeId: String)(implicit hc: HeaderCarrier): Future[EnvelopeInfo] = {
     http.GET[EnvelopeInfo](s"$url/file-upload/envelopes/$envelopeId")
-      .recover { case _ => EnvelopeInfo(envelopeId, "NOT_EXISTING", "VOA_CCA", "", Nil, EnvelopeMetadata("nosubmissionid", 0)) }
+      .recover { case _ => EnvelopeInfo(envelopeId, "NOT_EXISTING", Nil, EnvelopeMetadata("nosubmissionid", 0)) }
   }
 
   override def getFilesInEnvelope(envelopeId: String)(implicit hc: HeaderCarrier): Future[Seq[String]] = {
