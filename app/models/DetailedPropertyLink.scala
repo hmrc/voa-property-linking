@@ -34,14 +34,14 @@ case class DetailedPropertyLink(authorisationId: Long,
 object DetailedPropertyLink {
   implicit val formats = Json.format[DetailedPropertyLink]
 
-  def fromAPIAuthorisation(prop: APIAuthorisation, agentAccounts: Seq[GroupAccount]) = {
+  def fromAPIAuthorisation(prop: APIAuthorisation, parties: Seq[Party]) = {
     val capacityDeclaration = CapacityDeclaration(prop.authorisationOwnerCapacity, prop.startDate, prop.endDate)
     DetailedPropertyLink(prop.authorisationId, prop.uarn, prop.authorisationOwnerOrganisationId,
       prop.NDRListValuationHistoryItems.headOption.map(_.address).getOrElse("No address found"),
       capacityDeclaration, prop.createDatetime,
       prop.authorisationStatus != "APPROVED",
       prop.NDRListValuationHistoryItems.map(x => Assessment.fromAPIValuationHistory(x, prop.authorisationId, capacityDeclaration)),
-      agentAccounts.map(x=> Party(x.agentCode, x.companyName, x.id))
+      parties
     )
   }
 }

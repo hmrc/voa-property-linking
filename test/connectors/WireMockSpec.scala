@@ -18,8 +18,10 @@ package connectors
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.client.WireMock._
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import org.scalatestplus.play.OneAppPerSuite
+import play.api.libs.json.Json
 import uk.gov.hmrc.play.it.Port
 import uk.gov.hmrc.play.test.UnitSpec
 
@@ -36,6 +38,7 @@ trait WireMockSpec extends UnitSpec with OneAppPerSuite with BeforeAndAfterAll w
   }
 
   override def beforeEach() = {
+    wireMockServer.resetAll()
     WireMock.reset()
   }
 

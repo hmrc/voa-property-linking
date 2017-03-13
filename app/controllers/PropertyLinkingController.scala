@@ -45,9 +45,12 @@ class PropertyLinkingController @Inject() (
       props <- propertyLinksConnector.find(organisationId)
       res <- Future.traverse(props)(prop => {
         for {
-          optionalGroupAccounts <- Future.traverse(prop.parties)(party => groupAccountsConnector.get(party.authorisedPartyOrganisationId))
-          groupAccounts = optionalGroupAccounts.flatten
-        } yield DetailedPropertyLink.fromAPIAuthorisation(prop, groupAccounts)
+          optionalGroupAccounts <- Future.traverse(prop.parties)(party => {
+            groupAccountsConnector.get(party.authorisedPartyOrganisationId).map(_.map(groupAccount => (party, groupAccount)))
+          })
+          apiPartiesWithGroupAccounts = optionalGroupAccounts.flatten
+          parties = apiPartiesWithGroupAccounts.map {case (p: APIParty, g: GroupAccount) => Party.fromAPIParty(p,g)}.flatten
+        } yield DetailedPropertyLink.fromAPIAuthorisation(prop, parties)
       })
     } yield {
       res

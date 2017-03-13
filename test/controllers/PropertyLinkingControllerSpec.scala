@@ -17,6 +17,7 @@
 package controllers
 
 import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.admin.AdminTask._
 import config.VOABackendWSHttp
 import connectors._
 import models._
@@ -62,15 +63,15 @@ class PropertyLinkingControllerSpec
           Nil),
         //prop with agent
         APIAuthorisation(100, 2, userOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
-          Seq(APIParty(agentOrgId, Seq(Permissions("CONTINUE_ONLY", "CONTINUE_ONLY"))))),
+          Seq(APIParty(1, "APPROVED", agentOrgId, Seq(Permissions(1, "CONTINUE_ONLY", "CONTINUE_ONLY", None))))),
         //prop with OtherAgent
         APIAuthorisation(100, 3, userOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
-          Seq(APIParty(otherAgentOrgId, Seq(Permissions("CONTINUE_ONLY", "CONTINUE_ONLY"))))),
+          Seq(APIParty(2, "APPROVED", otherAgentOrgId, Seq(Permissions(2, "CONTINUE_ONLY", "CONTINUE_ONLY", None))))),
         //prop with agent and OtherAgent
         APIAuthorisation(100, 4, userOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
           Seq(
-            APIParty(otherAgentOrgId, Seq(Permissions("CONTINUE_ONLY", "CONTINUE_ONLY"))),
-            APIParty(agentOrgId, Seq(Permissions("CONTINUE_ONLY", "CONTINUE_ONLY")))
+            APIParty(3, "APPROVED", otherAgentOrgId, Seq(Permissions(3, "CONTINUE_ONLY", "CONTINUE_ONLY", None))),
+            APIParty(4, "APPROVED", agentOrgId, Seq(Permissions(4, "CONTINUE_ONLY", "CONTINUE_ONLY", None)))
           )
         )
       )
@@ -98,13 +99,14 @@ class PropertyLinkingControllerSpec
           .withBody(Json.toJson(dummyUserGroupAccount).toString)
         )
       )
-      stubFor(get(urlEqualTo(s"/customer-management-api/organisation?organisationId=${agentOrgId}"))
+      stubFor(get(urlEqualTo(s"/customer-management-api/organisation?organisationId=${otherAgentOrgId}"))
         .willReturn(aResponse
           .withStatus(200)
           .withHeader("Content-Type", JSON)
           .withBody(Json.toJson(dummyAgentGroupAccount).toString)
         )
       )
+
       val res = testPropertyLinkingController.clientProperties(userOrgId, agentOrgId)(FakeRequest())
       status(res) shouldBe OK
       val uarns = Json.parse(contentAsString(res)).as[Seq[ClientProperties]].map(_.uarn)
@@ -160,10 +162,15 @@ class PropertyLinkingControllerSpec
       val otherUsersProperties = Seq (
         //1 is managed by userAgentOnly,
         APIAuthorisation(3, 201, otherUserOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
-          Seq(APIParty(userAgentOrgId, Nil))),
+          Seq(APIParty(1, "APPROVED", userAgentOrgId, Seq(Permissions(1L, "START_AND_CONTINUE", "START_AND_CONTINUE", None)))
+          )
+        ),
         //1 is managed by both userAgent and anotherAgent
         APIAuthorisation(4, 202, otherUserOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
-          Seq(APIParty(userAgentOrgId, Nil),APIParty(anotherAgentOrgId, Nil))),
+          Seq(APIParty(2, "APPROVED", userAgentOrgId, Seq(Permissions(2L, "START_AND_CONTINUE", "START_AND_CONTINUE", None))),
+            APIParty(3, "APPROVED", anotherAgentOrgId, Seq(Permissions(3L, "START_AND_CONTINUE", "START_AND_CONTINUE", None)))
+          )
+        ),
         //1 is not managed all all
         APIAuthorisation(5, 203, otherUserOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
           Nil)
@@ -200,7 +207,7 @@ class PropertyLinkingControllerSpec
           .withBody(Json.toJson(dummyAgentGroupAccount).toString)
         )
       )
-      stubFor(get(urlEqualTo(s"/customer-management-api/organisation?organisationId=${otherUserOrgId}"))
+      stubFor(get(urlEqualTo(s"/customer-management-api/organisation?organisationId=${anotherAgentOrgId}"))
         .willReturn(aResponse
           .withStatus(200)
           .withHeader("Content-Type", JSON)
