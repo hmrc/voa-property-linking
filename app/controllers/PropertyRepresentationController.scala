@@ -65,4 +65,8 @@ class PropertyRepresentationController @Inject() (representations: PropertyRepre
     }
   }
 
+  def revoke(permissionId: Long) = Action.async { implicit request =>
+    representations.revoke(permissionId)  map { _ => Ok("") }
+  }
+
 }

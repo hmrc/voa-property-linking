@@ -20,7 +20,8 @@ import javax.inject.Inject
 
 import config.VOABackendWSHttp
 import models._
-import play.api.libs.json.JsValue
+import org.joda.time.LocalDate
+import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
 
@@ -80,6 +81,11 @@ class PropertyRepresentationConnector @Inject()(http: VOABackendWSHttp)(implicit
   def update(reprRequest: UpdatedRepresentation)(implicit hc: HeaderCarrier): Future[Unit] = {
     val url = baseUrl  + "/property-representations"+ s"/update"
     http.PUT[UpdatedRepresentation, HttpResponse](url, reprRequest) map { _ => () }
+  }
+
+  def revoke(permissionId: Long)(implicit hc: HeaderCarrier): Future[Unit] = {
+    val url = baseUrl  + s"/authorisation-management-api/permission/$permissionId"
+    http.PATCH(url, Json.obj("endDate"-> s"${LocalDate.now.toString}")) map{ _ => () }
   }
 
 }

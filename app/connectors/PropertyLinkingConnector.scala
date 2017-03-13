@@ -38,12 +38,20 @@ class PropertyLinkingConnector @Inject() (http: VOABackendWSHttp)(implicit ec: E
 
   def find(organisationId: Long)(implicit hc: HeaderCarrier): Future[Seq[APIAuthorisation]] = {
     val url = baseUrl + s"/mdtp-dashboard-management-api/mdtp_dashboard/properties_view?listYear=$listYear&organisationId=$organisationId"
-    http.GET[JsValue](url).map(js =>{
+    val props = http.GET[JsValue](url).map(js =>{
       (js \ "authorisations").as[Seq[APIAuthorisation]]
     }).map( _
         .filterNot(_.authorisationStatus.toUpperCase == "REVOKED")
         .filterNot(_.authorisationStatus.toUpperCase == "DECLINED")
       )
+    props.map(_.map(x=> {
+      x.copy(parties = {
+        x.parties
+          .filter(party => List("APPROVED", "PENDING").contains(party.authorisedPartyStatus)) //parties must be approved or pending
+          .map(party => party.copy(permissions =  party.permissions.filterNot(_.endDate.isDefined))) //permissions can't have enddate
+          .filter(_.permissions.nonEmpty) //and agent must have a permission
+      })
+    }))
   }
 
   def getAssessment(authorisationId: Long)(implicit hc: HeaderCarrier): Future[Seq[Assessment]] = {

@@ -18,10 +18,24 @@ package models
 
 import play.api.libs.json.Json
 
-case class Party (agentCode: Long,
+case class Party (
+
+                  agentCode: Long,
                   organisationName: String,
-                  organisationId: Long)
+                  organisationId: Long,
+                  permissionId: Long,
+                  checkPermission: String,
+                  challengePermission: String
+                 )
 
 object Party {
   implicit val format = Json.format[Party]
+  def fromAPIParty(party: APIParty, agentDetails: GroupAccount) = {
+    party.permissions.headOption.map(permissions => {
+      Party(agentDetails.agentCode, agentDetails.companyName, agentDetails.id,
+        permissions.id, permissions.checkPermission,
+        permissions.challengePermission
+      )
+    })
+  }
 }
