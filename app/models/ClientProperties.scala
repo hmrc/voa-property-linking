@@ -19,9 +19,11 @@ package models
 import play.api.libs.json.Json
 
 case class ClientProperties (
-                              clientOrganisationName: String,
+                              ownerOrganisationId: Long,
+                              ownerOrganisationName: String,
                               uarn: Long,
                               billingAuthorityReference: String,
+                              permissionId: Long,
                               checkPermission: String,
                               challengePermission: String,
                               address: String
@@ -31,9 +33,11 @@ object ClientProperties {
 
   def build(prop: APIAuthorisation, userAccount: Option[GroupAccount]) = {
     ClientProperties(
+      prop.authorisationOwnerOrganisationId,
       userAccount.map(_.companyName).getOrElse("Name not found"),
       prop.uarn,
       prop.NDRListValuationHistoryItems.headOption.map(_.billingAuthorityReference).getOrElse("BARef not found"),
+      prop.parties.head.permissions.head.id,
       prop.parties.head.permissions.head.checkPermission,
       prop.parties.head.permissions.head.challengePermission,
       prop.NDRListValuationHistoryItems.headOption.map(_.address).getOrElse("Address not found")

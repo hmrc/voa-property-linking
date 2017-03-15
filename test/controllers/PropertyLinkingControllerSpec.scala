@@ -52,7 +52,7 @@ class PropertyLinkingControllerSpec
 
 
   "clientProperties" should {
-    "only show the properties assigned to an agent" in {
+    "only show the properties and permissions for that an agent" in {
       val userOrgId = 111
       val agentOrgId = 222
       val otherAgentOrgId = 333
@@ -70,8 +70,8 @@ class PropertyLinkingControllerSpec
         //prop with agent and OtherAgent
         APIAuthorisation(100, 4, userOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
           Seq(
-            APIParty(3, "APPROVED", otherAgentOrgId, Seq(Permissions(3, "CONTINUE_ONLY", "CONTINUE_ONLY", None))),
-            APIParty(4, "APPROVED", agentOrgId, Seq(Permissions(4, "CONTINUE_ONLY", "CONTINUE_ONLY", None)))
+            APIParty(3, "APPROVED", otherAgentOrgId, Seq(Permissions(3, "START_AND_CONTINUE", "CONTINUE_ONLY", None))),
+            APIParty(4, "APPROVED", agentOrgId, Seq(Permissions(4, "CONTINUE_ONLY", "NOT_PERMITTED", None)))
           )
         )
       )
@@ -109,8 +109,8 @@ class PropertyLinkingControllerSpec
 
       val res = testPropertyLinkingController.clientProperties(userOrgId, agentOrgId)(FakeRequest())
       status(res) shouldBe OK
-      val uarns = Json.parse(contentAsString(res)).as[Seq[ClientProperties]].map(_.uarn)
-       uarns shouldBe Seq(2, 4)
+      val uarnsAndPermIds = Json.parse(contentAsString(res)).as[Seq[ClientProperties]].map(x => (x.uarn, x.permissionId))
+       uarnsAndPermIds shouldBe Seq((2, 1), (4, 4))
     }
   }
 
