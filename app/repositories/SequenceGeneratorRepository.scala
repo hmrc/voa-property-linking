@@ -81,7 +81,7 @@ class SequenceGeneratorMongoRepository @Inject() (db: DB) extends
 
   private def findLatestSequence(key: String): Future[Option[Sequence]] =
     collection
-      .find(Json.obj())
+      .find(Json.obj("_id" -> key))
       .sort(Json.obj("_id" -> -1))
       .one[Sequence]
 }
