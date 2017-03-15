@@ -90,10 +90,11 @@ class PropertyLinkingController @Inject() (
   def clientProperties(userOrgId: Long, agentOrgId: Long) = Action.async { implicit request => {
     (for {
       props <- propertyLinksConnector.find(userOrgId)
-      filterProps = props.filter(_.parties.map(_.authorisedPartyOrganisationId).contains(agentOrgId))
+      filteredProps = props.filter(_.parties.map(_.authorisedPartyOrganisationId).contains(agentOrgId))
+      filteredPropsAgents = filteredProps.map(prop => prop.copy(parties = prop.parties.filter(_.authorisedPartyOrganisationId == agentOrgId)))
       userAccount <- groupAccountsConnector.get(props.head.authorisationOwnerOrganisationId)
     } yield {
-      filterProps.map(x => ClientProperties.build(x, userAccount))
+      filteredPropsAgents.map(x => ClientProperties.build(x, userAccount))
     }).map(x => Ok(Json.toJson(x)))
   }
   }
