@@ -34,31 +34,18 @@ class IndividualAccountConnector @Inject() (
   lazy val baseUrl: String = baseUrl("external-business-rates-data-platform") + "/customer-management-api/person"
 
   def create(account: IndividualAccountWrite)(implicit hc: HeaderCarrier): Future[JsValue] = {
-    account.details.address.addressUnitId match {
-      case Some(id) => http.POST[APIIndividualAccount, JsValue](baseUrl, account.toAPIIndividualAccount(id))
-      case None => addresses.create(account.details.address) flatMap { id =>
-        http.POST[APIIndividualAccount, JsValue](baseUrl, account.toAPIIndividualAccount(id))
-      }
-    }
+    http.POST[APIIndividualAccount, JsValue](baseUrl, account.toAPIIndividualAccount)
   }
 
   def get(id: Int)(implicit hc: HeaderCarrier): Future[Option[IndividualAccount]] = {
-    http.GET[Option[APIDetailedIndividualAccount]](s"$baseUrl?personId=$id") flatMap {
-      case Some(a) => addresses.get(a.personLatestDetail.addressUnitId) map {
-        case Some(address) => Some(a.toIndividualAccount(address.simplify))
-        case None => Some(a.toIndividualAccount(SimpleAddress(None, "", "", "", "", "")))
-      }
-      case None => Future.successful(None)
+    http.GET[Option[APIDetailedIndividualAccount]](s"$baseUrl?personId=$id") map {
+      _.map(a => a.toIndividualAccount)
     }
   }
 
   def findByGGID(ggId: String)(implicit hc: HeaderCarrier): Future[Option[IndividualAccount]] = {
-    http.GET[Option[APIDetailedIndividualAccount]](s"$baseUrl?governmentGatewayExternalId=$ggId") flatMap {
-      case Some(a) => addresses.get(a.personLatestDetail.addressUnitId) map {
-        case Some(address) => Some(a.toIndividualAccount(address.simplify))
-        case None => None
-      }
-      case None => Future.successful(None)
+    http.GET[Option[APIDetailedIndividualAccount]](s"$baseUrl?governmentGatewayExternalId=$ggId") map {
+      _.map(_.toIndividualAccount)
     }
   }
 

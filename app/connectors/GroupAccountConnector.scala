@@ -35,41 +35,18 @@ class GroupAccountConnector@Inject()(
   lazy val url =  baseUrl + "/customer-management-api/organisation"
 
   def create(account: GroupAccountSubmission)(implicit hc: HeaderCarrier): Future[JsValue] = {
-    account.address.addressUnitId match {
-      case Some(id) => http.POST[APIGroupAccount, JsValue](url, account.toApiAccount(id))
-      case None => addresses.create(account.address) flatMap { id =>
-        http.POST[APIGroupAccount, JsValue](url, account.toApiAccount(id))
-      }
-    }
+    http.POST[APIGroupAccount, JsValue](url, account.toApiAccount)
   }
 
   def get(id: Long)(implicit hc: HeaderCarrier): Future[Option[GroupAccount]] = {
-    http.GET[Option[APIDetailedGroupAccount]](s"$url?organisationId=$id") flatMap {
-      case Some(a) => addresses.get(a.organisationLatestDetail.addressUnitId) map {
-        case Some(address) => Some(a.toGroupAccount(address.simplify))
-        case None => Some(a.toGroupAccount(SimpleAddress(None, "", "", "", "", "")))
-      }
-      case None => Future.successful(None)
-    }
+    http.GET[Option[APIDetailedGroupAccount]](s"$url?organisationId=$id") map { _.map { _.toGroupAccount } }
   }
 
   def findByGGID(ggId: String)(implicit hc: HeaderCarrier): Future[Option[GroupAccount]] = {
-    http.GET[Option[APIDetailedGroupAccount]](s"$url?governmentGatewayGroupId=$ggId") flatMap {
-      case Some(a) => addresses.get(a.organisationLatestDetail.addressUnitId) map {
-        case Some(address) => Some(a.toGroupAccount(address.simplify))
-        case None => None
-      }
-      case None => Future.successful(None)
-    }
+    http.GET[Option[APIDetailedGroupAccount]](s"$url?governmentGatewayGroupId=$ggId") map { _.map { _.toGroupAccount } }
   }
 
   def withAgentCode(agentCode: String)(implicit hc: HeaderCarrier): Future[Option[GroupAccount]] = {
-    http.GET[Option[APIDetailedGroupAccount]](s"$url?representativeCode=$agentCode") flatMap {
-      case Some(a) => addresses.get(a.organisationLatestDetail.addressUnitId) map {
-        case Some(address) => Some(a.toGroupAccount(address.simplify))
-        case None => None
-      }
-      case None => Future.successful(None)
-    }
+    http.GET[Option[APIDetailedGroupAccount]](s"$url?representativeCode=$agentCode") map { _.map { _.toGroupAccount } }
   }
 }
