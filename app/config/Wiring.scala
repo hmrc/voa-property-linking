@@ -16,7 +16,7 @@
 
 package config
 
-import java.net.URI
+import java.net.{URI, URLEncoder}
 import javax.inject.{Inject, Singleton}
 
 import com.kenshoo.play.metrics.Metrics
@@ -57,7 +57,7 @@ class VOABackendWSHttp @Inject()(override val metrics: Metrics) extends WSHttp w
     }
 
   def getPath(url: String): String = {
-    val path = new URI(url).getPath.drop(1)
+    val path = new URI(URLEncoder.encode(url, "UTF-8")).getPath.drop(1)
     path.substring(0, path.indexOf("/"))
   }
 
