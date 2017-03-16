@@ -19,7 +19,7 @@ package models
 import org.joda.time.LocalDate
 import play.api.libs.json.Json
 
-case class IndividualDetails(firstName: String, lastName: String, email: String, phone1: String, phone2: Option[String], address: SimpleAddress)
+case class IndividualDetails(firstName: String, lastName: String, email: String, phone1: String, phone2: Option[String], addressId: Int)
 
 object IndividualDetails {
   implicit val formats = Json.format[IndividualDetails]
@@ -32,8 +32,8 @@ object IndividualAccount {
 }
 
 case class IndividualAccountWrite(externalId: String, trustId: String, organisationId: Int, details: IndividualDetails) {
-  def toAPIIndividualAccount(addressId: Int) = {
-    APIIndividualAccount(trustId, details.firstName, details.lastName, organisationId, addressId, details.phone1, details.phone2, details.email, externalId, LocalDate.now)
+  def toAPIIndividualAccount = {
+    APIIndividualAccount(trustId, details.firstName, details.lastName, organisationId, details.addressId, details.phone1, details.phone2, details.email, externalId, LocalDate.now)
   }
 }
 object IndividualAccountWrite {

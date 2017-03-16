@@ -22,10 +22,10 @@ import play.api.libs.json._
 case class APIDetailedIndividualAccount(id: Int, governmentGatewayExternalId: String, personLatestDetail: APIIndividualDetails,
                                         organisationId: Int, organisationLatestDetail: GroupDetails) {
 
-  def toIndividualAccount(address: SimpleAddress) = {
+  def toIndividualAccount = {
     IndividualAccount(governmentGatewayExternalId, personLatestDetail.identifyVerificationId, organisationId, id,
       IndividualDetails(personLatestDetail.firstName, personLatestDetail.lastName, personLatestDetail.emailAddress,
-        personLatestDetail.telephoneNumber.getOrElse("not set"), personLatestDetail.mobileNumber, address)
+        personLatestDetail.telephoneNumber.getOrElse("not set"), personLatestDetail.mobileNumber, personLatestDetail.addressUnitId)
     )
   }
 }
