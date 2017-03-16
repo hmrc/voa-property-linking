@@ -94,7 +94,7 @@ class PropertyLinkingController @Inject() (
       filteredPropsAgents = filteredProps.map(prop => prop.copy(parties = prop.parties.filter(_.authorisedPartyOrganisationId == agentOrgId)))
       userAccount <- groupAccountsConnector.get(props.head.authorisationOwnerOrganisationId)
     } yield {
-      filteredPropsAgents.map(x => ClientProperties.build(x, userAccount))
+      filteredPropsAgents.map(x => ClientProperty.build(x, userAccount))
     }).map(x => Ok(Json.toJson(x)))
   }
   }

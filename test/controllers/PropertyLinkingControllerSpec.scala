@@ -109,7 +109,7 @@ class PropertyLinkingControllerSpec
 
       val res = testPropertyLinkingController.clientProperties(userOrgId, agentOrgId)(FakeRequest())
       status(res) shouldBe OK
-      val uarnsAndPermIds = Json.parse(contentAsString(res)).as[Seq[ClientProperties]].map(x => (x.uarn, x.permissionId))
+      val uarnsAndPermIds = Json.parse(contentAsString(res)).as[Seq[ClientProperty]].map(x => (x.uarn, x.permissionId))
        uarnsAndPermIds shouldBe Seq((2, 1), (4, 4))
     }
   }

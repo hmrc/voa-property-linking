@@ -83,9 +83,11 @@ class PropertyRepresentationConnector @Inject()(http: VOABackendWSHttp)(implicit
     http.PUT[UpdatedRepresentation, HttpResponse](url, reprRequest) map { _ => () }
   }
 
-  def revoke(permissionId: Long)(implicit hc: HeaderCarrier): Future[Unit] = {
-    val url = baseUrl  + s"/authorisation-management-api/permission/$permissionId"
-    http.PATCH(url, Json.obj("endDate"-> s"${LocalDate.now.toString}")) map{ _ => () }
+  def revoke(authorisedPartyId: Long)(implicit hc: HeaderCarrier): Future[Unit] = {
+    val url = baseUrl  + s"/authorisation-management-api/authorisedParty/$authorisedPartyId"
+    http.PATCH(url,
+      Json.obj("endDate"-> s"${LocalDate.now.toString}",
+               "authorisedPartyStatus"-> "REVOKED")) map{ _ => () }
   }
 
 }

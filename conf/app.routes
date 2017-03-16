@@ -7,7 +7,7 @@ GET         /property-representations/agent/:status/:organisationId             
 POST        /property-representations/create                                                 @controllers.PropertyRepresentationController.create()
 
 PUT         /property-representations/update                                                 @controllers.PropertyRepresentationController.update()
-PATCH       /property-representations/revoke/:permissionId                                   @controllers.PropertyRepresentationController.revoke(permissionId: Long)
+PATCH       /property-representations/revoke/:authorisedPartyId                              @controllers.PropertyRepresentationController.revoke(authorisedPartyId: Long)
 PUT         /property-representations/response                                               @controllers.PropertyRepresentationController.response()
 
 POST        /property-links                                                                  @controllers.PropertyLinkingController.create()
