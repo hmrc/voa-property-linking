@@ -18,25 +18,27 @@ package models
 
 import play.api.libs.json.Json
 
-case class ClientProperties (
+case class ClientProperty(
                               ownerOrganisationId: Long,
                               ownerOrganisationName: String,
                               uarn: Long,
                               billingAuthorityReference: String,
+                              authorisedPartyId: Long,
                               permissionId: Long,
                               checkPermission: String,
                               challengePermission: String,
                               address: String
                             )
-object ClientProperties {
-  implicit val format = Json.format[ClientProperties]
+object ClientProperty {
+  implicit val format = Json.format[ClientProperty]
 
   def build(prop: APIAuthorisation, userAccount: Option[GroupAccount]) = {
-    ClientProperties(
+    ClientProperty(
       prop.authorisationOwnerOrganisationId,
       userAccount.map(_.companyName).getOrElse("Name not found"),
       prop.uarn,
       prop.NDRListValuationHistoryItems.headOption.map(_.billingAuthorityReference).getOrElse("BARef not found"),
+      prop.parties.head.id,
       prop.parties.head.permissions.head.id,
       prop.parties.head.permissions.head.checkPermission,
       prop.parties.head.permissions.head.challengePermission,
