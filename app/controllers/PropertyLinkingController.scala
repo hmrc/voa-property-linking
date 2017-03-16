@@ -49,7 +49,7 @@ class PropertyLinkingController @Inject() (
             groupAccountsConnector.get(party.authorisedPartyOrganisationId).map(_.map(groupAccount => (party, groupAccount)))
           })
           apiPartiesWithGroupAccounts = optionalGroupAccounts.flatten
-          parties = apiPartiesWithGroupAccounts.map {case (p: APIParty, g: GroupAccount) => Party.fromAPIParty(p,g)}.flatten
+          parties = apiPartiesWithGroupAccounts.flatMap { case (p: APIParty, g: GroupAccount) => Party.fromAPIParty(p, g) }
         } yield DetailedPropertyLink.fromAPIAuthorisation(prop, parties)
       })
     } yield {
