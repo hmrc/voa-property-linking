@@ -35,6 +35,10 @@ class PropertyLinkingControllerSpec
 
   implicit val request = FakeRequest()
 
+  val userAgentOrgId = 111
+  val otherUserOrgId = 222
+  val anotherAgentOrgId = 333
+
   play.api.Play.start(app)
   val http = app.injector.instanceOf[VOABackendWSHttp]
   val propertyLinksConnector = new PropertyLinkingConnector(http) {
@@ -54,8 +58,8 @@ class PropertyLinkingControllerSpec
   "clientProperties" should {
     "only show the properties and permissions for that an agent" in {
       val userOrgId = 111
-      val agentOrgId = 222
-      val otherAgentOrgId = 333
+      val otherAgentOrgId = 222
+      val agentOrgId = 333
 
       val dummyProperties = Seq (
         //prop with noAgents
@@ -144,12 +148,10 @@ class PropertyLinkingControllerSpec
       uarns shouldBe Seq(101, 102)
     }
   }
+
   it should {
     "return the user's own properties, and the properties it is managing" in {
-      val userAgentOrgId = 111
-      val otherUserOrgId = 222
-      val anotherAgentOrgId = 333
-
+      
       val usersOwnProperties = Seq (
         APIAuthorisation(1, 101, userAgentOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
           Nil),
@@ -242,6 +244,118 @@ class PropertyLinkingControllerSpec
       val uarns = Json.parse(contentAsString(res)).as[Seq[DetailedPropertyLink]].map(_.uarn)
       uarns.sorted shouldBe Seq(101, 102, 201, 202).sorted
 
+    }
+  }
+
+  "findFor" should {
+    "show return the property links for just the organisation and uarn" in {
+      val userOrgId = 111
+      val agentOrgId = 222
+      val otherAgentOrgId = 333
+
+      val dummyProperties = Seq (
+        //prop with noAgents
+        APIAuthorisation(100, 1, userOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
+          Nil),
+        //prop with agent
+        APIAuthorisation(100, 2, userOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
+          Seq(APIParty(1, "APPROVED", agentOrgId, Seq(Permissions(1, "CONTINUE_ONLY", "CONTINUE_ONLY", None))))),
+        //prop with OtherAgent
+        APIAuthorisation(100, 3, userOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
+          Seq(APIParty(2, "APPROVED", otherAgentOrgId, Seq(Permissions(2, "CONTINUE_ONLY", "CONTINUE_ONLY", None))))),
+        //prop with agent and OtherAgent
+        APIAuthorisation(100, 4, userOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
+          Seq(
+            APIParty(3, "APPROVED", otherAgentOrgId, Seq(Permissions(3, "START_AND_CONTINUE", "CONTINUE_ONLY", None))),
+            APIParty(4, "APPROVED", agentOrgId, Seq(Permissions(4, "CONTINUE_ONLY", "NOT_PERMITTED", None)))
+          )
+        )
+      )
+      val dummyAgentGroupAccount = APIDetailedGroupAccount(
+        agentOrgId, "123", 1234, GroupDetails(1, true, true, "UserCompany", "aaa@aaa.com", None, LocalDate.now()), Nil
+      )
+      val dummyOtherAgentGroupAccount = APIDetailedGroupAccount(
+        anotherAgentOrgId, "123", 1234, GroupDetails(2, true, true, "UserCompany", "aaa@aaa.com", None, LocalDate.now()), Nil
+      )
+
+      stubFor(get(urlEqualTo("/authorisation-management-api/authorisation?startPoint=1&pageSize=100&searchParameters=%7B%22organisationId%22%3A111%2C%22uarn%22%3A4%7D"))
+        .willReturn(aResponse
+          .withStatus(200)
+          .withHeader("Content-Type", JSON)
+          .withBody(s"""{"authorisations": ${Json.toJson(Seq(dummyProperties.last)).toString}}""")
+        )
+      )
+      stubFor(get(urlEqualTo(s"/customer-management-api/organisation?organisationId=${otherAgentOrgId}"))
+        .willReturn(aResponse
+          .withStatus(200)
+          .withHeader("Content-Type", JSON)
+          .withBody(Json.toJson(dummyOtherAgentGroupAccount).toString)
+        )
+      )
+      stubFor(get(urlEqualTo(s"/customer-management-api/organisation?organisationId=$agentOrgId}"))
+        .willReturn(aResponse
+          .withStatus(200)
+          .withHeader("Content-Type", JSON)
+          .withBody(Json.toJson(dummyAgentGroupAccount).toString)
+        )
+      )
+
+      val res = testPropertyLinkingController.findFor(userOrgId, dummyProperties.last.uarn)(FakeRequest())
+      status(res) shouldBe OK
+      val string = contentAsString(res)
+      val link = Json.parse(contentAsString(res)).as[Seq[DetailedPropertyLink]].map(_.uarn)
+      link shouldBe Seq(dummyProperties.last.uarn)
+    }
+  }
+
+  "get" should {
+    "show return the property link for given id" in {
+
+      val userOrgId = 111
+      val agentOrgId = 222
+      val otherAgentOrgId = 333
+
+      val dummyProperties = Seq (
+        //prop with noAgents
+        APIAuthorisation(100, 1, userOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
+          Nil),
+        //prop with agent
+        APIAuthorisation(101, 2, userOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
+          Seq(APIParty(1, "APPROVED", agentOrgId, Seq(Permissions(1, "CONTINUE_ONLY", "CONTINUE_ONLY", None))))),
+        //prop with OtherAgent
+        APIAuthorisation(102, 3, userOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
+          Seq(APIParty(2, "APPROVED", otherAgentOrgId, Seq(Permissions(2, "CONTINUE_ONLY", "CONTINUE_ONLY", None))))),
+        //prop with agent and OtherAgent
+        APIAuthorisation(103, 4, userOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
+          Seq(
+            APIParty(3, "APPROVED", otherAgentOrgId, Seq(Permissions(3, "START_AND_CONTINUE", "CONTINUE_ONLY", None))),
+            APIParty(4, "APPROVED", agentOrgId, Seq(Permissions(4, "CONTINUE_ONLY", "NOT_PERMITTED", None)))
+          )
+        )
+      )
+      val dummyOtherAgentGroupAccount = APIDetailedGroupAccount(
+        anotherAgentOrgId, "123", 1234, GroupDetails(1, true, true, "UserCompany", "aaa@aaa.com", None, LocalDate.now()), Nil
+      )
+
+      stubFor(get(urlEqualTo(s"/authorisation-management-api/authorisation/102"))
+        .willReturn(aResponse
+          .withStatus(200)
+          .withHeader("Content-Type", JSON)
+          .withBody(Json.toJson(dummyProperties.filter(_.authorisationId==102).head).toString)
+        )
+      )
+      stubFor(get(urlEqualTo(s"/customer-management-api/organisation?organisationId=${otherAgentOrgId}"))
+        .willReturn(aResponse
+          .withStatus(200)
+          .withHeader("Content-Type", JSON)
+          .withBody(Json.toJson(dummyOtherAgentGroupAccount).toString)
+        )
+      )
+
+      val res = testPropertyLinkingController.get(102)(FakeRequest())
+      status(res) shouldBe OK
+      val link = Json.parse(contentAsString(res)).as[DetailedPropertyLink]
+      link.authorisationId should be(102)
     }
   }
 

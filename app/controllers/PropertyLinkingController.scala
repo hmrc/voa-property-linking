@@ -32,6 +32,16 @@ class PropertyLinkingController @Inject() (
                                             representationsConnector: PropertyRepresentationConnector
                                           ) extends PropertyLinkingBaseController {
 
+
+  def get(authorisationId: Long) = Action.async { implicit request => {
+      for {
+        apiLink <- propertyLinksConnector.get(authorisationId)
+        partyGroupAccountsOptions <- Future.traverse(apiLink.parties)(party => groupAccountsConnector.get(party.authorisedPartyOrganisationId).flatMap(org => (party, org)))
+      } yield Ok(Json.toJson(DetailedPropertyLink.fromAPIAuthorisation(apiLink, partyGroupAccountsOptions.map(partyGroupAccount =>
+        partyGroupAccount._2.map(Party.fromAPIParty(partyGroupAccount._1, _)).flatMap(identity)).flatten)))
+    }
+  }
+
   def create() = Action.async(parse.json) { implicit request =>
     withJsonBody[PropertyLinkRequest] { linkRequest =>
       propertyLinksConnector.create(APIPropertyLinkRequest.fromPropertyLinkRequest(linkRequest))
@@ -40,17 +50,11 @@ class PropertyLinkingController @Inject() (
     }
   }
 
-  def setEnd() = Action.async(parse.json) { implicit request =>
+  def setEnd(authorisationId: Long) = Action.async(parse.json) { implicit request =>
     withJsonBody[PropertyLinkEndDateRequest] { endRequest =>
-      NotImplemented
-      /*if(This user has permission to manage this property link) {*/
-      /*propertyLinksConnector.setEnd(endRequest.authorisationId, APIPropertyLinkEndDateRequest.fromPropertyLinkEndDateRequest(endRequest))
-        .map { _ => NoContent }
-        .recover { case _: Upstream5xxResponse => InternalServerError }
+      propertyLinksConnector.setEnd(authorisationId, APIPropertyLinkEndDateRequest.fromPropertyLinkEndDateRequest(endRequest)) map { _ =>
+        Ok
       }
-      else {
-        Unauthorized
-      }  */
     }
   }
 
@@ -71,7 +75,7 @@ class PropertyLinkingController @Inject() (
     }
   }
 
-  private def getPropertiesWithAgent(organisationId: Long, agentOrgId: Long)(implicit  hc: HeaderCarrier): Future[Seq[DetailedPropertyLink]] = {
+  def getPropertiesWithAgent(organisationId: Long, agentOrgId: Long)(implicit  hc: HeaderCarrier): Future[Seq[DetailedPropertyLink]] = {
     for {
       props <- getProperties(organisationId)
       filterProps = props
@@ -101,8 +105,8 @@ class PropertyLinkingController @Inject() (
     allProps.map(x => Ok(Json.toJson(x)))
   }
 
- def findFor(organisationId: Long, uarn:Long) = Action.async { implicit request => {
-    propertyLinksConnector.find(organisationId, uarn).map(x => Ok(Json.toJson(x)))
+  def findFor(organisationId: Long, uarn:Long) = Action.async { implicit request => {
+    propertyLinksConnector.findFor(organisationId, uarn).map(x => Ok(Json.toJson(x)))
   }}
 
   def clientProperties(userOrgId: Long, agentOrgId: Long) = Action.async { implicit request => {

@@ -16,11 +16,12 @@
 
 package connectors
 
+import java.net.URLEncoder
 import javax.inject.Inject
 
 import config.VOABackendWSHttp
 import models._
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
 
@@ -31,12 +32,20 @@ class PropertyLinkingConnector @Inject() (http: VOABackendWSHttp)(implicit ec: E
   lazy val baseUrl: String = baseUrl("external-business-rates-data-platform")
   val listYear = 2017
 
+  private def liveAuthorisation(a: APIAuthorisation) = !Seq("REVOKED", "DECLINED").contains(a.authorisationStatus.toUpperCase)
+
+
+  def get(authorisationId: Long)(implicit hc: HeaderCarrier): Future[APIAuthorisation] = {
+    val url = s"$baseUrl/authorisation-management-api/authorisation/$authorisationId"
+    http.GET[APIAuthorisation](url)
+  }
+
   def create(linkingRequest: APIPropertyLinkRequest)(implicit hc: HeaderCarrier): Future[Unit] = {
     val url = baseUrl + s"/property-management-api/property/save_property_link"
     http.POST[APIPropertyLinkRequest, HttpResponse](url, linkingRequest) map { _ => () }
   }
 
-  def setEnd(authorisationId:String, endRequest: APIPropertyLinkEndDateRequest)(implicit hc: HeaderCarrier): Future[Unit] = {
+  def setEnd(authorisationId: Long, endRequest: APIPropertyLinkEndDateRequest)(implicit hc: HeaderCarrier): Future[Unit] = {
     val url = baseUrl + s"/authorisation-management-api/authorisation/${authorisationId}"
     http.PATCH[APIPropertyLinkEndDateRequest, HttpResponse](url, endRequest) map { _ => () }
   }
@@ -45,10 +54,8 @@ class PropertyLinkingConnector @Inject() (http: VOABackendWSHttp)(implicit ec: E
     val url = baseUrl + s"/mdtp-dashboard-management-api/mdtp_dashboard/properties_view?listYear=$listYear&organisationId=$organisationId"
     val props = http.GET[JsValue](url).map(js =>{
       (js \ "authorisations").as[Seq[APIAuthorisation]]
-    }).map( _
-        .filterNot(_.authorisationStatus.toUpperCase == "REVOKED")
-        .filterNot(_.authorisationStatus.toUpperCase == "DECLINED")
-      )
+    }).map(_.filter(liveAuthorisation(_))
+    )
     props.map(_.map(x=> {
       x.copy(parties = {
         x.parties
@@ -59,13 +66,12 @@ class PropertyLinkingConnector @Inject() (http: VOABackendWSHttp)(implicit ec: E
     }))
   }
 
-  def find(organisationId: Long, uarn: Long)(implicit hc: HeaderCarrier): Future[Seq[APIAuthorisation]] = {
-    val url = baseUrl + s"/mdtp-dashboard-management-api/mdtp_dashboard/properties_view?listYear=$listYear&organisationId=$organisationId&uarn=$uarn"
-    http.GET[JsValue](url).map(js =>{
+  def findFor(organisationId: Long, uarn: Long)(implicit hc: HeaderCarrier): Future[Seq[APIAuthorisation]] = {
+    val searchParameters = new APIAuthorisationQuery(organisationId, uarn)
+    val url = baseUrl + s"/authorisation-management-api/authorisation?startPoint=1&pageSize=100&searchParameters=${URLEncoder.encode(Json.toJson(searchParameters).toString, "UTF-8")}"
+    http.GET[JsValue](url).map(js => {
       (js \ "authorisations").as[Seq[APIAuthorisation]]
-    }).map( _
-      .filterNot(_.authorisationStatus.toUpperCase == "REVOKED")
-      .filterNot(_.authorisationStatus.toUpperCase == "DECLINED")
+    }).map(_.filter(liveAuthorisation(_))
     )
   }
 
