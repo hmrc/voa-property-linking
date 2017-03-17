@@ -57,9 +57,6 @@ class PropertyLinkingControllerSpec
 
   "clientProperties" should {
     "only show the properties and permissions for that an agent" in {
-      val userOrgId = 111
-      val otherAgentOrgId = 222
-      val agentOrgId = 333
 
       val dummyProperties = Seq (
         //prop with noAgents
