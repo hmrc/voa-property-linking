@@ -35,8 +35,11 @@ class PropertyLinkingControllerSpec
 
   implicit val request = FakeRequest()
 
+  val userOrgId = 100
   val userAgentOrgId = 111
   val otherUserOrgId = 222
+  val agentOrgId = 202
+  val otherAgentOrgId = 200
   val anotherAgentOrgId = 333
 
   play.api.Play.start(app)
@@ -292,8 +295,15 @@ class PropertyLinkingControllerSpec
       stubFor(get(urlEqualTo(s"/customer-management-api/organisation?organisationId=$agentOrgId}"))
         .willReturn(aResponse
           .withStatus(200)
-          .withHeader("Content-Type", JSON)
+          .withHead c
           .withBody(Json.toJson(dummyAgentGroupAccount).toString)
+        )
+      )
+      stubFor(get(urlEqualTo(s"/mdtp-dashboard-management-api/mdtp_dashboard/agent_representation_requests?status=APPROVED&organisationId=$userOrgId&startPoint=1"))
+        .willReturn(aResponse
+          .withStatus(200)
+          .withHeader("Content-Type", JSON)
+          .withBody(Json.toJson(APIPropertyRepresentations(0, Nil)).toString)
         )
       )
 
@@ -307,10 +317,6 @@ class PropertyLinkingControllerSpec
 
   "get" should {
     "show return the property link for given id" in {
-
-      val userOrgId = 111
-      val agentOrgId = 222
-      val otherAgentOrgId = 333
 
       val dummyProperties = Seq (
         //prop with noAgents
