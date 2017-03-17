@@ -14,31 +14,40 @@
  * limitations under the License.
  */
 
-package models
+package uk.gov.voa.businessrates.dataplatform.stub.models
 
-import org.joda.time.{DateTime, LocalDate}
-import play.api.libs.functional.syntax._
-import play.api.libs.json._
+import java.time.LocalDate
 
-case class APIAuthorisation(
-                             authorisationId: Long,
-                             uarn: Long,
-                             authorisationOwnerOrganisationId: Int,
-                             authorisationStatus: String,
-                             authorisationMethod: String,
-                             authorisationOwnerCapacity: String,
-                             createDatetime: DateTime,
-                             startDate: LocalDate,
-                             endDate: Option[LocalDate],
-                             submissionId: String,
-                             NDRListValuationHistoryItems: Seq[APIValuationHistory],
-                             parties: Seq[APIParty]
+import models.{APIParty, APIUploadedFile, PropertyLink}
+import org.joda.time.DateTime
+import play.api.libs.json.{Format, Json, Reads, Writes}
+
+case class APIAuthorisation(id: Option[Long],
+                            uarn: Long,
+                            authorisationOwnerOrganisationId: Long,
+                            authorisationOwnerPersonId: Option[Long],
+                            authorisationStatus: String,
+                            authorisationMethod: String,
+                            authorisationOwnerCapacity: String,
+                            createDatetime: DateTime,
+                            startDate: LocalDate,
+                            endDate: Option[LocalDate],
+                            submissionId: String,
+                            selfCertificationDeclarationFlag: Boolean,
+                            parties: Option[Seq[APIParty]],
+                            uploadedFiles: Option[Seq[APIUploadedFile]],
+                            authorisationNotes: Option[Seq[String]],
+                            ruleResults: Option[Seq[String]],
+                            canTheDataSuppliedBeAccepted: Option[Boolean],
+                            actionRequiredBy: Option[LocalDate],
+                            reasonForDecision: Option[String],
+                            additionalDetails: Option[String]
                            )
 
 object APIAuthorisation {
-  implicit val yourJodaDateTimeReads: Reads[DateTime] = Reads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-  implicit val yourJodaDateTimeWrites: Writes[DateTime] = Writes.jodaDateWrites("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-  implicit val yourJodaDateReads: Reads[LocalDate] = Reads.jodaLocalDateReads("yyyy-MM-dd")
-  implicit val yourJodaDateWrites: Writes[LocalDate] = Writes.jodaLocalDateWrites("yyyy-MM-dd")
-  implicit val format: Format[APIAuthorisation] =  Json.format[APIAuthorisation]
+  implicit val jodaDateReads: Reads[DateTime] = Reads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+  implicit val jodaDateWrites: Writes[DateTime] = Writes.jodaDateWrites("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+
+  implicit val format: Format[APIAuthorisation] = Json.format[APIAuthorisation]
+
 }

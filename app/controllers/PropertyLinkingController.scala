@@ -36,8 +36,8 @@ class PropertyLinkingController @Inject() (
   def get(authorisationId: Long) = Action.async { implicit request => {
       for {
         apiLink <- propertyLinksConnector.get(authorisationId)
-        partyGroupAccountsOptions <- Future.traverse(apiLink.parties)(party => groupAccountsConnector.get(party.authorisedPartyOrganisationId).flatMap(org => (party, org)))
-      } yield Ok(Json.toJson(DetailedPropertyLink.fromAPIAuthorisation(apiLink, partyGroupAccountsOptions.map(partyGroupAccount =>
+        partyGroupAccountsOptions <- Future.traverse(apiLink.parties.map(_.map(party => groupAccountsConnector.get(party.authorisedPartyOrganisationId).flatMap(org => (party, org)))))
+      } yield Ok(Json.toJson(DetailedPropertyLink.fromAPIDashboardPropertyView(apiLink, partyGroupAccountsOptions.map(partyGroupAccount =>
         partyGroupAccount._2.map(Party.fromAPIParty(partyGroupAccount._1, _)).flatMap(identity)).flatten)))
     }
   }
@@ -64,7 +64,7 @@ class PropertyLinkingController @Inject() (
       propsOrgs = props.map(prop => (prop, prop.parties))
       orgs <- Future.sequence(propsOrgs.flatMap(t => t._2).groupBy(party => party.authorisedPartyOrganisationId).mapValues(v => v.head)
         .map(orgParty => groupAccountsConnector.get(orgParty._2.authorisedPartyOrganisationId).flatMap(optOrg => (orgParty._1, optOrg)))).map(_.toMap)
-      res = propsOrgs.map(propOrgs => DetailedPropertyLink.fromAPIAuthorisation(propOrgs._1, propOrgs._2
+      res = propsOrgs.map(propOrgs => DetailedPropertyLink.fromAPIDashboardPropertyView(propOrgs._1, propOrgs._2
         .map(party => orgs(party.authorisedPartyOrganisationId)
           .flatMap(group => Party.fromAPIParty(party, group))).flatten))
     } yield res
