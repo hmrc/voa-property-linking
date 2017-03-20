@@ -27,7 +27,3 @@ class ControllerSpec extends WordSpec with FutureAwaits with DefaultAwaitTimeout
     StubLoginAttemptsRepo.reset()
   }
 }
-object TestApp {
-  val app = new GuiceApplicationBuilder().build()
-  play.api.Play.start(app)
-}
