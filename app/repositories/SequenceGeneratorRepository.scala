@@ -19,13 +19,12 @@ package repositories
 import javax.inject.Inject
 
 import play.api.libs.json._
-import play.modules.reactivemongo.MongoDbConnection
 import reactivemongo.api.DB
-import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.{BSONDocument, BSONInteger, BSONString}
 import uk.gov.hmrc.mongo.{ReactiveRepository, Repository}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 case class Sequence(_id: String, sequence: Long)
 
@@ -39,24 +38,17 @@ trait SequenceGeneratorRepository extends Repository[Sequence, String] {
 }
 
 
-class SequenceGeneratorMongoRepository @Inject() (db: DB) extends
+class SequenceGeneratorMongoRepository @Inject()(db: DB) extends
   ReactiveRepository[Sequence, String]("sequences", () => db, Json.format[Sequence], implicitly[Format[String]])
   with SequenceGeneratorRepository {
 
-  import scala.concurrent.ExecutionContext.Implicits.global
-
-  override def ensureIndexes(implicit ec: ExecutionContext) = {
-    collection.indexesManager.ensure(
-      Index(key = List("sequence" -> IndexType.Ascending), unique = true, sparse = false)
-    ).map(Seq(_))
-  }
 
   override def getNextSequenceId(key: String): Future[Long] = {
     // get latest from sequence, if none - then set next number to 600_000_000, else inc by one
     // if num=999_999_999 throw error
-    findLatestSequence(key).flatMap{
+    findLatestSequence(key).flatMap {
 
-      case Some(sequence) if sequence.sequence  == 999999999 =>
+      case Some(sequence) if sequence.sequence == 999999999 =>
         throw new IllegalStateException("Reached upper limit of 999999999 on generating sequence number")
 
       case Some(sequence) =>
