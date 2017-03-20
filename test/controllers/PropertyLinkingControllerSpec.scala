@@ -17,7 +17,6 @@
 package controllers
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import com.github.tomakehurst.wiremock.admin.AdminTask._
 import config.VOABackendWSHttp
 import connectors._
 import models._
@@ -26,12 +25,13 @@ import play.api.http.ContentTypes
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import uk.gov.voa.businessrates.dataplatform.stub.models.APIAuthorisation
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class PropertyLinkingControllerSpec
   extends ContentTypes
-  with WireMockSpec{
+    with WireMockSpec {
 
   implicit val request = FakeRequest()
 
@@ -55,13 +55,13 @@ class PropertyLinkingControllerSpec
   val representationsConnector = new PropertyRepresentationConnector(http) {
     override lazy val baseUrl: String = mockServerUrl
   }
-  val testPropertyLinkingController  = new PropertyLinkingController(propertyLinksConnector, groupAccountsConnector, representationsConnector)
+  val testPropertyLinkingController = new PropertyLinkingController(propertyLinksConnector, groupAccountsConnector, representationsConnector)
 
 
   "clientProperties" should {
     "only show the properties and permissions for that an agent" in {
 
-      val dummyProperties = Seq (
+      val dummyProperties = Seq(
         //prop with noAgents
         APIDashboardPropertyView(100, 1, userOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
           Nil),
@@ -114,7 +114,7 @@ class PropertyLinkingControllerSpec
       val res = testPropertyLinkingController.clientProperties(userOrgId, agentOrgId)(FakeRequest())
       status(res) shouldBe OK
       val uarnsAndPermIds = Json.parse(contentAsString(res)).as[Seq[ClientProperty]].map(x => (x.uarn, x.permissionId))
-       uarnsAndPermIds shouldBe Seq((2, 1), (4, 4))
+      uarnsAndPermIds shouldBe Seq((2, 1), (4, 4))
     }
   }
 
@@ -122,7 +122,7 @@ class PropertyLinkingControllerSpec
     "only return the users properties if he is not an agent" in {
       val userOrgId = 111
 
-      val dummyProperties = Seq (
+      val dummyProperties = Seq(
         APIDashboardPropertyView(101, 101, userOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
           Nil),
         APIDashboardPropertyView(102, 102, userOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
@@ -151,17 +151,17 @@ class PropertyLinkingControllerSpec
 
   it should {
     "return the user's own properties, and the properties it is managing" in {
-      
-      val usersOwnProperties = Seq (
+
+      val usersOwnProperties = Seq(
         APIDashboardPropertyView(1, 101, userAgentOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
           Nil),
         APIDashboardPropertyView(2, 102, userAgentOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
           Nil)
-        )
+      )
 
       //userAgent is representing 2 properties from  otherUser
       //otherUser has 3 properties
-      val otherUsersProperties = Seq (
+      val otherUsersProperties = Seq(
         //1 is managed by userAgentOnly,
         APIDashboardPropertyView(3, 201, otherUserOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
           Seq(APIParty(1, "APPROVED", userAgentOrgId, Seq(Permissions(1L, "START_AND_CONTINUE", "START_AND_CONTINUE", None)))
@@ -253,24 +253,25 @@ class PropertyLinkingControllerSpec
       val agentOrgId = 222
       val otherAgentOrgId = 333
 
-      val dummyProperties = Seq (
+      val dummyProperties = Seq(
         //prop with noAgents
-        APIDashboardPropertyView(100, 1, userOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
-          Nil),
+        APIAuthorisation(Some(100l), 1, userOrgId, None, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", None),
         //prop with agent
-        APIDashboardPropertyView(100, 2, userOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
-          Seq(APIParty(1, "APPROVED", agentOrgId, Seq(Permissions(1, "CONTINUE_ONLY", "CONTINUE_ONLY", None))))),
+        APIAuthorisation(Some(101l), 2, userOrgId, None, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231",
+          Some(Seq(APIParty(1, "APPROVED", agentOrgId, Seq(Permissions(1, "CONTINUE_ONLY", "CONTINUE_ONLY", None)))))),
         //prop with OtherAgent
-        APIDashboardPropertyView(100, 3, userOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
-          Seq(APIParty(2, "APPROVED", otherAgentOrgId, Seq(Permissions(2, "CONTINUE_ONLY", "CONTINUE_ONLY", None))))),
+        APIAuthorisation(Some(102l), 3, userOrgId, None, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231",
+          Some(Seq(APIParty(2, "APPROVED", otherAgentOrgId, Seq(Permissions(2, "CONTINUE_ONLY", "CONTINUE_ONLY", None)))))),
         //prop with agent and OtherAgent
-        APIDashboardPropertyView(100, 4, userOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
-          Seq(
+        APIAuthorisation(Some(103l), 4, userOrgId, None, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231",
+          Some(Seq(
             APIParty(3, "APPROVED", otherAgentOrgId, Seq(Permissions(3, "START_AND_CONTINUE", "CONTINUE_ONLY", None))),
-            APIParty(4, "APPROVED", agentOrgId, Seq(Permissions(4, "CONTINUE_ONLY", "NOT_PERMITTED", None)))
+            APIParty(4, "APPROVED", agentOrgId, Seq(Permissions(4, "CONTINUE_ONLY", "NOT_PERMITTED", None))
+            ))
           )
         )
       )
+
       val dummyAgentGroupAccount = APIDetailedGroupAccount(
         agentOrgId, "123", 1234, GroupDetails(1, true, true, "UserCompany", "aaa@aaa.com", None, LocalDate.now()), Nil
       )
@@ -318,24 +319,23 @@ class PropertyLinkingControllerSpec
   "get" should {
     "show return the property link for given id" in {
 
-      val dummyProperties = Seq (
+      val dummyProperties = Seq(
         //prop with noAgents
-        APIDashboardPropertyView(100, 1, userOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
-          Nil),
+        APIAuthorisation(Some(100l), 1, userOrgId, None, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", None),
         //prop with agent
-        APIDashboardPropertyView(101, 2, userOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
-          Seq(APIParty(1, "APPROVED", agentOrgId, Seq(Permissions(1, "CONTINUE_ONLY", "CONTINUE_ONLY", None))))),
+        APIAuthorisation(Some(101l), 2, userOrgId, None, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231",
+          Some(Seq(APIParty(1, "APPROVED", agentOrgId, Seq(Permissions(1, "CONTINUE_ONLY", "CONTINUE_ONLY", None)))))),
         //prop with OtherAgent
-        APIDashboardPropertyView(102, 3, userOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
-          Seq(APIParty(2, "APPROVED", otherAgentOrgId, Seq(Permissions(2, "CONTINUE_ONLY", "CONTINUE_ONLY", None))))),
+        APIAuthorisation(Some(102l), 3, userOrgId, None, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231",
+          Some(Seq(APIParty(2, "APPROVED", otherAgentOrgId, Seq(Permissions(2, "CONTINUE_ONLY", "CONTINUE_ONLY", None)))))),
         //prop with agent and OtherAgent
-        APIDashboardPropertyView(103, 4, userOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
-          Seq(
+        APIAuthorisation(Some(103l), 4, userOrgId, None, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231",
+          Some(Seq(
             APIParty(3, "APPROVED", otherAgentOrgId, Seq(Permissions(3, "START_AND_CONTINUE", "CONTINUE_ONLY", None))),
-            APIParty(4, "APPROVED", agentOrgId, Seq(Permissions(4, "CONTINUE_ONLY", "NOT_PERMITTED", None)))
+            APIParty(4, "APPROVED", agentOrgId, Seq(Permissions(4, "CONTINUE_ONLY", "NOT_PERMITTED", None))
+            ))
           )
-        )
-      )
+        ))
       val dummyOtherAgentGroupAccount = APIDetailedGroupAccount(
         anotherAgentOrgId, "123", 1234, GroupDetails(1, true, true, "UserCompany", "aaa@aaa.com", None, LocalDate.now()), Nil
       )
@@ -344,10 +344,11 @@ class PropertyLinkingControllerSpec
         .willReturn(aResponse
           .withStatus(200)
           .withHeader("Content-Type", JSON)
-          .withBody(Json.toJson(dummyProperties.filter(_.authorisationId==102).head).toString)
+          .withBody(Json.toJson(dummyProperties.filter(_.id contains 102).head).toString)
         )
       )
-      stubFor(get(urlEqualTo(s"/customer-management-api/organisation?organisationId=${otherAgentOrgId}"))
+      stubFor(get(urlEqualTo(s"/customer-management-api/organisation"))
+        .withQueryParam("organisationId", equalTo(otherAgentOrgId.toString))
         .willReturn(aResponse
           .withStatus(200)
           .withHeader("Content-Type", JSON)

@@ -16,10 +16,8 @@
 
 package uk.gov.voa.businessrates.dataplatform.stub.models
 
-import java.time.LocalDate
-
-import models.{APIParty, APIUploadedFile, PropertyLink}
-import org.joda.time.DateTime
+import models.{APIParty}
+import org.joda.time.{DateTime, LocalDate}
 import play.api.libs.json.{Format, Json, Reads, Writes}
 
 case class APIAuthorisation(id: Option[Long],
@@ -33,15 +31,7 @@ case class APIAuthorisation(id: Option[Long],
                             startDate: LocalDate,
                             endDate: Option[LocalDate],
                             submissionId: String,
-                            selfCertificationDeclarationFlag: Boolean,
-                            parties: Option[Seq[APIParty]],
-                            uploadedFiles: Option[Seq[APIUploadedFile]],
-                            authorisationNotes: Option[Seq[String]],
-                            ruleResults: Option[Seq[String]],
-                            canTheDataSuppliedBeAccepted: Option[Boolean],
-                            actionRequiredBy: Option[LocalDate],
-                            reasonForDecision: Option[String],
-                            additionalDetails: Option[String]
+                            parties: Option[Seq[APIParty]]
                            )
 
 object APIAuthorisation {

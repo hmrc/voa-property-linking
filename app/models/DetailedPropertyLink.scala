@@ -16,12 +16,13 @@
 
 package models
 
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, LocalDate}
 import play.api.libs.json.Json
+import uk.gov.voa.businessrates.dataplatform.stub.models.APIAuthorisation
 
 case class DetailedPropertyLink(authorisationId: Long,
                                 uarn: Long,
-                                organisationId: Int,
+                                organisationId: Long,
                                 address: String,
                                 capacityDeclaration: CapacityDeclaration,
                                 linkedDate: DateTime,
@@ -41,6 +42,19 @@ object DetailedPropertyLink {
       capacityDeclaration, prop.createDatetime,
       prop.authorisationStatus != "APPROVED",
       prop.NDRListValuationHistoryItems.map(x => Assessment.fromAPIValuationHistory(x, prop.authorisationId, capacityDeclaration)),
+      parties
+    )
+  }
+
+  def fromAPIAuthorisation(prop: APIAuthorisation, parties: Seq[Party]) = {
+    val capacityDeclaration = CapacityDeclaration(prop.authorisationOwnerCapacity,
+      prop.startDate,
+      prop.endDate)
+    DetailedPropertyLink(prop.id.get, prop.uarn, prop.authorisationOwnerOrganisationId,
+      "",
+      capacityDeclaration, prop.createDatetime,
+      prop.authorisationStatus != "APPROVED",
+      Seq.empty,
       parties
     )
   }

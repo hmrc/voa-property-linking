@@ -23,6 +23,7 @@ import models._
 import play.api.libs.json.Json
 import play.api.mvc.Action
 import uk.gov.hmrc.play.http.{HeaderCarrier, Upstream5xxResponse}
+import uk.gov.voa.businessrates.dataplatform.stub.models.APIAuthorisation
 
 import scala.concurrent.Future
 
@@ -32,15 +33,30 @@ class PropertyLinkingController @Inject() (
                                             representationsConnector: PropertyRepresentationConnector
                                           ) extends PropertyLinkingBaseController {
 
+  def resolveGroupIds(ids:Seq[Long])(implicit hc:HeaderCarrier):Future[Map[Long, Option[GroupAccount]]] = {
+    Future.sequence(ids.map(id => groupAccountsConnector.get(id).map((id, _)))).map(_.toMap)
+  }
+
+  def createDetailedPropertyLink(apiAuth:APIAuthorisation, groupAccountsMap:Map[Long, Option[GroupAccount]]):DetailedPropertyLink = {
+    val parties = apiAuth.parties.fold(Seq[Party]())(_.flatMap(apiParty => groupAccountsMap(apiParty.authorisedPartyOrganisationId).map(Party.fromAPIParty(apiParty, _))).flatten)
+    DetailedPropertyLink.fromAPIAuthorisation(apiAuth, parties)
+  }
+
+  def createDetailedPropertyLink(apiAuth:APIDashboardPropertyView, groupAccountsMap:Map[Long, Option[GroupAccount]]):DetailedPropertyLink = {
+    val parties = apiAuth.parties.flatMap(apiParty => groupAccountsMap(apiParty.authorisedPartyOrganisationId).map(Party.fromAPIParty(apiParty, _))).flatten
+    DetailedPropertyLink.fromAPIDashboardPropertyView(apiAuth, parties)
+  }
+
+
 
   def get(authorisationId: Long) = Action.async { implicit request => {
-      for {
-        apiLink <- propertyLinksConnector.get(authorisationId)
-        partyGroupAccountsOptions <- Future.traverse(apiLink.parties.map(_.map(party => groupAccountsConnector.get(party.authorisedPartyOrganisationId).flatMap(org => (party, org)))))
-      } yield Ok(Json.toJson(DetailedPropertyLink.fromAPIDashboardPropertyView(apiLink, partyGroupAccountsOptions.map(partyGroupAccount =>
-        partyGroupAccount._2.map(Party.fromAPIParty(partyGroupAccount._1, _)).flatMap(identity)).flatten)))
-    }
-  }
+    for {
+      apiAuth <- propertyLinksConnector.get(authorisationId)
+      apiParties = apiAuth.parties.getOrElse(Seq[APIParty]())
+      groupAccountsMap <- resolveGroupIds(apiParties.map(_.authorisedPartyOrganisationId))
+    } yield Ok(Json.toJson(createDetailedPropertyLink(apiAuth, groupAccountsMap)))
+  }}
+
 
   def create() = Action.async(parse.json) { implicit request =>
     withJsonBody[PropertyLinkRequest] { linkRequest =>
@@ -58,17 +74,22 @@ class PropertyLinkingController @Inject() (
     }
   }
 
-  private def getProperties(organisationId: Long, uarn: Option[Long] = None)(implicit hc: HeaderCarrier): Future[Seq[DetailedPropertyLink]] = {
+  private def getProperties(organisationId:Long)(implicit hc: HeaderCarrier): Future[Seq[DetailedPropertyLink]] = {
     for {
-      props <- uarn.fold(propertyLinksConnector.find(organisationId))(propertyLinksConnector.findFor(organisationId, _))
-      propsOrgs = props.map(prop => (prop, prop.parties))
-      orgs <- Future.sequence(propsOrgs.flatMap(t => t._2).groupBy(party => party.authorisedPartyOrganisationId).mapValues(v => v.head)
-        .map(orgParty => groupAccountsConnector.get(orgParty._2.authorisedPartyOrganisationId).flatMap(optOrg => (orgParty._1, optOrg)))).map(_.toMap)
-      res = propsOrgs.map(propOrgs => DetailedPropertyLink.fromAPIDashboardPropertyView(propOrgs._1, propOrgs._2
-        .map(party => orgs(party.authorisedPartyOrganisationId)
-          .flatMap(group => Party.fromAPIParty(party, group))).flatten))
+      props <- propertyLinksConnector.find(organisationId)
+      groupAccountMap <- resolveGroupIds(props.flatMap(_.parties.map(_.authorisedPartyOrganisationId)).distinct)
+      res = props.map(p => createDetailedPropertyLink(p, groupAccountMap))
     } yield res
   }
+
+  private def getProperties(organisationId: Long, uarn:Long)(implicit hc: HeaderCarrier): Future[Seq[DetailedPropertyLink]] = {
+    for {
+      props <- propertyLinksConnector.findFor(organisationId, uarn)
+      groupAccountMap <- resolveGroupIds(props.flatMap(_.parties).flatten.map(_.authorisedPartyOrganisationId).distinct)
+      res = props.map(p => createDetailedPropertyLink(p, groupAccountMap))
+    } yield res
+  }
+
 
   def getPropertiesWithAgent(organisationId: Long, agentOrgId: Long)(implicit hc: HeaderCarrier): Future[Seq[DetailedPropertyLink]] = {
     for {
@@ -101,7 +122,7 @@ class PropertyLinkingController @Inject() (
   }
 
   def findFor(organisationId: Long, uarn: Long) = Action.async { implicit request => {
-      val eventualUserProps = getProperties(organisationId, Some(uarn))
+      val eventualUserProps = getProperties(organisationId, uarn)
       val allProps = addRepresentedProperties(organisationId, eventualUserProps)
       allProps.map(x => Ok(Json.toJson(x)))
     }
