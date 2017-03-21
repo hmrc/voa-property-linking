@@ -18,7 +18,7 @@ package repositories
 
 import javax.inject.Inject
 
-import com.google.inject.Singleton
+import com.google.inject.{ImplementedBy, Singleton}
 import play.api.Logger
 import play.api.libs.json._
 import reactivemongo.api.DB
@@ -59,6 +59,7 @@ object EnvelopeId {
   val mongoFormat = Json.format[EnvelopeId]
 }
 
+@ImplementedBy(classOf[EnvelopeIdRepository])
 trait EnvelopeIdRepo {
   def create(envelopeId: String): Future[Unit]
 

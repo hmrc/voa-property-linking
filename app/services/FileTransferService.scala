@@ -22,14 +22,14 @@ import connectors.EvidenceConnector
 import connectors.fileUpload.{EnvelopeInfo, EnvelopeMetadata, FileInfo, FileUploadConnector}
 import play.api.Logger
 import play.modules.reactivemongo.MongoDbConnection
-import repositories.EnvelopeIdRepository
+import repositories.EnvelopeIdRepo
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector,
                                     val evidenceConnector: EvidenceConnector,
-                                    val repo: EnvelopeIdRepository
+                                    val repo: EnvelopeIdRepo
                                    )
   extends MongoDbConnection {
 
@@ -47,6 +47,7 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
           case "CLOSED" if envInfo.files.isEmpty => Future.successful(removeEnvelopes(envInfo))
           case "CLOSED" => processClosedNotEmptyEnvelope(envInfo)
           case "NOT_EXISTING" => Future.successful(repo.remove(envInfo.id))
+          case "OPEN" => Future.successful(())
           case _ if !envInfo.files.map(_.status).contains("QUARANTINED") => processNotYetClosedEnvelopes(envInfo)
           case _ => Future.successful(()) //Some files haven't been virus checked yet.
         })

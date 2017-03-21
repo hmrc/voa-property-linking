@@ -19,14 +19,16 @@ package services
 import javax.inject.{Inject, Named}
 
 import akka.actor.ActorSystem
+import com.google.inject.Singleton
 import infrastructure.{Lock, LockedJobScheduler, Schedule}
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
 
+@Singleton
 class FileTransferScheduler @Inject()(val lock: Lock,
-                                      val transerService: FileTransferService,
+                                      val transferService: FileTransferService,
                                       val actorSystem: ActorSystem,
                                       @Named("regularSchedule") val schedule: Schedule)
   extends LockedJobScheduler[FileTransferComplete](lock, actorSystem)
@@ -34,7 +36,7 @@ class FileTransferScheduler @Inject()(val lock: Lock,
   val name = "FileTransferer"
   this.start()
   implicit val hc = new HeaderCarrier()
-  override def runJob()(implicit ec: ExecutionContext) = transerService.justDoIt.map(_ => FileTransferComplete(""))
+  override def runJob()(implicit ec: ExecutionContext) = transferService.justDoIt.map(_ => FileTransferComplete(""))
 }
 
 
