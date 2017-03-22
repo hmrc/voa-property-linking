@@ -16,8 +16,11 @@
 
 package connectors.fileUpload
 
+import java.io.{ByteArrayOutputStream, File, FileOutputStream}
 import javax.inject.Inject
 
+import akka.stream.scaladsl._
+import akka.util.ByteString
 import com.google.inject.{ImplementedBy, Singleton}
 import config.WSHttp
 import connectors.HandleErrors
@@ -26,6 +29,7 @@ import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import play.api.libs.ws.WSClient
 import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
 import uk.gov.hmrc.play.http._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -84,7 +88,7 @@ trait FileUpload {
 }
 
 @Singleton
-class FileUploadConnector @Inject()(ws: WSClient, http: WSHttp)(implicit ec: ExecutionContext) extends FileUpload with ServicesConfig with HandleErrors {
+class FileUploadConnector @Inject()(ws: WSClient, http: WSHttp)(implicit ec: ExecutionContext) extends FileUpload with ServicesConfig with HandleErrors with MicroserviceFilterSupport {
   lazy val url = baseUrl("file-upload-backend")
 
   override def getEnvelopeDetails(envelopeId: String)(implicit hc: HeaderCarrier): Future[EnvelopeInfo] = {
@@ -98,9 +102,19 @@ class FileUploadConnector @Inject()(ws: WSClient, http: WSHttp)(implicit ec: Exe
 
   override def downloadFile(href: String)(implicit hc: HeaderCarrier): Future[Array[Byte]] = {
     Logger.info(s"Downloading file from $url$href")
-    val res = ws.url(s"$url$href").get()
+    
+    ws.url(s"$url$href").withMethod("GET").stream() flatMap { r =>
+      val outputStream = new ByteArrayOutputStream()
 
-    handleErrors(res, s"$url$href") map { _.body.getBytes }
+      val sink = Sink.foreach[ByteString] { bytes =>
+        outputStream.write(bytes.toArray)
+      }
+
+      r.body.runWith(sink).andThen {
+        case result =>
+          result.get
+      } map { _ => outputStream.toByteArray }
+    }
   }
 
   override def deleteEnvelope(envelopeId: String)(implicit hc: HeaderCarrier): Future[Unit] = {

@@ -49,8 +49,7 @@ class EvidenceConnector @Inject()(val ws: WSClient) extends EvidenceTransfer wit
     val res = ws.url(url + endpoint)
       .withHeaders(
         ("Ocp-Apim-Subscription-Key", ApplicationConfig.apiConfigSubscriptionKeyHeader),
-        ("Ocp-Apim-Trace", ApplicationConfig.apiConfigTraceHeader),
-        ("Content-Type", "multipart/form-data")
+        ("Ocp-Apim-Trace", ApplicationConfig.apiConfigTraceHeader)
       )
       .put(Source(
         content.map(c => List(FilePart("file", fileName, Some("application/octet-stream"), Source.single(ByteString(c))))).getOrElse(Nil) ++ (
