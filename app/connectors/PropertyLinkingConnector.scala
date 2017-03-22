@@ -24,7 +24,6 @@ import models._
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
-import uk.gov.voa.businessrates.dataplatform.stub.models.APIAuthorisation
 
 import scala.concurrent.{ExecutionContext, Future}
 

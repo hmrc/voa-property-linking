@@ -25,7 +25,6 @@ import play.api.http.ContentTypes
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.voa.businessrates.dataplatform.stub.models.APIAuthorisation
 
 import scala.concurrent.ExecutionContext.Implicits.global
 

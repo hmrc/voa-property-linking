@@ -16,9 +16,8 @@
 
 package models
 
-import org.joda.time.{DateTime, LocalDate}
+import org.joda.time.DateTime
 import play.api.libs.json.Json
-import uk.gov.voa.businessrates.dataplatform.stub.models.APIAuthorisation
 
 case class DetailedPropertyLink(authorisationId: Long,
                                 uarn: Long,
@@ -28,7 +27,7 @@ case class DetailedPropertyLink(authorisationId: Long,
                                 linkedDate: DateTime,
                                 pending: Boolean,
                                 assessment: Seq[Assessment],
-                                agents:Seq[Party]) {
+                                agents: Seq[Party]) {
 }
 
 
