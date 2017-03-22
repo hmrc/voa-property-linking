@@ -20,6 +20,7 @@ import javax.inject.Inject
 
 import connectors.EvidenceConnector
 import connectors.fileUpload.{EnvelopeInfo, EnvelopeMetadata, FileInfo, FileUploadConnector}
+import models.Closed
 import play.api.Logger
 import play.modules.reactivemongo.MongoDbConnection
 import repositories.EnvelopeIdRepo
@@ -36,28 +37,27 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
   implicit val ec: ExecutionContext = play.api.libs.concurrent.Execution.Implicits.defaultContext
 
   def justDoIt()(implicit hc: HeaderCarrier): Future[Unit] = {
-    val envelopeIds = repo.get()
-    envelopeIds.foreach(envId => Logger.info(s"Envelope Id: $envId found in mongo"))
+    val allEnvelopes = repo.get()
+    allEnvelopes.foreach(envelope => Logger.info(s"envelope found in mongo: ${envelope.map(x=> (x.envelopeId, x.status))}"))
 
-    val envelopeAndFiles = envelopeIds.map(_.map(envId => fileUploadConnector.getEnvelopeDetails(envId)))
-      .flatMap(x => Future.sequence(x))
-
-    envelopeAndFiles.flatMap { es => Future.sequence {
-        es.map(envInfo => envInfo.status match {
-          case "CLOSED" if envInfo.files.isEmpty => Future.successful(removeEnvelopes(envInfo))
-          case "CLOSED" => processClosedNotEmptyEnvelope(envInfo)
-          case "NOT_EXISTING" => Future.successful(repo.remove(envInfo.id))
-          case "OPEN" => Future.successful(())
-          case _ if !envInfo.files.map(_.status).contains("QUARANTINED") => processNotYetClosedEnvelopes(envInfo)
-          case _ => Future.successful(()) //Some files haven't been virus checked yet.
-        })
-      }
-    } map { _ => () }
+    val closedEnvelopes = allEnvelopes.map(_.filter(_.status.getOrElse(Closed)==Closed)).map(_.map(_.envelopeId))
+    closedEnvelopes.map(x => println("ClosedEnvL " + x))
+    for {
+      closedEnvelopes <- allEnvelopes.map(_.filter(_.status.getOrElse(Closed) == Closed))
+      envelopeIds = closedEnvelopes.map(_.envelopeId)
+      envelopeInfos <- Future.traverse(envelopeIds)( envId => fileUploadConnector.getEnvelopeDetails(envId))
+      envelopeFilesNotQuarantine = envelopeInfos.filterNot(env => env.files.map(_.status).contains("QUARANTINED"))
+      res <- Future.traverse(envelopeFilesNotQuarantine)(envInfo => processNotYetClosedEnvelopes(envInfo))
+    } yield {
+      ()
+    }
   }
 
   private def removeEnvelopes(envInfo: EnvelopeInfo)(implicit hc: HeaderCarrier) = {
-//    fileUploadConnector.deleteEnvelope(envInfo.id).map(_ => repo.remove(envInfo.id)) TODO work out which endpoint to call
-    repo.remove(envInfo.id)
+    if (envInfo.status == "NOT_EXISTING" )
+      repo.remove(envInfo.id)
+    else
+      fileUploadConnector.deleteEnvelope(envInfo.id).map(_ => repo.remove(envInfo.id))
   }
 
   private def processClosedNotEmptyEnvelope(envelopeInfo: EnvelopeInfo)(implicit hc: HeaderCarrier) = {
