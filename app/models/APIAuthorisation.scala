@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package uk.gov.voa.businessrates.dataplatform.stub.models
+package models
 
-import models.{APIParty}
 import org.joda.time.{DateTime, LocalDate}
 import play.api.libs.json.{Format, Json, Reads, Writes}
 
