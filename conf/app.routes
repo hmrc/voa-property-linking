@@ -11,9 +11,12 @@ PATCH       /property-representations/revoke/:authorisedPartyId                 
 PUT         /property-representations/response                                               @controllers.PropertyRepresentationController.response()
 
 POST        /property-links                                                                  @controllers.PropertyLinkingController.create()
-GET         /property-links/:organisationId                                                  @controllers.PropertyLinkingController.find(organisationId: Int)
+GET         /property-links/:organisationId                                                  @controllers.PropertyLinkingController.find(organisationId: Long)
+GET         /property-links/:organisationId/:uarn                                            @controllers.PropertyLinkingController.findFor(organisationId: Long, uarn: Long)
 GET         /dashboard/assessments/:authorisationId                                          @controllers.PropertyLinkingController.assessments(authorisationId: Long)
 GET         /property-links/client-properties/:userId/:agentId                               @controllers.PropertyLinkingController.clientProperties(userId: Long, agentId: Long)
+PATCH       /property-link/:authorisationId/end                                              @controllers.PropertyLinkingController.setEnd(authorisationId:Long)
+GET         /property-link/:authorisationId                                                  @controllers.PropertyLinkingController.get(authorisationId: Long)
 
 GET         /individuals/:personId                                                           @controllers.IndividualAccountController.get(personId: Int)
 GET         /individuals                                                                     @controllers.IndividualAccountController.withExternalId(externalId)

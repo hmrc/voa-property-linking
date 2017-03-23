@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-package controllers
+package models
 
-import org.scalatest.{BeforeAndAfterEach, MustMatchers, WordSpec}
-import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
-import utils.StubLoginAttemptsRepo
+import org.joda.time.{DateTime, LocalDate}
+import play.api.libs.json.{Json, Writes}
 
-class ControllerSpec extends WordSpec with FutureAwaits with DefaultAwaitTimeout with BeforeAndAfterEach with MustMatchers {
+case class APIPropertyLinkEndDateRequest(endDate: LocalDate)
 
-  override protected def afterEach() = {
-    StubLoginAttemptsRepo.reset()
+object APIPropertyLinkEndDateRequest {
+  implicit val yourJodaDateTimeReads: Writes[DateTime] = Writes.jodaDateWrites("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+  implicit val format = Json.format[APIPropertyLinkEndDateRequest]
+
+  def fromPropertyLinkEndDateRequest(propertyLinkEndDateRequest: PropertyLinkEndDateRequest) = {
+    APIPropertyLinkEndDateRequest(propertyLinkEndDateRequest.endDate)
   }
 }

@@ -16,47 +16,68 @@
 
 package connectors
 
+import java.net.URLEncoder
 import javax.inject.Inject
 
 import config.VOABackendWSHttp
 import models._
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class PropertyLinkingConnector @Inject() (http: VOABackendWSHttp)(implicit ec: ExecutionContext)
+class PropertyLinkingConnector @Inject()(http: VOABackendWSHttp)(implicit ec: ExecutionContext)
   extends ServicesConfig {
   lazy val baseUrl: String = baseUrl("external-business-rates-data-platform")
   val listYear = 2017
+
+  private def liveAuthorisation(authorisationStatus: String) = !Seq("REVOKED", "DECLINED").contains(authorisationStatus.toUpperCase)
+
+  def get(authorisationId: Long)(implicit hc: HeaderCarrier): Future[APIAuthorisation] = {
+    val url = s"$baseUrl/authorisation-management-api/authorisation/$authorisationId"
+    http.GET[APIAuthorisation](url)
+  }
 
   def create(linkingRequest: APIPropertyLinkRequest)(implicit hc: HeaderCarrier): Future[Unit] = {
     val url = baseUrl + s"/property-management-api/property/save_property_link"
     http.POST[APIPropertyLinkRequest, HttpResponse](url, linkingRequest) map { _ => () }
   }
 
-  def find(organisationId: Long)(implicit hc: HeaderCarrier): Future[Seq[APIAuthorisation]] = {
+  def setEnd(authorisationId: Long, endRequest: APIPropertyLinkEndDateRequest)(implicit hc: HeaderCarrier): Future[Unit] = {
+    val url = baseUrl + s"/authorisation-management-api/authorisation/${authorisationId}"
+    http.PATCH[APIPropertyLinkEndDateRequest, HttpResponse](url, endRequest) map { _ => () }
+  }
+
+  def find(organisationId: Long)(implicit hc: HeaderCarrier): Future[Seq[APIDashboardPropertyView]] = {
     val url = baseUrl + s"/mdtp-dashboard-management-api/mdtp_dashboard/properties_view?listYear=$listYear&organisationId=$organisationId"
-    val props = http.GET[JsValue](url).map(js =>{
-      (js \ "authorisations").as[Seq[APIAuthorisation]]
-    }).map( _
-        .filterNot(_.authorisationStatus.toUpperCase == "REVOKED")
-        .filterNot(_.authorisationStatus.toUpperCase == "DECLINED")
-      )
-    props.map(_.map(x=> {
+    val props = http.GET[JsValue](url).map(js => {
+      (js \ "authorisations").as[Seq[APIDashboardPropertyView]]
+    }).map(_.filter(a => liveAuthorisation(a.authorisationStatus))
+    )
+    props.map(_.map(x => {
       x.copy(parties = {
         x.parties
           .filter(party => List("APPROVED", "PENDING").contains(party.authorisedPartyStatus)) //parties must be approved or pending
-          .map(party => party.copy(permissions =  party.permissions.filterNot(_.endDate.isDefined))) //permissions can't have enddate
+          .map(party => party.copy(permissions = party.permissions.filterNot(_.endDate.isDefined))) //permissions can't have enddate
           .filter(_.permissions.nonEmpty) //and agent must have a permission
       })
     }))
   }
 
+  def findFor(organisationId: Long, uarn: Long)(implicit hc: HeaderCarrier): Future[Seq[APIAuthorisation]] = {
+    val searchParameters = new APIAuthorisationQuery(organisationId, uarn)
+    val url = baseUrl + s"/authorisation-management-api/authorisation?startPoint=1&pageSize=100&searchParameters=${URLEncoder.encode(Json.toJson(searchParameters).toString, "UTF-8")}"
+    http.GET[JsValue](url).map(js => {
+      (js \ "authorisations").as[Seq[APIAuthorisation]]
+    }).map(_.filter(a => liveAuthorisation(a.authorisationStatus))
+    )
+  }
+
+
   def getAssessment(authorisationId: Long)(implicit hc: HeaderCarrier): Future[Seq[Assessment]] = {
     val url = baseUrl + s"/mdtp-dashboard-management-api/mdtp_dashboard/view_assessment?listYear=$listYear&authorisationId=$authorisationId"
-    http.GET[APIAuthorisation](url).map(pLink => {
+    http.GET[APIDashboardPropertyView](url).map(pLink => {
       pLink.NDRListValuationHistoryItems.map(assessment => Assessment.fromAPIValuationHistory(assessment, authorisationId, CapacityDeclaration(pLink.authorisationOwnerCapacity, pLink.startDate, pLink.endDate)))
     })
   }

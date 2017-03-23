@@ -17,28 +17,26 @@
 package models
 
 import org.joda.time.{DateTime, LocalDate}
-import play.api.libs.functional.syntax._
-import play.api.libs.json._
+import play.api.libs.json.{Format, Json, Reads, Writes}
 
-case class APIAuthorisation(
-                             authorisationId: Long,
-                             uarn: Long,
-                             authorisationOwnerOrganisationId: Int,
-                             authorisationStatus: String,
-                             authorisationMethod: String,
-                             authorisationOwnerCapacity: String,
-                             createDatetime: DateTime,
-                             startDate: LocalDate,
-                             endDate: Option[LocalDate],
-                             submissionId: String,
-                             NDRListValuationHistoryItems: Seq[APIValuationHistory],
-                             parties: Seq[APIParty]
+case class APIAuthorisation(id: Option[Long],
+                            uarn: Long,
+                            authorisationOwnerOrganisationId: Long,
+                            authorisationOwnerPersonId: Option[Long],
+                            authorisationStatus: String,
+                            authorisationMethod: String,
+                            authorisationOwnerCapacity: String,
+                            createDatetime: DateTime,
+                            startDate: LocalDate,
+                            endDate: Option[LocalDate],
+                            submissionId: String,
+                            parties: Option[Seq[APIParty]]
                            )
 
 object APIAuthorisation {
-  implicit val yourJodaDateTimeReads: Reads[DateTime] = Reads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-  implicit val yourJodaDateTimeWrites: Writes[DateTime] = Writes.jodaDateWrites("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-  implicit val yourJodaDateReads: Reads[LocalDate] = Reads.jodaLocalDateReads("yyyy-MM-dd")
-  implicit val yourJodaDateWrites: Writes[LocalDate] = Writes.jodaLocalDateWrites("yyyy-MM-dd")
-  implicit val format: Format[APIAuthorisation] =  Json.format[APIAuthorisation]
+  implicit val jodaDateReads: Reads[DateTime] = Reads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+  implicit val jodaDateWrites: Writes[DateTime] = Writes.jodaDateWrites("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+
+  implicit val format: Format[APIAuthorisation] = Json.format[APIAuthorisation]
+
 }

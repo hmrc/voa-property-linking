@@ -14,16 +14,12 @@
  * limitations under the License.
  */
 
-package controllers
+package models
 
-import org.scalatest.{BeforeAndAfterEach, MustMatchers, WordSpec}
-import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
-import utils.StubLoginAttemptsRepo
+import play.api.libs.json.Json
 
-class ControllerSpec extends WordSpec with FutureAwaits with DefaultAwaitTimeout with BeforeAndAfterEach with MustMatchers {
+case class APIAuthorisationQuery(organisationId: Long, uarn: Long)
 
-  override protected def afterEach() = {
-    StubLoginAttemptsRepo.reset()
-  }
+object APIAuthorisationQuery {
+  implicit val format = Json.format[APIAuthorisationQuery]
 }
