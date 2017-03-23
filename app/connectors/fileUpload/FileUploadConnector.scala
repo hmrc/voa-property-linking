@@ -118,7 +118,8 @@ class FileUploadConnector @Inject()(ws: WSClient, http: WSHttp)(implicit ec: Exe
   }
 
   override def deleteEnvelope(envelopeId: String)(implicit hc: HeaderCarrier): Future[Unit] = {
-    Logger.info(s"Deleting envelopedId: $envelopeId from FUAAS")
+    Logger.info(s"Deleting envelopeId: $envelopeId from FUAAS")
     http.DELETE[HttpResponse](s"$url/file-upload/envelopes/$envelopeId").map(_ => ())
   }
+
 }

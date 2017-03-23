@@ -18,6 +18,7 @@ package controllers
 
 import javax.inject.Inject
 
+import models.Closed
 import play.api.mvc.Action
 import repositories.EnvelopeIdRepository
 import services.FileTransferScheduler
@@ -27,6 +28,10 @@ class EnvelopeController @Inject()(val repo: EnvelopeIdRepository, val service: 
 
   def create(envelopeId: String) = Action.async { implicit request =>
     repo.create(envelopeId).map(_=> Ok(envelopeId))
+  }
+
+  def close(envelopeId: String) = Action.async { implicit request =>
+    repo.update(envelopeId, Closed).map(_=> Ok(envelopeId))
   }
 
   def get() = Action.async { implicit  request =>

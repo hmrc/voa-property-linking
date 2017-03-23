@@ -19,9 +19,11 @@ package repositories
 import javax.inject.Inject
 
 import com.google.inject.{ImplementedBy, Singleton}
+import models._
 import play.api.Logger
 import play.api.libs.json._
 import reactivemongo.api.DB
+import reactivemongo.bson.BSONDocument
 import reactivemongo.core.errors.DatabaseException
 import uk.gov.hmrc.mongo.ReactiveRepository
 
@@ -34,17 +36,25 @@ class EnvelopeIdRepository @Inject()(db: DB)
     EnvelopeIdRepo {
 
   override def create(envelopeId: String): Future[Unit] = {
-    insert(EnvelopeId(envelopeId, envelopeId))
+    insert(EnvelopeId(envelopeId, envelopeId, Some(Open)))
       .map(_ => ())
       .recover {
         case e: DatabaseException if e.code.contains(11000) =>
           Logger.debug(s"EnvelopeId: $envelopeId has already been added")
       }
   }
+  override def update(envelopeId: String, status: EnvelopeStatus): Future[Unit] = {
+    collection.findAndUpdate(
+      selector = BSONDocument(("_id", envelopeId)),
+      update = Json.obj("$set" -> EnvelopeId(envelopeId, envelopeId, Some(status))),
+      fetchNewObject = false,
+      upsert = false
+    ) map { _ => () }
 
-  override def get(): Future[Seq[String]] = {
-    findAll().map(x =>
-      x.map(_.envelopeId))
+  }
+
+  override def get(): Future[Seq[EnvelopeId]] = {
+    findAll()
   }
 
   override def remove(envelopeId: String) = {
@@ -53,7 +63,7 @@ class EnvelopeIdRepository @Inject()(db: DB)
   }
 }
 
-case class EnvelopeId(envelopeId: String, _id: String)
+case class EnvelopeId(envelopeId: String, _id: String, status: Option[EnvelopeStatus])
 
 object EnvelopeId {
   val mongoFormat = Json.format[EnvelopeId]
@@ -63,7 +73,11 @@ object EnvelopeId {
 trait EnvelopeIdRepo {
   def create(envelopeId: String): Future[Unit]
 
-  def get(): Future[Seq[String]]
+  def get(): Future[Seq[EnvelopeId]]
 
   def remove(envelopeId: String)
+
+  def update(envelopeId: String, status: EnvelopeStatus): Future[Unit]
 }
+
+
