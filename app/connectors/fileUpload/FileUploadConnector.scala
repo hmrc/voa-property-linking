@@ -16,7 +16,7 @@
 
 package connectors.fileUpload
 
-import java.io.{ByteArrayOutputStream, File, FileOutputStream}
+import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 
 import akka.stream.scaladsl._
@@ -102,7 +102,7 @@ class FileUploadConnector @Inject()(ws: WSClient, http: WSHttp)(implicit ec: Exe
 
   override def downloadFile(href: String)(implicit hc: HeaderCarrier): Future[Array[Byte]] = {
     Logger.info(s"Downloading file from $url$href")
-    
+
     ws.url(s"$url$href").withMethod("GET").stream() flatMap { r =>
       val outputStream = new ByteArrayOutputStream()
 

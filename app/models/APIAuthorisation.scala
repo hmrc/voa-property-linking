@@ -17,13 +17,13 @@
 package models
 
 import org.joda.time.{DateTime, LocalDate}
-import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
 case class APIAuthorisation(
                              authorisationId: Long,
                              uarn: Long,
-                             authorisationOwnerOrganisationId: Int,
+                             authorisationOwnerOrganisationId: Long,
+                             authorisationOwnerPersonId: Long,
                              authorisationStatus: String,
                              authorisationMethod: String,
                              authorisationOwnerCapacity: String,
@@ -40,5 +40,5 @@ object APIAuthorisation {
   implicit val yourJodaDateTimeWrites: Writes[DateTime] = Writes.jodaDateWrites("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
   implicit val yourJodaDateReads: Reads[LocalDate] = Reads.jodaLocalDateReads("yyyy-MM-dd")
   implicit val yourJodaDateWrites: Writes[LocalDate] = Writes.jodaLocalDateWrites("yyyy-MM-dd")
-  implicit val format: Format[APIAuthorisation] =  Json.format[APIAuthorisation]
+  implicit val format: Format[APIAuthorisation] = Json.format[APIAuthorisation]
 }
