@@ -59,16 +59,16 @@ class PropertyLinkingControllerSpec
 
       val dummyProperties = Seq (
         //prop with noAgents
-        APIAuthorisation(100, 1, userOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
+        APIAuthorisation(100, 1, 5, userOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
           Nil),
         //prop with agent
-        APIAuthorisation(100, 2, userOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
+        APIAuthorisation(100, 2, 6, userOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
           Seq(APIParty(1, "APPROVED", agentOrgId, Seq(Permissions(1, "CONTINUE_ONLY", "CONTINUE_ONLY", None))))),
         //prop with OtherAgent
-        APIAuthorisation(100, 3, userOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
+        APIAuthorisation(100, 3, 7, userOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
           Seq(APIParty(2, "APPROVED", otherAgentOrgId, Seq(Permissions(2, "CONTINUE_ONLY", "CONTINUE_ONLY", None))))),
         //prop with agent and OtherAgent
-        APIAuthorisation(100, 4, userOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
+        APIAuthorisation(100, 4, 8, userOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
           Seq(
             APIParty(3, "APPROVED", otherAgentOrgId, Seq(Permissions(3, "START_AND_CONTINUE", "CONTINUE_ONLY", None))),
             APIParty(4, "APPROVED", agentOrgId, Seq(Permissions(4, "CONTINUE_ONLY", "NOT_PERMITTED", None)))
@@ -119,9 +119,9 @@ class PropertyLinkingControllerSpec
       val userOrgId = 111
 
       val dummyProperties = Seq (
-        APIAuthorisation(101, 101, userOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
+        APIAuthorisation(101, 101, 103, userOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
           Nil),
-        APIAuthorisation(102, 102, userOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
+        APIAuthorisation(102, 102, 104, userOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
           Nil)
       )
       stubFor(get(urlEqualTo(s"/mdtp-dashboard-management-api/mdtp_dashboard/properties_view?listYear=2017&organisationId=${userOrgId}"))
@@ -151,9 +151,9 @@ class PropertyLinkingControllerSpec
       val anotherAgentOrgId = 333
 
       val usersOwnProperties = Seq (
-        APIAuthorisation(1, 101, userAgentOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
+        APIAuthorisation(1, 101, 105, userAgentOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
           Nil),
-        APIAuthorisation(2, 102, userAgentOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
+        APIAuthorisation(2, 102, 106, userAgentOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
           Nil)
         )
 
@@ -161,18 +161,18 @@ class PropertyLinkingControllerSpec
       //otherUser has 3 properties
       val otherUsersProperties = Seq (
         //1 is managed by userAgentOnly,
-        APIAuthorisation(3, 201, otherUserOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
+        APIAuthorisation(3, 201, 211, otherUserOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
           Seq(APIParty(1, "APPROVED", userAgentOrgId, Seq(Permissions(1L, "START_AND_CONTINUE", "START_AND_CONTINUE", None)))
           )
         ),
         //1 is managed by both userAgent and anotherAgent
-        APIAuthorisation(4, 202, otherUserOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
+        APIAuthorisation(4, 202, 212, otherUserOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
           Seq(APIParty(2, "APPROVED", userAgentOrgId, Seq(Permissions(2L, "START_AND_CONTINUE", "START_AND_CONTINUE", None))),
             APIParty(3, "APPROVED", anotherAgentOrgId, Seq(Permissions(3L, "START_AND_CONTINUE", "START_AND_CONTINUE", None)))
           )
         ),
         //1 is not managed all all
-        APIAuthorisation(5, 203, otherUserOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
+        APIAuthorisation(5, 203, 213, otherUserOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
           Nil)
       )
 

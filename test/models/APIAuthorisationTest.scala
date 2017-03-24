@@ -24,7 +24,7 @@ class APIAuthorisationTest extends FlatSpec with MustMatchers {
 
   "APIAuthorisation" should "be deserialised property" in {
     val authorisation = Json.parse(DummyData.testData).as[APIAuthorisation]
-    authorisation mustBe APIAuthorisation(112, 146440182, 2, "MORE_EVIDENCE_REQUIRED", "OTHER", "OWNER_OCCUPIER",
+    authorisation mustBe APIAuthorisation(112, 146440182, 2, 3, "MORE_EVIDENCE_REQUIRED", "OTHER", "OWNER_OCCUPIER",
       new DateTime(2016, 3, 1, 12, 53, 51),
       new LocalDate(2016, 5, 7),
       Some(new LocalDate(2016, 11, 12)),
@@ -51,7 +51,6 @@ class APIAuthorisationTest extends FlatSpec with MustMatchers {
           20000,
           "4, HERON ROAD IND UNITS, EXETER, EX2 7LL", "70305000400")),
       Nil
-
     )
   }
 }
@@ -129,6 +128,7 @@ object DummyData {
                    |      ],
                    |      "authorisationOwnerCapacity": "OWNER_OCCUPIER",
                    |      "authorisationOwnerOrganisationId": 2,
+                   |      "authorisationOwnerPersonId": 3,
                    |      "authorisationStatus": "MORE_EVIDENCE_REQUIRED",
                    |      "createDatetime": "2016-03-01T12:53:51.000+0000",
                    |      "endDate": "2016-11-12",
