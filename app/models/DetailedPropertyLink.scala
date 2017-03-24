@@ -20,6 +20,7 @@ import org.joda.time.DateTime
 import play.api.libs.json.Json
 
 case class DetailedPropertyLink(authorisationId: Long,
+                                submissionId: String,
                                 uarn: Long,
                                 organisationId: Long,
                                 personId: Long,
@@ -39,6 +40,7 @@ object DetailedPropertyLink {
     val capacityDeclaration = CapacityDeclaration(prop.authorisationOwnerCapacity, prop.startDate, prop.endDate)
     DetailedPropertyLink(
       prop.authorisationId,
+      prop.submissionId,
       prop.uarn,
       prop.authorisationOwnerOrganisationId,
       prop.authorisationOwnerPersonId,
