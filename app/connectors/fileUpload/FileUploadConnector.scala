@@ -22,8 +22,8 @@ import javax.inject.Inject
 import akka.stream.scaladsl._
 import akka.util.ByteString
 import com.google.inject.{ImplementedBy, Singleton}
-import config.WSHttp
 import connectors.HandleErrors
+import infrastructure.WSHttp
 import play.api.Logger
 import play.api.libs.functional.syntax._
 import play.api.libs.json._

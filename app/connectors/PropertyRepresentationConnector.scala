@@ -18,7 +18,7 @@ package connectors
 
 import javax.inject.Inject
 
-import config.VOABackendWSHttp
+import infrastructure.VOABackendWSHttp
 import models._
 import org.joda.time.LocalDate
 import play.api.libs.json.{JsValue, Json}

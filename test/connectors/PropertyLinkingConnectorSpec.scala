@@ -17,7 +17,7 @@
 package connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import config.VOABackendWSHttp
+import infrastructure.VOABackendWSHttp
 import play.api.http.ContentTypes
 import uk.gov.hmrc.play.http.HeaderCarrier
 

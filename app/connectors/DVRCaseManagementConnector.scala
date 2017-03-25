@@ -16,7 +16,8 @@
 
 package connectors
 import javax.inject.Inject
-import config.VOABackendWSHttp
+
+import infrastructure.VOABackendWSHttp
 import models.DetailedValuationRequest
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpPost, HttpResponse}

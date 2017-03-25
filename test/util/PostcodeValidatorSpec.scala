@@ -24,9 +24,9 @@ class PostcodeValidatorSpec extends FlatSpec with Matchers {
 
   behavior of "PostcodeValidator"
 
-    it should "validate a correct with space" in {
-      PostcodeValidator.validate("AA1 1AA") shouldBe (true)
-    }
+  it should "validate a correct with space" in {
+    PostcodeValidator.validate("AA1 1AA") shouldBe (true)
+  }
 
   it should "validate a correct postcode without space" in {
     PostcodeValidator.validate("BN21FG") shouldBe (true)
@@ -55,8 +55,10 @@ class PostcodeValidatorSpec extends FlatSpec with Matchers {
 
   it should "return validate all postcodes in the all postcodes list" in {
     val source = Source.fromFile(getClass.getResource("/all_postcodes.txt").getFile())
-    for(line <- source.getLines()) {
-      withClue(s"using $line validate") { PostcodeValidator.validate(line) shouldBe (true) }
+    for (line <- source.getLines()) {
+      withClue(s"using $line validate") {
+        PostcodeValidator.validate(line) shouldBe (true)
+      }
     }
   }
 }

@@ -18,8 +18,8 @@ package controllers
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.admin.AdminTask._
-import config.VOABackendWSHttp
 import connectors._
+import infrastructure.VOABackendWSHttp
 import models._
 import org.joda.time.{DateTime, LocalDate}
 import play.api.http.ContentTypes

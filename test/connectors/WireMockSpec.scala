@@ -18,14 +18,13 @@ package connectors
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.client.WireMock._
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
-import org.scalatestplus.play.OneAppPerSuite
-import play.api.libs.json.Json
 import uk.gov.hmrc.play.it.Port
-import uk.gov.hmrc.play.test.UnitSpec
+import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
-trait WireMockSpec extends UnitSpec with OneAppPerSuite with BeforeAndAfterAll with BeforeAndAfterEach {
+trait WireMockSpec extends UnitSpec with WithFakeApplication with BeforeAndAfterAll with BeforeAndAfterEach {
+
+  val app = fakeApplication
 
   private lazy val wireMockServer = new WireMockServer(Port.randomAvailable)
 
@@ -38,7 +37,6 @@ trait WireMockSpec extends UnitSpec with OneAppPerSuite with BeforeAndAfterAll w
   }
 
   override def beforeEach() = {
-    wireMockServer.resetAll()
     WireMock.reset()
   }
 

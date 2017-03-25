@@ -14,19 +14,16 @@
  * limitations under the License.
  */
 
-package config
+import com.google.inject.AbstractModule
+import com.google.inject.name.Names
+import play.api.{Configuration, Environment}
 
-import uk.gov.hmrc.play.audit.http.config.LoadAuditingConfig
-import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.play.auth.microservice.connectors.AuthConnector
-import uk.gov.hmrc.play.config.{RunMode, ServicesConfig}
+class Module(environment: Environment,
+             configuration: Configuration) extends AbstractModule {
 
+  override def configure() = {
+    bindConstant().annotatedWith(Names.named("voaApiSubscriptionHeader")).to(configuration.getString("voaApi.subscriptionKeyHeader").get)
+    bindConstant().annotatedWith(Names.named("voaApiTraceHeader")).to(configuration.getString("voaApi.traceHeader").get)
+  }
 
-
-object MicroserviceAuditConnector extends AuditConnector with RunMode {
-  override lazy val auditingConfig = LoadAuditingConfig(s"auditing")
-}
-
-object MicroserviceAuthConnector extends AuthConnector with ServicesConfig {
-  override val authBaseUrl = baseUrl("auth")
 }

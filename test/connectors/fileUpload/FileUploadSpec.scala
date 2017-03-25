@@ -17,8 +17,8 @@
 package connectors.fileUpload
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import config.WSHttp
 import connectors.WireMockSpec
+import infrastructure.WSHttp
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.ws.WSClient
 import play.api.libs.ws.ahc.AhcWSClient

@@ -18,7 +18,7 @@ package connectors
 
 import javax.inject.Inject
 
-import config.VOABackendWSHttp
+import infrastructure.VOABackendWSHttp
 import models.{APIAddressLookupResult, DetailedAddress, SimpleAddress}
 import play.api.Logger
 import play.api.libs.json.{JsArray, JsDefined, JsNumber, JsValue}

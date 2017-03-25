@@ -18,7 +18,7 @@ package connectors
 
 import javax.inject.Inject
 
-import config.VOABackendWSHttp
+import infrastructure.VOABackendWSHttp
 import models._
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.play.config.ServicesConfig
