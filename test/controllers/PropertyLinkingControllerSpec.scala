@@ -19,7 +19,7 @@ package controllers
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors._
-import helpers.WithMetricsDisabledTestApplication
+import helpers.WithSimpleWsHttpTestApplication
 import infrastructure.SimpleWSHttp
 import models._
 import org.joda.time.{DateTime, LocalDate}
@@ -31,17 +31,17 @@ import play.api.test.Helpers._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class PropertyLinkingControllerSpec
-  extends WireMockSpec with WithMetricsDisabledTestApplication with ContentTypes {
+  extends WireMockSpec with WithSimpleWsHttpTestApplication with ContentTypes {
 
   implicit val request = FakeRequest()
 
-  var testPropertyLinkingController: PropertyLinkingController = null
+  var testPropertyLinkingController: PropertyLinkingController = _
 
   override def beforeAll() {
     super.beforeAll
 
     val http = fakeApplication.injector.instanceOf[SimpleWSHttp]
-s,m
+
     val propertyLinksConnector = new PropertyLinkingConnector(http) {
       override lazy val baseUrl: String = mockServerUrl
     }

@@ -24,12 +24,13 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.play.http.ws.WSHttp
 import uk.gov.hmrc.play.test.WithFakeApplication
 
-trait WithMetricsDisabledTestApplication extends WithFakeApplication {
+trait WithSimpleWsHttpTestApplication extends WithFakeApplication {
 
   this: Suite =>
 
   override lazy val fakeApplication: Application = new GuiceApplicationBuilder()
     .bindings(bindModules: _*)
     .overrides(bind[WSHttp].to[SimpleWSHttp])
+    .configure("metrics.enabled" -> "false")
     .build()
 }

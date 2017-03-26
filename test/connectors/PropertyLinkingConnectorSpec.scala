@@ -17,7 +17,7 @@
 package connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import helpers.WithMetricsDisabledTestApplication
+import helpers.WithSimpleWsHttpTestApplication
 import play.api.http.ContentTypes
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.http.ws.WSHttp
@@ -27,7 +27,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class PropertyLinkingConnectorSpec
   extends ContentTypes
-    with WireMockSpec with WithMetricsDisabledTestApplication {
+    with WireMockSpec with WithSimpleWsHttpTestApplication {
 
   "PropertyLinkingConnector.find" should {
     "filter properties that are revoked, or declined" in {
