@@ -16,17 +16,18 @@
 
 package connectors
 
-import javax.inject.Inject
+import javax.inject.{Inject, Named}
 
 import infrastructure.VOABackendWSHttp
 import models._
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
+import uk.gov.hmrc.play.http.ws.WSHttp
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class PropertyLinkingConnector @Inject() (http: VOABackendWSHttp)(implicit ec: ExecutionContext)
+class PropertyLinkingConnector @Inject() (@Named("VoaBackendWsHttp") http: WSHttp)(implicit ec: ExecutionContext)
   extends ServicesConfig {
   lazy val baseUrl: String = baseUrl("external-business-rates-data-platform")
   val listYear = 2017

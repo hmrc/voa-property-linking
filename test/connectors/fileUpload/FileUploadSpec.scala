@@ -18,14 +18,15 @@ package connectors.fileUpload
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.WireMockSpec
-import infrastructure.WSHttp
+import infrastructure.SimpleWSHttp
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.ws.WSClient
 import play.api.libs.ws.ahc.AhcWSClient
 import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
 import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.play.test.WithFakeApplication
 
-class FileUploadSpec extends WireMockSpec with MicroserviceFilterSupport {
+class FileUploadSpec extends WireMockSpec with WithFakeApplication with MicroserviceFilterSupport {
 
   "FileUploadConnector" should {
     "be able to download files from the file upload service" in {
@@ -33,8 +34,8 @@ class FileUploadSpec extends WireMockSpec with MicroserviceFilterSupport {
 
       val fileBytes = getClass.getResource("/document.pdf").getFile.getBytes
       val fileUrl = s"/file-upload/envelopes/${java.util.UUID.randomUUID()}/files/document.pdf/content"
-      val wsClient = app.injector.instanceOf[WSClient]
-      val http = app.injector.instanceOf[WSHttp]
+      val wsClient = fakeApplication.injector.instanceOf[WSClient]
+      val http = fakeApplication.injector.instanceOf[SimpleWSHttp]
       val connector = new FileUploadConnector(wsClient, http) {
         override lazy val url = mockServerUrl
       }

@@ -16,10 +16,11 @@
 
 package controllers
 
+import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock._
-import com.github.tomakehurst.wiremock.admin.AdminTask._
 import connectors._
-import infrastructure.VOABackendWSHttp
+import helpers.WithMetricsDisabledTestApplication
+import infrastructure.SimpleWSHttp
 import models._
 import org.joda.time.{DateTime, LocalDate}
 import play.api.http.ContentTypes
@@ -30,26 +31,33 @@ import play.api.test.Helpers._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class PropertyLinkingControllerSpec
-  extends ContentTypes
-  with WireMockSpec{
+  extends WireMockSpec with WithMetricsDisabledTestApplication with ContentTypes {
 
   implicit val request = FakeRequest()
 
-  play.api.Play.start(app)
-  val http = app.injector.instanceOf[VOABackendWSHttp]
-  val propertyLinksConnector = new PropertyLinkingConnector(http) {
-    override lazy val baseUrl: String = mockServerUrl
-  }
-  val addressesConnector = new AddressConnector(http)
+  var testPropertyLinkingController: PropertyLinkingController = null
 
-  val groupAccountsConnector: GroupAccountConnector = new GroupAccountConnector(addressesConnector, http) {
-    override lazy val baseUrl: String = mockServerUrl
-  }
-  val representationsConnector = new PropertyRepresentationConnector(http) {
-    override lazy val baseUrl: String = mockServerUrl
-  }
-  val testPropertyLinkingController  = new PropertyLinkingController(propertyLinksConnector, groupAccountsConnector, representationsConnector)
+  override def beforeAll() {
+    super.beforeAll
 
+    val http = fakeApplication.injector.instanceOf[SimpleWSHttp]
+s,m
+    val propertyLinksConnector = new PropertyLinkingConnector(http) {
+      override lazy val baseUrl: String = mockServerUrl
+    }
+
+    val addressesConnector = new AddressConnector(http)
+
+    val groupAccountsConnector: GroupAccountConnector = new GroupAccountConnector(addressesConnector, http) {
+      override lazy val baseUrl: String = mockServerUrl
+    }
+
+    val representationsConnector = new PropertyRepresentationConnector(http) {
+      override lazy val baseUrl: String = mockServerUrl
+    }
+
+    testPropertyLinkingController = new PropertyLinkingController(propertyLinksConnector, groupAccountsConnector, representationsConnector)
+  }
 
   "clientProperties" should {
     "only show the properties and permissions for that an agent" in {
@@ -57,7 +65,7 @@ class PropertyLinkingControllerSpec
       val agentOrgId = 222
       val otherAgentOrgId = 333
 
-      val dummyProperties = Seq (
+      val dummyProperties = Seq(
         //prop with noAgents
         APIAuthorisation(100, 1, 5, userOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
           Nil),
@@ -110,7 +118,7 @@ class PropertyLinkingControllerSpec
       val res = testPropertyLinkingController.clientProperties(userOrgId, agentOrgId)(FakeRequest())
       status(res) shouldBe OK
       val uarnsAndPermIds = Json.parse(contentAsString(res)).as[Seq[ClientProperty]].map(x => (x.uarn, x.permissionId))
-       uarnsAndPermIds shouldBe Seq((2, 1), (4, 4))
+      uarnsAndPermIds shouldBe Seq((2, 1), (4, 4))
     }
   }
 
@@ -118,7 +126,7 @@ class PropertyLinkingControllerSpec
     "only return the users properties if he is not an agent" in {
       val userOrgId = 111
 
-      val dummyProperties = Seq (
+      val dummyProperties = Seq(
         APIAuthorisation(101, 101, 103, userOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
           Nil),
         APIAuthorisation(102, 102, 104, userOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
@@ -150,16 +158,16 @@ class PropertyLinkingControllerSpec
       val otherUserOrgId = 222
       val anotherAgentOrgId = 333
 
-      val usersOwnProperties = Seq (
+      val usersOwnProperties = Seq(
         APIAuthorisation(1, 101, 105, userAgentOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
           Nil),
         APIAuthorisation(2, 102, 106, userAgentOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
           Nil)
-        )
+      )
 
       //userAgent is representing 2 properties from  otherUser
       //otherUser has 3 properties
-      val otherUsersProperties = Seq (
+      val otherUsersProperties = Seq(
         //1 is managed by userAgentOnly,
         APIAuthorisation(3, 201, 211, otherUserOrgId, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
           Seq(APIParty(1, "APPROVED", userAgentOrgId, Seq(Permissions(1L, "START_AND_CONTINUE", "START_AND_CONTINUE", None)))

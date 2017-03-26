@@ -16,7 +16,7 @@
 
 package connectors
 
-import javax.inject.Inject
+import javax.inject.{Inject, Named}
 
 import infrastructure.VOABackendWSHttp
 import models._
@@ -24,16 +24,17 @@ import org.joda.time.LocalDate
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
+import uk.gov.hmrc.play.http.ws.WSHttp
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class PropertyRepresentationConnector @Inject()(http: VOABackendWSHttp)(implicit ec: ExecutionContext)
+class PropertyRepresentationConnector @Inject()(@Named("VoaBackendWsHttp") http: WSHttp)(implicit ec: ExecutionContext)
   extends ServicesConfig {
   lazy val baseUrl: String = baseUrl("external-business-rates-data-platform")
 
-  def validateAgentCode(agentCode:Long, authorisationId: Long)(implicit hc: HeaderCarrier): Future[Either[Long, String]] = {
-    val url = baseUrl  + s"/authorisation-management-api/agent/validate_agent_code?agentCode=$agentCode&authorisationId=$authorisationId"
-    http.GET[JsValue](url).map( js => {
+  def validateAgentCode(agentCode: Long, authorisationId: Long)(implicit hc: HeaderCarrier): Future[Either[Long, String]] = {
+    val url = baseUrl + s"/authorisation-management-api/agent/validate_agent_code?agentCode=$agentCode&authorisationId=$authorisationId"
+    http.GET[JsValue](url).map(js => {
       val valid = (js \ "isValid").as[Boolean]
       if (valid)
         Left((js \ "organisationId").as[Long])
@@ -49,19 +50,19 @@ class PropertyRepresentationConnector @Inject()(http: VOABackendWSHttp)(implicit
   }
 
   def get(representationId: String)(implicit hc: HeaderCarrier): Future[Option[PropertyRepresentation]] = {
-    val url = baseUrl  + "/property-representations"+ s"/$representationId"
+    val url = baseUrl + "/property-representations" + s"/$representationId"
     http.GET[Option[PropertyRepresentation]](url)
   }
 
   def find(authorisationId: String)(implicit hc: HeaderCarrier): Future[Seq[PropertyRepresentation]] = {
-    val url = baseUrl  + "/property-representations"+ s"/find/$authorisationId"
+    val url = baseUrl + "/property-representations" + s"/find/$authorisationId"
     http.GET[Seq[PropertyRepresentation]](url)
   }
 
   def forAgent(status: String, organisationId: Long)(implicit hc: HeaderCarrier): Future[PropertyRepresentations] = {
-    val params=s"status=$status&organisationId=$organisationId&startPoint=1"
+    val params = s"status=$status&organisationId=$organisationId&startPoint=1"
     val url = baseUrl + s"/mdtp-dashboard-management-api/mdtp_dashboard/agent_representation_requests?$params"
-    http.GET[APIPropertyRepresentations](url).map( x => {
+    http.GET[APIPropertyRepresentations](url).map(x => {
       PropertyRepresentations(
         x.totalPendingRequests,
         x.requests.map(_.toPropertyRepresentation))
@@ -69,25 +70,25 @@ class PropertyRepresentationConnector @Inject()(http: VOABackendWSHttp)(implicit
   }
 
   def create(reprRequest: APIRepresentationRequest)(implicit hc: HeaderCarrier): Future[Unit] = {
-    val url = baseUrl  + s"/authorisation-management-api/agent/submit_agent_representation"
+    val url = baseUrl + s"/authorisation-management-api/agent/submit_agent_representation"
     http.POST[APIRepresentationRequest, HttpResponse](url, reprRequest) map { _ => () }
   }
 
   def response(representationResponse: APIRepresentationResponse)(implicit hc: HeaderCarrier): Future[Unit] = {
-    val url = baseUrl  + s"/authorisation-management-api/agent/submit_agent_rep_reponse"
+    val url = baseUrl + s"/authorisation-management-api/agent/submit_agent_rep_reponse"
     http.PUT[APIRepresentationResponse, HttpResponse](url, representationResponse) map { _ => () }
   }
 
   def update(reprRequest: UpdatedRepresentation)(implicit hc: HeaderCarrier): Future[Unit] = {
-    val url = baseUrl  + "/property-representations"+ s"/update"
+    val url = baseUrl + "/property-representations" + s"/update"
     http.PUT[UpdatedRepresentation, HttpResponse](url, reprRequest) map { _ => () }
   }
 
   def revoke(authorisedPartyId: Long)(implicit hc: HeaderCarrier): Future[Unit] = {
-    val url = baseUrl  + s"/authorisation-management-api/authorisedParty/$authorisedPartyId"
+    val url = baseUrl + s"/authorisation-management-api/authorisedParty/$authorisedPartyId"
     http.PATCH[JsValue, HttpResponse](url,
-      Json.obj("endDate"-> s"${LocalDate.now.toString}",
-               "authorisedPartyStatus"-> "REVOKED")) map{ _ => () }
+      Json.obj("endDate" -> s"${LocalDate.now.toString}",
+        "authorisedPartyStatus" -> "REVOKED")) map { _ => () }
   }
 
 }

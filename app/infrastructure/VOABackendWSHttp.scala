@@ -16,7 +16,7 @@
 
 package infrastructure
 
-import java.net.{URI, URL}
+import java.net.URL
 import javax.inject.{Inject, Singleton}
 
 import com.google.inject.name.Named
@@ -24,6 +24,7 @@ import com.kenshoo.play.metrics.Metrics
 import metrics.HasMetrics
 import play.api.libs.json.Writes
 import uk.gov.hmrc.play.http.hooks.HttpHook
+import uk.gov.hmrc.play.http.ws._
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -39,7 +40,7 @@ class VOABackendWSHttp @Inject()(override val metrics: Metrics,
     .withExtraHeaders(("Ocp-Apim-Subscription-Key", voaApiSubscriptionHeader), ("Ocp-Apim-Trace", voaApiTraceHeader))
     .withExtraHeaders(hc.extraHeaders: _*)
 
-  def completeRequestTimer(response: HttpResponse, timer: MetricsTimer): HttpResponse =
+  def mapResponseToSuccessOrFailure(response: HttpResponse, timer: MetricsTimer): HttpResponse =
     response.status.toString match {
       case status if status.startsWith("2") =>
         timer.completeTimerAndMarkAsSuccess
@@ -58,7 +59,12 @@ class VOABackendWSHttp @Inject()(override val metrics: Metrics,
     withMetricsTimer(getApiName(url)) {
       timer => {
         super.doGet(url)(buildHeaderCarrier(hc)) map {
-          response => completeRequestTimer(response, timer)
+          response => mapResponseToSuccessOrFailure(response, timer)
+        } recover {
+          case ex: Exception => {
+            timer.completeTimerAndMarkAsFailure
+            throw ex
+          }
         }
       }
     }
@@ -68,7 +74,12 @@ class VOABackendWSHttp @Inject()(override val metrics: Metrics,
     withMetricsTimer(getApiName(url)) {
       timer => {
         super.doDelete(url)(buildHeaderCarrier(hc)) map {
-          response => completeRequestTimer(response, timer)
+          response => mapResponseToSuccessOrFailure(response, timer)
+        } recover {
+          case ex: Exception => {
+            timer.completeTimerAndMarkAsFailure
+            throw ex
+          }
         }
       }
     }
@@ -78,7 +89,12 @@ class VOABackendWSHttp @Inject()(override val metrics: Metrics,
     withMetricsTimer(getApiName(url)) {
       timer => {
         super.doPatch(url, body)(rds, buildHeaderCarrier(hc)) map {
-          response => completeRequestTimer(response, timer)
+          response => mapResponseToSuccessOrFailure(response, timer)
+        } recover {
+          case ex: Exception => {
+            timer.completeTimerAndMarkAsFailure
+            throw ex
+          }
         }
       }
     }
@@ -88,7 +104,12 @@ class VOABackendWSHttp @Inject()(override val metrics: Metrics,
     withMetricsTimer(getApiName(url)) {
       timer => {
         super.doPut(url, body)(rds, buildHeaderCarrier(hc)) map {
-          response => completeRequestTimer(response, timer)
+          response => mapResponseToSuccessOrFailure(response, timer)
+        } recover {
+          case ex: Exception => {
+            timer.completeTimerAndMarkAsFailure
+            throw ex
+          }
         }
       }
     }
@@ -98,7 +119,12 @@ class VOABackendWSHttp @Inject()(override val metrics: Metrics,
     withMetricsTimer(getApiName(url)) {
       timer => {
         super.doPost(url, body, headers)(rds, buildHeaderCarrier(hc)) map {
-          response => completeRequestTimer(response, timer)
+          response => mapResponseToSuccessOrFailure(response, timer)
+        } recover {
+          case ex: Exception => {
+            timer.completeTimerAndMarkAsFailure
+            throw ex
+          }
         }
       }
     }

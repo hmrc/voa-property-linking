@@ -16,14 +16,27 @@
 
 package infrastructure
 
+import com.codahale.metrics.{Counter, Meter, MetricRegistry, Timer}
 import com.kenshoo.play.metrics.Metrics
+import connectors.WireMockSpec
+import org.mockito.ArgumentMatchers._
+import org.mockito.Mockito.when
 import org.scalatest.mock.MockitoSugar
-import uk.gov.hmrc.play.test.UnitSpec
+import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
-
-class VOABackendWSHttpTest extends UnitSpec with MockitoSugar {
+class VOABackendWSHttpTest extends UnitSpec with WireMockSpec with WithFakeApplication with MockitoSugar {
 
   val metricsMock = mock[Metrics]
+  val metricRegistry = mock[MetricRegistry]
+
+  when(metricsMock.defaultRegistry).thenReturn(metricRegistry)
+
+  when(metricRegistry.timer(any[String])).thenReturn(mock[Timer])
+  when(metricRegistry.counter(any[String])).thenReturn(mock[Counter])
+  when(metricRegistry.meter(any[String])).thenReturn(mock[Meter])
+
+  implicit val hc: HeaderCarrier = HeaderCarrier()
 
   val wsHttp = new VOABackendWSHttp(metricsMock, "subKey", "true")
 
@@ -44,6 +57,14 @@ class VOABackendWSHttpTest extends UnitSpec with MockitoSugar {
       val url = "http://voa-api-proxy.service:80/address-management-api/address?pageSize=100&startPoint=1&SearchParameters={\"postcode\": \"BN12 6EA\"}"
 
       wsHttp.getApiName(url) shouldBe "address-management-api"
+    }
+  }
+
+  "when a request succeeds" should {
+    "the metrics should be recorded" in {
+      val url = s"http://${mockServerUrl}/customer-management-api/organisation"
+
+      wsHttp.doGet(url)
     }
   }
 

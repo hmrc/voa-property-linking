@@ -15,17 +15,18 @@
  */
 
 package connectors
-import javax.inject.Inject
+import javax.inject.{Inject, Named}
 
 import infrastructure.VOABackendWSHttp
 import models.DetailedValuationRequest
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpPost, HttpResponse}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import uk.gov.hmrc.play.http.ws.WSHttp
 
 import scala.concurrent.Future
 
-class DVRCaseManagementConnector @Inject() (http: VOABackendWSHttp) extends ServicesConfig {
+class DVRCaseManagementConnector @Inject() (@Named("VoaBackendWsHttp") http: WSHttp) extends ServicesConfig {
   val url = baseUrl("external-business-rates-data-platform") + "/dvr-case-management-api"
 
   def requestDetailedValuation(request: DetailedValuationRequest)(implicit hc: HeaderCarrier): Future[Unit] = {

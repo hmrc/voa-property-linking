@@ -22,8 +22,9 @@ import connectors.{EvidenceConnector, WireMockSpec}
 import play.api.libs.ws.ahc.AhcWSClient
 import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
 import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.play.test.WithFakeApplication
 
-class EvidenceConnectorSpec extends WireMockSpec with MicroserviceFilterSupport {
+class EvidenceConnectorSpec extends WireMockSpec with WithFakeApplication with MicroserviceFilterSupport {
 
   "Evidence connector" should {
     "be able to upload a file" in {

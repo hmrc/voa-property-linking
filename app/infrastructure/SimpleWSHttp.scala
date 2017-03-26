@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-import com.google.inject.AbstractModule
-import com.google.inject.name.Names
-import play.api.{Configuration, Environment}
+package infrastructure
 
-class Module(environment: Environment,
-             configuration: Configuration) extends AbstractModule {
+import javax.inject.Singleton
 
-  override def configure() = {
-    bindConstant().annotatedWith(Names.named("voaApiSubscriptionHeader")).to(configuration.getString("voaApi.subscriptionKeyHeader").get)
-    bindConstant().annotatedWith(Names.named("voaApiTraceHeader")).to(configuration.getString("voaApi.traceHeader").get)
-  }
+import uk.gov.hmrc.play.config.AppName
+import uk.gov.hmrc.play.http.hooks.HttpHook
+import uk.gov.hmrc.play.http.ws._
 
+@Singleton
+class SimpleWSHttp extends WSGet with WSPut with WSPost with WSDelete with WSPatch with WSHttp with AppName {
+  override val hooks: Seq[HttpHook] = NoneRequired
 }

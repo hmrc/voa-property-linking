@@ -17,20 +17,22 @@
 package connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import infrastructure.VOABackendWSHttp
+import helpers.WithMetricsDisabledTestApplication
 import play.api.http.ContentTypes
 import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.play.http.ws.WSHttp
+import uk.gov.hmrc.play.test.WithFakeApplication
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class PropertyLinkingConnectorSpec
   extends ContentTypes
-    with WireMockSpec {
+    with WireMockSpec with WithMetricsDisabledTestApplication {
 
   "PropertyLinkingConnector.find" should {
     "filter properties that are revoked, or declined" in {
       implicit val hc = HeaderCarrier()
-      val http = app.injector.instanceOf[VOABackendWSHttp]
+      val http = fakeApplication.injector.instanceOf[WSHttp]
       val connector = new PropertyLinkingConnector(http) {
         override lazy val baseUrl: String = mockServerUrl
       }

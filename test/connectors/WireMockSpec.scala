@@ -22,9 +22,7 @@ import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import uk.gov.hmrc.play.it.Port
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
-trait WireMockSpec extends UnitSpec with WithFakeApplication with BeforeAndAfterAll with BeforeAndAfterEach {
-
-  val app = fakeApplication
+trait WireMockSpec extends UnitSpec with BeforeAndAfterAll with BeforeAndAfterEach {
 
   private lazy val wireMockServer = new WireMockServer(Port.randomAvailable)
 

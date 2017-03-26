@@ -31,7 +31,6 @@ trait HasMetrics {
   lazy val registry = metrics.defaultRegistry
 
   class MetricsTimer(metric: Metric) {
-
     val timer = localMetrics.startTimer(metric)
 
     def completeTimerAndMarkAsSuccess: Unit = {

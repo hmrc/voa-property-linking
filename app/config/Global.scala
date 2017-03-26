@@ -20,10 +20,10 @@ import javax.inject._
 import com.google.inject.AbstractModule
 import com.google.inject.name.Names
 import com.typesafe.config.Config
-import infrastructure.{RegularSchedule, Schedule}
+import infrastructure.{SimpleWSHttp, RegularSchedule, Schedule, VOABackendWSHttp}
 import net.ceedubs.ficus.Ficus._
 import org.joda.time.Duration
-import play.api.{Application, Configuration, Play}
+import play.api.{Application, Configuration, Environment, Play}
 import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.DB
 import uk.gov.hmrc.play.audit.filters.AuditFilter
@@ -32,6 +32,7 @@ import uk.gov.hmrc.play.auth.microservice.filters.AuthorisationFilter
 import uk.gov.hmrc.play.config.{AppName, ControllerConfig, RunMode}
 import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
 import uk.gov.hmrc.play.http.logging.filters.LoggingFilter
+import uk.gov.hmrc.play.http.ws.WSHttp
 import uk.gov.hmrc.play.microservice.bootstrap.DefaultMicroserviceGlobal
 
 object ControllerConfiguration extends ControllerConfig {
@@ -57,13 +58,19 @@ object MicroserviceAuthFilter extends AuthorisationFilter with MicroserviceFilte
   override def controllerNeedsAuth(controllerName: String): Boolean = ControllerConfiguration.paramsForController(controllerName).needsAuth
 }
 
-class GuiceModule() extends AbstractModule {
+class GuiceModule(environment: Environment,
+                  configuration: Configuration) extends AbstractModule {
   def configure() = {
     bind(classOf[String]).annotatedWith(Names.named("lockName")).toInstance("FileTransferLock")
     bind(classOf[Duration]).annotatedWith(Names.named("lockTimeout")).toInstance(Duration.standardHours(1))
 
     bind(classOf[Schedule]).annotatedWith(Names.named("regularSchedule")).to(classOf[RegularSchedule])
     bind(classOf[DB]).toProvider(classOf[MongoDbProvider]).asEagerSingleton()
+    
+    bindConstant().annotatedWith(Names.named("voaApiSubscriptionHeader")).to(configuration.getString("voaApi.subscriptionKeyHeader").get)
+    bindConstant().annotatedWith(Names.named("voaApiTraceHeader")).to(configuration.getString("voaApi.traceHeader").get)
+
+    bind(classOf[WSHttp]).annotatedWith(Names.named("VoaBackendWsHttp")).to(classOf[VOABackendWSHttp])
   }
 }
 

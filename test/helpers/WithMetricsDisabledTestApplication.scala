@@ -14,15 +14,22 @@
  * limitations under the License.
  */
 
-package infrastructure
+package helpers
 
-import javax.inject.Singleton
+import infrastructure.SimpleWSHttp
+import org.scalatest.Suite
+import play.api.Application
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
+import uk.gov.hmrc.play.http.ws.WSHttp
+import uk.gov.hmrc.play.test.WithFakeApplication
 
-import uk.gov.hmrc.play.config.AppName
-import uk.gov.hmrc.play.http.hooks.HttpHook
-import uk.gov.hmrc.play.http.ws._
+trait WithMetricsDisabledTestApplication extends WithFakeApplication {
 
-@Singleton
-class WSHttp extends WSGet with WSPut with WSPost with WSDelete with WSPatch with AppName {
-  override val hooks: Seq[HttpHook] = NoneRequired
+  this: Suite =>
+
+  override lazy val fakeApplication: Application = new GuiceApplicationBuilder()
+    .bindings(bindModules: _*)
+    .overrides(bind[WSHttp].to[SimpleWSHttp])
+    .build()
 }
