@@ -21,18 +21,10 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 import utils.StubLoginAttemptsRepo
 
-class ControllerSpec extends WordSpec with FutureAwaits with DefaultAwaitTimeout with BeforeAndAfterEach with BeforeAndAfterAll with MustMatchers {
+class ControllerSpec extends WordSpec with FutureAwaits with DefaultAwaitTimeout with BeforeAndAfterEach with MustMatchers {
 
   override protected def afterEach() = {
     StubLoginAttemptsRepo.reset()
   }
 
-  override protected def afterAll(): Unit = {
-    TestApp.app.stop()
-  }
-}
-
-object TestApp {
-  val app = new GuiceApplicationBuilder().build()
-  play.api.Play.start(app)
 }

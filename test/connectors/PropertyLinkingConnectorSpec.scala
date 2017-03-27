@@ -21,7 +21,6 @@ import helpers.WithSimpleWsHttpTestApplication
 import play.api.http.ContentTypes
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.http.ws.WSHttp
-import uk.gov.hmrc.play.test.WithFakeApplication
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
