@@ -40,7 +40,7 @@ class PropertyLinkingController @Inject() (
     }
   }
 
-  private def getProperties(organisationId: Long)(implicit  hc: HeaderCarrier): Future[Seq[DetailedPropertyLink]] = {
+  private def getProperties(organisationId: Long, userActingAsAgent: Boolean = false )(implicit  hc: HeaderCarrier): Future[Seq[DetailedPropertyLink]] = {
     for {
       props <- propertyLinksConnector.find(organisationId)
       res <- Future.traverse(props)(prop => {
@@ -50,7 +50,7 @@ class PropertyLinkingController @Inject() (
           })
           apiPartiesWithGroupAccounts = optionalGroupAccounts.flatten
           parties = apiPartiesWithGroupAccounts.flatMap { case (p: APIParty, g: GroupAccount) => Party.fromAPIParty(p, g) }
-        } yield DetailedPropertyLink.fromAPIAuthorisation(prop, parties)
+        } yield DetailedPropertyLink.fromAPIAuthorisation(prop, parties, userActingAsAgent)
       })
     } yield {
       res
@@ -59,7 +59,7 @@ class PropertyLinkingController @Inject() (
 
   private def getPropertiesWithAgent(organisationId: Long, agentOrgId: Long)(implicit  hc: HeaderCarrier): Future[Seq[DetailedPropertyLink]] = {
     for {
-      props <- getProperties(organisationId)
+      props <- getProperties(organisationId, userActingAsAgent = true)
       filterProps = props
         .map(p => p.copy(agents= p.agents.filter(_.organisationId == agentOrgId)))
         .filter(_.agents.nonEmpty)
