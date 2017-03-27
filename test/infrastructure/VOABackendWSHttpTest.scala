@@ -19,13 +19,14 @@ package infrastructure
 import com.codahale.metrics.{Counter, Meter, MetricRegistry, Timer}
 import com.kenshoo.play.metrics.Metrics
 import connectors.WireMockSpec
+import helpers.WithSimpleWsHttpTestApplication
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito.when
 import org.scalatest.mock.MockitoSugar
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
-class VOABackendWSHttpTest extends UnitSpec with WireMockSpec with WithFakeApplication with MockitoSugar {
+class VOABackendWSHttpTest extends UnitSpec with WireMockSpec with WithSimpleWsHttpTestApplication with MockitoSugar {
 
   val metricsMock = mock[Metrics]
   val metricRegistry = mock[MetricRegistry]
