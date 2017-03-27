@@ -18,6 +18,7 @@ package connectors.fileUpload
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.WireMockSpec
+import helpers.WithSimpleWsHttpTestApplication
 import infrastructure.SimpleWSHttp
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.ws.WSClient
@@ -26,7 +27,7 @@ import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.WithFakeApplication
 
-class FileUploadSpec extends WireMockSpec with WithFakeApplication with MicroserviceFilterSupport {
+class FileUploadSpec extends WireMockSpec with WithSimpleWsHttpTestApplication with MicroserviceFilterSupport {
 
   "FileUploadConnector" should {
     "be able to download files from the file upload service" in {

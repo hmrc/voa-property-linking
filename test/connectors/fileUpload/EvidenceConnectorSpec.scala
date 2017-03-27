@@ -19,12 +19,12 @@ package connectors.fileUpload
 import com.github.tomakehurst.wiremock.client.WireMock._
 import config.ApplicationConfig
 import connectors.{EvidenceConnector, WireMockSpec}
+import helpers.WithSimpleWsHttpTestApplication
 import play.api.libs.ws.ahc.AhcWSClient
 import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
 import uk.gov.hmrc.play.http.HeaderCarrier
-import uk.gov.hmrc.play.test.WithFakeApplication
 
-class EvidenceConnectorSpec extends WireMockSpec with WithFakeApplication with MicroserviceFilterSupport {
+class EvidenceConnectorSpec extends WireMockSpec with WithSimpleWsHttpTestApplication with MicroserviceFilterSupport {
 
   "Evidence connector" should {
     "be able to upload a file" in {
