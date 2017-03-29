@@ -18,10 +18,12 @@ package controllers
 
 import javax.inject.Inject
 
+import com.google.inject.Singleton
 import play.api.libs.json.Json
 import play.api.mvc.Action
 import repositories.SequenceGeneratorMongoRepository
 
+@Singleton
 class SubmissionIdController @Inject()(val sequenceGenerator: SequenceGeneratorMongoRepository)
   extends PropertyLinkingBaseController {
 

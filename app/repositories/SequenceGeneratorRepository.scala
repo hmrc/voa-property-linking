@@ -18,6 +18,7 @@ package repositories
 
 import javax.inject.Inject
 
+import com.google.inject.Singleton
 import play.api.libs.json._
 import reactivemongo.api.DB
 import reactivemongo.bson.{BSONDocument, BSONInteger, BSONString}
@@ -37,7 +38,7 @@ trait SequenceGeneratorRepository extends Repository[Sequence, String] {
   def getNextSequenceId(key: String): Future[Long]
 }
 
-
+@Singleton
 class SequenceGeneratorMongoRepository @Inject()(db: DB) extends
   ReactiveRepository[Sequence, String]("sequences", () => db, Json.format[Sequence], implicitly[Format[String]])
   with SequenceGeneratorRepository {
