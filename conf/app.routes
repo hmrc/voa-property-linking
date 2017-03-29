@@ -33,8 +33,6 @@ GET         /address                                                            
 GET         /address/:id                                                                     @controllers.AddressLookup.get(id: Int)
 POST        /address                                                                         @controllers.AddressLookup.create
 
-POST        /betalogin                                                                       controllers.PrivateBetaLoginController.login
-
 GET         /submissionId/:prefix                                                            @controllers.SubmissionIdController.get(prefix: String)
 
 POST        /request-detailed-valuation                                                      @controllers.DVRCaseManagement.requestDetailedValuation

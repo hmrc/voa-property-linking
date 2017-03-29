@@ -18,10 +18,12 @@ package controllers
 
 import javax.inject.Inject
 
+import com.google.inject.Singleton
 import connectors.DVRCaseManagementConnector
 import models.DetailedValuationRequest
 import play.api.mvc.Action
 
+@Singleton
 class DVRCaseManagement @Inject() (dvrCaseManagement: DVRCaseManagementConnector)
   extends PropertyLinkingBaseController {
 

@@ -18,6 +18,7 @@ package connectors
 
 import javax.inject.Inject
 
+import com.google.inject.Singleton
 import com.google.inject.name.Named
 import models._
 import play.api.libs.json.JsValue
@@ -27,13 +28,13 @@ import uk.gov.hmrc.play.http.ws.WSHttp
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class GroupAccountConnector@Inject()(
-                                       addresses: AddressConnector,
-                                       @Named("VoaBackendWsHttp") http: WSHttp)(implicit ec: ExecutionContext)
+@Singleton
+class GroupAccountConnector @Inject()(addresses: AddressConnector,
+                                      @Named("VoaBackendWsHttp") http: WSHttp)(implicit ec: ExecutionContext)
   extends ServicesConfig {
 
   lazy val baseUrl: String = baseUrl("external-business-rates-data-platform")
-  lazy val url =  baseUrl + "/customer-management-api/organisation"
+  lazy val url = baseUrl + "/customer-management-api/organisation"
 
   def create(account: GroupAccountSubmission)(implicit hc: HeaderCarrier): Future[JsValue] = {
     http.POST[APIGroupAccount, JsValue](url, account.toApiAccount)

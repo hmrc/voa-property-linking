@@ -18,6 +18,7 @@ package controllers
 
 import javax.inject.Inject
 
+import com.google.inject.Singleton
 import connectors.AddressConnector
 import models.SimpleAddress
 import play.api.libs.json.Json
@@ -26,6 +27,7 @@ import util.PostcodeValidator
 
 import scala.concurrent.Future
 
+@Singleton
 class AddressLookup @Inject() (addresses: AddressConnector) extends PropertyLinkingBaseController {
 
   def find(postcode: String) = Action.async { implicit request =>

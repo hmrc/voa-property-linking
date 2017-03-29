@@ -18,6 +18,7 @@ package services
 
 import javax.inject.Inject
 
+import com.google.inject.Singleton
 import connectors.EvidenceConnector
 import connectors.fileUpload.{EnvelopeInfo, EnvelopeMetadata, FileInfo, FileUploadConnector}
 import models.Closed
@@ -28,6 +29,7 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector,
                                     val evidenceConnector: EvidenceConnector,
                                     val repo: EnvelopeIdRepo

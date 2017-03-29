@@ -18,11 +18,13 @@ package controllers
 
 import javax.inject.Inject
 
+import com.google.inject.Singleton
 import connectors.IndividualAccountConnector
 import models.IndividualAccountWrite
 import play.api.libs.json.Json
 import play.api.mvc.Action
 
+@Singleton
 class IndividualAccountController @Inject() (individuals: IndividualAccountConnector) extends PropertyLinkingBaseController {
 
   def create() = Action.async(parse.json) { implicit request =>
