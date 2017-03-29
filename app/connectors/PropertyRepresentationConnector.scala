@@ -64,7 +64,11 @@ class PropertyRepresentationConnector @Inject()(@Named("VoaBackendWsHttp") http:
     http.GET[APIPropertyRepresentations](url).map(x => {
       PropertyRepresentations(
         x.totalPendingRequests,
-        x.requests.map(_.toPropertyRepresentation))
+        x.requests
+          //representationId is actually the AgentOrgId, and the backend currently returns
+          //representation requests that don't belong to the orgId we are interested in.
+          .filter(_.representationId == organisationId)
+          .map(_.toPropertyRepresentation))
     })
   }
 

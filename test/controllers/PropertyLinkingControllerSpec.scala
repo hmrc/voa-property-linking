@@ -187,8 +187,8 @@ class PropertyLinkingControllerSpec
       val propertyRepresentations = APIPropertyRepresentations(
         0,
         Seq(
-          APIPropertyRepresentation(1, "", otherUserOrgId, "Client1Ltd", "", "", "", LocalDate.now(), "APPROVED"),
-          APIPropertyRepresentation(2, "", otherUserOrgId, "Client1Ltd", "", "", "", LocalDate.now(), "APPROVED")
+          APIPropertyRepresentation(userAgentOrgId, "", otherUserOrgId, "Client1Ltd", "", "", "", LocalDate.now(), "APPROVED"),
+          APIPropertyRepresentation(userAgentOrgId, "", otherUserOrgId, "Client1Ltd", "", "", "", LocalDate.now(), "APPROVED")
         )
       )
       val dummyUserGroupAccount = APIDetailedGroupAccount(
