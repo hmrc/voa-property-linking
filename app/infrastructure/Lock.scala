@@ -18,10 +18,12 @@ package infrastructure
 
 import javax.inject.{Inject, Named}
 
+import com.google.inject.Singleton
 import org.joda.time.Duration
 import reactivemongo.api.DB
 import uk.gov.hmrc.lock.{LockKeeper, LockMongoRepository, LockRepository}
 
+@Singleton
 class Lock @Inject() (@Named("lockName") val name: String, @Named("lockTimeout") val timeout: Duration, val db: DB)extends LockKeeper{
   override def repo: LockRepository = LockMongoRepository(() => db)
   override def lockId: String = name

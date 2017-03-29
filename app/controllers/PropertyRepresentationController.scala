@@ -18,13 +18,11 @@ package controllers
 
 import javax.inject.Inject
 
-import com.google.inject.Singleton
 import connectors.PropertyRepresentationConnector
 import models._
 import play.api.libs.json.Json
 import play.api.mvc.Action
 
-@Singleton
 class PropertyRepresentationController @Inject() (representations: PropertyRepresentationConnector) extends PropertyLinkingBaseController {
 
   def validateAgentCode(agentCode:Long, authorisationId: Long) = Action.async { implicit request =>

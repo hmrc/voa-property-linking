@@ -18,13 +18,11 @@ package controllers
 
 import javax.inject.Inject
 
-import com.google.inject.Singleton
 import connectors.GroupAccountConnector
 import models.GroupAccountSubmission
 import play.api.libs.json.Json
 import play.api.mvc.Action
 
-@Singleton
 class GroupAccountController @Inject() (groups: GroupAccountConnector) extends PropertyLinkingBaseController {
 
   def get(organisationId: Int) = Action.async { implicit request =>

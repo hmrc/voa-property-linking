@@ -18,13 +18,11 @@ package controllers
 
 import javax.inject.Inject
 
-import com.google.inject.Singleton
 import models.Closed
 import play.api.mvc.Action
 import repositories.EnvelopeIdRepository
 import services.FileTransferScheduler
 
-@Singleton
 class EnvelopeController @Inject()(val repo: EnvelopeIdRepository, val service: FileTransferScheduler)
   extends PropertyLinkingBaseController {
 

@@ -30,7 +30,6 @@ import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-@Singleton
 class VOABackendWSHttp @Inject()(override val metrics: Metrics,
                                  @Named("voaApiSubscriptionHeader") voaApiSubscriptionHeader: String,
                                  @Named("voaApiTraceHeader") voaApiTraceHeader: String) extends WSHttp with HasMetrics {
