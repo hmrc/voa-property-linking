@@ -21,7 +21,7 @@ import javax.inject.Inject
 
 import akka.stream.scaladsl._
 import akka.util.ByteString
-import com.google.inject.{ImplementedBy, Singleton}
+import com.google.inject.ImplementedBy
 import connectors.HandleErrors
 import infrastructure.SimpleWSHttp
 import play.api.Logger
@@ -87,7 +87,6 @@ trait FileUpload {
   def deleteEnvelope(envelopeId: String)(implicit hc: HeaderCarrier): Future[Unit]
 }
 
-@Singleton
 class FileUploadConnector @Inject()(ws: WSClient, http: SimpleWSHttp)(implicit ec: ExecutionContext) extends FileUpload with ServicesConfig with HandleErrors with MicroserviceFilterSupport {
   lazy val url = baseUrl("file-upload-backend")
 

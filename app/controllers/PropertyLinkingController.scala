@@ -18,7 +18,6 @@ package controllers
 
 import javax.inject.Inject
 
-import com.google.inject.Singleton
 import connectors.{GroupAccountConnector, PropertyLinkingConnector, PropertyRepresentationConnector}
 import models._
 import play.api.libs.json.Json
@@ -27,7 +26,6 @@ import uk.gov.hmrc.play.http.{HeaderCarrier, Upstream5xxResponse}
 
 import scala.concurrent.Future
 
-@Singleton
 class PropertyLinkingController @Inject() (
                                             propertyLinksConnector: PropertyLinkingConnector,
                                             groupAccountsConnector: GroupAccountConnector,

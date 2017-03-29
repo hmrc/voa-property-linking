@@ -18,12 +18,10 @@ package controllers
 
 import javax.inject.Inject
 
-import com.google.inject.Singleton
 import connectors.EvidenceConnector
 import play.api.mvc.Action
 import services.FileTransferService
 
-@Singleton
 class FileTransferController @Inject() (val fileTransferService: FileTransferService,
                                         val evidenceConnector: EvidenceConnector) extends PropertyLinkingBaseController {
   def run() = Action.async { implicit  request =>

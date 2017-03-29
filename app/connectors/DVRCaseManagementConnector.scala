@@ -17,7 +17,6 @@
 package connectors
 import javax.inject.{Inject, Named}
 
-import com.google.inject.Singleton
 import models.DetailedValuationRequest
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import uk.gov.hmrc.play.config.ServicesConfig
@@ -26,7 +25,6 @@ import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.Future
 
-@Singleton
 class DVRCaseManagementConnector @Inject() (@Named("VoaBackendWsHttp") http: WSHttp) extends ServicesConfig {
   val url = baseUrl("external-business-rates-data-platform") + "/dvr-case-management-api"
 

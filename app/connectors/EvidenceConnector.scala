@@ -37,7 +37,6 @@ trait EvidenceTransfer {
   def uploadFile(fileName: String, content: Option[Array[Byte]], metadata: EnvelopeMetadata)(implicit hc: HeaderCarrier): Future[Unit]
 }
 
-@Singleton
 class EvidenceConnector @Inject()(val ws: WSClient) extends EvidenceTransfer with ServicesConfig with HandleErrors {
 
   val url = baseUrl("external-business-rates-data-platform")
