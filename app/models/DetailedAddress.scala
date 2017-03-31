@@ -24,8 +24,18 @@ case class DetailedAddress(addressUnitId: Option[Int] = None, nonAbpAddressId: O
                            doubleDependentLocality: Option[String] = None, dependentLocality: Option[String] = None, postTown: String, postcode: String) {
 
   def simplify = {
-    val lines = Seq(subBuildingName, buildingName, buildingNumber, dependentThoroughfareName, thoroughfareName, dependentLocality).filter(_.exists(_.nonEmpty))
-    SimpleAddress(addressUnitId, lines.headOption.flatten.getOrElse(""), lines.lift(1).flatten.getOrElse(""), lines.lift(2).flatten.getOrElse(""), postTown, postcode)
+    SimpleAddress(
+      addressUnitId = addressUnitId,
+      line1 = concatenate(organisationName, departmentName),
+      line2 = concatenate(subBuildingName, buildingName, buildingNumber),
+      line3 = concatenate(dependentThoroughfareName, thoroughfareName),
+      line4 = concatenate(doubleDependentLocality, dependentLocality, Some(postTown)),
+      postcode = postcode
+    )
+  }
+
+  private def concatenate(lines: Option[String]*) = {
+    lines.toSeq.flatten.mkString(", ")
   }
 }
 
