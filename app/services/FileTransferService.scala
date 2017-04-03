@@ -21,7 +21,7 @@ import javax.inject.Inject
 import com.google.inject.Singleton
 import connectors.EvidenceConnector
 import connectors.fileUpload.{EnvelopeInfo, EnvelopeMetadata, FileInfo, FileUploadConnector}
-import models.Closed
+import models.{Closed, Open}
 import play.api.Logger
 import play.modules.reactivemongo.MongoDbConnection
 import repositories.EnvelopeIdRepo
@@ -40,10 +40,12 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
 
   def justDoIt()(implicit hc: HeaderCarrier): Future[Unit] = {
     val allEnvelopes = repo.get()
-    allEnvelopes.foreach(envelope => Logger.info(s"envelope found in mongo: ${envelope.map(x=> (x.envelopeId, x.status))}"))
+    allEnvelopes.foreach(envelope => {
+      Logger.info(s"${envelope.filter(_.status == Some(Open)).size} open, ${envelope.filter(_.status == Some(Closed)).size} closed")
+      Logger.info(s"${envelope.size} envelopes found in mongo: ${envelope.map(x=> (x.envelopeId, x.status))}")
+    })
 
     val closedEnvelopes = allEnvelopes.map(_.filter(_.status.getOrElse(Closed)==Closed)).map(_.map(_.envelopeId))
-    closedEnvelopes.map(x => println("ClosedEnvL " + x))
     for {
       closedEnvelopes <- allEnvelopes.map(_.filter(_.status.getOrElse(Closed) == Closed))
       envelopeIds = closedEnvelopes.map(_.envelopeId)
