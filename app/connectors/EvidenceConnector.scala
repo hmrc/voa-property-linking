@@ -43,7 +43,7 @@ class EvidenceConnector @Inject()(val ws: WSClient) extends EvidenceTransfer wit
   override def uploadFile(fileName: String, content: Option[Array[Byte]], metadata: EnvelopeMetadata)(implicit hc: HeaderCarrier): Future[Unit] = {
     val endpoint = "/customer-management-api/customer/evidence"
 
-    Logger.info(s"Uploading file $fileName to /customer/evidence")
+    Logger.info(s"Uploading file: $fileName, subId: ${metadata.submissionId} to /customer/evidence")
 
     val res = ws.url(url + endpoint)
       .withHeaders(
