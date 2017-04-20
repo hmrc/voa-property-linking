@@ -19,6 +19,12 @@ package models
 import org.joda.time.{DateTime, LocalDate}
 import play.api.libs.json._
 
+case class PropertiesView(resultCount: Option[Int], authorisations: Seq[APIAuthorisation])
+
+object PropertiesView {
+  implicit val format: Format[PropertiesView] = Json.format[PropertiesView]
+}
+
 case class APIAuthorisation(
                              authorisationId: Long,
                              uarn: Long,

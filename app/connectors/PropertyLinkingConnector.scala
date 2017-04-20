@@ -19,7 +19,6 @@ package connectors
 import javax.inject.{Inject, Named}
 
 import models._
-import play.api.libs.json.JsValue
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.play.http.ws.WSHttp
@@ -36,22 +35,36 @@ class PropertyLinkingConnector @Inject() (@Named("VoaBackendWsHttp") http: WSHtt
     http.POST[APIPropertyLinkRequest, HttpResponse](url, linkingRequest) map { _ => () }
   }
 
-  def find(organisationId: Long)(implicit hc: HeaderCarrier): Future[Seq[APIAuthorisation]] = {
-    val url = baseUrl + s"/mdtp-dashboard-management-api/mdtp_dashboard/properties_view?listYear=$listYear&organisationId=$organisationId"
-    val props = http.GET[JsValue](url).map(js =>{
-      (js \ "authorisations").as[Seq[APIAuthorisation]]
-    }).map( _
-        .filterNot(_.authorisationStatus.toUpperCase == "REVOKED")
-        .filterNot(_.authorisationStatus.toUpperCase == "DECLINED")
-      )
-    props.map(_.map(x=> {
-      x.copy(parties = {
-        x.parties
-          .filter(party => List("APPROVED", "PENDING").contains(party.authorisedPartyStatus)) //parties must be approved or pending
-          .map(party => party.copy(permissions =  party.permissions.filterNot(_.endDate.isDefined))) //permissions can't have enddate
-          .filter(_.permissions.nonEmpty) //and agent must have a permission
-      })
-    }))
+  def find(organisationId: Long, params: PaginationParams)(implicit hc: HeaderCarrier): Future[PropertiesView] = {
+    val url = baseUrl +
+      s"/mdtp-dashboard-management-api/mdtp_dashboard/properties_view" +
+      s"?listYear=$listYear" +
+      s"&organisationId=$organisationId" +
+      s"&startPoint=${params.startPoint}" +
+      s"&pageSize=${params.pageSize}" +
+      s"&requestTotalRowCount=${params.requestTotalRowCount}"
+
+    http.GET[PropertiesView](url)
+      .map(filterInvalid)
+      .map(filterParties)
+
+  }
+
+  private def filterInvalid(view: PropertiesView): PropertiesView = {
+    view.copy(authorisations = view.authorisations.filterNot(a => Seq("REVOKED", "DECLINED").contains(a.authorisationStatus.toUpperCase)))
+  }
+
+  private def filterParties(view: PropertiesView): PropertiesView = {
+    val filtered = view.authorisations map { auth =>
+      val filteredParties = auth.parties
+        .filter(party => List("APPROVED", "PENDING").contains(party.authorisedPartyStatus)) //parties must be approved or pending
+        .map(party => party.copy(permissions =  party.permissions.filterNot(_.endDate.isDefined))) //permissions can't have enddate
+        .filter(_.permissions.nonEmpty) //and agent must have a permission
+
+      auth.copy(parties = filteredParties)
+    }
+
+    view.copy(authorisations = filtered)
   }
 
   def getAssessment(authorisationId: Long)(implicit hc: HeaderCarrier): Future[Seq[Assessment]] = {
