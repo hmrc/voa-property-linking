@@ -30,7 +30,8 @@ private object AppDependencies {
     "uk.gov.hmrc" %% "play-config" % "3.0.0",
     "uk.gov.hmrc" %% "logback-json-logger" % "3.1.0",
     "uk.gov.hmrc" %% "mongo-lock" % "4.0.0",
-    "uk.gov.hmrc" %% "domain" % "4.0.0"
+    "uk.gov.hmrc" %% "domain" % "4.0.0",
+    "org.typelevel" %% "cats-core" % "0.8.1"
   )
 
   trait TestDependencies {

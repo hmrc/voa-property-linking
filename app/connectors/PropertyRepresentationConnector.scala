@@ -31,6 +31,11 @@ class PropertyRepresentationConnector @Inject()(@Named("VoaBackendWsHttp") http:
   extends ServicesConfig {
   lazy val baseUrl: String = baseUrl("external-business-rates-data-platform")
 
+  def get(authorisationId: Long)(implicit hc: HeaderCarrier): Future[Option[APIAuthorisation]] = {
+    val url = baseUrl + s"/authorisation-management-api/$authorisationId"
+    http.GET[APIAuthorisation](url) map { Some.apply } recover { case _: NotFoundException => None }
+  }
+
   def validateAgentCode(agentCode: Long, authorisationId: Long)(implicit hc: HeaderCarrier): Future[Either[Long, String]] = {
     val url = baseUrl + s"/authorisation-management-api/agent/validate_agent_code?agentCode=$agentCode&authorisationId=$authorisationId"
     http.GET[JsValue](url).map(js => {
@@ -46,16 +51,6 @@ class PropertyRepresentationConnector @Inject()(@Named("VoaBackendWsHttp") http:
           })
       }
     })
-  }
-
-  def get(representationId: String)(implicit hc: HeaderCarrier): Future[Option[PropertyRepresentation]] = {
-    val url = baseUrl + "/property-representations" + s"/$representationId"
-    http.GET[Option[PropertyRepresentation]](url)
-  }
-
-  def find(authorisationId: String)(implicit hc: HeaderCarrier): Future[Seq[PropertyRepresentation]] = {
-    val url = baseUrl + "/property-representations" + s"/find/$authorisationId"
-    http.GET[Seq[PropertyRepresentation]](url)
   }
 
   def forAgent(status: String, organisationId: Long)(implicit hc: HeaderCarrier): Future[PropertyRepresentations] = {
@@ -80,11 +75,6 @@ class PropertyRepresentationConnector @Inject()(@Named("VoaBackendWsHttp") http:
   def response(representationResponse: APIRepresentationResponse)(implicit hc: HeaderCarrier): Future[Unit] = {
     val url = baseUrl + s"/authorisation-management-api/agent/submit_agent_rep_reponse"
     http.PUT[APIRepresentationResponse, HttpResponse](url, representationResponse) map { _ => () }
-  }
-
-  def update(reprRequest: UpdatedRepresentation)(implicit hc: HeaderCarrier): Future[Unit] = {
-    val url = baseUrl + "/property-representations" + s"/update"
-    http.PUT[UpdatedRepresentation, HttpResponse](url, reprRequest) map { _ => () }
   }
 
   def revoke(authorisedPartyId: Long)(implicit hc: HeaderCarrier): Future[Unit] = {

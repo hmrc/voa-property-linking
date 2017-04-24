@@ -18,6 +18,7 @@ package controllers
 
 import javax.inject.Inject
 
+import cats.data.OptionT
 import connectors.{GroupAccountConnector, PropertyLinkingConnector, PropertyRepresentationConnector}
 import models._
 import play.api.libs.json.Json
@@ -39,6 +40,13 @@ class PropertyLinkingController @Inject()(propertyLinksConnector: PropertyLinkin
     }
   }
 
+  def get(authorisationId: Long) = Action.async { implicit request =>
+    representationsConnector.get(authorisationId) flatMap {
+      case Some(authorisation) => detailed(authorisation) map { d => Ok(Json.toJson(d)) }
+      case None => NotFound
+    }
+  }
+
   def find(organisationId: Long, paginationParams: PaginationParams) = Action.async { implicit request =>
     getProperties(organisationId, paginationParams).map(x => Ok(Json.toJson(x)))
   }
@@ -46,18 +54,23 @@ class PropertyLinkingController @Inject()(propertyLinksConnector: PropertyLinkin
   private def getProperties(organisationId: Long, params: PaginationParams)(implicit hc: HeaderCarrier): Future[PropertyLinkResponse] = {
     for {
       view <- propertyLinksConnector.find(organisationId, params)
-      detailedLinks <- Future.traverse(view.authorisations)(prop => {
-        for {
-          optionalGroupAccounts <- Future.traverse(prop.parties)(party => {
-            groupAccountsConnector.get(party.authorisedPartyOrganisationId).map(_.map(groupAccount => (party, groupAccount)))
-          })
-          apiPartiesWithGroupAccounts = optionalGroupAccounts.flatten
-          parties = apiPartiesWithGroupAccounts.flatMap { case (p: APIParty, g: GroupAccount) => Party.fromAPIParty(p, g) }
-        } yield DetailedPropertyLink.fromAPIAuthorisation(prop, parties)
-      })
+      detailedLinks <- Future.traverse(view.authorisations)(detailed)
     } yield {
       PropertyLinkResponse(view.resultCount, detailedLinks)
     }
+  }
+
+  private def detailed(authorisation: APIAuthorisation)(implicit hc: HeaderCarrier): Future[DetailedPropertyLink] = {
+    for {
+      apiPartiesWithGroupAccounts <- getGroupAccounts(authorisation)
+      parties = apiPartiesWithGroupAccounts.flatMap { case (p: APIParty, g: GroupAccount) => Party.fromAPIParty(p, g) }
+    } yield DetailedPropertyLink.fromAPIAuthorisation(authorisation, parties)
+  }
+
+  private def getGroupAccounts(authorisation: APIAuthorisation)(implicit hc: HeaderCarrier): Future[Seq[(APIParty, GroupAccount)]] = {
+    Future.traverse(authorisation.parties)(party =>
+      groupAccountsConnector.get(party.authorisedPartyOrganisationId).map(_.map(groupAccount => (party, groupAccount)))
+    ).map(_.flatten)
   }
 
   def clientProperties(userOrgId: Long, agentOrgId: Long, params: PaginationParams) = Action.async { implicit request =>
@@ -72,6 +85,23 @@ class PropertyLinkingController @Inject()(propertyLinksConnector: PropertyLinkin
         filteredPropsAgents.map(x => ClientProperty.build(x, userAccount))
       )
     }).map(x => Ok(Json.toJson(x)))
+  }
+
+  def clientProperty(authorisationId: Long, clientOrgId: Long, agentOrgId: Long) = Action.async { implicit request =>
+    representationsConnector.get(authorisationId) flatMap {
+      case Some(authorisation) if authorisedFor(authorisation, clientOrgId, agentOrgId) => toClientProperty(authorisation) map { p => Ok(Json.toJson(p)) }
+      case _ => NotFound
+    }
+  }
+
+  private def authorisedFor(authorisation: APIAuthorisation, clientOrgId: Long, agentOrgId: Long) = {
+    authorisation.authorisationOwnerOrganisationId == clientOrgId && authorisation.parties.exists(_.authorisedPartyOrganisationId == agentOrgId)
+  }
+
+  private def toClientProperty(authorisation: APIAuthorisation)(implicit hc: HeaderCarrier): Future[ClientProperty] = {
+    groupAccountsConnector.get(authorisation.authorisationOwnerOrganisationId) map { acc =>
+      ClientProperty.build(authorisation, acc)
+    }
   }
 
   def assessments(authorisationId: Long) = Action.async { implicit request =>

@@ -1,19 +1,19 @@
 # microservice specific routes
 
 GET          /property-representations/validate-agent-code/:agentCode/:authorisationId        @controllers.PropertyRepresentationController.validateAgentCode(agentCode:Long, authorisationId: Long)
-GET          /property-representations/:representationId                                      @controllers.PropertyRepresentationController.get(representationId)
 GET          /property-representations/agent/:status/:organisationId                          @controllers.PropertyRepresentationController.forAgent(status: String, organisationId: Long)
 
 POST         /property-representations/create                                                 @controllers.PropertyRepresentationController.create()
 
-PUT          /property-representations/update                                                 @controllers.PropertyRepresentationController.update()
 PATCH        /property-representations/revoke/:authorisedPartyId                              @controllers.PropertyRepresentationController.revoke(authorisedPartyId: Long)
 PUT          /property-representations/response                                               @controllers.PropertyRepresentationController.response()
 
 POST         /property-links                                                                  @controllers.PropertyLinkingController.create()
-GET          /property-links/:organisationId                                                  @controllers.PropertyLinkingController.find(organisationId: Int, params: models.PaginationParams)
+GET          /property-links                                                                  @controllers.PropertyLinkingController.find(organisationId: Long, params: models.PaginationParams)
+GET          /property-links/client-properties                                                @controllers.PropertyLinkingController.clientProperties(clientOrganisationId: Long, agentOrganisationId: Long, params: models.PaginationParams)
+GET          /property-links/client-property/:authorisationId                                 @controllers.PropertyLinkingController.clientProperty(authorisationId: Long, clientOrganisationId: Long, agentOrganisationId: Long)
+GET          /property-links/:linkId                                                          @controllers.PropertyLinkingController.get(linkId: Long)
 GET          /dashboard/assessments/:authorisationId                                          @controllers.PropertyLinkingController.assessments(authorisationId: Long)
-GET          /property-links/client-properties/:userId/:agentId                               @controllers.PropertyLinkingController.clientProperties(userId: Long, agentId: Long, params: models.PaginationParams)
 
 GET          /individuals/:personId                                                           @controllers.IndividualAccountController.get(personId: Int)
 GET          /individuals                                                                     @controllers.IndividualAccountController.withExternalId(externalId)

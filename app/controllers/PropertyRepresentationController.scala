@@ -23,6 +23,8 @@ import models._
 import play.api.libs.json.Json
 import play.api.mvc.Action
 
+import scala.concurrent.Future
+
 class PropertyRepresentationController @Inject() (representations: PropertyRepresentationConnector) extends PropertyLinkingBaseController {
 
   def validateAgentCode(agentCode:Long, authorisationId: Long) = Action.async { implicit request =>
@@ -38,13 +40,6 @@ class PropertyRepresentationController @Inject() (representations: PropertyRepre
     representations.forAgent(status, organisationId).map( x=> Ok(Json.toJson(x)))
   }
 
-  def get(representationId: String) = Action.async { implicit request =>
-    representations.get(representationId) map {
-      case Some(r) => Ok(Json.toJson(r))
-      case None => BadRequest
-    }
-  }
-
   def create() = Action.async(parse.json) { implicit request =>
     withJsonBody[RepresentationRequest] { reprRequest =>
       representations.create(APIRepresentationRequest.fromRepresentationRequest(reprRequest)).map(x => Ok(""))
@@ -54,12 +49,6 @@ class PropertyRepresentationController @Inject() (representations: PropertyRepre
   def response() = Action.async(parse.json) { implicit request =>
     withJsonBody[APIRepresentationResponse] { r =>
       representations.response(r) map { _ => Ok("") }
-    }
-  }
-
-  def update() = Action.async(parse.json) { implicit request =>
-    withJsonBody[UpdatedRepresentation] { r =>
-      representations.update(r) map { _ => Ok("") }
     }
   }
 
