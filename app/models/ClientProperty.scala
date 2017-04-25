@@ -40,7 +40,7 @@ case class ClientProperty(ownerOrganisationId: Long,
 object ClientProperty {
   implicit val format = Json.format[ClientProperty]
 
-  def build(prop: APIAuthorisation, userAccount: Option[GroupAccount]) = {
+  def build(prop: PropertiesView, userAccount: Option[GroupAccount]) = {
     ClientProperty(
       prop.authorisationOwnerOrganisationId,
       userAccount.map(_.companyName).getOrElse("Name not found"),

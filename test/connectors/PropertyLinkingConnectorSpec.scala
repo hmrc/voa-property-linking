@@ -18,6 +18,7 @@ package connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import helpers.WithSimpleWsHttpTestApplication
+import models.PaginationParams
 import play.api.http.ContentTypes
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.http.ws.WSHttp
@@ -32,21 +33,29 @@ class PropertyLinkingConnectorSpec
     "filter properties that are revoked, or declined" in {
       implicit val hc = HeaderCarrier()
       val http = fakeApplication.injector.instanceOf[WSHttp]
+
       val connector = new PropertyLinkingConnector(http) {
         override lazy val baseUrl: String = mockServerUrl
       }
+
       val organisationId = 123
-      stubFor(get(urlEqualTo(s"/mdtp-dashboard-management-api/mdtp_dashboard/properties_view?listYear=2017&organisationId=${organisationId}"))
+      val propertiesUrl = s"/mdtp-dashboard-management-api/mdtp_dashboard/properties_view" +
+        s"?listYear=2017" +
+        s"&organisationId=$organisationId" +
+        s"&startPoint=1" +
+        s"&pageSize=25" +
+        s"&requestTotalRowCount=false"
+
+      stubFor(get(urlEqualTo(propertiesUrl))
         .willReturn(aResponse
           .withStatus(200)
           .withHeader("Content-Type", JSON)
           .withBody(declinedAndRevokedProperties)
         )
       )
-      await(connector.find(organisationId)(hc)).size shouldBe 0
+      await(connector.find(organisationId, PaginationParams(1, 25, requestTotalRowCount = false))(hc)).authorisations.size shouldBe 0
     }
   }
-
 
   lazy val declinedAndRevokedProperties =
     """

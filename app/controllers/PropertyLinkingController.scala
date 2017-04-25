@@ -18,7 +18,6 @@ package controllers
 
 import javax.inject.Inject
 
-import cats.data.OptionT
 import connectors.{GroupAccountConnector, PropertyLinkingConnector, PropertyRepresentationConnector}
 import models._
 import play.api.libs.json.Json
@@ -41,7 +40,7 @@ class PropertyLinkingController @Inject()(propertyLinksConnector: PropertyLinkin
   }
 
   def get(authorisationId: Long) = Action.async { implicit request =>
-    representationsConnector.get(authorisationId) flatMap {
+    propertyLinksConnector.get(authorisationId) flatMap {
       case Some(authorisation) => detailed(authorisation) map { d => Ok(Json.toJson(d)) }
       case None => NotFound
     }
@@ -60,14 +59,14 @@ class PropertyLinkingController @Inject()(propertyLinksConnector: PropertyLinkin
     }
   }
 
-  private def detailed(authorisation: APIAuthorisation)(implicit hc: HeaderCarrier): Future[DetailedPropertyLink] = {
+  private def detailed(authorisation: PropertiesView)(implicit hc: HeaderCarrier): Future[DetailedPropertyLink] = {
     for {
       apiPartiesWithGroupAccounts <- getGroupAccounts(authorisation)
       parties = apiPartiesWithGroupAccounts.flatMap { case (p: APIParty, g: GroupAccount) => Party.fromAPIParty(p, g) }
     } yield DetailedPropertyLink.fromAPIAuthorisation(authorisation, parties)
   }
 
-  private def getGroupAccounts(authorisation: APIAuthorisation)(implicit hc: HeaderCarrier): Future[Seq[(APIParty, GroupAccount)]] = {
+  private def getGroupAccounts(authorisation: PropertiesView)(implicit hc: HeaderCarrier): Future[Seq[(APIParty, GroupAccount)]] = {
     Future.traverse(authorisation.parties)(party =>
       groupAccountsConnector.get(party.authorisedPartyOrganisationId).map(_.map(groupAccount => (party, groupAccount)))
     ).map(_.flatten)
@@ -88,17 +87,17 @@ class PropertyLinkingController @Inject()(propertyLinksConnector: PropertyLinkin
   }
 
   def clientProperty(authorisationId: Long, clientOrgId: Long, agentOrgId: Long) = Action.async { implicit request =>
-    representationsConnector.get(authorisationId) flatMap {
+    propertyLinksConnector.get(authorisationId) flatMap {
       case Some(authorisation) if authorisedFor(authorisation, clientOrgId, agentOrgId) => toClientProperty(authorisation) map { p => Ok(Json.toJson(p)) }
       case _ => NotFound
     }
   }
 
-  private def authorisedFor(authorisation: APIAuthorisation, clientOrgId: Long, agentOrgId: Long) = {
+  private def authorisedFor(authorisation: PropertiesView, clientOrgId: Long, agentOrgId: Long) = {
     authorisation.authorisationOwnerOrganisationId == clientOrgId && authorisation.parties.exists(_.authorisedPartyOrganisationId == agentOrgId)
   }
 
-  private def toClientProperty(authorisation: APIAuthorisation)(implicit hc: HeaderCarrier): Future[ClientProperty] = {
+  private def toClientProperty(authorisation: PropertiesView)(implicit hc: HeaderCarrier): Future[ClientProperty] = {
     groupAccountsConnector.get(authorisation.authorisationOwnerOrganisationId) map { acc =>
       ClientProperty.build(authorisation, acc)
     }

@@ -16,35 +16,6 @@
 
 package models
 
-import org.joda.time.{DateTime, LocalDate}
-import play.api.libs.json._
+class APIAuthorisation {
 
-case class PropertiesView(resultCount: Option[Int], authorisations: Seq[APIAuthorisation])
-
-object PropertiesView {
-  implicit val format: Format[PropertiesView] = Json.format[PropertiesView]
-}
-
-case class APIAuthorisation(
-                             authorisationId: Long,
-                             uarn: Long,
-                             authorisationOwnerOrganisationId: Long,
-                             authorisationOwnerPersonId: Long,
-                             authorisationStatus: String,
-                             authorisationMethod: String,
-                             authorisationOwnerCapacity: String,
-                             createDatetime: DateTime,
-                             startDate: LocalDate,
-                             endDate: Option[LocalDate],
-                             submissionId: String,
-                             NDRListValuationHistoryItems: Seq[APIValuationHistory],
-                             parties: Seq[APIParty]
-                           )
-
-object APIAuthorisation {
-  implicit val yourJodaDateTimeReads: Reads[DateTime] = Reads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-  implicit val yourJodaDateTimeWrites: Writes[DateTime] = Writes.jodaDateWrites("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-  implicit val yourJodaDateReads: Reads[LocalDate] = Reads.jodaLocalDateReads("yyyy-MM-dd")
-  implicit val yourJodaDateWrites: Writes[LocalDate] = Writes.jodaLocalDateWrites("yyyy-MM-dd")
-  implicit val format: Format[APIAuthorisation] = Json.format[APIAuthorisation]
 }

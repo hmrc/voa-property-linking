@@ -21,12 +21,12 @@ import org.joda.time.{DateTime, LocalDate}
 import play.api.libs.json.Json
 import uk.gov.hmrc.play.test.UnitSpec
 
-class APIAuthorisationTest extends UnitSpec with WithSimpleWsHttpTestApplication {
+class PropertiesViewTest extends UnitSpec with WithSimpleWsHttpTestApplication {
 
   "APIAuthorisation" should {
     "be deserialised property" in {
-      val authorisation = Json.parse(DummyData.testData).as[APIAuthorisation]
-      authorisation shouldBe APIAuthorisation(112, 146440182, 2, 3, "MORE_EVIDENCE_REQUIRED", "OTHER", "OWNER_OCCUPIER",
+      val authorisation = Json.parse(DummyData.testData).as[PropertiesView]
+      authorisation shouldBe PropertiesView(112, 146440182, 2, 3, "MORE_EVIDENCE_REQUIRED", "OTHER", "OWNER_OCCUPIER",
         new DateTime(2016, 3, 1, 12, 53, 51),
         new LocalDate(2016, 5, 7),
         Some(new LocalDate(2016, 11, 12)),

@@ -35,7 +35,21 @@ class PropertyLinkingConnector @Inject() (@Named("VoaBackendWsHttp") http: WSHtt
     http.POST[APIPropertyLinkRequest, HttpResponse](url, linkingRequest) map { _ => () }
   }
 
-  def find(organisationId: Long, params: PaginationParams)(implicit hc: HeaderCarrier): Future[PropertiesView] = {
+  def get(authorisationId: Long)(implicit hc: HeaderCarrier): Future[Option[PropertiesView]] = {
+    val url = baseUrl +
+      s"/mdtp-dashboard-management-api/mdtp_dashboard/view_assessment" +
+      s"?listYear=$listYear" +
+      s"&authorisationId=$authorisationId"
+
+    http.GET[Option[PropertiesView]](url) map {
+      case Some(view) if view.hasValidStatus => Some(view.copy(parties = filterInvalidParties(view.parties)))
+      case _ => None
+    } recover {
+      case _: NotFoundException => None
+    }
+  }
+
+  def find(organisationId: Long, params: PaginationParams)(implicit hc: HeaderCarrier): Future[PropertiesViewResponse] = {
     val url = baseUrl +
       s"/mdtp-dashboard-management-api/mdtp_dashboard/properties_view" +
       s"?listYear=$listYear" +
@@ -44,32 +58,34 @@ class PropertyLinkingConnector @Inject() (@Named("VoaBackendWsHttp") http: WSHtt
       s"&pageSize=${params.pageSize}" +
       s"&requestTotalRowCount=${params.requestTotalRowCount}"
 
-    http.GET[PropertiesView](url)
-      .map(filterInvalid)
-      .map(filterParties)
+    http.GET[PropertiesViewResponse](url)
+      .map(withValidStatuses)
+      .map(withValidParties)
 
   }
 
-  private def filterInvalid(view: PropertiesView): PropertiesView = {
-    view.copy(authorisations = view.authorisations.filterNot(a => Seq("REVOKED", "DECLINED").contains(a.authorisationStatus.toUpperCase)))
+  private def withValidStatuses(view: PropertiesViewResponse): PropertiesViewResponse = {
+    view.copy(authorisations = view.authorisations.filter(_.hasValidStatus))
   }
 
-  private def filterParties(view: PropertiesView): PropertiesView = {
+  private def withValidParties(view: PropertiesViewResponse): PropertiesViewResponse = {
     val filtered = view.authorisations map { auth =>
-      val filteredParties = auth.parties
-        .filter(party => List("APPROVED", "PENDING").contains(party.authorisedPartyStatus)) //parties must be approved or pending
-        .map(party => party.copy(permissions =  party.permissions.filterNot(_.endDate.isDefined))) //permissions can't have enddate
-        .filter(_.permissions.nonEmpty) //and agent must have a permission
-
-      auth.copy(parties = filteredParties)
+      auth.copy(parties = filterInvalidParties(auth.parties))
     }
 
     view.copy(authorisations = filtered)
   }
 
+  private def filterInvalidParties(parties: Seq[APIParty]): Seq[APIParty] = {
+    parties
+      .filter(party => List("APPROVED", "PENDING").contains(party.authorisedPartyStatus)) //parties must be approved or pending
+      .map(party => party.copy(permissions =  party.permissions.filterNot(_.endDate.isDefined))) //permissions can't have enddate
+      .filter(_.permissions.nonEmpty) //and agent must have a permission
+  }
+
   def getAssessment(authorisationId: Long)(implicit hc: HeaderCarrier): Future[Seq[Assessment]] = {
     val url = baseUrl + s"/mdtp-dashboard-management-api/mdtp_dashboard/view_assessment?listYear=$listYear&authorisationId=$authorisationId"
-    http.GET[APIAuthorisation](url).map(pLink => {
+    http.GET[PropertiesView](url).map(pLink => {
       pLink.NDRListValuationHistoryItems.map(assessment => Assessment.fromAPIValuationHistory(assessment, authorisationId, CapacityDeclaration(pLink.authorisationOwnerCapacity, pLink.startDate, pLink.endDate)))
     })
   }

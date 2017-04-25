@@ -42,7 +42,7 @@ case class DetailedPropertyLink(authorisationId: Long,
 object DetailedPropertyLink {
   implicit val formats = Json.format[DetailedPropertyLink]
 
-  def fromAPIAuthorisation(prop: APIAuthorisation, parties: Seq[Party]) = {
+  def fromAPIAuthorisation(prop: PropertiesView, parties: Seq[Party]) = {
     val capacityDeclaration = CapacityDeclaration(prop.authorisationOwnerCapacity, prop.startDate, prop.endDate)
     DetailedPropertyLink(
       prop.authorisationId,
