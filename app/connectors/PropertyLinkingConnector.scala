@@ -58,17 +58,14 @@ class PropertyLinkingConnector @Inject() (@Named("VoaBackendWsHttp") http: WSHtt
       s"&pageSize=${params.pageSize}" +
       s"&requestTotalRowCount=${params.requestTotalRowCount}"
 
-    http.GET[PropertiesViewResponse](url)
-      .map(withValidStatuses)
-      .map(withValidParties)
-
+    http.GET[PropertiesViewResponse](url).map(withValidStatuses.andThen(withValidParties))
   }
 
-  private def withValidStatuses(view: PropertiesViewResponse): PropertiesViewResponse = {
+  private def withValidStatuses: PropertiesViewResponse => PropertiesViewResponse = { view =>
     view.copy(authorisations = view.authorisations.filter(_.hasValidStatus))
   }
 
-  private def withValidParties(view: PropertiesViewResponse): PropertiesViewResponse = {
+  private def withValidParties: PropertiesViewResponse => PropertiesViewResponse = { view =>
     val filtered = view.authorisations map { auth =>
       auth.copy(parties = filterInvalidParties(auth.parties))
     }
