@@ -162,7 +162,7 @@ class PropertyLinkingControllerSpec
         .willReturn(aResponse
           .withStatus(200)
           .withHeader("Content-Type", JSON)
-          .withBody(Json.toJson(APIPropertyRepresentations(0, Nil)).toString)
+          .withBody(Json.toJson(APIPropertyRepresentations(0, Some(0), Nil)).toString)
         )
       )
 
