@@ -21,7 +21,7 @@ import play.api.libs.json.{Json, Reads}
 
 case class APIPropertyRepresentation(representationId: Long,
                                      authorisationId: Long,
-                                     billingAuthorityReferenceNumber: String,
+                                     billingAuthorityReference: String,
                                      submissionId: String,
                                      authorisationOwnerOrganisationId: Long,
                                      organisationName: String,
@@ -33,7 +33,7 @@ case class APIPropertyRepresentation(representationId: Long,
   def toPropertyRepresentation = PropertyRepresentation(
     this.representationId,
     this.authorisationId,
-    this.billingAuthorityReferenceNumber,
+    this.billingAuthorityReference,
     this.submissionId,
     this.authorisationOwnerOrganisationId,
     this.organisationName,
