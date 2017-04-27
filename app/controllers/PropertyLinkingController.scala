@@ -26,11 +26,10 @@ import uk.gov.hmrc.play.http.{HeaderCarrier, Upstream5xxResponse}
 
 import scala.concurrent.Future
 
-class PropertyLinkingController @Inject() (
-                                            propertyLinksConnector: PropertyLinkingConnector,
-                                            groupAccountsConnector: GroupAccountConnector,
-                                            representationsConnector: PropertyRepresentationConnector
-                                          ) extends PropertyLinkingBaseController {
+class PropertyLinkingController @Inject()(propertyLinksConnector: PropertyLinkingConnector,
+                                          groupAccountsConnector: GroupAccountConnector,
+                                          representationsConnector: PropertyRepresentationConnector
+                                         ) extends PropertyLinkingBaseController {
 
   def create() = Action.async(parse.json) { implicit request =>
     withJsonBody[PropertyLinkRequest] { linkRequest =>
@@ -40,63 +39,68 @@ class PropertyLinkingController @Inject() (
     }
   }
 
-  private def getProperties(organisationId: Long, userActingAsAgent: Boolean = false )(implicit  hc: HeaderCarrier): Future[Seq[DetailedPropertyLink]] = {
+  def get(authorisationId: Long) = Action.async { implicit request =>
+    propertyLinksConnector.get(authorisationId) flatMap {
+      case Some(authorisation) => detailed(authorisation) map { d => Ok(Json.toJson(d)) }
+      case None => NotFound
+    }
+  }
+
+  def find(organisationId: Long, paginationParams: PaginationParams) = Action.async { implicit request =>
+    getProperties(organisationId, paginationParams).map(x => Ok(Json.toJson(x)))
+  }
+
+  private def getProperties(organisationId: Long, params: PaginationParams)(implicit hc: HeaderCarrier): Future[PropertyLinkResponse] = {
     for {
-      props <- propertyLinksConnector.find(organisationId)
-      res <- Future.traverse(props)(prop => {
-        for {
-          optionalGroupAccounts <- Future.traverse(prop.parties)(party => {
-            groupAccountsConnector.get(party.authorisedPartyOrganisationId).map(_.map(groupAccount => (party, groupAccount)))
-          })
-          apiPartiesWithGroupAccounts = optionalGroupAccounts.flatten
-          parties = apiPartiesWithGroupAccounts.flatMap { case (p: APIParty, g: GroupAccount) => Party.fromAPIParty(p, g) }
-        } yield DetailedPropertyLink.fromAPIAuthorisation(prop, parties, userActingAsAgent)
-      })
+      view <- propertyLinksConnector.find(organisationId, params)
+      detailedLinks <- Future.traverse(view.authorisations)(detailed)
     } yield {
-      res
+      PropertyLinkResponse(view.resultCount, detailedLinks)
     }
   }
 
-  private def getPropertiesWithAgent(organisationId: Long, agentOrgId: Long)(implicit  hc: HeaderCarrier): Future[Seq[DetailedPropertyLink]] = {
+  private def detailed(authorisation: PropertiesView)(implicit hc: HeaderCarrier): Future[DetailedPropertyLink] = {
     for {
-      props <- getProperties(organisationId, userActingAsAgent = true)
-      filterProps = props
-        .map(p => p.copy(agents= p.agents.filter(_.organisationId == agentOrgId)))
-        .filter(_.agents.nonEmpty)
-    } yield {
-      filterProps
-    }
+      apiPartiesWithGroupAccounts <- getGroupAccounts(authorisation)
+      parties = apiPartiesWithGroupAccounts.flatMap { case (p: APIParty, g: GroupAccount) => Party.fromAPIParty(p, g) }
+    } yield DetailedPropertyLink.fromAPIAuthorisation(authorisation, parties)
   }
 
-  def find(organisationId: Long) = Action.async { implicit request =>
-    val eventualUserProps = getProperties(organisationId)
-    val eventualNominations = representationsConnector.forAgent("APPROVED", organisationId)
-
-    val allProps = for {
-      userProps <- eventualUserProps
-      nominations <- eventualNominations
-      clientOrgIds = nominations.propertyRepresentations.map({
-        _.organisationId
-      }).distinct
-      res <- Future.traverse(clientOrgIds) (userOrgId => getPropertiesWithAgent(userOrgId, organisationId))
-      managedProperties = res.flatten
-    } yield {
-      managedProperties ++  userProps
-    }
-
-    allProps.map(x => Ok(Json.toJson(x)))
+  private def getGroupAccounts(authorisation: PropertiesView)(implicit hc: HeaderCarrier): Future[Seq[(APIParty, GroupAccount)]] = {
+    Future.traverse(authorisation.parties)(party =>
+      groupAccountsConnector.get(party.authorisedPartyOrganisationId).map(_.map(groupAccount => (party, groupAccount)))
+    ).map(_.flatten)
   }
 
-  def clientProperties(userOrgId: Long, agentOrgId: Long) = Action.async { implicit request => {
+  def clientProperties(userOrgId: Long, agentOrgId: Long, params: PaginationParams) = Action.async { implicit request =>
     (for {
-      props <- propertyLinksConnector.find(userOrgId)
-      filteredProps = props.filter(_.parties.map(_.authorisedPartyOrganisationId).contains(agentOrgId))
+      view <- propertyLinksConnector.find(userOrgId, params)
+      filteredProps = view.authorisations.filter(_.parties.map(_.authorisedPartyOrganisationId).contains(agentOrgId))
       filteredPropsAgents = filteredProps.map(prop => prop.copy(parties = prop.parties.filter(_.authorisedPartyOrganisationId == agentOrgId)))
-      userAccount <- groupAccountsConnector.get(props.head.authorisationOwnerOrganisationId)
+      userAccount <- groupAccountsConnector.get(view.authorisations.head.authorisationOwnerOrganisationId)
     } yield {
-      filteredPropsAgents.map(x => ClientProperty.build(x, userAccount))
+      ClientPropertyResponse(
+        view.resultCount,
+        filteredPropsAgents.map(x => ClientProperty.build(x, userAccount))
+      )
     }).map(x => Ok(Json.toJson(x)))
   }
+
+  def clientProperty(authorisationId: Long, clientOrgId: Long, agentOrgId: Long) = Action.async { implicit request =>
+    propertyLinksConnector.get(authorisationId) flatMap {
+      case Some(authorisation) if authorisedFor(authorisation, clientOrgId, agentOrgId) => toClientProperty(authorisation) map { p => Ok(Json.toJson(p)) }
+      case _ => NotFound
+    }
+  }
+
+  private def authorisedFor(authorisation: PropertiesView, clientOrgId: Long, agentOrgId: Long) = {
+    authorisation.authorisationOwnerOrganisationId == clientOrgId && authorisation.parties.exists(_.authorisedPartyOrganisationId == agentOrgId)
+  }
+
+  private def toClientProperty(authorisation: PropertiesView)(implicit hc: HeaderCarrier): Future[ClientProperty] = {
+    groupAccountsConnector.get(authorisation.authorisationOwnerOrganisationId) map { acc =>
+      ClientProperty.build(authorisation, acc)
+    }
   }
 
   def assessments(authorisationId: Long) = Action.async { implicit request =>

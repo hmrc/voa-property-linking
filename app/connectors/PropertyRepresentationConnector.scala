@@ -48,16 +48,6 @@ class PropertyRepresentationConnector @Inject()(@Named("VoaBackendWsHttp") http:
     })
   }
 
-  def get(representationId: String)(implicit hc: HeaderCarrier): Future[Option[PropertyRepresentation]] = {
-    val url = baseUrl + "/property-representations" + s"/$representationId"
-    http.GET[Option[PropertyRepresentation]](url)
-  }
-
-  def find(authorisationId: String)(implicit hc: HeaderCarrier): Future[Seq[PropertyRepresentation]] = {
-    val url = baseUrl + "/property-representations" + s"/find/$authorisationId"
-    http.GET[Seq[PropertyRepresentation]](url)
-  }
-
   def forAgent(status: String, organisationId: Long)(implicit hc: HeaderCarrier): Future[PropertyRepresentations] = {
     val params = s"status=$status&organisationId=$organisationId&startPoint=1"
     val url = baseUrl + s"/mdtp-dashboard-management-api/mdtp_dashboard/agent_representation_requests?$params"
@@ -80,11 +70,6 @@ class PropertyRepresentationConnector @Inject()(@Named("VoaBackendWsHttp") http:
   def response(representationResponse: APIRepresentationResponse)(implicit hc: HeaderCarrier): Future[Unit] = {
     val url = baseUrl + s"/authorisation-management-api/agent/submit_agent_rep_reponse"
     http.PUT[APIRepresentationResponse, HttpResponse](url, representationResponse) map { _ => () }
-  }
-
-  def update(reprRequest: UpdatedRepresentation)(implicit hc: HeaderCarrier): Future[Unit] = {
-    val url = baseUrl + "/property-representations" + s"/update"
-    http.PUT[UpdatedRepresentation, HttpResponse](url, reprRequest) map { _ => () }
   }
 
   def revoke(authorisedPartyId: Long)(implicit hc: HeaderCarrier): Future[Unit] = {

@@ -17,7 +17,13 @@
 package models
 
 import org.joda.time.DateTime
-import play.api.libs.json.Json
+import play.api.libs.json.{Format, Json}
+
+case class PropertyLinkResponse(resultCount: Option[Int], propertyLinks: Seq[DetailedPropertyLink])
+
+object PropertyLinkResponse {
+  implicit val formats: Format[PropertyLinkResponse] = Json.format[PropertyLinkResponse]
+}
 
 case class DetailedPropertyLink(authorisationId: Long,
                                 submissionId: String,
@@ -29,7 +35,6 @@ case class DetailedPropertyLink(authorisationId: Long,
                                 linkedDate: DateTime,
                                 pending: Boolean,
                                 assessment: Seq[Assessment],
-                                userActingAsAgent: Boolean,
                                 agents: Seq[Party]) {
 }
 
@@ -37,7 +42,7 @@ case class DetailedPropertyLink(authorisationId: Long,
 object DetailedPropertyLink {
   implicit val formats = Json.format[DetailedPropertyLink]
 
-  def fromAPIAuthorisation(prop: APIAuthorisation, parties: Seq[Party], userActingAsAgent: Boolean) = {
+  def fromAPIAuthorisation(prop: PropertiesView, parties: Seq[Party]) = {
     val capacityDeclaration = CapacityDeclaration(prop.authorisationOwnerCapacity, prop.startDate, prop.endDate)
     DetailedPropertyLink(
       prop.authorisationId,
@@ -50,7 +55,6 @@ object DetailedPropertyLink {
       prop.createDatetime,
       prop.authorisationStatus != "APPROVED",
       prop.NDRListValuationHistoryItems.map(x => Assessment.fromAPIValuationHistory(x, prop.authorisationId, capacityDeclaration)),
-      userActingAsAgent,
       parties
     )
   }

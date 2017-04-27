@@ -16,26 +16,31 @@
 
 package models
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Format, Json}
 
-case class ClientProperty(
-                              ownerOrganisationId: Long,
-                              ownerOrganisationName: String,
-                              uarn: Long,
-                              billingAuthorityReference: String,
-                              authorisedPartyId: Long,
-                              authorisationId: Long,
-                              authorisationStatus: Boolean,
-                              authorisedPartyStatus: String,
-                              permissionId: Long,
-                              checkPermission: String,
-                              challengePermission: String,
-                              address: String
-                            )
+case class ClientPropertyResponse(resultCount: Option[Int], properties: Seq[ClientProperty])
+
+object ClientPropertyResponse {
+  implicit val format: Format[ClientPropertyResponse] = Json.format[ClientPropertyResponse]
+}
+
+case class ClientProperty(ownerOrganisationId: Long,
+                          ownerOrganisationName: String,
+                          uarn: Long,
+                          billingAuthorityReference: String,
+                          authorisedPartyId: Long,
+                          authorisationId: Long,
+                          authorisationStatus: Boolean,
+                          authorisedPartyStatus: String,
+                          permissionId: Long,
+                          checkPermission: String,
+                          challengePermission: String,
+                          address: String)
+
 object ClientProperty {
   implicit val format = Json.format[ClientProperty]
 
-  def build(prop: APIAuthorisation, userAccount: Option[GroupAccount]) = {
+  def build(prop: PropertiesView, userAccount: Option[GroupAccount]) = {
     ClientProperty(
       prop.authorisationOwnerOrganisationId,
       userAccount.map(_.companyName).getOrElse("Name not found"),
