@@ -72,20 +72,6 @@ class PropertyLinkingController @Inject()(propertyLinksConnector: PropertyLinkin
     ).map(_.flatten)
   }
 
-  def clientProperties(userOrgId: Long, agentOrgId: Long, params: PaginationParams) = Action.async { implicit request =>
-    (for {
-      view <- propertyLinksConnector.find(userOrgId, params)
-      filteredProps = view.authorisations.filter(_.parties.map(_.authorisedPartyOrganisationId).contains(agentOrgId))
-      filteredPropsAgents = filteredProps.map(prop => prop.copy(parties = prop.parties.filter(_.authorisedPartyOrganisationId == agentOrgId)))
-      userAccount <- groupAccountsConnector.get(view.authorisations.head.authorisationOwnerOrganisationId)
-    } yield {
-      ClientPropertyResponse(
-        view.resultCount,
-        filteredPropsAgents.map(x => ClientProperty.build(x, userAccount))
-      )
-    }).map(x => Ok(Json.toJson(x)))
-  }
-
   def clientProperty(authorisationId: Long, clientOrgId: Long, agentOrgId: Long) = Action.async { implicit request =>
     propertyLinksConnector.get(authorisationId) flatMap {
       case Some(authorisation) if authorisedFor(authorisation, clientOrgId, agentOrgId) => toClientProperty(authorisation) map { p => Ok(Json.toJson(p)) }

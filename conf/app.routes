@@ -10,7 +10,6 @@ PUT          /property-representations/response                                 
 
 POST         /property-links                                                                  @controllers.PropertyLinkingController.create()
 GET          /property-links                                                                  @controllers.PropertyLinkingController.find(organisationId: Long, params: models.PaginationParams)
-GET          /property-links/client-properties                                                @controllers.PropertyLinkingController.clientProperties(clientOrganisationId: Long, agentOrganisationId: Long, params: models.PaginationParams)
 GET          /property-links/client-property/:authorisationId                                 @controllers.PropertyLinkingController.clientProperty(authorisationId: Long, clientOrganisationId: Long, agentOrganisationId: Long)
 GET          /property-links/:linkId                                                          @controllers.PropertyLinkingController.get(linkId: Long)
 GET          /dashboard/assessments/:authorisationId                                          @controllers.PropertyLinkingController.assessments(authorisationId: Long)
