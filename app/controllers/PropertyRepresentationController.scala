@@ -23,8 +23,6 @@ import models._
 import play.api.libs.json.Json
 import play.api.mvc.Action
 
-import scala.concurrent.Future
-
 class PropertyRepresentationController @Inject() (representations: PropertyRepresentationConnector) extends PropertyLinkingBaseController {
 
   def validateAgentCode(agentCode:Long, authorisationId: Long) = Action.async { implicit request =>
@@ -36,8 +34,8 @@ class PropertyRepresentationController @Inject() (representations: PropertyRepre
     )
   }
 
-  def forAgent(status: String, organisationId: Long) = Action.async { implicit request =>
-    representations.forAgent(status, organisationId).map( x=> Ok(Json.toJson(x)))
+  def forAgent(status: String, organisationId: Long, pagination: PaginationParams) = Action.async { implicit request =>
+    representations.forAgent(status, organisationId, pagination).map( x=> Ok(Json.toJson(x)))
   }
 
   def create() = Action.async(parse.json) { implicit request =>

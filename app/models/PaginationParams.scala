@@ -18,7 +18,11 @@ package models
 
 import play.api.mvc.QueryStringBindable
 
-case class PaginationParams(startPoint: Int, pageSize: Int, requestTotalRowCount: Boolean)
+case class PaginationParams(startPoint: Int, pageSize: Int, requestTotalRowCount: Boolean) {
+  override val toString = s"startPoint=$startPoint&pageSize=$pageSize&requestTotalRowCount=$requestTotalRowCount"
+}
+
+object DefaultPaginationParams extends PaginationParams(startPoint = 1, pageSize = 15, requestTotalRowCount = true)
 
 object PaginationParams {
   implicit def queryStringBindable(implicit intBinder: QueryStringBindable[Int],
@@ -35,11 +39,7 @@ object PaginationParams {
         }
       }
 
-      override def unbind(key: String, value: PaginationParams): String = {
-        s"${intBinder.unbind("startPoint", value.startPoint)}&" +
-          s"${intBinder.unbind("pageSize", value.pageSize)}&" +
-          s"${booleanBinder.unbind("requestTotalRowCount", value.requestTotalRowCount)}"
-      }
+      override def unbind(key: String, value: PaginationParams): String = s"$value"
     }
   }
 }

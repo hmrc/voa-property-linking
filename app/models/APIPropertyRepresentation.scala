@@ -20,6 +20,8 @@ import org.joda.time.{DateTime, LocalDate}
 import play.api.libs.json.{Json, Reads}
 
 case class APIPropertyRepresentation(representationId: Long,
+                                     authorisationId: Long,
+                                     billingAuthorityReference: String,
                                      submissionId: String,
                                      authorisationOwnerOrganisationId: Long,
                                      organisationName: String,
@@ -30,6 +32,8 @@ case class APIPropertyRepresentation(representationId: Long,
                                      status: String) {
   def toPropertyRepresentation = PropertyRepresentation(
     this.representationId,
+    this.authorisationId,
+    this.billingAuthorityReference,
     this.submissionId,
     this.authorisationOwnerOrganisationId,
     this.organisationName,

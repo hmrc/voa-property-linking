@@ -48,17 +48,11 @@ class PropertyRepresentationConnector @Inject()(@Named("VoaBackendWsHttp") http:
     })
   }
 
-  def forAgent(status: String, organisationId: Long)(implicit hc: HeaderCarrier): Future[PropertyRepresentations] = {
-    val params = s"status=$status&organisationId=$organisationId&startPoint=1"
-    val url = baseUrl + s"/mdtp-dashboard-management-api/mdtp_dashboard/agent_representation_requests?$params"
+  def forAgent(status: String, organisationId: Long, pagination: PaginationParams)(implicit hc: HeaderCarrier): Future[PropertyRepresentations] = {
+    val params = s"status=$status&organisationId=$organisationId&$pagination"
+    val url = s"$baseUrl/mdtp-dashboard-management-api/mdtp_dashboard/agent_representation_requests?$params"
     http.GET[APIPropertyRepresentations](url).map(x => {
-      PropertyRepresentations(
-        x.totalPendingRequests,
-        x.requests
-          //representationId is actually the AgentOrgId, and the backend currently returns
-          //representation requests that don't belong to the orgId we are interested in.
-          .filter(_.representationId == organisationId)
-          .map(_.toPropertyRepresentation))
+      PropertyRepresentations(x.totalPendingRequests, x.resultCount, x.requests.map(_.toPropertyRepresentation))
     })
   }
 

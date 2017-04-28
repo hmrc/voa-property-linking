@@ -18,10 +18,9 @@ package models
 
 import play.api.libs.json.Json
 
-case class APIPropertyRepresentations(
-                                       totalPendingRequests: Long,
-                                       requests: Seq[APIPropertyRepresentation]
-                                     )
+case class APIPropertyRepresentations(totalPendingRequests: Long,
+                                      resultCount: Option[Long],
+                                      requests: Seq[APIPropertyRepresentation])
 
 object APIPropertyRepresentations {
   implicit val format = Json.format[APIPropertyRepresentations]

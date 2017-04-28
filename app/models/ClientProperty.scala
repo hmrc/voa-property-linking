@@ -16,13 +16,7 @@
 
 package models
 
-import play.api.libs.json.{Format, Json}
-
-case class ClientPropertyResponse(resultCount: Option[Int], properties: Seq[ClientProperty])
-
-object ClientPropertyResponse {
-  implicit val format: Format[ClientPropertyResponse] = Json.format[ClientPropertyResponse]
-}
+import play.api.libs.json.Json
 
 case class ClientProperty(ownerOrganisationId: Long,
                           ownerOrganisationName: String,

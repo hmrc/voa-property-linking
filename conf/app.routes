@@ -1,7 +1,7 @@
 # microservice specific routes
 
 GET          /property-representations/validate-agent-code/:agentCode/:authorisationId        @controllers.PropertyRepresentationController.validateAgentCode(agentCode:Long, authorisationId: Long)
-GET          /property-representations/agent/:status/:organisationId                          @controllers.PropertyRepresentationController.forAgent(status: String, organisationId: Long)
+GET          /property-representations/agent/:status/:organisationId                          @controllers.PropertyRepresentationController.forAgent(status: String, organisationId: Long, pagination: models.PaginationParams ?= models.DefaultPaginationParams)
 
 POST         /property-representations/create                                                 @controllers.PropertyRepresentationController.create()
 
@@ -10,7 +10,6 @@ PUT          /property-representations/response                                 
 
 POST         /property-links                                                                  @controllers.PropertyLinkingController.create()
 GET          /property-links                                                                  @controllers.PropertyLinkingController.find(organisationId: Long, params: models.PaginationParams)
-GET          /property-links/client-properties                                                @controllers.PropertyLinkingController.clientProperties(clientOrganisationId: Long, agentOrganisationId: Long, params: models.PaginationParams)
 GET          /property-links/client-property/:authorisationId                                 @controllers.PropertyLinkingController.clientProperty(authorisationId: Long, clientOrganisationId: Long, agentOrganisationId: Long)
 GET          /property-links/:linkId                                                          @controllers.PropertyLinkingController.get(linkId: Long)
 GET          /dashboard/assessments/:authorisationId                                          @controllers.PropertyLinkingController.assessments(authorisationId: Long)

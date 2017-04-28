@@ -20,6 +20,8 @@ import org.joda.time.{DateTime, LocalDate}
 import play.api.libs.json.Json
 
 case class PropertyRepresentation(representationId: Long,
+                                  authorisationId: Long,
+                                  billingAuthorityReference: String,
                                   submissionId: String,
                                   organisationId: Long,
                                   organisationName: String,
