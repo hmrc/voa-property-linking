@@ -61,23 +61,20 @@ class PropertyLinkingConnector @Inject() (@Named("VoaBackendWsHttp") http: WSHtt
     http.GET[PropertiesViewResponse](url).map(withValidStatuses.andThen(withValidParties))
   }
 
-  private def withValidStatuses: PropertiesViewResponse => PropertiesViewResponse = { view =>
+  private val withValidStatuses: PropertiesViewResponse => PropertiesViewResponse = { view =>
     view.copy(authorisations = view.authorisations.filter(_.hasValidStatus))
   }
 
-  private def withValidParties: PropertiesViewResponse => PropertiesViewResponse = { view =>
-    val filtered = view.authorisations map { auth =>
-      auth.copy(parties = filterInvalidParties(auth.parties))
-    }
-
-    view.copy(authorisations = filtered)
+  private val withValidPermissions: APIParty => Boolean = { party =>
+    List("APPROVED", "PENDING").contains(party.authorisedPartyStatus) && party.permissions.exists(_.endDate.isEmpty)
   }
 
-  private def filterInvalidParties(parties: Seq[APIParty]): Seq[APIParty] = {
-    parties
-      .filter(party => List("APPROVED", "PENDING").contains(party.authorisedPartyStatus)) //parties must be approved or pending
-      .map(party => party.copy(permissions =  party.permissions.filterNot(_.endDate.isDefined))) //permissions can't have enddate
-      .filter(_.permissions.nonEmpty) //and agent must have a permission
+  private val filterInvalidParties: Seq[APIParty] => Seq[APIParty] = { parties =>
+    parties.withFilter(withValidPermissions).map(p => p.copy(permissions = p.permissions.filter(_.endDate.isEmpty)))
+  }
+
+  private val withValidParties: PropertiesViewResponse => PropertiesViewResponse = { view =>
+    view.copy(authorisations = view.authorisations map { auth => auth.copy(parties = filterInvalidParties(auth.parties))})
   }
 
   def getAssessment(authorisationId: Long)(implicit hc: HeaderCarrier): Future[Seq[Assessment]] = {
