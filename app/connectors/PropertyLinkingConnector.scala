@@ -77,10 +77,8 @@ class PropertyLinkingConnector @Inject() (@Named("VoaBackendWsHttp") http: WSHtt
     view.copy(authorisations = view.authorisations map { auth => auth.copy(parties = filterInvalidParties(auth.parties))})
   }
 
-  def getAssessment(authorisationId: Long)(implicit hc: HeaderCarrier): Future[Seq[Assessment]] = {
+  def getAssessment(authorisationId: Long)(implicit hc: HeaderCarrier): Future[Option[PropertiesView]] = {
     val url = baseUrl + s"/mdtp-dashboard-management-api/mdtp_dashboard/view_assessment?listYear=$listYear&authorisationId=$authorisationId"
-    http.GET[PropertiesView](url).map(pLink => {
-      pLink.NDRListValuationHistoryItems.map(assessment => Assessment.fromAPIValuationHistory(assessment, authorisationId, CapacityDeclaration(pLink.authorisationOwnerCapacity, pLink.startDate, pLink.endDate)))
-    })
+    http.GET[Option[PropertiesView]](url) recover { case _: NotFoundException => None }
   }
 }

@@ -59,11 +59,11 @@ class PropertyLinkingController @Inject()(propertyLinksConnector: PropertyLinkin
     }
   }
 
-  private def detailed(authorisation: PropertiesView)(implicit hc: HeaderCarrier): Future[DetailedPropertyLink] = {
+  private def detailed(authorisation: PropertiesView)(implicit hc: HeaderCarrier): Future[PropertyLink] = {
     for {
       apiPartiesWithGroupAccounts <- getGroupAccounts(authorisation)
       parties = apiPartiesWithGroupAccounts.flatMap { case (p: APIParty, g: GroupAccount) => Party.fromAPIParty(p, g) }
-    } yield DetailedPropertyLink.fromAPIAuthorisation(authorisation, parties)
+    } yield PropertyLink.fromAPIAuthorisation(authorisation, parties)
   }
 
   private def getGroupAccounts(authorisation: PropertiesView)(implicit hc: HeaderCarrier): Future[Seq[(APIParty, GroupAccount)]] = {
@@ -90,7 +90,10 @@ class PropertyLinkingController @Inject()(propertyLinksConnector: PropertyLinkin
   }
 
   def assessments(authorisationId: Long) = Action.async { implicit request =>
-    propertyLinksConnector.getAssessment(authorisationId) map { x => Ok(Json.toJson(x)) }
+    propertyLinksConnector.getAssessment(authorisationId) flatMap {
+      case Some(assessment) => detailed(assessment) map { x => Ok(Json.toJson(x)) }
+      case None => NotFound
+    }
   }
 }
 
