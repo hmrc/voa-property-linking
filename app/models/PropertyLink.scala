@@ -17,11 +17,43 @@
 package models
 
 import org.joda.time.DateTime
-import play.api.libs.json.Json
+import play.api.libs.json.{Format, Json}
 
-case class PropertyLink(authorisationId: String, uarn: Long, organisationId: Int, description: String,
-                        capacityDeclaration: CapacityDeclaration, linkedDate: DateTime, pending: Boolean)
+case class PropertyLinkResponse(resultCount: Option[Int], propertyLinks: Seq[PropertyLink])
+
+object PropertyLinkResponse {
+  implicit val formats: Format[PropertyLinkResponse] = Json.format[PropertyLinkResponse]
+}
+
+case class PropertyLink(authorisationId: Long,
+                        submissionId: String,
+                        uarn: Long,
+                        organisationId: Long,
+                        personId: Long,
+                        address: String,
+                        capacityDeclaration: CapacityDeclaration,
+                        linkedDate: DateTime,
+                        pending: Boolean,
+                        assessments: Seq[Assessment],
+                        agents: Seq[Party])
 
 object PropertyLink {
-  implicit val propertyLink = Json.format[PropertyLink]
+  implicit val formats = Json.format[PropertyLink]
+
+  def fromAPIAuthorisation(prop: PropertiesView, parties: Seq[Party]) = {
+    val capacityDeclaration = CapacityDeclaration(prop.authorisationOwnerCapacity, prop.startDate, prop.endDate)
+    PropertyLink(
+      prop.authorisationId,
+      prop.submissionId,
+      prop.uarn,
+      prop.authorisationOwnerOrganisationId,
+      prop.authorisationOwnerPersonId,
+      prop.NDRListValuationHistoryItems.headOption.map(_.address).getOrElse("No address found"),
+      capacityDeclaration,
+      prop.createDatetime,
+      prop.authorisationStatus != "APPROVED",
+      prop.NDRListValuationHistoryItems.map(x => Assessment.fromAPIValuationHistory(x, prop.authorisationId, capacityDeclaration)),
+      parties
+    )
+  }
 }
