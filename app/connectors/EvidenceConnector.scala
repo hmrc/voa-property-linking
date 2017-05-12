@@ -57,6 +57,6 @@ class EvidenceConnector @Inject()(val ws: WSClient) extends EvidenceTransfer wit
           DataPart("submissionId", metadata.submissionId) ::
           List())
       ))
-    handleErrors(res, endpoint) map { r => Logger.info(s"Response from API manager: $r") }
+    handleErrors(res, endpoint) map { r => Logger.info(s"Response from API manager for file $fileName: $r") }
   }
 }

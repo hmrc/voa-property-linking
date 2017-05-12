@@ -41,7 +41,7 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
   def justDoIt()(implicit hc: HeaderCarrier): Future[Unit] = {
     val allEnvelopes = repo.get()
     allEnvelopes.foreach(envelope => {
-      Logger.info(s"${envelope.filter(_.status == Some(Open)).size} open, ${envelope.filter(_.status == Some(Closed)).size} closed")
+      Logger.info(s"${envelope.count(_.status == Some(Open))} open, ${envelope.count(_.status == Some(Closed))} closed")
       Logger.info(s"${envelope.size} envelopes found in mongo: ${envelope.map(x=> (x.envelopeId, x.status))}")
     })
 
