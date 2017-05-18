@@ -30,6 +30,7 @@ case class APIPropertyRepresentation(representationId: Long,
                                      challengePermission: String,
                                      createDatetime: LocalDate,
                                      status: String) {
+
   def toPropertyRepresentation = PropertyRepresentation(
     this.representationId,
     this.authorisationId,

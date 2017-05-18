@@ -17,8 +17,8 @@
 package models
 
 
-import org.joda.time.{DateTime, DateTimeZone, LocalDate}
-import play.api.libs.json.{Json, Reads}
+import org.joda.time.LocalDate
+import play.api.libs.json.Json
 
 case class Assessment(
                        authorisationId: Long,
@@ -33,7 +33,6 @@ case class Assessment(
                      )
 
 object Assessment {
-  implicit val yourJodaDateTimeReads: Reads[DateTime] = Reads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
   implicit val formats = Json.format[Assessment]
 
   def fromAPIValuationHistory(valuationHistory: APIValuationHistory, authorisationId: Long,
@@ -43,7 +42,7 @@ object Assessment {
       valuationHistory.asstRef,
       valuationHistory.listYear,
       valuationHistory.uarn,
-      valuationHistory.effectiveDate.toDateTime(DateTimeZone.forID("Europe/London")).toLocalDate,
+      valuationHistory.effectiveDate,
       valuationHistory.rateableValue,
       PropertyAddress.fromString(valuationHistory.address),
       valuationHistory.billingAuthorityReference,
