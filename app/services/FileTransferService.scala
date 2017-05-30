@@ -32,16 +32,14 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector,
                                     val evidenceConnector: EvidenceConnector,
-                                    val repo: EnvelopeIdRepo
-                                   )
-  extends MongoDbConnection {
+                                    val repo: EnvelopeIdRepo) extends MongoDbConnection {
 
   implicit val ec: ExecutionContext = play.api.libs.concurrent.Execution.Implicits.defaultContext
 
-  def justDoIt()(implicit hc: HeaderCarrier): Future[Unit] = {
+  def justDoIt()(implicit hc: HeaderCarrier): Future[FileTransferComplete] = {
     val allEnvelopes = repo.get()
     allEnvelopes.foreach(envelope => {
-      Logger.info(s"${envelope.count(_.status == Some(Open))} open, ${envelope.count(_.status == Some(Closed))} closed")
+      Logger.info(s"${envelope.count(_.status.contains(Open))} open, ${envelope.count(_.status.contains(Closed))} closed")
       Logger.info(s"${envelope.size} envelopes found in mongo: ${envelope.map(x=> (x.envelopeId, x.status))}")
     })
 
@@ -53,7 +51,7 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
       envelopeFilesNotQuarantine = envelopeInfos.filterNot(env => env.files.map(_.status).contains("QUARANTINED"))
       res <- Future.traverse(envelopeFilesNotQuarantine)(envInfo => processNotYetClosedEnvelopes(envInfo))
     } yield {
-      ()
+      FileTransferComplete("")
     }
   }
 

@@ -17,13 +17,9 @@
 package models
 
 import org.joda.time.DateTime
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.{Format, Json, OFormat}
 
 case class PropertyLinkResponse(resultCount: Option[Int], propertyLinks: Seq[PropertyLink])
-
-object PropertyLinkResponse {
-  implicit val formats: Format[PropertyLinkResponse] = Json.format[PropertyLinkResponse]
-}
 
 case class PropertyLink(authorisationId: Long,
                         submissionId: String,
@@ -38,7 +34,7 @@ case class PropertyLink(authorisationId: Long,
                         agents: Seq[Party])
 
 object PropertyLink {
-  implicit val formats = Json.format[PropertyLink]
+  implicit val formats: Format[PropertyLink] = Json.format[PropertyLink]
 
   def fromAPIAuthorisation(prop: PropertiesView, parties: Seq[Party]) = {
     val capacityDeclaration = CapacityDeclaration(prop.authorisationOwnerCapacity, prop.startDate, prop.endDate)
@@ -56,4 +52,8 @@ object PropertyLink {
       parties
     )
   }
+}
+
+object PropertyLinkResponse {
+  implicit val formats: Format[PropertyLinkResponse] = Json.format[PropertyLinkResponse]
 }

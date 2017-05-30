@@ -62,7 +62,8 @@ class GuiceModule(environment: Environment,
                   configuration: Configuration) extends AbstractModule {
   def configure() = {
     bind(classOf[String]).annotatedWith(Names.named("lockName")).toInstance("FileTransferLock")
-    bind(classOf[Duration]).annotatedWith(Names.named("lockTimeout")).toInstance(Duration.standardHours(1))
+    bind(classOf[Duration]).annotatedWith(Names.named("lockTimeout")).toInstance(
+      Duration.standardMinutes(configuration.getLong("fileTransfer.lockMinutes").getOrElse(30L)))
 
     bind(classOf[Schedule]).annotatedWith(Names.named("regularSchedule")).to(classOf[RegularSchedule])
     bind(classOf[DB]).toProvider(classOf[MongoDbProvider]).asEagerSingleton()

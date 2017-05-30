@@ -20,11 +20,11 @@ import javax.inject.Inject
 
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
-import com.google.inject.{ImplementedBy, Singleton}
+import com.google.inject.ImplementedBy
 import config.ApplicationConfig
 import connectors.fileUpload.EnvelopeMetadata
 import play.api.Logger
-import play.api.libs.ws.WSClient
+import play.api.libs.ws.{WSClient, WSResponse}
 import play.api.mvc.MultipartFormData.{DataPart, FilePart}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -40,6 +40,7 @@ trait EvidenceTransfer {
 class EvidenceConnector @Inject()(val ws: WSClient) extends EvidenceTransfer with ServicesConfig with HandleErrors {
 
   val url = baseUrl("external-business-rates-data-platform")
+
   override def uploadFile(fileName: String, content: Option[Array[Byte]], metadata: EnvelopeMetadata)(implicit hc: HeaderCarrier): Future[Unit] = {
     val endpoint = "/customer-management-api/customer/evidence"
 
@@ -53,10 +54,19 @@ class EvidenceConnector @Inject()(val ws: WSClient) extends EvidenceTransfer wit
       .put(Source(
         content.map(c => List(FilePart("file", fileName, Some("application/octet-stream"), Source.single(ByteString(c))))).getOrElse(Nil) ++ (
           DataPart("customerId", metadata.personId.toString) ::
-          DataPart("filename", fileName) ::
-          DataPart("submissionId", metadata.submissionId) ::
-          List())
-      ))
-    handleErrors(res, endpoint) map { r => Logger.info(s"Response from API manager for file $fileName: $r") }
+            DataPart("filename", fileName) ::
+            DataPart("submissionId", metadata.submissionId) ::
+            List())
+      )) map logResponse(fileName, metadata.submissionId)
+    handleErrors(res, endpoint) map logError(fileName, metadata.submissionId)
+  }
+
+  def logResponse(fileName: String, subId: String): WSResponse => WSResponse = { r =>
+    Logger.info(s"File upload completed: $fileName, subId: $subId to /customer/evidence, status: ${r.status}")
+    r
+  }
+
+  def logError(fileName: String, subId: String): WSResponse => Unit = { r =>
+    Logger.info(s"Response from API manager for file $fileName: $r")
   }
 }

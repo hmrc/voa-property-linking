@@ -23,6 +23,7 @@ import uk.gov.hmrc.lock.LockKeeper
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
 
 abstract class LockedJobScheduler[Event <: AnyRef](lock: LockKeeper, actorSystem: ActorSystem) {
   implicit val t: Timeout = 1 hour
@@ -33,26 +34,22 @@ abstract class LockedJobScheduler[Event <: AnyRef](lock: LockKeeper, actorSystem
   val eventStream = actorSystem.eventStream
   def runJob()(implicit ec: ExecutionContext): Future[Event]
 
-	def start()(implicit ec: ExecutionContext) { 
-    scheduleNextImport() 
-  }
-
   private def run()(implicit ec: ExecutionContext) = {
     Logger.info(s"Starting job: $name")
-    runJob().map { event => 
-      eventStream.publish(event)
-    } recoverWith {
+    runJob().map(eventStream.publish) recoverWith {
       case e: Exception =>
         Logger.error(s"Error running job: $name", e)
         Future.failed(e)
     }
   }
 
-  private def scheduleNextImport()(implicit ec: ExecutionContext) {
-    val t = schedule.timeUntilNextRun
-    Logger.info(s"Scheduling $name to run in: $t")
-  	scheduler.scheduleOnce(t) {
-      lock.tryLock { run } onComplete { _ => scheduleNextImport() }
-    }
+  private def tryJob(implicit ec: ExecutionContext): Unit = lock.tryLock { run } onComplete scheduleNextImport
+
+  private def scheduleNextImport(implicit ec: ExecutionContext): Try[Option[Unit]] => Unit = { t =>
+    val t = schedule.timeUntilNextRun()
+    Logger.info(s"Scheduling $name to try in: $t")
+  	scheduler.scheduleOnce(t)(tryJob)
   }
+
+  def start(implicit ec:ExecutionContext): Unit = scheduleNextImport
 }

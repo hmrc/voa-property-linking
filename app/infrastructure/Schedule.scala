@@ -29,6 +29,5 @@ trait Schedule {
 
 class RegularSchedule @Inject() (val configuration: Configuration) extends Schedule {
   def timeUntilNextRun() =
-    new FiniteDuration(configuration.getLong("fileTransfer.frequencySeconds").getOrElse(60L),
-      TimeUnit.SECONDS)
+    new FiniteDuration(configuration.getLong("fileTransfer.frequencySeconds").getOrElse(60L), TimeUnit.SECONDS)
 }

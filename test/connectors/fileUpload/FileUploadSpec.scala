@@ -52,5 +52,4 @@ class FileUploadSpec extends WireMockSpec with WithSimpleWsHttpTestApplication w
       await(connector.downloadFile(fileUrl)) should be(fileBytes)
     }
   }
-
 }
