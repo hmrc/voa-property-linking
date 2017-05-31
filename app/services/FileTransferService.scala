@@ -50,14 +50,14 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
       envelopeIds = closedEnvelopes.map(_.envelopeId)
       envelopeInfos <- Future.traverse(envelopeIds)( envId => fileUploadConnector.getEnvelopeDetails(envId))
       envelopeFilesNotQuarantine = envelopeInfos.filterNot(env => env.files.map(_.status).contains("QUARANTINED"))
-      res <- Future.traverse(envelopeFilesNotQuarantine)(envInfo => { pause; processNotYetClosedEnvelopes(envInfo) })
+      res <- Future.traverse(envelopeFilesNotQuarantine)(envInfo => { pause(); processNotYetClosedEnvelopes(envInfo) })
     } yield {
       FileTransferComplete("")
     }
   }
 
-  private def pause: PartialFunction[Try[Unit], Unit] = {
-    case _ => Logger.info(s"waiting for ${ApplicationConfig.fileTransferInterval}ms"); Thread.sleep(ApplicationConfig.fileTransferInterval)
+  private def pause(): Unit = {
+    Logger.info(s"waiting for ${ApplicationConfig.fileTransferInterval}ms"); Thread.sleep(ApplicationConfig.fileTransferInterval)
   }
 
   private def removeEnvelopes(envInfo: EnvelopeInfo)(implicit hc: HeaderCarrier) = {
