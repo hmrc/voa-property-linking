@@ -19,6 +19,7 @@ package services
 import javax.inject.Inject
 
 import com.google.inject.Singleton
+import config.ApplicationConfig
 import connectors.EvidenceConnector
 import connectors.fileUpload.{EnvelopeInfo, EnvelopeMetadata, FileInfo, FileUploadConnector}
 import models.{Closed, Open}
@@ -28,6 +29,7 @@ import repositories.EnvelopeIdRepo
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
 
 @Singleton
 class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector,
@@ -43,16 +45,19 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
       Logger.info(s"${envelope.size} envelopes found in mongo: ${envelope.map(x=> (x.envelopeId, x.status))}")
     })
 
-    val closedEnvelopes = allEnvelopes.map(_.filter(_.status.getOrElse(Closed)==Closed)).map(_.map(_.envelopeId))
     for {
       closedEnvelopes <- allEnvelopes.map(_.filter(_.status.getOrElse(Closed) == Closed))
       envelopeIds = closedEnvelopes.map(_.envelopeId)
       envelopeInfos <- Future.traverse(envelopeIds)( envId => fileUploadConnector.getEnvelopeDetails(envId))
       envelopeFilesNotQuarantine = envelopeInfos.filterNot(env => env.files.map(_.status).contains("QUARANTINED"))
-      res <- Future.traverse(envelopeFilesNotQuarantine)(envInfo => processNotYetClosedEnvelopes(envInfo))
+      res <- Future.traverse(envelopeFilesNotQuarantine)(envInfo => { pause; processNotYetClosedEnvelopes(envInfo) })
     } yield {
       FileTransferComplete("")
     }
+  }
+
+  private def pause: PartialFunction[Try[Unit], Unit] = {
+    case _ => Logger.info(s"waiting for ${ApplicationConfig.fileTransferInterval}ms"); Thread.sleep(ApplicationConfig.fileTransferInterval)
   }
 
   private def removeEnvelopes(envInfo: EnvelopeInfo)(implicit hc: HeaderCarrier) = {
@@ -60,14 +65,6 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
       repo.remove(envInfo.id)
     else
       fileUploadConnector.deleteEnvelope(envInfo.id).map(_ => repo.remove(envInfo.id))
-  }
-
-  private def processClosedNotEmptyEnvelope(envelopeInfo: EnvelopeInfo)(implicit hc: HeaderCarrier) = {
-    val fileInfos = envelopeInfo.files
-    Future.sequence(fileInfos.map(fileInfo => {
-      transferFile(fileInfo, envelopeInfo.metadata)
-    }))
-      .map(_ => removeEnvelopes(envelopeInfo))
   }
 
   def transferFile(fileInfo: FileInfo, metadata: EnvelopeMetadata)(implicit hc: HeaderCarrier): Future[Unit] = {
@@ -78,8 +75,7 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
     } yield ()
   }
 
-  private def processNotYetClosedEnvelopes(envelopeInfo: EnvelopeInfo)(implicit hc: HeaderCarrier) = {
-    val envId = envelopeInfo.id
+  private def processNotYetClosedEnvelopes(envelopeInfo: EnvelopeInfo)(implicit hc: HeaderCarrier): Future[Unit] = {
     Future.sequence(envelopeInfo.files.map(fileInfo => {
       fileInfo.status match {
         case "ERROR" =>

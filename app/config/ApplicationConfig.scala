@@ -18,20 +18,14 @@ package config
 
 import play.api.Play._
 
-trait ApplicationConfig {
-  val privateBetaPassword: String
-  val passwordValidationEnabled: Boolean
-  val lockoutMinutes: Int
-  val maxAttempts: Int
-}
-
-object ApplicationConfig extends ApplicationConfig {
+object ApplicationConfig {
   val privateBetaPassword = getConfig("betaLogin.password")
   val passwordValidationEnabled = getConfig("betaLogin.validationRequired").toBoolean //disable locally as trueClientIP is not available
   val lockoutMinutes = getConfig("betaLogin.lockoutMinutes").toInt
   val maxAttempts = getConfig("betaLogin.maxAttempts").toInt
   val apiConfigSubscriptionKeyHeader = getConfig("voaApi.subscriptionKeyHeader")
   val apiConfigTraceHeader = getConfig("voaApi.traceHeader")
+  val fileTransferInterval = getConfig("fileTransfer.intervalSeconds").toInt * 1000
 
   private def getConfig(key: String) = configuration.getString(key).getOrElse(throw ConfigMissing(key))
 }
