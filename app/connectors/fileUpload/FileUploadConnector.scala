@@ -102,7 +102,7 @@ class FileUploadConnector @Inject()(ws: WSClient, http: SimpleWSHttp)(implicit e
   override def downloadFile(href: String)(implicit hc: HeaderCarrier): Future[Array[Byte]] = {
     Logger.info(s"Downloading file from $url$href")
 
-    ws.url(s"$url$href").withMethod("GET").stream() flatMap { r =>
+    val res = ws.url(s"$url$href").withMethod("GET").stream() flatMap { r =>
       val outputStream = new ByteArrayOutputStream()
 
       val sink = Sink.foreach[ByteString] { bytes =>
@@ -114,6 +114,9 @@ class FileUploadConnector @Inject()(ws: WSClient, http: SimpleWSHttp)(implicit e
           result.get
       } map { _ => outputStream.toByteArray }
     }
+    
+    res.map { r => Logger.info(s"Downloaded ${r.length / 1024}kB from $url$href") }
+    res
   }
 
   override def deleteEnvelope(envelopeId: String)(implicit hc: HeaderCarrier): Future[Unit] = {

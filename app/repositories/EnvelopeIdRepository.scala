@@ -50,7 +50,6 @@ class EnvelopeIdRepository @Inject()(db: DB)
       fetchNewObject = false,
       upsert = false
     ) map { _ => () }
-
   }
 
   override def get(): Future[Seq[EnvelopeId]] = {
