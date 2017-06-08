@@ -50,7 +50,7 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
       envelopeIds = closedEnvelopes.map(_.envelopeId)
       envelopeInfos <- Future.traverse(envelopeIds)( envId => fileUploadConnector.getEnvelopeDetails(envId))
       envelopeFilesNotQuarantine = envelopeInfos.filterNot(env => env.files.map(_.status).contains("QUARANTINED"))
-      res <- Future.traverse(envelopeFilesNotQuarantine)(envInfo => { pause(); processNotYetClosedEnvelopes(envInfo) })
+      _ <- Future.traverse(envelopeFilesNotQuarantine)(envInfo => processNotYetClosedEnvelopes(envInfo))
     } yield {
       FileTransferComplete("")
     }
