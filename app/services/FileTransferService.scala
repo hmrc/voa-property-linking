@@ -18,6 +18,7 @@ package services
 
 import javax.inject.Inject
 
+import akka.stream.scaladsl.Source
 import com.google.inject.Singleton
 import config.ApplicationConfig
 import connectors.EvidenceConnector
@@ -29,7 +30,7 @@ import repositories.EnvelopeIdRepo
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 @Singleton
 class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector,
@@ -56,12 +57,8 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
     }
   }
 
-  private def pause(): Unit = {
-    Logger.info(s"waiting for ${ApplicationConfig.fileTransferInterval}ms"); Thread.sleep(ApplicationConfig.fileTransferInterval)
-  }
-
   private def removeEnvelopes(envInfo: EnvelopeInfo)(implicit hc: HeaderCarrier) = {
-    if (envInfo.status == "NOT_EXISTING" )
+    if (envInfo.status == "NOT_EXISTING")
       repo.remove(envInfo.id)
     else
       fileUploadConnector.deleteEnvelope(envInfo.id).map(_ => repo.remove(envInfo.id))
@@ -70,16 +67,19 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
   def transferFile(fileInfo: FileInfo, metadata: EnvelopeMetadata)(implicit hc: HeaderCarrier): Future[Unit] = {
     for {
       file <- fileUploadConnector.downloadFile(fileInfo.href)
-      _ = Logger.info(s"Downloaded file ${fileInfo.name}")
-      _ <- evidenceConnector.uploadFile(fileInfo.name, if (file.isEmpty) None else Some(file), metadata)
+      _ <- evidenceConnector.uploadFile(fileInfo.name, file.body, metadata)
     } yield ()
+  }
+
+  private def log[T](msg:String): PartialFunction[Try[T],T] = {
+    case Success(v) => Logger.info(s"Success: $msg"); v
+    case Failure(f) => Logger.error(s"Failed: $msg"); throw f
   }
 
   private def processNotYetClosedEnvelopes(envelopeInfo: EnvelopeInfo)(implicit hc: HeaderCarrier): Future[Unit] = {
     Future.sequence(envelopeInfo.files.map(fileInfo => {
       fileInfo.status match {
-        case "ERROR" =>
-          evidenceConnector.uploadFile(fileInfo.name, None, envelopeInfo.metadata)
+        case "ERROR" => evidenceConnector.uploadFile(fileInfo.name, Source.empty, envelopeInfo.metadata)
         case _ => transferFile(fileInfo, envelopeInfo.metadata)
       }
     })).map(_ => removeEnvelopes(envelopeInfo))

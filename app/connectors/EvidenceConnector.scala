@@ -24,7 +24,7 @@ import com.google.inject.ImplementedBy
 import config.ApplicationConfig
 import connectors.fileUpload.EnvelopeMetadata
 import play.api.Logger
-import play.api.libs.ws.{WSClient, WSResponse}
+import play.api.libs.ws.{StreamedResponse, WSClient, WSResponse}
 import play.api.mvc.MultipartFormData.{DataPart, FilePart}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -34,14 +34,14 @@ import scala.concurrent.Future
 
 @ImplementedBy(classOf[EvidenceConnector])
 trait EvidenceTransfer {
-  def uploadFile(fileName: String, content: Option[Array[Byte]], metadata: EnvelopeMetadata)(implicit hc: HeaderCarrier): Future[Unit]
+  def uploadFile(fileName: String, content: Source[ByteString, _], metadata: EnvelopeMetadata)(implicit hc: HeaderCarrier): Future[Unit]
 }
 
 class EvidenceConnector @Inject()(val ws: WSClient) extends EvidenceTransfer with ServicesConfig with HandleErrors {
 
   val url = baseUrl("external-business-rates-data-platform")
 
-  override def uploadFile(fileName: String, content: Option[Array[Byte]], metadata: EnvelopeMetadata)(implicit hc: HeaderCarrier): Future[Unit] = {
+  override def uploadFile(fileName: String, content: Source[ByteString, _], metadata: EnvelopeMetadata)(implicit hc: HeaderCarrier): Future[Unit] = {
     val endpoint = "/customer-management-api/customer/evidence"
 
     Logger.info(s"Uploading file: $fileName, subId: ${metadata.submissionId} to /customer/evidence")
@@ -50,14 +50,15 @@ class EvidenceConnector @Inject()(val ws: WSClient) extends EvidenceTransfer wit
       .withHeaders(
         ("Ocp-Apim-Subscription-Key", ApplicationConfig.apiConfigSubscriptionKeyHeader),
         ("Ocp-Apim-Trace", ApplicationConfig.apiConfigTraceHeader)
-      )
-      .put(Source(
-        content.map(c => List(FilePart("file", fileName, Some("application/octet-stream"), Source.single(ByteString(c))))).getOrElse(Nil) ++ (
+      ).put(
+        Source(
+          FilePart("file", fileName, Some("application/octet-stream"), content) ::
           DataPart("customerId", metadata.personId.toString) ::
-            DataPart("filename", fileName) ::
-            DataPart("submissionId", metadata.submissionId) ::
-            List())
-      )) map logResponse(fileName, metadata.submissionId)
+          DataPart("filename", fileName) ::
+          DataPart("submissionId", metadata.submissionId) ::
+          Nil
+        )
+    ) map logResponse(fileName, metadata.submissionId)
     handleErrors(res, endpoint) map logError(fileName, metadata.submissionId)
   }
 

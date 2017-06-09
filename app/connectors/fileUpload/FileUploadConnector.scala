@@ -27,13 +27,14 @@ import infrastructure.SimpleWSHttp
 import play.api.Logger
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
-import play.api.libs.ws.WSClient
+import play.api.libs.ws.{StreamedResponse, WSClient}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
 import uk.gov.hmrc.play.http._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success, Try}
 
 case class EnvelopeMetadata(submissionId: String, personId: Long)
 
@@ -82,7 +83,7 @@ trait FileUpload {
 
   def getFilesInEnvelope(envelopeId: String)(implicit hc: HeaderCarrier): Future[Seq[String]]
 
-  def downloadFile(href: String)(implicit hc: HeaderCarrier): Future[Array[Byte]]
+  def downloadFile(href: String)(implicit hc: HeaderCarrier): Future[StreamedResponse]
 
   def deleteEnvelope(envelopeId: String)(implicit hc: HeaderCarrier): Future[Unit]
 }
@@ -99,29 +100,17 @@ class FileUploadConnector @Inject()(ws: WSClient, http: SimpleWSHttp)(implicit e
     http.GET[EnvelopeInfo](s"$url/file-upload/envelopes/$envelopeId").map(_.files.map(_.href))
   }
 
-  override def downloadFile(href: String)(implicit hc: HeaderCarrier): Future[Array[Byte]] = {
+  override def downloadFile(href: String)(implicit hc: HeaderCarrier): Future[StreamedResponse] = {
     Logger.info(s"Downloading file from $url$href")
 
-    val res = ws.url(s"$url$href").withMethod("GET").stream() flatMap { r =>
-      val outputStream = new ByteArrayOutputStream()
-
-      val sink = Sink.foreach[ByteString] { bytes =>
-        outputStream.write(bytes.toArray)
-      }
-
-      r.body.runWith(sink).andThen {
-        case result =>
-          result.get
-      } map { _ => outputStream.toByteArray }
+    ws.url(s"$url$href").withMethod("GET").stream() andThen {
+      case Success(v) => Logger.info(s"Transfered successfully from $url$href")
+      case Failure(ex) => Logger.error(s"Exception copying $url$href", ex)
     }
-    
-    res.map { r => Logger.info(s"Downloaded ${r.length / 1024}kB from $url$href") }
-    res
   }
 
   override def deleteEnvelope(envelopeId: String)(implicit hc: HeaderCarrier): Future[Unit] = {
     Logger.info(s"Deleting envelopeId: $envelopeId from FUAAS")
     http.DELETE[HttpResponse](s"$url/file-upload/envelopes/$envelopeId").map(_ => ())
   }
-
 }

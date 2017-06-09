@@ -16,6 +16,8 @@
 
 package connectors.fileUpload
 
+import akka.stream.scaladsl.{Sink, Source}
+import akka.util.ByteString
 import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.WireMockSpec
 import helpers.WithSimpleWsHttpTestApplication
@@ -49,7 +51,7 @@ class FileUploadSpec extends WireMockSpec with WithSimpleWsHttpTestApplication w
         )
       )
 
-      await(connector.downloadFile(fileUrl)) should be(fileBytes)
+      await(await(connector.downloadFile(fileUrl)).body.runFold("")(_ + _.decodeString("UTF-8"))) should be(new String(fileBytes))
     }
   }
 }
