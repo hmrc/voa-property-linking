@@ -16,6 +16,9 @@
 
 package connectors.fileUpload
 
+import java.io.ByteArrayInputStream
+
+import akka.stream.scaladsl.StreamConverters
 import com.github.tomakehurst.wiremock.client.WireMock._
 import config.ApplicationConfig
 import connectors.{EvidenceConnector, WireMockSpec}
@@ -44,7 +47,7 @@ class EvidenceConnectorSpec extends WireMockSpec with WithSimpleWsHttpTestApplic
         .withRequestBody(containing("12345"))
         .willReturn(aResponse().withStatus(200)))
 
-      noException should be thrownBy await(connector.uploadFile("FileName", Some(file.getBytes), metadata))
+      noException should be thrownBy await(connector.uploadFile("FileName", StreamConverters.fromInputStream { () => new ByteArrayInputStream(file.getBytes) }, metadata))
     }
   }
 }
