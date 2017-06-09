@@ -19,7 +19,7 @@ package infrastructure
 import javax.inject.{Inject, Named}
 
 import com.google.inject.Singleton
-import org.joda.time.Duration
+import org.joda.time.{DateTimeZone, Duration}
 import play.api.Logger
 import reactivemongo.api.DB
 import uk.gov.hmrc.lock.{LockKeeper, LockMongoRepository, LockRepository}
@@ -45,7 +45,7 @@ class Lock @Inject()(@Named("lockName") val name: String, @Named("lockTimeout") 
 
   def lockAcquired[T](body: Future[T])(implicit ec: ExecutionContext): Future[Option[T]] = {
     withCurrentTime { now =>
-      Logger.info(s"Acquired lock - setting release to: ${now.plus(timeout)}")
+      Logger.info(s"Acquired lock - setting release to: ${now.plus(timeout).withZone(zone)}")
       body.map(x => Some(x))
     }
   }
