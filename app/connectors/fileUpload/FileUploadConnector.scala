@@ -104,7 +104,7 @@ class FileUploadConnector @Inject()(ws: WSClient, http: SimpleWSHttp)(implicit e
     Logger.info(s"Downloading file from $url$href")
 
     ws.url(s"$url$href").withMethod("GET").stream() andThen {
-      case Success(v) => Logger.info(s"Transfered successfully from $url$href")
+      case Success(v) => Logger.info(s"Transferred successfully from $url$href")
       case Failure(ex) => Logger.error(s"Exception copying $url$href", ex)
     }
   }
