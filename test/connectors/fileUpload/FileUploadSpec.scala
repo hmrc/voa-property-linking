@@ -16,20 +16,21 @@
 
 package connectors.fileUpload
 
-import akka.stream.scaladsl.{Sink, Source}
-import akka.util.ByteString
 import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.WireMockSpec
 import helpers.WithSimpleWsHttpTestApplication
 import infrastructure.SimpleWSHttp
+import org.scalatest.mock.MockitoSugar
+import org.mockito.Mockito.{verify => mockitoVerify, _}
+import org.mockito.ArgumentMatchers.{any => mockitoAny, _}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import play.api.libs.ws.WSClient
-import play.api.libs.ws.ahc.AhcWSClient
+import play.api.libs.ws.{StreamedResponse, WSClient, WSRequest}
 import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
 import uk.gov.hmrc.play.http.HeaderCarrier
-import uk.gov.hmrc.play.test.WithFakeApplication
 
-class FileUploadSpec extends WireMockSpec with WithSimpleWsHttpTestApplication with MicroserviceFilterSupport {
+import scala.concurrent.Future
+
+class FileUploadSpec extends WireMockSpec with WithSimpleWsHttpTestApplication with MicroserviceFilterSupport with MockitoSugar {
 
   "FileUploadConnector" should {
     "be able to download files from the file upload service" in {
@@ -52,6 +53,28 @@ class FileUploadSpec extends WireMockSpec with WithSimpleWsHttpTestApplication w
       )
 
       await(await(connector.downloadFile(fileUrl)).body.runFold("")(_ + _.decodeString("UTF-8"))) should be(new String(fileBytes))
+    }
+
+    "set the USER_AGENT header to the appName" in {
+      implicit val fakeHc = HeaderCarrier()
+
+      val mockWsClient = mock[WSClient]
+      val mockHttp = mock[SimpleWSHttp]
+      val mockWsRequest = mock[WSRequest]
+      val mockFutureStreamedResponse = Future.successful(mock[StreamedResponse])
+
+      val connector = new FileUploadConnector(mockWsClient, mockHttp) {
+        override lazy val url = ""
+      }
+
+      when(mockWsClient.url(anyString())).thenReturn(mockWsRequest)
+      when(mockWsRequest.withHeaders(mockitoAny())).thenReturn(mockWsRequest)
+      when(mockWsRequest.withMethod(mockitoAny())).thenReturn(mockWsRequest)
+      when(mockWsRequest.stream()).thenReturn(mockFutureStreamedResponse)
+
+      await(connector.downloadFile("someFile.pdf"))
+
+      mockitoVerify(mockWsRequest, times(1)).withHeaders("User-Agent" -> "voa-property-linking")
     }
   }
 }
