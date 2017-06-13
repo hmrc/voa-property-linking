@@ -21,10 +21,10 @@ import java.util.concurrent.atomic.AtomicInteger
 import connectors.EvidenceConnector
 import connectors.fileUpload.{EnvelopeInfo, EnvelopeMetadata, FileInfo, FileUploadConnector}
 import helpers.AnswerSugar
-import models.{Closed, Open}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import org.mockito.invocation.InvocationOnMock
+import org.scalatest.BeforeAndAfterEach
 import org.scalatest.mock.MockitoSugar
 import play.api.libs.ws.{StreamedResponse, WSResponseHeaders}
 import repositories.{EnvelopeId, EnvelopeIdRepo}
@@ -41,10 +41,16 @@ object Result {
   case object Fail extends Result
 }
 
-class FileTransferServiceSpec extends UnitSpec with MockitoSugar with AnswerSugar {
+class FileTransferServiceSpec extends UnitSpec with MockitoSugar with AnswerSugar with BeforeAndAfterEach {
+
+  override protected def beforeEach(): Unit = {
+    reset(evidenceConnector)
+  }
+
+  lazy val evidenceConnector = mock[EvidenceConnector]
+
   "The FileTransferService" should {
     val fileUploadConnector = mock[FileUploadConnector]
-    val evidenceConnector = mock[EvidenceConnector]
     val repo = mock[EnvelopeIdRepo]
 
     val personId = 1L
@@ -108,7 +114,7 @@ class FileTransferServiceSpec extends UnitSpec with MockitoSugar with AnswerSuga
           EnvelopeMetadata("", 1L)))
       }
 
-      var counter = new AtomicInteger(0)
+      val counter = new AtomicInteger(0)
 
       when(fileUploadConnector.downloadFile(any())(any())).thenReturn(Future.successful(mockStreamedResponse))
       when(mockStreamedResponse.headers).thenReturn(mockHeaders)
