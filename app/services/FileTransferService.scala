@@ -20,7 +20,6 @@ import javax.inject.Inject
 
 import akka.stream.scaladsl.Source
 import com.google.inject.Singleton
-import config.ApplicationConfig
 import connectors.EvidenceConnector
 import connectors.fileUpload.{EnvelopeInfo, EnvelopeMetadata, FileInfo, FileUploadConnector}
 import models.{Closed, Open}
@@ -30,7 +29,8 @@ import repositories.EnvelopeIdRepo
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success, Try}
+
+case class FUAASDownloadException(msg: String) extends Exception(msg)
 
 @Singleton
 class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector,
@@ -67,13 +67,17 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
   def transferFile(fileInfo: FileInfo, metadata: EnvelopeMetadata)(implicit hc: HeaderCarrier): Future[Unit] = {
     for {
       file <- fileUploadConnector.downloadFile(fileInfo.href)
-      _ <- evidenceConnector.uploadFile(fileInfo.name, file.body, metadata)
+      _ <- if(file.headers.status < 400)
+            evidenceConnector.uploadFile(fileInfo.name, file.body, metadata)
+           else
+            failedDownloadFromFUAAS(fileInfo, file.headers.status)
     } yield ()
   }
 
-  private def log[T](msg:String): PartialFunction[Try[T],T] = {
-    case Success(v) => Logger.info(s"Success: $msg"); v
-    case Failure(f) => Logger.error(s"Failed: $msg"); throw f
+  private def failedDownloadFromFUAAS(fileInfo: FileInfo, status: Int): Future[Unit] = {
+    val msg = s"Failed to download ${fileInfo.href} (status: $status)"
+    Logger.error(msg)
+    Future.failed(FUAASDownloadException(msg))
   }
 
   private def processNotYetClosedEnvelopes(envelopeInfo: EnvelopeInfo)(implicit hc: HeaderCarrier): Future[Unit] = {

@@ -32,7 +32,7 @@ class EvidenceConnectorSpec extends WireMockSpec with WithSimpleWsHttpTestApplic
   "Evidence connector" should {
     "be able to upload a file" in {
       val connector = new EvidenceConnector(AhcWSClient()) {
-        override val url = mockServerUrl
+        override lazy val url = mockServerUrl
       }
 
       implicit val fakeHc = HeaderCarrier()

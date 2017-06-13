@@ -16,25 +16,23 @@
 
 package connectors.fileUpload
 
-import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 
-import akka.stream.scaladsl._
-import akka.util.ByteString
 import com.google.inject.ImplementedBy
 import connectors.HandleErrors
 import infrastructure.SimpleWSHttp
 import play.api.Logger
+import play.api.http.HeaderNames.USER_AGENT
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import play.api.libs.ws.{StreamedResponse, WSClient}
-import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.play.config.{AppName, ServicesConfig}
 import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
 import uk.gov.hmrc.play.http._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success, Try}
+import scala.util.{Failure, Success}
 
 case class EnvelopeMetadata(submissionId: String, personId: Long)
 
@@ -88,7 +86,8 @@ trait FileUpload {
   def deleteEnvelope(envelopeId: String)(implicit hc: HeaderCarrier): Future[Unit]
 }
 
-class FileUploadConnector @Inject()(ws: WSClient, http: SimpleWSHttp)(implicit ec: ExecutionContext) extends FileUpload with ServicesConfig with HandleErrors with MicroserviceFilterSupport {
+class FileUploadConnector @Inject()(ws: WSClient, http: SimpleWSHttp)(implicit ec: ExecutionContext)
+  extends FileUpload with ServicesConfig with HandleErrors with MicroserviceFilterSupport with AppName {
   lazy val url = baseUrl("file-upload-backend")
 
   override def getEnvelopeDetails(envelopeId: String)(implicit hc: HeaderCarrier): Future[EnvelopeInfo] = {
@@ -103,7 +102,10 @@ class FileUploadConnector @Inject()(ws: WSClient, http: SimpleWSHttp)(implicit e
   override def downloadFile(href: String)(implicit hc: HeaderCarrier): Future[StreamedResponse] = {
     Logger.info(s"Downloading file from $url$href")
 
-    ws.url(s"$url$href").withMethod("GET").stream() andThen {
+    ws.url(s"$url$href")
+      .withHeaders(USER_AGENT -> appName)
+      .withHeaders(hc.headers: _*)
+      .withMethod("GET").stream() andThen {
       case Success(v) => Logger.info(s"Transferred successfully from $url$href")
       case Failure(ex) => Logger.error(s"Exception copying $url$href", ex)
     }
