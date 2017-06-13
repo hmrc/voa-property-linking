@@ -19,11 +19,13 @@ package models
 import org.joda.time.LocalDate
 import play.api.libs.json.Json
 
-case class APIGroupAccount(governmentGatewayGroupId: String, organisationName: String, addressUnitId: Int,
-                           organisationEmailAddress: String, organisationTelephoneNumber: String,
-                           representativeFlag: Boolean,
-                           representativeCode: Option[Int], effectiveFrom: LocalDate)
+case class APIGroupAccountSubmission(governmentGatewayGroupId: String, organisationName: String, addressUnitId: Int,
+                                     organisationEmailAddress: String, organisationTelephoneNumber: String,
+                                     representativeFlag: Boolean,
+                                     representativeCode: Option[Int], effectiveFrom: LocalDate,
+                                     individualAccount: APIIndividualAccountForOrganisation
+                          )
 
-object APIGroupAccount {
-  implicit val format = Json.format[APIGroupAccount]
+object APIGroupAccountSubmission {
+  implicit val format = Json.format[APIGroupAccountSubmission]
 }
