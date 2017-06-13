@@ -51,7 +51,9 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
       envelopeIds = closedEnvelopes.map(_.envelopeId)
       envelopeInfos <- Future.traverse(envelopeIds)( envId => fileUploadConnector.getEnvelopeDetails(envId))
       envelopeFilesNotQuarantine = envelopeInfos.filterNot(env => env.files.map(_.status).contains("QUARANTINED"))
-      _ <- Future.traverse(envelopeFilesNotQuarantine)(envInfo => processNotYetClosedEnvelopes(envInfo))
+      _ <- envelopeFilesNotQuarantine.foldLeft(Future.successful(())) {
+        case (f, envInfo) => f.flatMap(_ => processNotYetClosedEnvelopes(envInfo))
+      }
     } yield {
       FileTransferComplete("")
     }
@@ -59,7 +61,7 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
 
   private def removeEnvelopes(envInfo: EnvelopeInfo)(implicit hc: HeaderCarrier) = {
     if (envInfo.status == "NOT_EXISTING")
-      repo.remove(envInfo.id)
+      Future.successful(repo.remove(envInfo.id))
     else
       fileUploadConnector.deleteEnvelope(envInfo.id).map(_ => repo.remove(envInfo.id))
   }

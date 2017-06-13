@@ -16,22 +16,24 @@
 
 package services
 
-import config.MongoDbProvider
+import java.util.concurrent.atomic.AtomicInteger
+
 import connectors.EvidenceConnector
-import connectors.fileUpload.{EnvelopeMetadata, FileInfo, FileUploadConnector}
-import helpers.WithSimpleWsHttpTestApplication
-import org.scalatest.mock.MockitoSugar
-import org.mockito.Mockito._
+import connectors.fileUpload.{EnvelopeInfo, EnvelopeMetadata, FileInfo, FileUploadConnector}
+import helpers.AnswerSugar
 import org.mockito.ArgumentMatchers._
+import org.mockito.Mockito._
+import org.mockito.invocation.InvocationOnMock
+import org.scalatest.BeforeAndAfterEach
+import org.scalatest.mock.MockitoSugar
 import play.api.libs.ws.{StreamedResponse, WSResponseHeaders}
-import repositories.EnvelopeIdRepo
+import repositories.{EnvelopeId, EnvelopeIdRepo}
 import uk.gov.hmrc.mongo.MongoConnector
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
 
-import scala.concurrent.Future
-import scala.util.{Failure, Success}
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 object Result {
   sealed trait Result
@@ -39,10 +41,16 @@ object Result {
   case object Fail extends Result
 }
 
-class FileTransferServiceSpec extends UnitSpec with MockitoSugar {
+class FileTransferServiceSpec extends UnitSpec with MockitoSugar with AnswerSugar with BeforeAndAfterEach {
+
+  override protected def beforeEach(): Unit = {
+    reset(evidenceConnector)
+  }
+
+  lazy val evidenceConnector = mock[EvidenceConnector]
+
   "The FileTransferService" should {
     val fileUploadConnector = mock[FileUploadConnector]
-    val evidenceConnector = mock[EvidenceConnector]
     val repo = mock[EnvelopeIdRepo]
 
     val personId = 1L
@@ -78,6 +86,53 @@ class FileTransferServiceSpec extends UnitSpec with MockitoSugar {
       await(fts.transferFile(fileInfo, metaData) map { _ => Result.Ok } recover { case _ => Result.Fail } map {
         case Result.Ok => ()
         case Result.Fail => fail("Expected successful future")
+      })
+    }
+
+    "Fail fast on the first failure with uploads" in {
+
+      val envelopes: Seq[EnvelopeId] = Seq(
+        EnvelopeId("1", "1", None),
+        EnvelopeId("2", "2", None),
+        EnvelopeId("3", "3", None),
+        EnvelopeId("4", "4", None),
+        EnvelopeId("5", "5", None),
+        EnvelopeId("6", "6", None),
+        EnvelopeId("7", "7", None),
+        EnvelopeId("8", "8", None),
+        EnvelopeId("9", "9", None),
+        EnvelopeId("10", "10", None)
+      )
+
+      when(repo.get()).thenReturn(Future.successful(envelopes))
+      when(fileUploadConnector.getEnvelopeDetails(any())(any())).thenAnswer { invocation: InvocationOnMock =>
+        val envelopeId = invocation.getArgument[String](0)
+
+        Future.successful(EnvelopeInfo(envelopeId,
+          "Open",
+          Seq(FileInfo(envelopeId, "Open", "name", "contentType", "created", s"uniqueHref-$envelopeId")),
+          EnvelopeMetadata("", 1L)))
+      }
+
+      val counter = new AtomicInteger(0)
+
+      when(fileUploadConnector.downloadFile(any())(any())).thenReturn(Future.successful(mockStreamedResponse))
+      when(mockStreamedResponse.headers).thenReturn(mockHeaders)
+      when(mockHeaders.status).thenReturn(200)
+      when(fileUploadConnector.deleteEnvelope(any())(any())).thenReturn(Future.successful(()))
+
+      when(evidenceConnector.uploadFile(any(), any(), any())(any())).thenAnswer { invocation: InvocationOnMock =>
+        if(counter.getAndIncrement() > 4)
+          Future.failed(new Exception("Failure"))
+        else
+          Future.successful(())
+      }
+
+      await(fts.justDoIt() map { _ => Result.Fail } recover { case _ => Result.Ok } map {
+        case Result.Ok =>
+          verify(evidenceConnector, times(6)).uploadFile(any(), any(), any())(any())
+          verify(fileUploadConnector, times(5)).deleteEnvelope(any())(any())
+        case Result.Fail => fail("Expected failed future")
       })
     }
   }
