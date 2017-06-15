@@ -32,7 +32,7 @@ import scala.concurrent.Future
 
 @Singleton
 class EnvelopeIdRepository @Inject()(db: DB)
-  extends ReactiveRepository[EnvelopeId, String]("envelopeids", () => db, EnvelopeId.mongoFormat, implicitly[Format[String]]) with
+  extends ReactiveRepository[EnvelopeId, String]("s3envelopeids", () => db, EnvelopeId.mongoFormat, implicitly[Format[String]]) with
     EnvelopeIdRepo {
 
   override def create(envelopeId: String): Future[Unit] = {
@@ -56,7 +56,7 @@ class EnvelopeIdRepository @Inject()(db: DB)
     findAll()
   }
 
-  override def remove(envelopeId: String) = {
+  override def remove(envelopeId: String): Future[Unit] = {
     Logger.info(s"Deleting envelopedId: $envelopeId from mongo")
     removeById(envelopeId).map(_ => ())
   }
@@ -74,7 +74,7 @@ trait EnvelopeIdRepo {
 
   def get(): Future[Seq[EnvelopeId]]
 
-  def remove(envelopeId: String)
+  def remove(envelopeId: String): Future[Unit]
 
   def update(envelopeId: String, status: EnvelopeStatus): Future[Unit]
 }
