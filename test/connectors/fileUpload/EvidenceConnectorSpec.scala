@@ -18,17 +18,27 @@ package connectors.fileUpload
 
 import java.io.ByteArrayInputStream
 
-import akka.stream.scaladsl.StreamConverters
+import akka.stream.scaladsl.{Sink, Source, StreamConverters}
+import akka.util.ByteString
 import com.github.tomakehurst.wiremock.client.WireMock._
 import config.ApplicationConfig
 import connectors.{EvidenceConnector, WireMockSpec}
-import helpers.WithSimpleWsHttpTestApplication
+import helpers.{AnswerSugar, WithSimpleWsHttpTestApplication}
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito._
+import org.mockito.invocation.InvocationOnMock
+import org.scalatest.mock.MockitoSugar
+import play.api.libs.ws.{WSClient, WSRequest}
 import play.api.libs.ws.ahc.AhcWSClient
+import play.api.mvc.MultipartFormData
+import services.Result
 import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
 import uk.gov.hmrc.play.http.HeaderCarrier
 
-class EvidenceConnectorSpec extends WireMockSpec with WithSimpleWsHttpTestApplication with MicroserviceFilterSupport {
+import scala.concurrent.Future
 
+class EvidenceConnectorSpec extends WireMockSpec with WithSimpleWsHttpTestApplication with MicroserviceFilterSupport
+  with MockitoSugar with AnswerSugar {
   "Evidence connector" should {
     "be able to upload a file" in {
       val connector = new EvidenceConnector(AhcWSClient()) {
@@ -48,6 +58,34 @@ class EvidenceConnectorSpec extends WireMockSpec with WithSimpleWsHttpTestApplic
         .willReturn(aResponse().withStatus(200)))
 
       noException should be thrownBy await(connector.uploadFile("FileName", StreamConverters.fromInputStream { () => new ByteArrayInputStream(file.getBytes) }, metadata))
+    }
+
+    "Properly URL Decode a filename in the PUT body" in {
+      val connector = new EvidenceConnector(AhcWSClient()) {
+        override lazy val url = mockServerUrl
+      }
+
+      implicit val fakeHc = HeaderCarrier()
+      val file = getClass.getResource("/document.pdf").getFile
+      val metadata = EnvelopeMetadata("aSubmissionId", 12345)
+      val filenames = Map(
+        "Car+Space+16+Access+House%2C+Cray+Avenue+SBizhub+C2817042709470.pdf" -> "Car Space 16 Access House, Cray Avenue SBizhub C2817042709470.pdf",
+        "sharpscanner%40gmail.com.pdf" -> "sharpscanner@gmail.com.pdf",
+        "Scan+15+Jun+2017%2c+13.04.pdf" -> "Scan 15 Jun 2017, 13.04.pdf",
+        "Scan+15+Jun+2017%252c+13.04.pdf" -> "Scan 15 Jun 2017%2c 13.04.pdf"
+      )
+
+      for ((encoded, decoded) <- filenames) {
+        stubFor(put(urlEqualTo("/customer-management-api/customer/evidence"))
+          .withHeader("Ocp-Apim-Subscription-Key", matching(ApplicationConfig.apiConfigSubscriptionKeyHeader))
+          .withHeader("Ocp-Apim-Trace", matching(ApplicationConfig.apiConfigTraceHeader))
+          .withRequestBody(containing(s"""filename="$decoded""""))
+          .withRequestBody(containing("aSubmissionId"))
+          .withRequestBody(containing("12345"))
+          .willReturn(aResponse().withStatus(200)))
+
+        noException should be thrownBy await(connector.uploadFile(encoded, StreamConverters.fromInputStream { () => new ByteArrayInputStream(file.getBytes) }, metadata))
+      }
     }
   }
 }

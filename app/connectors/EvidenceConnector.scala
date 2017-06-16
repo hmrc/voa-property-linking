@@ -16,6 +16,7 @@
 
 package connectors
 
+import java.net.URLDecoder
 import javax.inject.Inject
 
 import akka.stream.scaladsl.Source
@@ -43,7 +44,9 @@ class EvidenceConnector @Inject()(val ws: WSClient) extends EvidenceTransfer wit
   lazy val uploadEndpoint = s"$url/customer-management-api/customer/evidence"
 
   override def uploadFile(fileName: String, content: Source[ByteString, _], metadata: EnvelopeMetadata)(implicit hc: HeaderCarrier): Future[Unit] = {
-    Logger.info(s"Uploading file: $fileName, subId: ${metadata.submissionId} to $uploadEndpoint")
+    val decodedFilename = URLDecoder.decode(fileName, "UTF-8")
+
+    Logger.info(s"Uploading file: $decodedFilename, subId: ${metadata.submissionId} to $uploadEndpoint")
 
     val res = ws.url(uploadEndpoint).withHeaders(
         ("Ocp-Apim-Subscription-Key", ApplicationConfig.apiConfigSubscriptionKeyHeader),
@@ -51,9 +54,9 @@ class EvidenceConnector @Inject()(val ws: WSClient) extends EvidenceTransfer wit
         (USER_AGENT, appName)
       ).put(
         Source(
-          FilePart("file", fileName, Some("application/octet-stream"), content) ::
+          FilePart("file", decodedFilename, Some("application/octet-stream"), content) ::
           DataPart("customerId", metadata.personId.toString) ::
-          DataPart("filename", fileName) ::
+          DataPart("filename", decodedFilename) ::
           DataPart("submissionId", metadata.submissionId) ::
           Nil
         )
