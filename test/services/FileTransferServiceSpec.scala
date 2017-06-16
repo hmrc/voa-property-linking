@@ -44,13 +44,13 @@ object Result {
 class FileTransferServiceSpec extends UnitSpec with MockitoSugar with AnswerSugar with BeforeAndAfterEach {
 
   override protected def beforeEach(): Unit = {
-    reset(evidenceConnector)
+    reset(evidenceConnector, fileUploadConnector)
   }
 
   lazy val evidenceConnector = mock[EvidenceConnector]
+  lazy val fileUploadConnector = mock[FileUploadConnector]
 
   "The FileTransferService" should {
-    val fileUploadConnector = mock[FileUploadConnector]
     val repo = mock[EnvelopeIdRepo]
 
     val personId = 1L
