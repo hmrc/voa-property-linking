@@ -106,7 +106,8 @@ class FileUploadConnector @Inject()(ws: WSClient, http: SimpleWSHttp)(implicit e
       .withHeaders(USER_AGENT -> appName)
       .withHeaders(hc.headers: _*)
       .withMethod("GET").stream() andThen {
-      case Success(v) => Logger.info(s"Transferred successfully from $url$href")
+      case Success(v) if v.headers.status < 400 => Logger.info(s"Transferred successfully from $url$href")
+      case Success(v) if v.headers.status >= 400 => Logger.info(s"Transfer failed (${v.headers.status}) from $url$href")
       case Failure(ex) => Logger.error(s"Exception copying $url$href", ex)
     }
   }
