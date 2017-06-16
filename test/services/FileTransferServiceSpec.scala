@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import connectors.EvidenceConnector
 import connectors.fileUpload.{EnvelopeInfo, EnvelopeMetadata, FileInfo, FileUploadConnector}
 import helpers.AnswerSugar
-import org.mockito.ArgumentMatchers._
+import org.mockito.ArgumentMatchers.{eq => mEq, _}
 import org.mockito.Mockito._
 import org.mockito.invocation.InvocationOnMock
 import org.scalatest.BeforeAndAfterEach
@@ -90,7 +90,6 @@ class FileTransferServiceSpec extends UnitSpec with MockitoSugar with AnswerSuga
     }
 
     "Fail fast on the first failure with uploads" in {
-
       val envelopes: Seq[EnvelopeId] = Seq(
         EnvelopeId("1", "1", None),
         EnvelopeId("2", "2", None),
@@ -133,6 +132,57 @@ class FileTransferServiceSpec extends UnitSpec with MockitoSugar with AnswerSuga
           verify(evidenceConnector, times(6)).uploadFile(any(), any(), any())(any())
           verify(fileUploadConnector, times(5)).deleteEnvelope(any())(any())
         case Result.Fail => fail("Expected failed future")
+      })
+    }
+
+    "Not fail, but skip errors originating in file upload" in {
+      val envelopes: Seq[EnvelopeId] = Seq(
+        EnvelopeId("1", "1", None),
+        EnvelopeId("2", "2", None),
+        EnvelopeId("3", "3", None),
+        EnvelopeId("4", "4", None),
+        EnvelopeId("5", "5", None),
+        EnvelopeId("6", "6", None),
+        EnvelopeId("7", "7", None),
+        EnvelopeId("8", "8", None),
+        EnvelopeId("9", "9", None),
+        EnvelopeId("10", "10", None)
+      )
+
+      when(repo.get()).thenReturn(Future.successful(envelopes))
+      when(fileUploadConnector.getEnvelopeDetails(any())(any())).thenAnswer { invocation: InvocationOnMock =>
+        val envelopeId = invocation.getArgument[String](0)
+
+        Future.successful(EnvelopeInfo(envelopeId,
+          "Open",
+          Seq(FileInfo(envelopeId, "Open", "name", "contentType", "created", s"uniqueHref-$envelopeId")),
+          EnvelopeMetadata("", 1L)))
+      }
+
+      val counter = new AtomicInteger(0)
+
+      val mock404StreamedResponse = mock[StreamedResponse]
+      val mock404Headers = mock[WSResponseHeaders]
+      when(mock404StreamedResponse.headers).thenReturn(mock404Headers)
+      when(mock404Headers.status).thenReturn(404)
+
+      when(fileUploadConnector.downloadFile(any())(any())).thenAnswer{ invocation: InvocationOnMock =>
+        if(counter.getAndIncrement() == 4)
+          Future.successful(mock404StreamedResponse)
+        else
+          Future.successful(mockStreamedResponse)
+      }
+
+      when(mockStreamedResponse.headers).thenReturn(mockHeaders)
+      when(mockHeaders.status).thenReturn(200)
+      when(fileUploadConnector.deleteEnvelope(any())(any())).thenReturn(Future.successful(()))
+      when(evidenceConnector.uploadFile(any(), any(), any())(any())).thenReturn(Future.successful(()))
+
+      await(fts.justDoIt() map { _ => Result.Ok } recover { case _ => Result.Fail } map {
+        case Result.Ok =>
+          verify(evidenceConnector, times(9)).uploadFile(any(), any(), any())(any())
+          verify(fileUploadConnector, times(9)).deleteEnvelope(any())(any())
+        case Result.Fail => fail("Expected future success")
       })
     }
   }

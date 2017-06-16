@@ -30,7 +30,7 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
-case class FUAASDownloadException(msg: String) extends Exception(msg)
+case class FUAASDownloadException(href: String, status: Int) extends Exception(s"Failed to download $href (status: $status)")
 
 @Singleton
 class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector,
@@ -52,9 +52,13 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
       envelopeInfos <- Future.traverse(envelopeIds)( envId => fileUploadConnector.getEnvelopeDetails(envId))
       envelopeFilesNotQuarantine = envelopeInfos.filterNot(env => env.files.map(_.status).contains("QUARANTINED"))
       _ <- envelopeFilesNotQuarantine.foldLeft(Future.successful(())) {
-        case (f, envInfo) => f.flatMap(_ => processNotYetClosedEnvelopes(envInfo))
+        case (f, envInfo) => f.flatMap(_ => processEnvelope(envInfo)).recover {
+          case ex: FUAASDownloadException =>
+            Logger.info(s"Skipping FUaaS download ${ex.href} as it returned ${ex.status}; continuing processing next envelope")
+        }
       }
     } yield {
+      Logger.info("Ending transfer job run")
       FileTransferComplete("")
     }
   }
@@ -77,12 +81,10 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
   }
 
   private def failedDownloadFromFUAAS(fileInfo: FileInfo, status: Int): Future[Unit] = {
-    val msg = s"Failed to download ${fileInfo.href} (status: $status)"
-    Logger.error(msg)
-    Future.failed(FUAASDownloadException(msg))
+    Future.failed(FUAASDownloadException(fileInfo.href, status))
   }
 
-  private def processNotYetClosedEnvelopes(envelopeInfo: EnvelopeInfo)(implicit hc: HeaderCarrier): Future[Unit] = {
+  private def processEnvelope(envelopeInfo: EnvelopeInfo)(implicit hc: HeaderCarrier): Future[Unit] = {
     Future.sequence(envelopeInfo.files.map(fileInfo => {
       fileInfo.status match {
         case "ERROR" => evidenceConnector.uploadFile(fileInfo.name, Source.empty, envelopeInfo.metadata)
