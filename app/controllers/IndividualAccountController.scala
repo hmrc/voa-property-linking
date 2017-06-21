@@ -27,7 +27,13 @@ class IndividualAccountController @Inject() (individuals: IndividualAccountConne
 
   def create() = Action.async(parse.json) { implicit request =>
     withJsonBody[IndividualAccountWrite] { acc =>
-      individuals.create(acc) map { Created(_) }
+      individuals.create(acc) map { x => Created(x) }
+    }
+  }
+
+  def update(personId: Int) = Action.async(parse.json) { implicit request =>
+    withJsonBody[IndividualAccountWrite] { account =>
+      individuals.update(personId, account) map { Ok(_) }
     }
   }
 

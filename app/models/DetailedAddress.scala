@@ -24,12 +24,21 @@ case class DetailedAddress(addressUnitId: Option[Int] = None, nonAbpAddressId: O
                            doubleDependentLocality: Option[String] = None, dependentLocality: Option[String] = None, postTown: String, postcode: String) {
 
   def simplify = {
+    val lines = List(
+      concatenate(organisationName, departmentName),
+      concatenate(subBuildingName, buildingName, buildingNumber),
+      concatenate(dependentThoroughfareName, thoroughfareName),
+      concatenate(doubleDependentLocality, dependentLocality, Some(postTown)))
+      .filter(_.nonEmpty)
+      .zipAll(List.fill(4)(""), "", "")
+      .map{ case (a,b) => a+b }
+
     SimpleAddress(
       addressUnitId = addressUnitId,
-      line1 = concatenate(organisationName, departmentName),
-      line2 = concatenate(subBuildingName, buildingName, buildingNumber),
-      line3 = concatenate(dependentThoroughfareName, thoroughfareName),
-      line4 = concatenate(doubleDependentLocality, dependentLocality, Some(postTown)),
+      line1 = lines(0),
+      line2 = lines(1),
+      line3 = lines(2),
+      line4 = lines(3),
       postcode = postcode
     )
   }

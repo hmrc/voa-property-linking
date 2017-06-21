@@ -36,8 +36,8 @@ class AddressConnector @Inject() (@Named("VoaBackendWsHttp") http: WSHttp)(impli
     }
   }
 
-  def get(addressUnitId: Int)(implicit hc: HeaderCarrier): Future[Option[DetailedAddress]] = {
-    http.GET[APIAddressLookupResult](s"$url/$addressUnitId").map(_.addressDetails.headOption).recover {
+  def get(addressUnitId: Int)(implicit hc: HeaderCarrier): Future[Option[SimpleAddress]] = {
+    http.GET[APIAddressLookupResult](s"$url/$addressUnitId").map(_.addressDetails.headOption.map(_.simplify)).recover {
       case _ => None
     }
   }
