@@ -32,7 +32,7 @@ import uk.gov.hmrc.play.http._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Success, Try}
 
 case class EnvelopeMetadata(submissionId: String, personId: Long)
 
@@ -100,16 +100,20 @@ class FileUploadConnector @Inject()(ws: WSClient, http: SimpleWSHttp)(implicit e
   }
 
   override def downloadFile(href: String)(implicit hc: HeaderCarrier): Future[StreamedResponse] = {
-    Logger.info(s"Downloading file from $url$href")
+    val fullUrl = s"$url$href"
+    Logger.info(s"Downloading file from $fullUrl")
 
-    ws.url(s"$url$href")
+    ws.url(fullUrl)
       .withHeaders(USER_AGENT -> appName)
       .withHeaders(hc.headers: _*)
-      .withMethod("GET").stream() andThen {
-      case Success(v) if v.headers.status < 400 => Logger.info(s"Transferred successfully from $url$href")
-      case Success(v) if v.headers.status >= 400 => Logger.info(s"Transfer failed (${v.headers.status}) from $url$href")
-      case Failure(ex) => Logger.error(s"Exception copying $url$href", ex)
-    }
+      .withMethod("GET")
+      .stream() andThen handleResponse(fullUrl)
+  }
+
+  private def handleResponse(url: String): PartialFunction[Try[StreamedResponse],Unit] = {
+    case Success(v) if v.headers.status < 400 => Logger.info(s"Transferred successfully from $url")
+    case Success(v) if v.headers.status >= 400 => Logger.info(s"Transfer failed (${v.headers.status}) from $url")
+    case Failure(ex) => Logger.error(s"Exception copying $url", ex)
   }
 
   override def deleteEnvelope(envelopeId: String)(implicit hc: HeaderCarrier): Future[Unit] = {

@@ -22,7 +22,6 @@ import javax.inject.Inject
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.google.inject.ImplementedBy
-import config.ApplicationConfig
 import connectors.fileUpload.EnvelopeMetadata
 import play.api.Logger
 import play.api.http.HeaderNames.USER_AGENT
@@ -40,8 +39,10 @@ trait EvidenceTransfer {
 }
 
 class EvidenceConnector @Inject()(val ws: WSClient) extends EvidenceTransfer with ServicesConfig with HandleErrors with AppName {
-  lazy val url = baseUrl("external-business-rates-data-platform")
-  lazy val uploadEndpoint = s"$url/customer-management-api/customer/evidence"
+  lazy val url: String = baseUrl("external-business-rates-data-platform")
+  lazy val uploadEndpoint: String = s"$url/customer-management-api/customer/evidence"
+  lazy val voaApiKey: String = getString("voaApi.subscriptionKeyHeader")
+  lazy val voaApiTrace: String = getString("voaApi.traceHeader")
 
   override def uploadFile(fileName: String, content: Source[ByteString, _], metadata: EnvelopeMetadata)(implicit hc: HeaderCarrier): Future[Unit] = {
     val decodedFilename = URLDecoder.decode(fileName, "UTF-8")
@@ -49,8 +50,8 @@ class EvidenceConnector @Inject()(val ws: WSClient) extends EvidenceTransfer wit
     Logger.info(s"Uploading file: $decodedFilename, subId: ${metadata.submissionId} to $uploadEndpoint")
 
     val res = ws.url(uploadEndpoint).withHeaders(
-        ("Ocp-Apim-Subscription-Key", ApplicationConfig.apiConfigSubscriptionKeyHeader),
-        ("Ocp-Apim-Trace", ApplicationConfig.apiConfigTraceHeader),
+        ("Ocp-Apim-Subscription-Key", voaApiKey),
+        ("Ocp-Apim-Trace", voaApiTrace),
         (USER_AGENT, appName)
       ).put(
         Source(

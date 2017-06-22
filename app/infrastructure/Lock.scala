@@ -19,39 +19,15 @@ package infrastructure
 import javax.inject.{Inject, Named}
 
 import com.google.inject.Singleton
-import org.joda.time.{DateTimeZone, Duration}
-import play.api.Logger
+import org.joda.time.Duration
 import reactivemongo.api.DB
-import uk.gov.hmrc.lock.{LockKeeper, LockMongoRepository, LockRepository}
-import uk.gov.hmrc.mongo.CurrentTime
-
-import scala.concurrent.{ExecutionContext, Future}
+import uk.gov.hmrc.lock.{ExclusiveTimePeriodLock, LockMongoRepository, LockRepository}
 
 @Singleton
-class Lock @Inject()(@Named("lockName") val name: String, @Named("lockTimeout") val timeout: Duration, val db: DB) extends LockKeeper with CurrentTime {
+class Lock @Inject()(@Named("lockName") val name: String, @Named("lockTimeout") val timeout: Duration, val db: DB)
+  extends ExclusiveTimePeriodLock {
+
   override def repo: LockRepository = LockMongoRepository(() => db)
-
-  override def lockId: String = name
-
-  override val forceLockReleaseAfter: Duration = timeout
-
-  override def tryLock[T](body: => Future[T])(implicit ec : ExecutionContext): Future[Option[T]] = {
-    repo.lock(lockId, serverId, forceLockReleaseAfter)
-      .flatMap {
-        case true => lockAcquired(body)
-        case _ => locked
-      }.recoverWith { case ex => repo.releaseLock(lockId, serverId).flatMap(_ => Future.failed(ex)) }
-  }
-
-  def lockAcquired[T](body: Future[T])(implicit ec: ExecutionContext): Future[Option[T]] = {
-    withCurrentTime { now =>
-      Logger.info(s"Acquired lock - setting release to: ${now.plus(timeout).withZone(zone)}")
-      body.map(x => Some(x))
-    }
-  }
-
-  def locked[T]: Future[Option[T]] = {
-    Logger.info("Lock not acquired - already held")
-    Future.successful(None)
-  }
+  override val lockId: String = name
+  override val holdLockFor: Duration = timeout
 }

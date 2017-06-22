@@ -21,17 +21,20 @@ import javax.inject.{Inject, Named}
 import akka.actor.ActorSystem
 import com.google.inject.Singleton
 import infrastructure.{Lock, LockedJobScheduler, Schedule}
+import play.api.Logger
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
+
+trait FileTransfer
 
 @Singleton
 class FileTransferScheduler @Inject()(val lock: Lock,
                                       val transferService: FileTransferService,
                                       val actorSystem: ActorSystem,
                                       @Named("regularSchedule") val schedule: Schedule)
-  extends LockedJobScheduler[FileTransferComplete](lock, actorSystem) {
+  extends LockedJobScheduler[FileTransferComplete](lock, actorSystem) with FileTransfer {
 
   val name = "FileTransferer"
 
@@ -39,8 +42,13 @@ class FileTransferScheduler @Inject()(val lock: Lock,
 
   override def runJob()(implicit ec: ExecutionContext): Future[FileTransferComplete] = transferService.justDoIt
 
+  Logger.info("Starting file transfer scheduler")
   start
 }
 
+@Singleton
+class FileTransferDisabled extends FileTransfer {
+  Logger.info("File transfer scheduler disabled")
+}
 
 case class FileTransferComplete(msg: String)

@@ -24,7 +24,6 @@ import connectors.EvidenceConnector
 import connectors.fileUpload.{EnvelopeInfo, EnvelopeMetadata, FileInfo, FileUploadConnector}
 import models.{Closed, Open}
 import play.api.Logger
-import play.modules.reactivemongo.MongoDbConnection
 import repositories.EnvelopeIdRepo
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -35,8 +34,7 @@ case class FUAASDownloadException(href: String, status: Int) extends Exception(s
 @Singleton
 class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector,
                                     val evidenceConnector: EvidenceConnector,
-                                    val repo: EnvelopeIdRepo) extends MongoDbConnection {
-
+                                    val repo: EnvelopeIdRepo) {
   implicit val ec: ExecutionContext = play.api.libs.concurrent.Execution.Implicits.defaultContext
 
   def justDoIt()(implicit hc: HeaderCarrier): Future[FileTransferComplete] = {

@@ -21,13 +21,13 @@ private object AppDependencies {
   val compile = Seq(
     "uk.gov.hmrc" %% "play-reactivemongo" % "5.0.0",
     ws,
-    "uk.gov.hmrc" %% "microservice-bootstrap" % "5.14.0",
-    "uk.gov.hmrc" %% "play-authorisation" % "4.2.0",
-    "uk.gov.hmrc" %% "play-health" % "2.0.0",
-    "uk.gov.hmrc" %% "play-url-binders" % "2.0.0",
-    "uk.gov.hmrc" %% "play-config" % "3.0.0",
+    "uk.gov.hmrc" %% "microservice-bootstrap" % "5.15.0",
+    "uk.gov.hmrc" %% "play-authorisation" % "4.3.0",
+    "uk.gov.hmrc" %% "play-health" % "2.1.0",
+    "uk.gov.hmrc" %% "play-url-binders" % "2.1.0",
+    "uk.gov.hmrc" %% "play-config" % "4.3.0",
     "uk.gov.hmrc" %% "logback-json-logger" % "3.1.0",
-    "uk.gov.hmrc" %% "mongo-lock" % "4.0.0",
+    "uk.gov.hmrc" %% "mongo-lock" % "4.1.0",
     "uk.gov.hmrc" %% "domain" % "4.0.0",
     "org.typelevel" %% "cats-core" % "0.8.1"
   )
