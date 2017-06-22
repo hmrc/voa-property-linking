@@ -44,8 +44,10 @@ class EvidenceConnector @Inject()(val ws: WSClient) extends EvidenceTransfer wit
   lazy val voaApiKey: String = getString("voaApi.subscriptionKeyHeader")
   lazy val voaApiTrace: String = getString("voaApi.traceHeader")
 
+  private def decode(fileName: String) = URLDecoder.decode(fileName, "UTF-8")
+
   override def uploadFile(fileName: String, content: Source[ByteString, _], metadata: EnvelopeMetadata)(implicit hc: HeaderCarrier): Future[Unit] = {
-    val decodedFilename = URLDecoder.decode(fileName, "UTF-8")
+    val decodedFilename = decode(fileName)
 
     Logger.info(s"Uploading file: $decodedFilename, subId: ${metadata.submissionId} to $uploadEndpoint")
 
@@ -66,11 +68,11 @@ class EvidenceConnector @Inject()(val ws: WSClient) extends EvidenceTransfer wit
   }
 
   def logResponse(fileName: String, subId: String): WSResponse => WSResponse = { r =>
-    Logger.info(s"File upload completed: $fileName, subId: $subId to $uploadEndpoint, status: ${r.status}")
+    Logger.info(s"File upload completed: ${decode(fileName)}, subId: $subId to $uploadEndpoint, status: ${r.status}")
     r
   }
 
   def logError(fileName: String, subId: String): WSResponse => Unit = { r =>
-    Logger.info(s"Response from API manager for file $fileName: $r")
+    Logger.info(s"Response from API manager for file ${decode(fileName)}: $r")
   }
 }
