@@ -47,9 +47,7 @@ class EvidenceConnector @Inject()(val ws: WSClient) extends EvidenceTransfer wit
   private def decode(fileName: String) = URLDecoder.decode(fileName, "UTF-8")
 
   override def uploadFile(fileName: String, content: Source[ByteString, _], metadata: EnvelopeMetadata)(implicit hc: HeaderCarrier): Future[Unit] = {
-    val decodedFilename = decode(fileName)
-
-    Logger.info(s"Uploading file: $decodedFilename, subId: ${metadata.submissionId} to $uploadEndpoint")
+    Logger.info(s"Uploading file: ${decode(fileName)}, subId: ${metadata.submissionId} to $uploadEndpoint")
 
     val res = ws.url(uploadEndpoint).withHeaders(
         ("Ocp-Apim-Subscription-Key", voaApiKey),
@@ -57,9 +55,9 @@ class EvidenceConnector @Inject()(val ws: WSClient) extends EvidenceTransfer wit
         (USER_AGENT, appName)
       ).put(
         Source(
-          FilePart("file", decodedFilename, Some("application/octet-stream"), content) ::
+          FilePart("file", decode(fileName), Some("application/octet-stream"), content) ::
           DataPart("customerId", metadata.personId.toString) ::
-          DataPart("filename", decodedFilename) ::
+          DataPart("filename", decode(fileName)) ::
           DataPart("submissionId", metadata.submissionId) ::
           Nil
         )
