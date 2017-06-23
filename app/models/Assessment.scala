@@ -43,7 +43,7 @@ object Assessment {
       valuationHistory.listYear,
       valuationHistory.uarn,
       valuationHistory.effectiveDate,
-      valuationHistory.rateableValue,
+      valuationHistory.rateableValue.getOrElse(0),
       PropertyAddress.fromString(valuationHistory.address),
       valuationHistory.billingAuthorityReference,
       capacityDeclaration
