@@ -16,6 +16,8 @@
 
 package modules
 
+import java.util.Base64
+
 import com.google.inject.name.{Named, Names}
 import com.google.inject.{AbstractModule, Inject, Singleton}
 import org.joda.time.Duration
@@ -32,8 +34,11 @@ class AdHocQuery(environment: Environment, configuration: Configuration) extends
     if (configuration.getBoolean("adhoc.mongo.enabled").getOrElse(false)) {
       bindConstant().annotatedWith(Names.named("collection")).to(configuration.getString("adhoc.mongo.collection")
         .getOrElse(throw new RuntimeException("Missing property adhoc.mongo.collection")))
-      bindConstant().annotatedWith(Names.named("query")).to(configuration.getString("adhoc.mongo.query")
-        .getOrElse(throw new RuntimeException("Missing property adhoc.mongo.query")))
+
+      val unencodedQuery = new String(Base64.getDecoder.decode(configuration.getString("adhoc.mongo.query")
+        .getOrElse(throw new RuntimeException("Missing property adhoc.mongo.query"))), "UTF-8")
+
+      bindConstant().annotatedWith(Names.named("query")).to(unencodedQuery)
       bind(classOf[AdhocQueryRunner]).to(classOf[AdhocQueryRunnerImpl]).asEagerSingleton()
     }
   }
