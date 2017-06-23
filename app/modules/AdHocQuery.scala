@@ -31,7 +31,7 @@ import uk.gov.hmrc.lock.{ExclusiveTimePeriodLock, LockMongoRepository, LockRepos
 
 class AdHocQuery(environment: Environment, configuration: Configuration) extends AbstractModule {
   def configure(): Unit = {
-    if (configuration.getBoolean("adhoc.mongo.enabled").getOrElse(false)) {
+    if (configuration.getString("adhoc.mongo.enabled").getOrElse("false").toBoolean) {
       bindConstant().annotatedWith(Names.named("collection")).to(configuration.getString("adhoc.mongo.collection")
         .getOrElse(throw new RuntimeException("Missing property adhoc.mongo.collection")))
 

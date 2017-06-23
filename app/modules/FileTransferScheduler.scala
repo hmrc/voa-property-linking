@@ -22,7 +22,7 @@ import services.{FileTransfer, FileTransferDisabled, FileTransferScheduler => Fi
 
 class FileTransferScheduler(environment: Environment, configuration: Configuration) extends AbstractModule {
   def configure(): Unit = {
-    if (configuration.getBoolean("fileTransfer.enabled").getOrElse(true)) {
+    if (configuration.getString("fileTransfer.enabled").getOrElse("true").toBoolean) {
       bind(classOf[FileTransfer]).to(classOf[FileTransferEnabled]).asEagerSingleton()
     } else {
       bind(classOf[FileTransfer]).to(classOf[FileTransferDisabled]).asEagerSingleton()
