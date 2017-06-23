@@ -19,18 +19,20 @@ package infrastructure
 import akka.actor.{ActorSystem, Scheduler}
 import akka.util.Timeout
 import play.api.Logger
-import uk.gov.hmrc.lock.LockKeeper
+import uk.gov.hmrc.lock.ExclusiveTimePeriodLock
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 
-abstract class LockedJobScheduler[Event <: AnyRef](lock: LockKeeper, actorSystem: ActorSystem) {
+abstract class LockedJobScheduler[Event <: AnyRef](lock: ExclusiveTimePeriodLock, actorSystem: ActorSystem) {
   implicit val t: Timeout = 1 hour
 
   val name: String
   val schedule: Schedule
-  val scheduler: Scheduler = actorSystem.scheduler
-  val eventStream = actorSystem.eventStream
+
+  private val scheduler: Scheduler = actorSystem.scheduler
+  private val eventStream = actorSystem.eventStream
+
   def runJob()(implicit ec: ExecutionContext): Future[Event]
 
   private def run()(implicit ec: ExecutionContext) = {
@@ -42,7 +44,7 @@ abstract class LockedJobScheduler[Event <: AnyRef](lock: LockKeeper, actorSystem
     }
   }
 
-  private def tryJob(implicit ec: ExecutionContext): Unit = lock.tryLock { run } onComplete { _ => scheduleNextImport }
+  private def tryJob(implicit ec: ExecutionContext): Unit = lock.tryToAcquireOrRenewLock { run } onComplete { _ => scheduleNextImport }
 
   private def scheduleNextImport(implicit ec: ExecutionContext): Unit = {
     val t = schedule.timeUntilNextRun()
@@ -50,5 +52,5 @@ abstract class LockedJobScheduler[Event <: AnyRef](lock: LockKeeper, actorSystem
   	scheduler.scheduleOnce(t)(tryJob)
   }
 
-  def start(implicit ec:ExecutionContext): Unit = scheduleNextImport(ec)
+  def start(implicit ec:ExecutionContext): Unit = tryJob(ec)
 }

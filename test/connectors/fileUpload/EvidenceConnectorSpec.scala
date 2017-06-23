@@ -18,24 +18,14 @@ package connectors.fileUpload
 
 import java.io.ByteArrayInputStream
 
-import akka.stream.scaladsl.{Sink, Source, StreamConverters}
-import akka.util.ByteString
+import akka.stream.scaladsl.StreamConverters
 import com.github.tomakehurst.wiremock.client.WireMock._
-import config.ApplicationConfig
 import connectors.{EvidenceConnector, WireMockSpec}
 import helpers.{AnswerSugar, WithSimpleWsHttpTestApplication}
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito._
-import org.mockito.invocation.InvocationOnMock
 import org.scalatest.mock.MockitoSugar
-import play.api.libs.ws.{WSClient, WSRequest}
 import play.api.libs.ws.ahc.AhcWSClient
-import play.api.mvc.MultipartFormData
-import services.Result
 import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
 import uk.gov.hmrc.play.http.HeaderCarrier
-
-import scala.concurrent.Future
 
 class EvidenceConnectorSpec extends WireMockSpec with WithSimpleWsHttpTestApplication with MicroserviceFilterSupport
   with MockitoSugar with AnswerSugar {
@@ -50,8 +40,8 @@ class EvidenceConnectorSpec extends WireMockSpec with WithSimpleWsHttpTestApplic
       val metadata = EnvelopeMetadata("aSubmissionId", 12345)
 
       stubFor(put(urlEqualTo("/customer-management-api/customer/evidence"))
-        .withHeader("Ocp-Apim-Subscription-Key", matching(ApplicationConfig.apiConfigSubscriptionKeyHeader))
-        .withHeader("Ocp-Apim-Trace", matching(ApplicationConfig.apiConfigTraceHeader))
+        .withHeader("Ocp-Apim-Subscription-Key", matching(fakeApplication.configuration.getString("voaApi.subscriptionKeyHeader").getOrElse("")))
+        .withHeader("Ocp-Apim-Trace", matching(fakeApplication.configuration.getString("voaApi.traceHeader").getOrElse("")))
         .withRequestBody(containing(file))
         .withRequestBody(containing("aSubmissionId"))
         .withRequestBody(containing("12345"))
@@ -77,8 +67,8 @@ class EvidenceConnectorSpec extends WireMockSpec with WithSimpleWsHttpTestApplic
 
       for ((encoded, decoded) <- filenames) {
         stubFor(put(urlEqualTo("/customer-management-api/customer/evidence"))
-          .withHeader("Ocp-Apim-Subscription-Key", matching(ApplicationConfig.apiConfigSubscriptionKeyHeader))
-          .withHeader("Ocp-Apim-Trace", matching(ApplicationConfig.apiConfigTraceHeader))
+          .withHeader("Ocp-Apim-Subscription-Key", matching(fakeApplication.configuration.getString("voaApi.subscriptionKeyHeader").getOrElse("")))
+          .withHeader("Ocp-Apim-Trace", matching(fakeApplication.configuration.getString("voaApi.traceHeader").getOrElse("")))
           .withRequestBody(containing(s"""filename="$decoded""""))
           .withRequestBody(containing("aSubmissionId"))
           .withRequestBody(containing("12345"))

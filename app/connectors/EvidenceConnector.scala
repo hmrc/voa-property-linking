@@ -22,7 +22,6 @@ import javax.inject.Inject
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import com.google.inject.ImplementedBy
-import config.ApplicationConfig
 import connectors.fileUpload.EnvelopeMetadata
 import play.api.Logger
 import play.api.http.HeaderNames.USER_AGENT
@@ -40,23 +39,25 @@ trait EvidenceTransfer {
 }
 
 class EvidenceConnector @Inject()(val ws: WSClient) extends EvidenceTransfer with ServicesConfig with HandleErrors with AppName {
-  lazy val url = baseUrl("external-business-rates-data-platform")
-  lazy val uploadEndpoint = s"$url/customer-management-api/customer/evidence"
+  lazy val url: String = baseUrl("external-business-rates-data-platform")
+  lazy val uploadEndpoint: String = s"$url/customer-management-api/customer/evidence"
+  lazy val voaApiKey: String = getString("voaApi.subscriptionKeyHeader")
+  lazy val voaApiTrace: String = getString("voaApi.traceHeader")
+
+  private def decode(fileName: String) = URLDecoder.decode(fileName, "UTF-8")
 
   override def uploadFile(fileName: String, content: Source[ByteString, _], metadata: EnvelopeMetadata)(implicit hc: HeaderCarrier): Future[Unit] = {
-    val decodedFilename = URLDecoder.decode(fileName, "UTF-8")
-
-    Logger.info(s"Uploading file: $decodedFilename, subId: ${metadata.submissionId} to $uploadEndpoint")
+    Logger.info(s"Uploading file: ${decode(fileName)}, subId: ${metadata.submissionId} to $uploadEndpoint")
 
     val res = ws.url(uploadEndpoint).withHeaders(
-        ("Ocp-Apim-Subscription-Key", ApplicationConfig.apiConfigSubscriptionKeyHeader),
-        ("Ocp-Apim-Trace", ApplicationConfig.apiConfigTraceHeader),
+        ("Ocp-Apim-Subscription-Key", voaApiKey),
+        ("Ocp-Apim-Trace", voaApiTrace),
         (USER_AGENT, appName)
       ).put(
         Source(
-          FilePart("file", decodedFilename, Some("application/octet-stream"), content) ::
+          FilePart("file", decode(fileName), Some("application/octet-stream"), content) ::
           DataPart("customerId", metadata.personId.toString) ::
-          DataPart("filename", decodedFilename) ::
+          DataPart("filename", decode(fileName)) ::
           DataPart("submissionId", metadata.submissionId) ::
           Nil
         )
@@ -65,11 +66,11 @@ class EvidenceConnector @Inject()(val ws: WSClient) extends EvidenceTransfer wit
   }
 
   def logResponse(fileName: String, subId: String): WSResponse => WSResponse = { r =>
-    Logger.info(s"File upload completed: $fileName, subId: $subId to $uploadEndpoint, status: ${r.status}")
+    Logger.info(s"File upload completed: ${decode(fileName)}, subId: $subId to $uploadEndpoint, status: ${r.status}")
     r
   }
 
   def logError(fileName: String, subId: String): WSResponse => Unit = { r =>
-    Logger.info(s"Response from API manager for file $fileName: $r")
+    Logger.info(s"Response from API manager for file ${decode(fileName)}: $r")
   }
 }

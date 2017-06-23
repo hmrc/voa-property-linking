@@ -60,9 +60,7 @@ class FileTransferServiceSpec extends UnitSpec with MockitoSugar with AnswerSuga
     val mockStreamedResponse = mock[StreamedResponse]
     val mockHeaders = mock[WSResponseHeaders]
 
-    val fts = new FileTransferService(fileUploadConnector, evidenceConnector, repo) {
-      override lazy val mongoConnector = mock[MongoConnector]
-    }
+    val fts = new FileTransferService(fileUploadConnector, evidenceConnector, repo)
 
     implicit val fakeHc = HeaderCarrier()
 

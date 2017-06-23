@@ -14,26 +14,18 @@
  * limitations under the License.
  */
 
-package controllers
+package modules
 
-import javax.inject.Inject
+import com.google.inject.AbstractModule
+import play.api.{Configuration, Environment}
+import services.{FileTransfer, FileTransferDisabled, FileTransferScheduler => FileTransferEnabled}
 
-import models.Closed
-import play.api.mvc.Action
-import repositories.EnvelopeIdRepository
-
-class EnvelopeController @Inject()(val repo: EnvelopeIdRepository) extends PropertyLinkingBaseController {
-
-  def create(envelopeId: String) = Action.async { implicit request =>
-    repo.create(envelopeId).map(_=> Ok(envelopeId))
+class FileTransferScheduler(environment: Environment, configuration: Configuration) extends AbstractModule {
+  def configure(): Unit = {
+    if (configuration.getBoolean("fileTransfer.enabled").getOrElse(true)) {
+      bind(classOf[FileTransfer]).to(classOf[FileTransferEnabled]).asEagerSingleton()
+    } else {
+      bind(classOf[FileTransfer]).to(classOf[FileTransferDisabled]).asEagerSingleton()
+    }
   }
-
-  def close(envelopeId: String) = Action.async { implicit request =>
-    repo.update(envelopeId, Closed).map(_=> Ok(envelopeId))
-  }
-
-  def get() = Action.async { implicit  request =>
-    repo.get().map(seq => Ok(seq.mkString("\n")))
-  }
-
 }
