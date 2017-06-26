@@ -20,7 +20,7 @@ import javax.inject._
 import com.google.inject.AbstractModule
 import com.google.inject.name.Names
 import com.typesafe.config.Config
-import infrastructure.{SimpleWSHttp, RegularSchedule, Schedule, VOABackendWSHttp}
+import infrastructure.{RegularSchedule, Schedule, SimpleWSHttp, VOABackendWSHttp}
 import net.ceedubs.ficus.Ficus._
 import org.joda.time.Duration
 import play.api.{Application, Configuration, Environment, Play}
@@ -29,6 +29,7 @@ import reactivemongo.api.DB
 import uk.gov.hmrc.play.audit.filters.AuditFilter
 import uk.gov.hmrc.play.auth.controllers.AuthParamsControllerConfig
 import uk.gov.hmrc.play.auth.microservice.filters.AuthorisationFilter
+import uk.gov.hmrc.play.config.inject.ConfigModule
 import uk.gov.hmrc.play.config.{AppName, ControllerConfig, RunMode}
 import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
 import uk.gov.hmrc.play.http.logging.filters.LoggingFilter
@@ -60,7 +61,7 @@ object MicroserviceAuthFilter extends AuthorisationFilter with MicroserviceFilte
 
 class GuiceModule(environment: Environment,
                   configuration: Configuration) extends AbstractModule {
-  def configure() = {
+  override def configure() = {
     bind(classOf[String]).annotatedWith(Names.named("lockName")).toInstance("FileTransferLock")
     bind(classOf[Duration]).annotatedWith(Names.named("lockTimeout")).toInstance(
       Duration.standardMinutes(configuration.getLong("fileTransfer.lockMinutes").getOrElse(30L)))

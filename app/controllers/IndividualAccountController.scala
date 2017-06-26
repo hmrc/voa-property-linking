@@ -18,12 +18,13 @@ package controllers
 
 import javax.inject.Inject
 
-import connectors.IndividualAccountConnector
+import connectors.{BusinessRatesAuthConnector, IndividualAccountConnector}
 import models.IndividualAccountWrite
 import play.api.libs.json.Json
 import play.api.mvc.Action
+import play.api.mvc.Results.EmptyContent
 
-class IndividualAccountController @Inject() (individuals: IndividualAccountConnector) extends PropertyLinkingBaseController {
+class IndividualAccountController @Inject() (individuals: IndividualAccountConnector, brAuth: BusinessRatesAuthConnector) extends PropertyLinkingBaseController {
 
   def create() = Action.async(parse.json) { implicit request =>
     withJsonBody[IndividualAccountWrite] { acc =>
@@ -33,7 +34,12 @@ class IndividualAccountController @Inject() (individuals: IndividualAccountConne
 
   def update(personId: Int) = Action.async(parse.json) { implicit request =>
     withJsonBody[IndividualAccountWrite] { account =>
-      individuals.update(personId, account) map { Ok(_) }
+      for {
+        _ <- individuals.update(personId, account)
+        _ <- brAuth.clearCache()
+      } yield {
+        Ok(EmptyContent())
+      }
     }
   }
 
