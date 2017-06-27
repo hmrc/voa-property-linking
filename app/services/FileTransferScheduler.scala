@@ -51,4 +51,4 @@ class FileTransferDisabled extends FileTransfer {
   Logger.info("File transfer scheduler disabled")
 }
 
-case class FileTransferComplete(msg: String)
+case class FileTransferComplete(msg: Option[String] = None)

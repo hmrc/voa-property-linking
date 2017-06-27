@@ -57,7 +57,7 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
       }
     } yield {
       Logger.info("Ending transfer job run")
-      FileTransferComplete("")
+      FileTransferComplete(None)
     }
   }
 
