@@ -24,7 +24,7 @@ case class APIValuationHistory(
                                 listYear: String,
                                 uarn: Long,
                                 effectiveDate: LocalDate,
-                                rateableValue: Option[Long],
+                                rateableValue: Long,
                                 address: String,
                                 billingAuthorityReference: String
                               )

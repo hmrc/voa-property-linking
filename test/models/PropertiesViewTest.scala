@@ -36,36 +36,22 @@ class PropertiesViewTest extends UnitSpec with WithSimpleWsHttpTestApplication {
             "2005",
             146440182,
             new LocalDate(2005, 3, 1),
-            Some(16500),
-            "4, HERON ROAD IND UNITS, EXETER, EX2 7LL", "70305000400"
-          ),
+            16500,
+            "4, HERON ROAD IND UNITS, EXETER, EX2 7LL", "70305000400"),
           APIValuationHistory(
             14345902000L,
             "2010",
             146440182,
             new LocalDate(2010, 3, 1),
-            Some(17750),
-            "4, HERON ROAD IND UNITS, EXETER, EX2 7LL", "70305000400"
-          ),
+            17750,
+            "4, HERON ROAD IND UNITS, EXETER, EX2 7LL", "70305000400"),
           APIValuationHistory(
             10176424000L,
             "2010",
             146440182,
             new LocalDate(2010, 3, 1),
-            Some(20000),
-            "4, HERON ROAD IND UNITS, EXETER, EX2 7LL", "70305000400"
-          ),
-          //handles valuations with no RV, e.g. deleted properties
-          APIValuationHistory(
-            10176424001L,
-            "2010",
-            146440182,
-            new LocalDate(2010, 2, 28),
-            None,
-            "4, HERON ROAD IND UNITS, EXETER, EX2 7LL",
-            "70305000400"
-          )
-        ),
+            20000,
+            "4, HERON ROAD IND UNITS, EXETER, EX2 7LL", "70305000400")),
         Nil
       )
     }
@@ -129,22 +115,6 @@ object DummyData {
       |          "numberOfPreviousProposals": 1,
       |          "origCasenoSeq": 12312194182,
       |          "rateableValue": 20000,
-      |          "specialCategoryCode": "1",
-      |          "transitionalCertificate": false,
-      |          "uarn": 146440182,
-      |          "valuationDetailsAvailable": true
-      |        },
-      |        {
-      |         "address": "4, HERON ROAD IND UNITS, EXETER, EX2 7LL",
-      |          "asstRef": 10176424001,
-      |          "billingAuthorityReference": "70305000400",
-      |          "compositeProperty": "N",
-      |          "deletedIndicator": false,
-      |          "description": "WAREHOUSE AND PREMISES",
-      |          "effectiveDate": "2010-02-28",
-      |          "listYear": "2010",
-      |          "numberOfPreviousProposals": 0,
-      |          "origCasenoSeq": 12312194182,
       |          "specialCategoryCode": "1",
       |          "transitionalCertificate": false,
       |          "uarn": 146440182,
