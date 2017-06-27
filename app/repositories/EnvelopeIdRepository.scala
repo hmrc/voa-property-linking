@@ -18,6 +18,7 @@ package repositories
 
 import javax.inject.Inject
 
+import com.google.inject.name.Named
 import com.google.inject.{ImplementedBy, Singleton}
 import models._
 import play.api.Logger
@@ -31,8 +32,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class EnvelopeIdRepository @Inject()(db: DB)
-  extends ReactiveRepository[EnvelopeId, String]("s3envelopeids", () => db, EnvelopeId.mongoFormat, implicitly[Format[String]]) with
+class EnvelopeIdRepository @Inject()(db: DB, @Named("envelopeCollectionName") val envelopeCollectionName: String)
+  extends ReactiveRepository[EnvelopeId, String](envelopeCollectionName, () => db, EnvelopeId.mongoFormat, implicitly[Format[String]]) with
     EnvelopeIdRepo {
 
   override def create(envelopeId: String): Future[Unit] = {

@@ -29,7 +29,8 @@ private object AppDependencies {
     "uk.gov.hmrc" %% "logback-json-logger" % "3.1.0",
     "uk.gov.hmrc" %% "mongo-lock" % "4.1.0",
     "uk.gov.hmrc" %% "domain" % "4.0.0",
-    "org.typelevel" %% "cats-core" % "0.8.1"
+    "org.typelevel" %% "cats-core" % "0.8.1",
+    "com.google.inject.extensions" % "guice-multibindings" % "4.0"
   )
 
   trait TestDependencies {

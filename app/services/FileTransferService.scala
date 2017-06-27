@@ -28,6 +28,7 @@ import repositories.EnvelopeIdRepo
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext.Implicits.global
 
 case class FUAASDownloadException(href: String, status: Int) extends Exception(s"Failed to download $href (status: $status)")
 
@@ -57,7 +58,7 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
       }
     } yield {
       Logger.info("Ending transfer job run")
-      FileTransferComplete("")
+      FileTransferComplete(None)
     }
   }
 

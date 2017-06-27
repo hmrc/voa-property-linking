@@ -28,10 +28,10 @@ object PostcodeValidator {
   }
 
   def validateAndFormat(candidate:String):Option[String] = {
-    if(validate(candidate)) {
+    if (validate(candidate)) {
       val candidateNormalised = candidate.toUpperCase.replaceAll(" ", "")
-      val (prefix, suffix) = candidateNormalised.splitAt(candidateNormalised.length-3)
-      return Some(prefix + " " + suffix)
+      val (prefix, suffix) = candidateNormalised.splitAt(candidateNormalised.length - 3)
+      Some(prefix + " " + suffix)
     } else {
       None
     }
