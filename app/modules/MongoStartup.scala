@@ -35,8 +35,9 @@ import scala.io.Source
 
 class MongoStartup(environment: Environment, configuration: Configuration) extends AbstractModule {
   def configure(): Unit = {
-    Multibinder.newSetBinder(binder(), new TypeLiteral[MongoTask[_]]() {})
-      .addBinding().to(classOf[RemoveEnvelopes])
+    val mb = Multibinder.newSetBinder(binder(), new TypeLiteral[MongoTask[_]]() {})
+    mb.addBinding().to(classOf[RemoveEnvelopes])
+    mb.addBinding().to(classOf[AddEnvelopes])
 
     bind(classOf[MongoStartupRunner]).to(classOf[MongoStartupRunnerImpl]).asEagerSingleton()
   }

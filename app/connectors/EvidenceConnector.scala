@@ -45,6 +45,8 @@ class EvidenceConnector @Inject()(val ws: WSClient) extends EvidenceTransfer wit
   lazy val voaApiTrace: String = getString("voaApi.traceHeader")
 
   private def decode(fileName: String) = URLDecoder.decode(fileName, "UTF-8")
+    .replaceAll("""[:<>"/\\|\?\*]""", "-")
+  // Temporary fix for windows character issue in filenames - will drop entries to manual with them in their names
 
   override def uploadFile(fileName: String, content: Source[ByteString, _], metadata: EnvelopeMetadata)(implicit hc: HeaderCarrier): Future[Unit] = {
     Logger.info(s"Uploading file: ${decode(fileName)}, subId: ${metadata.submissionId} to $uploadEndpoint")
