@@ -66,13 +66,16 @@ class MongoStartupRunnerImpl @Inject() (reactiveMongoComponent: ReactiveMongoCom
     tasks.foldLeft(Future.successful(())) { (prev, task) =>
       prev.map { _ =>
         logger.info(s"Processing ${task.name}...")
-        mongoTaskRepo.find("taskName" -> task.name, "version" -> task.version).map {
-          case Nil =>
-            logger.info(s"Task ${task.name} version ${task.version} not yet executed - running")
-            mongoTaskRepo.insert(MongoTaskRegister(task.name, task.version, LocalDateTime.now))
-            task.run()
-          case head :: Nil => alreadyRun(task)(head)
-          case head :: _ => alreadyRun(task)(head)
+
+        for (version <- 1 to task.version) {
+          mongoTaskRepo.find("taskName" -> task.name, "version" -> version).map {
+            case Nil =>
+              logger.info(s"Task ${task.name} version ${task.version} not yet executed - running")
+              mongoTaskRepo.insert(MongoTaskRegister(task.name, task.version, LocalDateTime.now))
+              task.run()
+            case head :: Nil => alreadyRun(task)(head)
+            case head :: _ => alreadyRun(task)(head)
+          }
         }
       }
     }.map { _ => logger.info("MongoStartup: end") }
@@ -95,7 +98,7 @@ trait MongoTask[T] {
 
   def run(): Future[Unit] = {
     Logger.info(s"Loading from file: $srcFile")
-    Source.fromInputStream(env.classLoader.getResourceAsStream(srcFile)).getLines.foldLeft(Future.successful(())) { (prev, line) =>
+    Source.fromInputStream(env.classLoader.getResourceAsStream(s"tasks/$srcFile")).getLines.foldLeft(Future.successful(())) { (prev, line) =>
       prev.map { _ =>
         verify(line) match {
           case Some(data) =>
