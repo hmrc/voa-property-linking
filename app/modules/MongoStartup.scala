@@ -73,16 +73,16 @@ class MongoStartupRunnerImpl @Inject() (reactiveMongoComponent: ReactiveMongoCom
               logger.info(s"Task ${task.name} version $version not yet executed - running")
               mongoTaskRepo.insert(MongoTaskRegister(task.name, version, LocalDateTime.now))
               task.run()
-            case head :: Nil => alreadyRun(task)(head)
-            case head :: _ => alreadyRun(task)(head)
+            case head :: Nil => alreadyRun(task, version)(head)
+            case head :: _ => alreadyRun(task, version)(head)
           }
         }
       }
     }.map { _ => logger.info("MongoStartup: end") }
   }
 
-  def alreadyRun(task: MongoTask[_]): MongoTaskRegister => Future[Unit] = { head =>
-    logger.info(s"Mongo task ${task.name} version ${task.version} already ran at ${head.executionDateTime}")
+  def alreadyRun(task: MongoTask[_], version: Int): MongoTaskRegister => Future[Unit] = { head =>
+    logger.info(s"Mongo task ${task.name} version $version already ran at ${head.executionDateTime}")
     Future.successful(())
   }
 }
