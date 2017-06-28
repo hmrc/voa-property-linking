@@ -19,7 +19,7 @@ package modules
 import java.time.LocalDateTime
 
 import com.google.inject.multibindings.Multibinder
-import com.google.inject.{AbstractModule, Inject, Singleton}
+import com.google.inject.{AbstractModule, Inject, Singleton, TypeLiteral}
 import modules.tasks.{AddEnvelopes, RemoveEnvelopes}
 import org.joda.time.Duration
 import play.api.{Configuration, Environment, Logger}
@@ -35,8 +35,8 @@ import scala.io.Source
 
 class MongoStartup(environment: Environment, configuration: Configuration) extends AbstractModule {
   def configure(): Unit = {
-    val mb = Multibinder.newSetBinder(binder(), classOf[MongoTask])
-    mb.addBinding().to(classOf[RemoveEnvelopes])
+    Multibinder.newSetBinder(binder(), new TypeLiteral[MongoTask[_]]() {})
+      .addBinding().to(classOf[RemoveEnvelopes])
 
     bind(classOf[MongoStartupRunner]).to(classOf[MongoStartupRunnerImpl]).asEagerSingleton()
   }
@@ -54,7 +54,7 @@ trait MongoStartupRunner extends ExclusiveTimePeriodLock {
 @Singleton
 class MongoStartupRunnerImpl @Inject() (reactiveMongoComponent: ReactiveMongoComponent,
                                         mongoTaskRepo: MongoTaskExecution,
-                                        tasks: java.util.Set[MongoTask]) extends MongoStartupRunner {
+                                        tasks: java.util.Set[MongoTask[_]]) extends MongoStartupRunner {
   import JavaConversions._
 
   override val db = reactiveMongoComponent.mongoConnector.db
@@ -77,31 +77,32 @@ class MongoStartupRunnerImpl @Inject() (reactiveMongoComponent: ReactiveMongoCom
     }.map { _ => logger.info("MongoStartup: end") }
   }
 
-  def alreadyRun(task: MongoTask): MongoTaskRegister => Future[Unit] = { head =>
+  def alreadyRun(task: MongoTask[_]): MongoTaskRegister => Future[Unit] = { head =>
     logger.info(s"Mongo task ${task.name} version ${task.version} already ran at ${head.executionDateTime}")
     Future.successful(())
   }
 }
 
-trait MongoTask {
+trait MongoTask[T] {
   val env: Environment
   val name: String = this.getClass.getSimpleName
   val version: Int
   lazy val srcFile = s"$name-$version.txt"
 
-  def verify: String => Boolean
-  def execute: String => Future[Unit]
+  def verify: String => Option[T]
+  def execute: T => Future[Unit]
 
   def run(): Future[Unit] = {
     Logger.info(s"Loading from file: $srcFile")
     Source.fromInputStream(env.classLoader.getResourceAsStream(srcFile)).getLines.foldLeft(Future.successful(())) { (prev, line) =>
       prev.map { _ =>
-        if (verify(line)) {
-          Logger.info(s"""Verification of $name - "$line" successful""")
-          execute(line)
-        } else {
-          Logger.warn(s"""Verification of $name - "$line" failed - skipping""")
-          Future.successful(())
+        verify(line) match {
+          case Some(data) =>
+            Logger.info(s"""Verification of $name - "$line" successful""")
+            execute(data)
+          case None =>
+            Logger.warn(s"""Verification of $name - "$line" failed - skipping""")
+            Future.successful(())
         }
       }
     }
