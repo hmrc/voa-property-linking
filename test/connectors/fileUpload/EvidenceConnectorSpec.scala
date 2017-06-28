@@ -77,5 +77,33 @@ class EvidenceConnectorSpec extends WireMockSpec with WithSimpleWsHttpTestApplic
         noException should be thrownBy await(connector.uploadFile(encoded, StreamConverters.fromInputStream { () => new ByteArrayInputStream(file.getBytes) }, metadata))
       }
     }
+
+    "URL Decode a filename with a : in it replacing with a - (temporary fix) in the PUT body" in {
+      val connector = new EvidenceConnector(AhcWSClient()) {
+        override lazy val url = mockServerUrl
+      }
+
+      implicit val fakeHc = HeaderCarrier()
+      val file = getClass.getResource("/document.pdf").getFile
+      val metadata = EnvelopeMetadata("aSubmissionId", 12345)
+      val filenames = Map(
+        "file:name.pdf" -> "file-name.pdf",
+        "sharpscanner:%40:gmail.com.pdf" -> "sharpscanner-@-gmail.com.pdf",
+        "Scan+15+Jun+:2017%2c+13.04.pdf" -> "Scan 15 Jun -2017, 13.04.pdf",
+        "Scan+15+Jun+2017%252c+:-13.04.pdf" -> "Scan 15 Jun 2017%2c --13.04.pdf"
+      )
+
+      for ((encoded, decoded) <- filenames) {
+        stubFor(put(urlEqualTo("/customer-management-api/customer/evidence"))
+          .withHeader("Ocp-Apim-Subscription-Key", matching(fakeApplication.configuration.getString("voaApi.subscriptionKeyHeader").getOrElse("")))
+          .withHeader("Ocp-Apim-Trace", matching(fakeApplication.configuration.getString("voaApi.traceHeader").getOrElse("")))
+          .withRequestBody(containing(s"""filename="$decoded""""))
+          .withRequestBody(containing("aSubmissionId"))
+          .withRequestBody(containing("12345"))
+          .willReturn(aResponse().withStatus(200)))
+
+        noException should be thrownBy await(connector.uploadFile(encoded, StreamConverters.fromInputStream { () => new ByteArrayInputStream(file.getBytes) }, metadata))
+      }
+    }
   }
 }
