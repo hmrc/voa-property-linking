@@ -70,8 +70,8 @@ class MongoStartupRunnerImpl @Inject() (reactiveMongoComponent: ReactiveMongoCom
         for (version <- 1 to task.version) {
           mongoTaskRepo.find("taskName" -> task.name, "version" -> version).map {
             case Nil =>
-              logger.info(s"Task ${task.name} version ${task.version} not yet executed - running")
-              mongoTaskRepo.insert(MongoTaskRegister(task.name, task.version, LocalDateTime.now))
+              logger.info(s"Task ${task.name} version $version not yet executed - running")
+              mongoTaskRepo.insert(MongoTaskRegister(task.name, version, LocalDateTime.now))
               task.run()
             case head :: Nil => alreadyRun(task)(head)
             case head :: _ => alreadyRun(task)(head)
