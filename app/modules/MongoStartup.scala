@@ -61,20 +61,17 @@ class MongoStartupRunnerImpl @Inject() (reactiveMongoComponent: ReactiveMongoCom
   override val db = reactiveMongoComponent.mongoConnector.db
 
   tryToAcquireOrRenewLock {
-    logger.info(s"MongoStartup: running")
-
-    tasks.foldLeft(Future.successful(())) { (prev, task) =>
-      prev.map { _ =>
-        logger.info(s"Processing ${task.name}...")
-
-        for (version <- 1 to task.version) {
-          mongoTaskRepo.find("taskName" -> task.name, "version" -> version).map {
-            case Nil =>
-              logger.info(s"Task ${task.name} version $version not yet executed - running")
-              mongoTaskRepo.insert(MongoTaskRegister(task.name, version, LocalDateTime.now))
-              task.run()
-            case head :: Nil => alreadyRun(task, version)(head)
-            case head :: _ => alreadyRun(task, version)(head)
+    tasks.foldLeft(Future(logger.info(s"MongoStartup: running"))) { (prev, task) =>
+      prev.flatMap { _ =>
+        (1 to task.upToVersion).foldLeft(Future(logger.info(s"Processing ${task.name}..."))) { (prev, version) =>
+          prev.flatMap { _ =>
+            mongoTaskRepo.find("taskName" -> task.name, "version" -> version).flatMap {
+              case Nil => Future(logger.info(s"Task ${task.name} version $version not yet executed - running"))
+                .map(_ => mongoTaskRepo.insert(MongoTaskRegister(task.name, version, LocalDateTime.now)))
+                .flatMap(_ => task.run(version))
+              case head :: Nil => alreadyRun(task, version)(head)
+              case head :: _ => alreadyRun(task, version)(head)
+            }
           }
         }
       }
@@ -82,31 +79,27 @@ class MongoStartupRunnerImpl @Inject() (reactiveMongoComponent: ReactiveMongoCom
   }
 
   def alreadyRun(task: MongoTask[_], version: Int): MongoTaskRegister => Future[Unit] = { head =>
-    logger.info(s"Mongo task ${task.name} version $version already ran at ${head.executionDateTime}")
-    Future.successful(())
+    Future(logger.info(s"Mongo task ${task.name} version $version already ran at ${head.executionDateTime}"))
   }
 }
 
 trait MongoTask[T] {
   val env: Environment
   val name: String = this.getClass.getSimpleName
-  val version: Int
-  lazy val srcFile = s"$name-$version.txt"
+  val upToVersion: Int
 
   def verify: String => Option[T]
   def execute: T => Future[Unit]
 
-  def run(): Future[Unit] = {
-    Logger.info(s"Loading from file: $srcFile")
-    Source.fromInputStream(env.classLoader.getResourceAsStream(s"tasks/$srcFile")).getLines.foldLeft(Future.successful(())) { (prev, line) =>
-      prev.map { _ =>
+  def run(version: Int): Future[Unit] = {
+    val srcFile = s"$name-$version.txt"
+
+    Source.fromInputStream(env.classLoader.getResourceAsStream(s"tasks/$srcFile")).getLines
+      .foldLeft(Future(Logger.info(s"Loading from file: $srcFile"))) { (prev, line) =>
+      prev.flatMap { _ =>
         verify(line) match {
-          case Some(data) =>
-            Logger.info(s"""Verification of $name - "$line" successful""")
-            execute(data)
-          case None =>
-            Logger.warn(s"""Verification of $name - "$line" failed - skipping""")
-            Future.successful(())
+          case Some(data) => Future(Logger.info(s"""Verification of $name - "$line" successful""")).flatMap(_ => execute(data))
+          case None => Future(Logger.warn(s"""Verification of $name - "$line" failed - skipping"""))
         }
       }
     }
