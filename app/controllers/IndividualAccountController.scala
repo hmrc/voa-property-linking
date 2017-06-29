@@ -18,16 +18,28 @@ package controllers
 
 import javax.inject.Inject
 
-import connectors.IndividualAccountConnector
+import connectors.{BusinessRatesAuthConnector, IndividualAccountConnector}
 import models.IndividualAccountWrite
 import play.api.libs.json.Json
 import play.api.mvc.Action
+import play.api.mvc.Results.EmptyContent
 
-class IndividualAccountController @Inject() (individuals: IndividualAccountConnector) extends PropertyLinkingBaseController {
+class IndividualAccountController @Inject() (individuals: IndividualAccountConnector, brAuth: BusinessRatesAuthConnector) extends PropertyLinkingBaseController {
 
   def create() = Action.async(parse.json) { implicit request =>
     withJsonBody[IndividualAccountWrite] { acc =>
-      individuals.create(acc) map { Created(_) }
+      individuals.create(acc) map { x => Created(x) }
+    }
+  }
+
+  def update(personId: Int) = Action.async(parse.json) { implicit request =>
+    withJsonBody[IndividualAccountWrite] { account =>
+      for {
+        _ <- individuals.update(personId, account)
+        _ <- brAuth.clearCache()
+      } yield {
+        Ok(EmptyContent())
+      }
     }
   }
 

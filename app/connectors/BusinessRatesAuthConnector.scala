@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
-package infrastructure
+package connectors
 
 import javax.inject.Inject
 
-import com.google.inject.name.Named
-import com.kenshoo.play.metrics.Metrics
-import metrics.HasMetrics
+import infrastructure.SimpleWSHttp
+import uk.gov.hmrc.play.config.inject.ServicesConfig
+import uk.gov.hmrc.play.http.HeaderCarrier
 
-class VOABackendWSHttp @Inject()(override val metrics: Metrics,
-                                 @Named("voaApiSubscriptionHeader") val voaApiSubscriptionHeader: String,
-                                 @Named("voaApiTraceHeader") val voaApiTraceHeader: String) extends HasMetrics with AzureHeaders {
-  override val hooks = NoneRequired
+import scala.concurrent.{ExecutionContext, Future}
+
+class BusinessRatesAuthConnector @Inject()(http: SimpleWSHttp, servicesConfig: ServicesConfig) {
+  private lazy val url = servicesConfig.baseUrl("business-rates-auth") + "/business-rates-authorisation"
+
+  def clearCache()(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] = {
+    http.DELETE(url + "/cache") map { _ => () }
+  }
 }
