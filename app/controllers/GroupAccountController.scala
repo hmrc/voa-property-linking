@@ -18,12 +18,12 @@ package controllers
 
 import javax.inject.Inject
 
-import connectors.GroupAccountConnector
-import models.GroupAccountSubmission
+import connectors.{BusinessRatesAuthConnector, GroupAccountConnector}
+import models.{GroupAccountSubmission, UpdatedOrganisationAccount}
 import play.api.libs.json.Json
 import play.api.mvc.Action
 
-class GroupAccountController @Inject() (groups: GroupAccountConnector) extends PropertyLinkingBaseController {
+class GroupAccountController @Inject() (groups: GroupAccountConnector, brAuth: BusinessRatesAuthConnector) extends PropertyLinkingBaseController {
 
   def get(organisationId: Int) = Action.async { implicit request =>
     groups.get(organisationId) map {
@@ -49,6 +49,15 @@ class GroupAccountController @Inject() (groups: GroupAccountConnector) extends P
   def create() = Action.async(parse.json) { implicit request =>
     withJsonBody[GroupAccountSubmission] { acc =>
       groups.create(acc) map { Created(_) }
+    }
+  }
+
+  def update(orgId: Long) = Action.async(parse.json) { implicit request =>
+    withJsonBody[UpdatedOrganisationAccount] { acc =>
+      for {
+        _ <- groups.update(orgId, acc)
+        _ <- brAuth.clearCache()
+      } yield Ok
     }
   }
 }
