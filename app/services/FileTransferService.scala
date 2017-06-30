@@ -29,6 +29,7 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.{Failure, Try}
 
 case class FUAASDownloadException(href: String, status: Int) extends Exception(s"Failed to download $href (status: $status)")
 
@@ -62,21 +63,21 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
     }
   }
 
-  private def removeEnvelopes(envInfo: EnvelopeInfo)(implicit hc: HeaderCarrier) = {
+  private def removeEnvelopes(envInfo: EnvelopeInfo)(implicit hc: HeaderCarrier): Future[Unit] = {
     if (envInfo.status == "NOT_EXISTING")
       Future.successful(repo.remove(envInfo.id))
     else
-      fileUploadConnector.deleteEnvelope(envInfo.id).map(_ => repo.remove(envInfo.id))
+      fileUploadConnector.deleteEnvelope(envInfo.id).flatMap(_ => repo.remove(envInfo.id))
   }
 
   def transferFile(fileInfo: FileInfo, metadata: EnvelopeMetadata)(implicit hc: HeaderCarrier): Future[Unit] = {
     for {
       file <- fileUploadConnector.downloadFile(fileInfo.href)
-      _ <- if(file.headers.status < 400)
+      r <- if(file.headers.status < 400)
             evidenceConnector.uploadFile(fileInfo.name, file.body, metadata)
            else
             failedDownloadFromFUAAS(fileInfo, file.headers.status)
-    } yield ()
+    } yield r
   }
 
   private def failedDownloadFromFUAAS(fileInfo: FileInfo, status: Int): Future[Unit] = {
@@ -84,11 +85,22 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
   }
 
   private def processEnvelope(envelopeInfo: EnvelopeInfo)(implicit hc: HeaderCarrier): Future[Unit] = {
-    Future.sequence(envelopeInfo.files.map(fileInfo => {
-      fileInfo.status match {
-        case "ERROR" => evidenceConnector.uploadFile(fileInfo.name, Source.empty, envelopeInfo.metadata)
-        case _ => transferFile(fileInfo, envelopeInfo.metadata)
+    val logMsg = s"Processing ${envelopeInfo.files.size} files: from envelope: ${envelopeInfo.id}"
+
+    envelopeInfo.files.foldLeft(Future(Logger.info(logMsg))) { (prev, fileInfo) =>
+      prev.flatMap { _ =>
+        fileInfo.status match {
+          case "ERROR" => evidenceConnector.uploadFile(fileInfo.name, Source.empty, envelopeInfo.metadata)
+          case _ => transferFile(fileInfo, envelopeInfo.metadata)
+        }
       }
-    })).map(_ => removeEnvelopes(envelopeInfo))
+    } recoverWith moveToBackOfQueue(envelopeInfo.id) flatMap { _ => removeEnvelopes(envelopeInfo) }
+  }
+
+  private def moveToBackOfQueue(envelopeId: String): PartialFunction[Throwable, Future[Unit]] = {
+    case e: FUAASDownloadException => Future.failed(e)
+    case e: Throwable =>
+      Logger.error(s"Error processing file(s) in envelope $envelopeId to backend - moving to back of queue", e)
+      repo.remove(envelopeId).flatMap(_ => repo.create(envelopeId, Closed)).flatMap(_ => Future.failed(e))
   }
 }

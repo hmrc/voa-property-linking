@@ -36,8 +36,8 @@ class EnvelopeIdRepository @Inject()(db: DB, @Named("envelopeCollectionName") va
   extends ReactiveRepository[EnvelopeId, String](envelopeCollectionName, () => db, EnvelopeId.mongoFormat, implicitly[Format[String]]) with
     EnvelopeIdRepo {
 
-  override def create(envelopeId: String): Future[Unit] = {
-    insert(EnvelopeId(envelopeId, envelopeId, Some(Open)))
+  override def create(envelopeId: String, status: EnvelopeStatus): Future[Unit] = {
+    insert(EnvelopeId(envelopeId, envelopeId, Some(status)))
       .map(_ => ())
       .recover {
         case e: DatabaseException if e.code.contains(11000) =>
@@ -71,7 +71,7 @@ object EnvelopeId {
 
 @ImplementedBy(classOf[EnvelopeIdRepository])
 trait EnvelopeIdRepo {
-  def create(envelopeId: String): Future[Unit]
+  def create(envelopeId: String, status: EnvelopeStatus = Open): Future[Unit]
 
   def get(): Future[Seq[EnvelopeId]]
 
