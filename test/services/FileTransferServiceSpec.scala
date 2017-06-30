@@ -102,6 +102,7 @@ class FileTransferServiceSpec extends UnitSpec with MockitoSugar with AnswerSuga
       )
 
       when(repo.get()).thenReturn(Future.successful(envelopes))
+      when(repo.remove(any())).thenReturn(Future(()))
       when(fileUploadConnector.getEnvelopeDetails(any())(any())).thenAnswer { invocation: InvocationOnMock =>
         val envelopeId = invocation.getArgument[String](0)
 
@@ -148,6 +149,7 @@ class FileTransferServiceSpec extends UnitSpec with MockitoSugar with AnswerSuga
       )
 
       when(repo.get()).thenReturn(Future.successful(envelopes))
+      when(repo.remove(any())).thenReturn(Future(()))
       when(fileUploadConnector.getEnvelopeDetails(any())(any())).thenAnswer { invocation: InvocationOnMock =>
         val envelopeId = invocation.getArgument[String](0)
 
