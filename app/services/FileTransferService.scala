@@ -27,9 +27,8 @@ import play.api.Logger
 import repositories.EnvelopeIdRepo
 import uk.gov.hmrc.play.http.{HeaderCarrier, Upstream4xxResponse}
 
-import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.{Failure, Try}
+import scala.concurrent.{ExecutionContext, Future}
 
 case class FUAASDownloadException(href: String, status: Int) extends Exception(s"Failed to download $href (status: $status)")
 
@@ -55,7 +54,7 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
         r <- envelopeFilesNotQuarantine.foldLeft(Future.successful(())) {
           case (f, envInfo) => f.flatMap(_ => processEnvelope(envInfo)).recover {
             case ex: FUAASDownloadException =>
-              Logger.info(s"Skipping FUaaS download ${ex.href} as it returned ${ex.status}; continuing processing next envelope")
+              Logger.warn(s"Skipping FUaaS download ${ex.href} as it returned ${ex.status}; continuing processing next envelope")
           }
         }
       } yield {
@@ -64,7 +63,7 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
       }
     }.recoverWith {
       case e: Upstream4xxResponse if e.upstreamResponseCode == 429 =>
-        Logger.info("Rate limit exceeded, terminating queue processing")
+        Logger.warn("Rate limit exceeded, terminating queue processing")
         Future.successful(FileTransferComplete(None))
     }
   }
@@ -106,7 +105,7 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
   private def moveToBackOfQueue(envelopeId: String): PartialFunction[Throwable, Future[Unit]] = {
     case e: FUAASDownloadException => Future.failed(e)
     case e: Upstream4xxResponse if e.upstreamResponseCode == 429 =>
-      Logger.error(s"Rate limit exceeded - will resume at envelope $envelopeId next run")
+      Logger.warn(s"Rate limit exceeded - will resume at envelope $envelopeId next run")
       Future.failed(e)
     case e: Throwable =>
       Logger.error(s"Error processing file(s) in envelope $envelopeId to backend - moving to back of queue", e)
