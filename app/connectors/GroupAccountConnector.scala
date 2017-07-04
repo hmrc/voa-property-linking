@@ -22,7 +22,7 @@ import com.google.inject.name.Named
 import models._
 import play.api.libs.json.JsValue
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.http.ws.WSHttp
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -36,6 +36,10 @@ class GroupAccountConnector @Inject()(addresses: AddressConnector,
 
   def create(account: GroupAccountSubmission)(implicit hc: HeaderCarrier): Future[JsValue] = {
     http.POST[APIGroupAccount, JsValue](url, account.toApiAccount)
+  }
+
+  def update(orgId: Long, account: UpdatedOrganisationAccount)(implicit hc: HeaderCarrier): Future[Unit] = {
+    http.PUT[UpdatedOrganisationAccount, HttpResponse](s"$url/$orgId", account) map { _ => () }
   }
 
   def get(id: Long)(implicit hc: HeaderCarrier): Future[Option[GroupAccount]] = {

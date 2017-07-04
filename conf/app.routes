@@ -23,6 +23,7 @@ GET          /groups/:organisationId                                            
 GET          /groups                                                                          @controllers.GroupAccountController.withGroupId(groupId)
 GET          /groups/agentCode/:agentCode                                                     @controllers.GroupAccountController.withAgentCode(agentCode)
 POST         /groups                                                                          @controllers.GroupAccountController.create()
+PUT          /groups/:orgId                                                                   @controllers.GroupAccountController.update(orgId: Long)
 
 POST         /envelopes/:envId                                                                @controllers.EnvelopeController.create(envId: String)
 PUT          /envelopes/:envId                                                                @controllers.EnvelopeController.close(envId: String)
