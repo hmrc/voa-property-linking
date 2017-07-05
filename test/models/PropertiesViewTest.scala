@@ -36,21 +36,21 @@ class PropertiesViewTest extends UnitSpec with WithSimpleWsHttpTestApplication {
             "2005",
             146440182,
             new LocalDate(2005, 3, 1),
-            16500,
+            Some(16500),
             "4, HERON ROAD IND UNITS, EXETER, EX2 7LL", "70305000400"),
           APIValuationHistory(
             14345902000L,
             "2010",
             146440182,
             new LocalDate(2010, 3, 1),
-            17750,
+            Some(17750),
             "4, HERON ROAD IND UNITS, EXETER, EX2 7LL", "70305000400"),
           APIValuationHistory(
             10176424000L,
             "2010",
             146440182,
             new LocalDate(2010, 3, 1),
-            20000,
+            Some(20000),
             "4, HERON ROAD IND UNITS, EXETER, EX2 7LL", "70305000400")),
         Nil
       )
