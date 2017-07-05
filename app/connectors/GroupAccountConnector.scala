@@ -35,7 +35,7 @@ class GroupAccountConnector @Inject()(addresses: AddressConnector,
   lazy val url = baseUrl + "/customer-management-api/organisation"
 
   def create(account: GroupAccountSubmission)(implicit hc: HeaderCarrier): Future[JsValue] = {
-    http.POST[APIGroupAccount, JsValue](url, account.toApiAccount)
+    http.POST[APIGroupAccountSubmission, JsValue](url, account.toApiAccount)
   }
 
   def update(orgId: Long, account: UpdatedOrganisationAccount)(implicit hc: HeaderCarrier): Future[Unit] = {
