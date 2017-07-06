@@ -31,20 +31,11 @@ object IndividualAccount {
   implicit val formats = Json.format[IndividualAccount]
 }
 
-case class IndividualAccountSubmission(externalId: String, trustId: String, organisationId: Int, details: IndividualDetails) {
+case class IndividualAccountWrite(externalId: String, trustId: String, organisationId: Int, details: IndividualDetails) {
   def toAPIIndividualAccount = {
     APIIndividualAccount(trustId, details.firstName, details.lastName, organisationId, details.addressId, details.phone1, details.phone2, details.email, externalId, LocalDate.now)
   }
 }
-object IndividualAccountSubmission {
-  implicit val formats = Json.format[IndividualAccountSubmission]
+object IndividualAccountWrite {
+  implicit val formats = Json.format[IndividualAccountWrite]
 }
-
-
-//used as part of POST /organisation - no organisationId is passed here.
-case class IndividualAccountSubmissionForOrganisation(externalId: String, trustId: String, details: IndividualDetails)
-object IndividualAccountSubmissionForOrganisation {
-  implicit val formats = Json.format[IndividualAccountSubmissionForOrganisation]
-}
-
-

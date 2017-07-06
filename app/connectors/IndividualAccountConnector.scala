@@ -32,11 +32,11 @@ class IndividualAccountConnector @Inject()(addresses: AddressConnector,
 
   lazy val baseUrl: String = baseUrl("external-business-rates-data-platform") + "/customer-management-api/person"
 
-  def create(account: IndividualAccountSubmission)(implicit hc: HeaderCarrier): Future[JsValue] = {
+  def create(account: IndividualAccountWrite)(implicit hc: HeaderCarrier): Future[JsValue] = {
     http.POST[APIIndividualAccount, JsValue](baseUrl, account.toAPIIndividualAccount)
   }
 
-  def update(personId: Int, account: IndividualAccountSubmission)(implicit hc: HeaderCarrier): Future[JsValue] = {
+  def update(personId: Int, account: IndividualAccountWrite)(implicit hc: HeaderCarrier): Future[JsValue] = {
     http.PUT[APIIndividualAccount, JsValue](baseUrl + s"/$personId", account.toAPIIndividualAccount)
   }
 

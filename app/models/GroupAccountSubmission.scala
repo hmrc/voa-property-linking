@@ -20,20 +20,9 @@ import org.joda.time.LocalDate
 import play.api.libs.json.Json
 
 case class GroupAccountSubmission(id: String, companyName: String, addressId: Int, email: String, phone: String,
-                                  isAgent: Boolean, individualAccountSubmission: IndividualAccountSubmissionForOrganisation) {
+                                  isSmallBusiness: Boolean, isAgent: Boolean) {
 
-  def toApiAccount = APIGroupAccountSubmission(id, companyName, addressId, email, phone, isAgent, None, LocalDate.now,
-    APIIndividualAccountForOrganisation(
-      individualAccountSubmission.trustId,
-      individualAccountSubmission.details.firstName,
-      individualAccountSubmission.details.lastName,
-      individualAccountSubmission.details.addressId,
-      individualAccountSubmission.details.phone1,
-      individualAccountSubmission.details.phone2,
-      individualAccountSubmission.details.email,
-      individualAccountSubmission.externalId,
-      LocalDate.now())
-  )
+  def toApiAccount = APIGroupAccount(id, companyName, addressId, email, phone, isSmallBusiness, isAgent, None, LocalDate.now)
 }
 
 object GroupAccountSubmission {

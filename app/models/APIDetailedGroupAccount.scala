@@ -25,13 +25,13 @@ case class APIDetailedGroupAccount(id: Int, governmentGatewayGroupId: String, re
   def toGroupAccount = {
     GroupAccount(id, governmentGatewayGroupId, organisationLatestDetail.organisationName, organisationLatestDetail.addressUnitId,
       organisationLatestDetail.organisationEmailAddress, organisationLatestDetail.organisationTelephoneNumber.getOrElse("not set"),
-      organisationLatestDetail.representativeFlag, representativeCode)
+      organisationLatestDetail.smallBusinessFlag, organisationLatestDetail.representativeFlag, representativeCode)
   }
 }
 
 case class IndividualSummary(personLatestDetail: APIIndividualDetails)
 
-case class GroupDetails(addressUnitId: Int, representativeFlag: Boolean, organisationName: String,
+case class GroupDetails(addressUnitId: Int, representativeFlag: Boolean, smallBusinessFlag: Boolean, organisationName: String,
                         organisationEmailAddress: String, organisationTelephoneNumber: Option[String], effectiveFrom: LocalDate)
 
 object GroupDetails {

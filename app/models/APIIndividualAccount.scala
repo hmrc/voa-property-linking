@@ -26,18 +26,3 @@ case class APIIndividualAccount(identifyVerificationId: String, firstName: Strin
 object APIIndividualAccount {
   implicit val format = Json.format[APIIndividualAccount]
 }
-
-case class APIIndividualAccountForOrganisation(
-                                                identifyVerificationId: String,
-                                                firstName: String,
-                                                lastName: String,
-                                                addressUnitId: Int,
-                                                telephoneNumber: String,
-                                                mobileNumber: Option[String],
-                                                emailAddress: String,
-                                                governmentGatewayExternalId: String,
-                                                effectiveFrom: LocalDate)
-
-object APIIndividualAccountForOrganisation {
-  implicit val format = Json.format[APIIndividualAccountForOrganisation]
-}
