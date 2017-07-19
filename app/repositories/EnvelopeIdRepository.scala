@@ -24,32 +24,40 @@ import models._
 import play.api.Logger
 import play.api.libs.json._
 import reactivemongo.api.DB
-import reactivemongo.bson.BSONDocument
+import reactivemongo.api.indexes.{Index, IndexType}
+import reactivemongo.bson.{BSONDateTime, BSONDocument}
 import reactivemongo.core.errors.DatabaseException
 import uk.gov.hmrc.mongo.ReactiveRepository
 
+import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.language.postfixOps
 
 @Singleton
 class EnvelopeIdRepository @Inject()(db: DB, @Named("envelopeCollectionName") val envelopeCollectionName: String)
   extends ReactiveRepository[EnvelopeId, String](envelopeCollectionName, () => db, EnvelopeId.mongoFormat, implicitly[Format[String]]) with
     EnvelopeIdRepo {
 
+  override def indexes: Seq[Index] = Seq(
+    Index(key = Seq("createdAt" -> IndexType.Ascending), name = Some("ttl"), options = BSONDocument("expireAfterSeconds" -> (7 days).toSeconds))
+  )
+
   override def create(envelopeId: String, status: EnvelopeStatus): Future[Unit] = {
-    insert(EnvelopeId(envelopeId, envelopeId, Some(status)))
+    insert(EnvelopeId(envelopeId, envelopeId, Some(status), now))
       .map(_ => ())
       .recover {
         case e: DatabaseException if e.code.contains(11000) =>
           Logger.debug(s"EnvelopeId: $envelopeId has already been added")
       }
   }
+
   override def update(envelopeId: String, status: EnvelopeStatus): Future[Unit] = {
     collection.findAndUpdate(
       selector = BSONDocument(("_id", envelopeId)),
-      update = Json.obj("$set" -> EnvelopeId(envelopeId, envelopeId, Some(status))),
+      update = Json.obj("$set" -> EnvelopeId(envelopeId, envelopeId, Some(status), now)),
       fetchNewObject = false,
-      upsert = false
+      upsert = true
     ) map { _ => () }
   }
 
@@ -61,11 +69,15 @@ class EnvelopeIdRepository @Inject()(db: DB, @Named("envelopeCollectionName") va
     Logger.info(s"Deleting envelopedId: $envelopeId from mongo")
     removeById(envelopeId).map(_ => ())
   }
+
+  private def now = Some(BSONDateTime(System.currentTimeMillis))
 }
 
-case class EnvelopeId(envelopeId: String, _id: String, status: Option[EnvelopeStatus])
+case class EnvelopeId(envelopeId: String, _id: String, status: Option[EnvelopeStatus], createdAt: Option[BSONDateTime])
 
 object EnvelopeId {
+  import reactivemongo.json.BSONFormats.BSONDateTimeFormat
+
   val mongoFormat = Json.format[EnvelopeId]
 }
 

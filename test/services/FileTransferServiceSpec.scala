@@ -27,8 +27,8 @@ import org.mockito.invocation.InvocationOnMock
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.mock.MockitoSugar
 import play.api.libs.ws.{StreamedResponse, WSResponseHeaders}
+import reactivemongo.bson.BSONDateTime
 import repositories.{EnvelopeId, EnvelopeIdRepo}
-import uk.gov.hmrc.mongo.MongoConnector
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
 
@@ -89,16 +89,16 @@ class FileTransferServiceSpec extends UnitSpec with MockitoSugar with AnswerSuga
 
     "Fail fast on the first failure with uploads" in {
       val envelopes: Seq[EnvelopeId] = Seq(
-        EnvelopeId("1", "1", None),
-        EnvelopeId("2", "2", None),
-        EnvelopeId("3", "3", None),
-        EnvelopeId("4", "4", None),
-        EnvelopeId("5", "5", None),
-        EnvelopeId("6", "6", None),
-        EnvelopeId("7", "7", None),
-        EnvelopeId("8", "8", None),
-        EnvelopeId("9", "9", None),
-        EnvelopeId("10", "10", None)
+        EnvelopeId("1", "1", None, Some(BSONDateTime(System.currentTimeMillis))),
+        EnvelopeId("2", "2", None, Some(BSONDateTime(System.currentTimeMillis))),
+        EnvelopeId("3", "3", None, Some(BSONDateTime(System.currentTimeMillis))),
+        EnvelopeId("4", "4", None, Some(BSONDateTime(System.currentTimeMillis))),
+        EnvelopeId("5", "5", None, Some(BSONDateTime(System.currentTimeMillis))),
+        EnvelopeId("6", "6", None, Some(BSONDateTime(System.currentTimeMillis))),
+        EnvelopeId("7", "7", None, Some(BSONDateTime(System.currentTimeMillis))),
+        EnvelopeId("8", "8", None, Some(BSONDateTime(System.currentTimeMillis))),
+        EnvelopeId("9", "9", None, Some(BSONDateTime(System.currentTimeMillis))),
+        EnvelopeId("10", "10", None, Some(BSONDateTime(System.currentTimeMillis)))
       )
 
       when(repo.get()).thenReturn(Future.successful(envelopes))
@@ -136,16 +136,16 @@ class FileTransferServiceSpec extends UnitSpec with MockitoSugar with AnswerSuga
 
     "Not fail, but skip errors originating in file upload" in {
       val envelopes: Seq[EnvelopeId] = Seq(
-        EnvelopeId("1", "1", None),
-        EnvelopeId("2", "2", None),
-        EnvelopeId("3", "3", None),
-        EnvelopeId("4", "4", None),
-        EnvelopeId("5", "5", None),
-        EnvelopeId("6", "6", None),
-        EnvelopeId("7", "7", None),
-        EnvelopeId("8", "8", None),
-        EnvelopeId("9", "9", None),
-        EnvelopeId("10", "10", None)
+        EnvelopeId("1", "1", None, Some(BSONDateTime(System.currentTimeMillis))),
+        EnvelopeId("2", "2", None, Some(BSONDateTime(System.currentTimeMillis))),
+        EnvelopeId("3", "3", None, Some(BSONDateTime(System.currentTimeMillis))),
+        EnvelopeId("4", "4", None, Some(BSONDateTime(System.currentTimeMillis))),
+        EnvelopeId("5", "5", None, Some(BSONDateTime(System.currentTimeMillis))),
+        EnvelopeId("6", "6", None, Some(BSONDateTime(System.currentTimeMillis))),
+        EnvelopeId("7", "7", None, Some(BSONDateTime(System.currentTimeMillis))),
+        EnvelopeId("8", "8", None, Some(BSONDateTime(System.currentTimeMillis))),
+        EnvelopeId("9", "9", None, Some(BSONDateTime(System.currentTimeMillis))),
+        EnvelopeId("10", "10", None, Some(BSONDateTime(System.currentTimeMillis)))
       )
 
       when(repo.get()).thenReturn(Future.successful(envelopes))

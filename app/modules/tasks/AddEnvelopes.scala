@@ -23,6 +23,7 @@ import models.Closed
 import modules.MongoTask
 import play.api.{Environment, Logger}
 import play.api.libs.concurrent.Execution.Implicits._
+import reactivemongo.bson.BSONDateTime
 import repositories.{EnvelopeId, EnvelopeIdRepository}
 
 import scala.concurrent.Future
@@ -31,7 +32,7 @@ import scala.util.Try
 @Singleton
 class AddEnvelopes @Inject()(override val env: Environment, envelopeRepo: EnvelopeIdRepository) extends MongoTask[EnvelopeId] {
   override val upToVersion: Int = 4
-  override def verify: String => Option[EnvelopeId] = line => Try(UUID.fromString(line)).map(_ => Some(EnvelopeId(line, line, Some(Closed)))).getOrElse(None)
+  override def verify: String => Option[EnvelopeId] = line => Try(UUID.fromString(line)).map(_ => Some(EnvelopeId(line, line, Some(Closed), Some(BSONDateTime(System.currentTimeMillis))))).getOrElse(None)
   override def execute: EnvelopeId => Future[Unit] = line => envelopeRepo.insert(line)
     .map(_ => Logger.info(s"Added: $line"))
     .recover{ case _ => Logger.info(s"Already exists: $line")}

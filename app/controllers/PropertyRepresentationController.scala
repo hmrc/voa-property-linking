@@ -28,8 +28,8 @@ class PropertyRepresentationController @Inject() (representations: PropertyRepre
   def validateAgentCode(agentCode:Long, authorisationId: Long) = Action.async { implicit request =>
     representations.validateAgentCode(agentCode, authorisationId).map(
       _.fold(
-        orgId => Ok(s"""{"organisationId": $orgId}"""),
-        errorString => Ok(s"""{"failureCode": "$errorString"}""")
+        orgId => Ok(Json.obj("organisationId" -> orgId)),
+        errorString => Ok(Json.obj("failureCode" -> errorString))
       )
     )
   }
