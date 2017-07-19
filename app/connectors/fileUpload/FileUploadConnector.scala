@@ -18,8 +18,8 @@ package connectors.fileUpload
 
 import javax.inject.Inject
 
+import akka.stream.Materializer
 import com.google.inject.ImplementedBy
-import connectors.HandleErrors
 import infrastructure.SimpleWSHttp
 import play.api.Logger
 import play.api.http.HeaderNames.USER_AGENT
@@ -27,7 +27,6 @@ import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import play.api.libs.ws.{StreamedResponse, WSClient}
 import uk.gov.hmrc.play.config.{AppName, ServicesConfig}
-import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
 import uk.gov.hmrc.play.http._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -40,25 +39,35 @@ object EnvelopeMetadata {
   implicit val format: Format[EnvelopeMetadata] = Json.format[EnvelopeMetadata]
 }
 
-case class EnvelopeInfo(
-                         id: String,
-                         status: String,
-                         files: Seq[FileInfo],
-                         metadata: EnvelopeMetadata
-                       )
+case class EnvelopeConstraints(maxNumFiles: Int, maxSize: String, contentTypes: Seq[String])
 
-case class FileInfo(
-                     id: String,
-                     status: String,
-                     name: String,
-                     contentType: String,
-                     created: String,
-                     href: String
-                   )
+object EnvelopeConstraints {
+  implicit lazy val format: Format[EnvelopeConstraints] = Json.format[EnvelopeConstraints]
+
+  lazy val defaultConstraints = EnvelopeConstraints(1, "10MB", Seq("application/pdf", "image/jpeg"))
+}
+
+case class CreateEnvelopePayload(metadata: EnvelopeMetadata, constraints: EnvelopeConstraints)
+
+object CreateEnvelopePayload {
+  implicit lazy val format: Format[CreateEnvelopePayload] = Json.format[CreateEnvelopePayload]
+}
+
+case class FileInfo(id: String,
+                    status: String,
+                    name: String,
+                    contentType: String,
+                    created: String,
+                    href: String)
 
 object FileInfo {
   implicit lazy val fileInfo = Json.format[FileInfo]
 }
+
+case class EnvelopeInfo(id: String,
+                        status: String,
+                        files: Seq[FileInfo],
+                        metadata: EnvelopeMetadata)
 
 object EnvelopeInfo {
   implicit lazy val envelopeInfo: Reads[EnvelopeInfo] = (
@@ -69,14 +78,10 @@ object EnvelopeInfo {
     ) (EnvelopeInfo.apply _)
 }
 
-case class RoutingRequest(envelopeId: String, application: String = "application/json", destination: String = "VOA_CCA")
-
-object RoutingRequest {
-  implicit lazy val routingRequest = Json.format[RoutingRequest]
-}
-
 @ImplementedBy(classOf[FileUploadConnector])
 trait FileUpload {
+  def createEnvelope(metadata: EnvelopeMetadata)(implicit hc: HeaderCarrier): Future[Option[String]]
+
   def getEnvelopeDetails(envelopeId: String)(implicit hc: HeaderCarrier): Future[EnvelopeInfo]
 
   def getFilesInEnvelope(envelopeId: String)(implicit hc: HeaderCarrier): Future[Seq[String]]
@@ -86,9 +91,18 @@ trait FileUpload {
   def deleteEnvelope(envelopeId: String)(implicit hc: HeaderCarrier): Future[Unit]
 }
 
-class FileUploadConnector @Inject()(ws: WSClient, http: SimpleWSHttp)(implicit ec: ExecutionContext)
-  extends FileUpload with ServicesConfig with HandleErrors with MicroserviceFilterSupport with AppName {
+class FileUploadConnector @Inject()(ws: WSClient, http: SimpleWSHttp)(implicit ec: ExecutionContext, mat: Materializer)
+  extends FileUpload with ServicesConfig with AppName {
+
   lazy val url = baseUrl("file-upload-backend")
+
+  override def createEnvelope(metadata: EnvelopeMetadata)(implicit hc: HeaderCarrier): Future[Option[String]] = {
+    val payload = CreateEnvelopePayload(metadata, EnvelopeConstraints.defaultConstraints)
+
+    http.POST[CreateEnvelopePayload, HttpResponse](s"$url/file-upload/envelopes", payload) map { res =>
+      res.header("location") flatMap { l => l.split("/").lastOption }
+    }
+  }
 
   override def getEnvelopeDetails(envelopeId: String)(implicit hc: HeaderCarrier): Future[EnvelopeInfo] = {
     http.GET[EnvelopeInfo](s"$url/file-upload/envelopes/$envelopeId")
@@ -110,7 +124,7 @@ class FileUploadConnector @Inject()(ws: WSClient, http: SimpleWSHttp)(implicit e
       .stream() andThen handleResponse(fullUrl)
   }
 
-  private def handleResponse(url: String): PartialFunction[Try[StreamedResponse],Unit] = {
+  private def handleResponse(url: String): PartialFunction[Try[StreamedResponse], Unit] = {
     case Success(v) if v.headers.status < 400 => Logger.info(s"Transferred successfully from $url")
     case Success(v) if v.headers.status >= 400 => Logger.info(s"Transfer failed (${v.headers.status}) from $url")
     case Failure(ex) => Logger.error(s"Exception copying $url", ex)

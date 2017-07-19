@@ -16,6 +16,8 @@
 
 package connectors.fileUpload
 
+import java.util.UUID
+
 import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.WireMockSpec
 import helpers.WithSimpleWsHttpTestApplication
@@ -24,6 +26,7 @@ import org.scalatest.mock.MockitoSugar
 import org.mockito.Mockito.{verify => mockitoVerify, _}
 import org.mockito.ArgumentMatchers.{any => mockitoAny, _}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import play.api.libs.json.{JsArray, Json}
 import play.api.libs.ws.{StreamedResponse, WSClient, WSRequest}
 import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -75,6 +78,55 @@ class FileUploadSpec extends WireMockSpec with WithSimpleWsHttpTestApplication w
       await(connector.downloadFile("someFile.pdf"))
 
       mockitoVerify(mockWsRequest, times(1)).withHeaders("User-Agent" -> "voa-property-linking")
+    }
+
+    "convert envelope metadata into a valid payload" in {
+      val connector = new FileUploadConnector(mock[WSClient], fakeApplication.injector.instanceOf[SimpleWSHttp]) {
+        override lazy val url = mockServerUrl
+      }
+
+      val metadata = EnvelopeMetadata("aSubmission", 123)
+      val fileId = UUID.randomUUID().toString
+
+      stubFor(post(urlEqualTo("/file-upload/envelopes"))
+        .willReturn(aResponse()
+          .withStatus(200)
+          .withHeader("location", s"/file-upload/envelopes/$fileId")))
+
+      val expectedJson = Json.stringify(Json.obj(
+        "metadata" -> Json.obj(
+          "submissionId" -> "aSubmission",
+          "personId" -> 123
+        ),
+        "constraints" -> Json.obj(
+          "maxNumFiles" -> 1,
+          "maxSize" -> "10MB",
+          "contentTypes" -> Json.arr("application/pdf", "image/jpeg")
+        )
+      ))
+
+
+      await(connector.createEnvelope(metadata)(HeaderCarrier()))
+
+      verify(postRequestedFor(urlEqualTo("/file-upload/envelopes")).withRequestBody(equalToJson(expectedJson)))
+    }
+
+    "extract and return the envelope ID from the response headers" in {
+      val connector = new FileUploadConnector(mock[WSClient], fakeApplication.injector.instanceOf[SimpleWSHttp]) {
+        override lazy val url = mockServerUrl
+      }
+
+      val metadata = EnvelopeMetadata("aSubmission", 123)
+      val fileId = UUID.randomUUID().toString
+
+      stubFor(post(urlEqualTo("/file-upload/envelopes"))
+        .willReturn(aResponse()
+          .withStatus(200)
+          .withHeader("location", s"/file-upload/envelopes/$fileId")))
+
+      val res = await(connector.createEnvelope(metadata)(HeaderCarrier()))
+
+      res shouldBe Some(fileId)
     }
   }
 }
