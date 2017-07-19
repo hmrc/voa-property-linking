@@ -18,22 +18,29 @@ package controllers
 
 import javax.inject.Inject
 
+import connectors.fileUpload.{EnvelopeMetadata, FileUploadConnector}
 import models.Closed
+import play.api.libs.json.Json
 import play.api.mvc.Action
-import repositories.EnvelopeIdRepository
+import repositories.EnvelopeIdRepo
 
-class EnvelopeController @Inject()(val repo: EnvelopeIdRepository) extends PropertyLinkingBaseController {
+class EnvelopeController @Inject()(val repo: EnvelopeIdRepo, fileUploadConnector: FileUploadConnector) extends PropertyLinkingBaseController {
 
-  def create(envelopeId: String) = Action.async { implicit request =>
+  def create = Action.async(parse.json) { implicit request =>
+    withJsonBody[EnvelopeMetadata] { metadata =>
+      fileUploadConnector.createEnvelope(metadata) flatMap {
+        case Some(id) => repo.create(id) map { _ => Ok(Json.obj("envelopeId" -> id))}
+        case None => InternalServerError(Json.obj("error" -> "envelope creation failed"))
+      }
+    }
+  }
+
+  // temporarily kept for backwards compatibility
+  def record(envelopeId: String) = Action.async { implicit request =>
     repo.create(envelopeId).map(_=> Ok(envelopeId))
   }
 
   def close(envelopeId: String) = Action.async { implicit request =>
     repo.update(envelopeId, Closed).map(_=> Ok(envelopeId))
   }
-
-  def get() = Action.async { implicit  request =>
-    repo.get().map(seq => Ok(seq.mkString("\n")))
-  }
-
 }

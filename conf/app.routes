@@ -25,9 +25,9 @@ GET          /groups/agentCode/:agentCode                                       
 POST         /groups                                                                          @controllers.GroupAccountController.create()
 PUT          /groups/:orgId                                                                   @controllers.GroupAccountController.update(orgId: Long)
 
-POST         /envelopes/:envId                                                                @controllers.EnvelopeController.create(envId: String)
+POST         /envelopes                                                                       @controllers.EnvelopeController.create
+POST         /envelopes/:envId                                                                @controllers.EnvelopeController.record(envId: String)
 PUT          /envelopes/:envId                                                                @controllers.EnvelopeController.close(envId: String)
-GET          /envelopes                                                                       @controllers.EnvelopeController.get()
 GET          /transfer                                                                        @controllers.FileTransferController.run()
 
 GET          /address                                                                         @controllers.AddressLookup.find(postcode)
