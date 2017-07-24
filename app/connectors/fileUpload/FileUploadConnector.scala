@@ -39,7 +39,7 @@ object EnvelopeMetadata {
   implicit val format: Format[EnvelopeMetadata] = Json.format[EnvelopeMetadata]
 }
 
-case class EnvelopeConstraints(maxNumFiles: Int, maxSize: String, contentTypes: Seq[String])
+case class EnvelopeConstraints(maxItems: Int, maxSize: String, contentTypes: Seq[String])
 
 object EnvelopeConstraints {
   implicit lazy val format: Format[EnvelopeConstraints] = Json.format[EnvelopeConstraints]
@@ -47,7 +47,7 @@ object EnvelopeConstraints {
   lazy val defaultConstraints = EnvelopeConstraints(1, "10MB", Seq("application/pdf", "image/jpeg"))
 }
 
-case class CreateEnvelopePayload(metadata: EnvelopeMetadata, constraints: EnvelopeConstraints)
+case class CreateEnvelopePayload(callbackUrl: String, metadata: EnvelopeMetadata, constraints: EnvelopeConstraints)
 
 object CreateEnvelopePayload {
   implicit lazy val format: Format[CreateEnvelopePayload] = Json.format[CreateEnvelopePayload]
@@ -80,7 +80,7 @@ object EnvelopeInfo {
 
 @ImplementedBy(classOf[FileUploadConnector])
 trait FileUpload {
-  def createEnvelope(metadata: EnvelopeMetadata)(implicit hc: HeaderCarrier): Future[Option[String]]
+  def createEnvelope(metadata: EnvelopeMetadata, callbackUrl: String)(implicit hc: HeaderCarrier): Future[Option[String]]
 
   def getEnvelopeDetails(envelopeId: String)(implicit hc: HeaderCarrier): Future[EnvelopeInfo]
 
@@ -96,8 +96,8 @@ class FileUploadConnector @Inject()(ws: WSClient, http: SimpleWSHttp)(implicit e
 
   lazy val url = baseUrl("file-upload-backend")
 
-  override def createEnvelope(metadata: EnvelopeMetadata)(implicit hc: HeaderCarrier): Future[Option[String]] = {
-    val payload = CreateEnvelopePayload(metadata, EnvelopeConstraints.defaultConstraints)
+  override def createEnvelope(metadata: EnvelopeMetadata, callbackUrl: String)(implicit hc: HeaderCarrier): Future[Option[String]] = {
+    val payload = CreateEnvelopePayload(callbackUrl, metadata, EnvelopeConstraints.defaultConstraints)
 
     http.POST[CreateEnvelopePayload, HttpResponse](s"$url/file-upload/envelopes", payload) map { res =>
       res.header("location") flatMap { l => l.split("/").lastOption }

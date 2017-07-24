@@ -28,7 +28,7 @@ class EnvelopeController @Inject()(val repo: EnvelopeIdRepo, fileUploadConnector
 
   def create = Action.async(parse.json) { implicit request =>
     withJsonBody[EnvelopeMetadata] { metadata =>
-      fileUploadConnector.createEnvelope(metadata) flatMap {
+      fileUploadConnector.createEnvelope(metadata, routes.FileTransferController.handleCallback().absoluteURL()) flatMap {
         case Some(id) => repo.create(id) map { _ => Ok(Json.obj("envelopeId" -> id))}
         case None => InternalServerError(Json.obj("error" -> "envelope creation failed"))
       }

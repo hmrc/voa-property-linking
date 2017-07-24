@@ -14,20 +14,28 @@
  * limitations under the License.
  */
 
-package models
+package models.fileUpload
 
-sealed trait EnvelopeStatus extends NamedEnum {
-  val key = "envelopeStatus"
+import models.{NamedEnum, NamedEnumSupport}
+
+sealed trait FileStatus extends NamedEnum
+
+case object Quarantined extends FileStatus {
+  override def name: String = "QUARANTINED"
 }
 
-case object Open extends EnvelopeStatus {
-  val name = "OPEN"
+case object Cleaned extends FileStatus {
+  override def name: String = "CLEANED"
 }
 
-case object Closed extends EnvelopeStatus {
-  override val name = "CLOSED"
+case object Available extends FileStatus {
+  override def name: String = "AVAILABLE"
 }
 
-object EnvelopeStatus extends NamedEnumSupport[EnvelopeStatus] {
-  override def all: List[EnvelopeStatus] = List(Open, Closed)
+case object Error extends FileStatus {
+  override def name: String = "UnKnownFileStatusERROR"
+}
+
+object FileStatus extends NamedEnumSupport[FileStatus] {
+  override def all: Seq[FileStatus] = Seq(Quarantined, Cleaned, Available, Error)
 }
