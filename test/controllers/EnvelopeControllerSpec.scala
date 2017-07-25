@@ -39,10 +39,10 @@ class EnvelopeControllerSpec extends ControllerSpec with MockitoSugar {
 
       val metadataJson = Json.obj("submissionId" -> submissionId, "personId" -> 1)
 
-      val res = testController.create()(FakeRequest().withBody(metadataJson))
+      val res = testController.create()(FakeRequest().withBody(metadataJson).withHeaders(HOST -> "localhost:9524"))
       await(res)
 
-      verify(mockFileUpload, once).createEnvelope(matching(EnvelopeMetadata(submissionId, 1)))(any[HeaderCarrier])
+      verify(mockFileUpload, once).createEnvelope(matching(EnvelopeMetadata(submissionId, 1)), matching(callbackUrl))(any[HeaderCarrier])
 
       status(res) mustBe OK
     }
@@ -53,9 +53,9 @@ class EnvelopeControllerSpec extends ControllerSpec with MockitoSugar {
       val metadataJson = Json.obj("submissionId" -> submissionId, "personId" -> 1)
       val metadata = EnvelopeMetadata(submissionId, 1)
 
-      when(mockFileUpload.createEnvelope(matching(metadata))(any[HeaderCarrier])).thenReturn(Future.successful(Some(envelopeId)))
+      when(mockFileUpload.createEnvelope(matching(metadata), matching(callbackUrl))(any[HeaderCarrier])).thenReturn(Future.successful(Some(envelopeId)))
 
-      val res = testController.create()(FakeRequest().withBody(metadataJson))
+      val res = testController.create()(FakeRequest().withBody(metadataJson).withHeaders(HOST -> "localhost:9524"))
       await(res)
 
       verify(mockRepo, once).create(matching(envelopeId), any())
@@ -69,9 +69,9 @@ class EnvelopeControllerSpec extends ControllerSpec with MockitoSugar {
       val metadata = EnvelopeMetadata(submissionId, 1)
       val envelopeId = UUID.randomUUID().toString
 
-      when(mockFileUpload.createEnvelope(matching(metadata))(any[HeaderCarrier])) thenReturn Future.successful(Some(envelopeId))
+      when(mockFileUpload.createEnvelope(matching(metadata), matching(callbackUrl))(any[HeaderCarrier])) thenReturn Future.successful(Some(envelopeId))
 
-      val res = testController.create()(FakeRequest().withBody(metadataJson))
+      val res = testController.create()(FakeRequest().withBody(metadataJson).withHeaders(HOST -> "localhost:9524"))
       await(res)
 
       status(res) mustBe OK
@@ -79,6 +79,8 @@ class EnvelopeControllerSpec extends ControllerSpec with MockitoSugar {
       contentAsJson(res) mustBe Json.obj("envelopeId" -> envelopeId)
     }
   }
+
+  lazy val callbackUrl = routes.FileTransferController.handleCallback().absoluteURL()(FakeRequest().withHeaders(HOST -> "localhost:9524"))
 
   lazy val testController = new EnvelopeController(mockRepo, mockFileUpload)
 
@@ -90,7 +92,7 @@ class EnvelopeControllerSpec extends ControllerSpec with MockitoSugar {
 
   lazy val mockFileUpload = {
     val m = mock[FileUploadConnector]
-    when(m.createEnvelope(any[EnvelopeMetadata])(any[HeaderCarrier])) thenReturn Future.successful(Some(UUID.randomUUID().toString))
+    when(m.createEnvelope(any[EnvelopeMetadata], matching(callbackUrl))(any[HeaderCarrier])) thenReturn Future.successful(Some(UUID.randomUUID().toString))
     m
   }
 

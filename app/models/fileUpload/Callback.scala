@@ -14,20 +14,12 @@
  * limitations under the License.
  */
 
-package models
+package models.fileUpload
 
-sealed trait EnvelopeStatus extends NamedEnum {
-  val key = "envelopeStatus"
-}
+import play.api.libs.json.Json
 
-case object Open extends EnvelopeStatus {
-  val name = "OPEN"
-}
+case class Callback(envelopeId: String, fileId: String, status: FileStatus, reason: Option[String])
 
-case object Closed extends EnvelopeStatus {
-  override val name = "CLOSED"
-}
-
-object EnvelopeStatus extends NamedEnumSupport[EnvelopeStatus] {
-  override def all: List[EnvelopeStatus] = List(Open, Closed)
+object Callback {
+  implicit val format = Json.format[Callback]
 }

@@ -20,10 +20,6 @@ import play.api.libs.json._
 
 trait NamedEnum {
   def name: String
-
-  def key: String
-
-  def msgKey: String = s"$key.$name"
 }
 
 trait NamedEnumSupport[E <: NamedEnum] {
@@ -39,6 +35,8 @@ trait NamedEnumSupport[E <: NamedEnum] {
   def options = all.map(_.name)
 
   def unapply(s: String) = all.find(_.name == s)
+
+  implicit lazy val format = EnumFormat(this)
 }
 
 object EnumFormat {
@@ -55,7 +53,7 @@ object EnumFormat {
       case JsString(value) =>
         enumObject.fromName(value) match {
           case Some(enumValue) => JsSuccess(enumValue)
-          case None => JsError(s"Value: $value is not valid type of ${this.getClass}")
+          case None => JsError(s"Value: $value is not valid; expected one of ${enumObject.options}")
         }
       case js =>
         JsError(s"Invalid Json: expected string, got: $js")

@@ -18,12 +18,21 @@ package controllers
 
 import javax.inject.Inject
 
-import connectors.EvidenceConnector
+import models.fileUpload.{Available, Callback}
+import play.api.Logger
 import play.api.mvc.Action
 import services.FileTransferService
 
-class FileTransferController @Inject() (val fileTransferService: FileTransferService,
-                                        val evidenceConnector: EvidenceConnector) extends PropertyLinkingBaseController {
+class FileTransferController @Inject() (val fileTransferService: FileTransferService) extends PropertyLinkingBaseController {
+
+  def handleCallback() = Action.async(parse.json) { implicit request =>
+    Logger.info(request.body.validate[Callback].toString)
+    withJsonBody[Callback] {
+      case Callback(envelopeId, _, Available, _) => fileTransferService.transferManually(envelopeId) map { _ => Ok }
+      case Callback(envelopeId, _, status, _) => Logger.info(s"Received callback for $envelopeId; File status: $status"); Ok
+    }
+  }
+
   def run() = Action.async { implicit  request =>
     fileTransferService.justDoIt().map(_ => Ok("File transfer was started manually"))
   }

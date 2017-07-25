@@ -94,19 +94,20 @@ class FileUploadSpec extends WireMockSpec with WithSimpleWsHttpTestApplication w
           .withHeader("location", s"/file-upload/envelopes/$fileId")))
 
       val expectedJson = Json.stringify(Json.obj(
+        "callbackUrl" -> "/some-callback",
         "metadata" -> Json.obj(
           "submissionId" -> "aSubmission",
           "personId" -> 123
         ),
         "constraints" -> Json.obj(
-          "maxNumFiles" -> 1,
+          "maxItems" -> 1,
           "maxSize" -> "10MB",
           "contentTypes" -> Json.arr("application/pdf", "image/jpeg")
         )
       ))
 
 
-      await(connector.createEnvelope(metadata)(HeaderCarrier()))
+      await(connector.createEnvelope(metadata, "/some-callback")(HeaderCarrier()))
 
       verify(postRequestedFor(urlEqualTo("/file-upload/envelopes")).withRequestBody(equalToJson(expectedJson)))
     }
@@ -124,7 +125,7 @@ class FileUploadSpec extends WireMockSpec with WithSimpleWsHttpTestApplication w
           .withStatus(200)
           .withHeader("location", s"/file-upload/envelopes/$fileId")))
 
-      val res = await(connector.createEnvelope(metadata)(HeaderCarrier()))
+      val res = await(connector.createEnvelope(metadata, "/some-callback")(HeaderCarrier()))
 
       res shouldBe Some(fileId)
     }

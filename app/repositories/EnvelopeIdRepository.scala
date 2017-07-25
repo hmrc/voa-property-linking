@@ -65,6 +65,12 @@ class EnvelopeIdRepository @Inject()(db: DB, @Named("envelopeCollectionName") va
     findAll()
   }
 
+  override def getStatus(envelopeId: String): Future[Option[EnvelopeStatus]] = {
+    find("envelopeId" -> envelopeId) map {
+      _.headOption flatMap { _.status }
+    }
+  }
+
   override def remove(envelopeId: String): Future[Unit] = {
     Logger.info(s"Deleting envelopedId: $envelopeId from mongo")
     removeById(envelopeId).map(_ => ())
@@ -86,6 +92,8 @@ trait EnvelopeIdRepo {
   def create(envelopeId: String, status: EnvelopeStatus = Open): Future[Unit]
 
   def get(): Future[Seq[EnvelopeId]]
+
+  def getStatus(envelopeId: String): Future[Option[EnvelopeStatus]]
 
   def remove(envelopeId: String): Future[Unit]
 

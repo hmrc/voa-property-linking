@@ -28,6 +28,8 @@ PUT          /groups/:orgId                                                     
 POST         /envelopes                                                                       @controllers.EnvelopeController.create
 POST         /envelopes/:envId                                                                @controllers.EnvelopeController.record(envId: String)
 PUT          /envelopes/:envId                                                                @controllers.EnvelopeController.close(envId: String)
+
+POST         /file-callback                                                                   @controllers.FileTransferController.handleCallback()
 GET          /transfer                                                                        @controllers.FileTransferController.run()
 
 GET          /address                                                                         @controllers.AddressLookup.find(postcode)

@@ -29,6 +29,7 @@ import uk.gov.hmrc.play.http.{HeaderCarrier, Upstream4xxResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.control.NonFatal
 
 case class FUAASDownloadException(href: String, status: Int) extends Exception(s"Failed to download $href (status: $status)")
 
@@ -37,6 +38,24 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
                                     val evidenceConnector: EvidenceConnector,
                                     val repo: EnvelopeIdRepo) {
   implicit val ec: ExecutionContext = play.api.libs.concurrent.Execution.Implicits.defaultContext
+
+  def transferManually(envelopeId: String)(implicit hc: HeaderCarrier): Future[Unit] = {
+    repo.getStatus(envelopeId) flatMap {
+      case Some(Closed) => transferSingleFile(envelopeId)
+      case _ => Logger.info(s"Received callback for $envelopeId, but declaration has not been submitted"); Future.successful(())
+    }
+  }
+
+  private def transferSingleFile(envelopeId: String)(implicit hc: HeaderCarrier): Future[Unit] = {
+    {
+      for {
+        info <- fileUploadConnector.getEnvelopeDetails(envelopeId)
+        _ <- processEnvelope(info)
+      } yield ()
+    } recover {
+      case NonFatal(t) => Logger.warn(s"Transfer of $envelopeId failed due to ${t.getMessage}")
+    }
+  }
 
   def justDoIt()(implicit hc: HeaderCarrier): Future[FileTransferComplete] = {
     val allEnvelopes = repo.get()
@@ -75,7 +94,7 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
       fileUploadConnector.deleteEnvelope(envInfo.id).flatMap(_ => repo.remove(envInfo.id))
   }
 
-  def transferFile(fileInfo: FileInfo, metadata: EnvelopeMetadata)(implicit hc: HeaderCarrier): Future[Unit] = {
+  private[services] def transferFile(fileInfo: FileInfo, metadata: EnvelopeMetadata)(implicit hc: HeaderCarrier): Future[Unit] = {
     for {
       file <- fileUploadConnector.downloadFile(fileInfo.href)
       r <- if(file.headers.status < 400)
