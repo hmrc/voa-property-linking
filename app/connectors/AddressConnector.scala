@@ -20,15 +20,15 @@ import javax.inject.{Inject, Named}
 
 import models.{APIAddressLookupResult, DetailedAddress, SimpleAddress}
 import play.api.libs.json.{JsDefined, JsNumber, JsValue}
-import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.play.config.inject.ServicesConfig
 import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.play.http.ws.WSHttp
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class AddressConnector @Inject() (@Named("VoaBackendWsHttp") http: WSHttp)(implicit ec: ExecutionContext) extends ServicesConfig {
+class AddressConnector @Inject() (@Named("VoaBackendWsHttp") http: WSHttp, conf: ServicesConfig)(implicit ec: ExecutionContext) {
 
-  val url = baseUrl("external-business-rates-data-platform") + "/address-management-api/address"
+  val url = conf.baseUrl("external-business-rates-data-platform") + "/address-management-api/address"
 
   def find(postcode: String)(implicit hc: HeaderCarrier): Future[Seq[SimpleAddress]] = {
     http.GET[APIAddressLookupResult](s"""$url?pageSize=100&startPoint=1&searchparams={"postcode": "$postcode"}""") map { res =>

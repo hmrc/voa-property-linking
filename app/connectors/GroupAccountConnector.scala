@@ -21,17 +21,17 @@ import javax.inject.Inject
 import com.google.inject.name.Named
 import models._
 import play.api.libs.json.JsValue
-import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.play.config.inject.ServicesConfig
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.http.ws.WSHttp
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class GroupAccountConnector @Inject()(addresses: AddressConnector,
-                                      @Named("VoaBackendWsHttp") http: WSHttp)(implicit ec: ExecutionContext)
-  extends ServicesConfig {
+                                      @Named("VoaBackendWsHttp") http: WSHttp,
+                                      conf: ServicesConfig)(implicit ec: ExecutionContext) {
 
-  lazy val baseUrl: String = baseUrl("external-business-rates-data-platform")
+  lazy val baseUrl: String = conf.baseUrl("external-business-rates-data-platform")
   lazy val url = baseUrl + "/customer-management-api/organisation"
 
   def create(account: GroupAccountSubmission)(implicit hc: HeaderCarrier): Future[JsValue] = {
