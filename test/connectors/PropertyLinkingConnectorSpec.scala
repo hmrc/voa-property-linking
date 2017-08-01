@@ -20,6 +20,7 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import helpers.WithSimpleWsHttpTestApplication
 import models.PaginationParams
 import play.api.http.ContentTypes
+import uk.gov.hmrc.play.config.inject.ServicesConfig
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.http.ws.WSHttp
 
@@ -34,7 +35,7 @@ class PropertyLinkingConnectorSpec
       implicit val hc = HeaderCarrier()
       val http = fakeApplication.injector.instanceOf[WSHttp]
 
-      val connector = new PropertyLinkingConnector(http) {
+      val connector = new PropertyLinkingConnector(http, fakeApplication.injector.instanceOf[ServicesConfig]) {
         override lazy val baseUrl: String = mockServerUrl
       }
 
