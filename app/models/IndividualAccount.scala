@@ -16,6 +16,8 @@
 
 package models
 
+import java.time.Instant
+
 import org.joda.time.LocalDate
 import play.api.libs.json.Json
 
@@ -32,19 +34,18 @@ object IndividualAccount {
 }
 
 case class IndividualAccountSubmission(externalId: String, trustId: String, organisationId: Int, details: IndividualDetails) {
+
   def toAPIIndividualAccount = {
-    APIIndividualAccount(trustId, details.firstName, details.lastName, organisationId, details.addressId, details.phone1, details.phone2, details.email, externalId, LocalDate.now)
+    APIIndividualAccount(PersonData(trustId, details.firstName, details.lastName, organisationId, details.addressId, details.phone1, details.phone2, details.email, externalId, Instant.now))
   }
 }
+
 object IndividualAccountSubmission {
   implicit val formats = Json.format[IndividualAccountSubmission]
 }
-
 
 //used as part of POST /organisation - no organisationId is passed here.
 case class IndividualAccountSubmissionForOrganisation(externalId: String, trustId: String, details: IndividualDetails)
 object IndividualAccountSubmissionForOrganisation {
   implicit val formats = Json.format[IndividualAccountSubmissionForOrganisation]
 }
-
-

@@ -16,6 +16,8 @@
 
 package controllers
 
+import java.time.Instant
+
 import connectors._
 import models._
 import org.joda.time.{DateTime, LocalDate}
@@ -114,8 +116,8 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
       val repUrl = s"$baseUrl/mdtp-dashboard-management-api/mdtp_dashboard/agent_representation_requests?status=APPROVED&organisationId=$userOrgId&startPoint=1"
       when(mockWS.GET(mockEq(repUrl))(any(classOf[HttpReads[APIPropertyRepresentations]]), any())).thenReturn(APIPropertyRepresentations(0, Some(0), Nil))
 
-      val detailedGroup1 = APIDetailedGroupAccount(11, "ggGroup11", 1111, GroupDetails(1, true, "orgName", "email@add.res", None, LocalDate.now()), Nil)
-      val detailedGroup2 = APIDetailedGroupAccount(22, "ggGroup22", 2222, GroupDetails(1, true, "orgName", "email@add.res", None, LocalDate.now()), Nil)
+      val detailedGroup1 = APIDetailedGroupAccount(11, "ggGroup11", 1111, GroupDetails(1, true, "orgName", "email@add.res", None), Nil)
+      val detailedGroup2 = APIDetailedGroupAccount(22, "ggGroup22", 2222, GroupDetails(1, true, "orgName", "email@add.res", None), Nil)
 
       val org1001Url = s"$baseUrl/customer-management-api/organisation?organisationId=1001"
       val org1002Url = s"$baseUrl/customer-management-api/organisation?organisationId=1002"

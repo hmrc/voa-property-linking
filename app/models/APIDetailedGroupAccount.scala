@@ -16,7 +16,6 @@
 
 package models
 
-import org.joda.time.LocalDate
 import play.api.libs.json.Json
 
 case class APIDetailedGroupAccount(id: Int, governmentGatewayGroupId: String, representativeCode: Long, organisationLatestDetail: GroupDetails,
@@ -32,7 +31,7 @@ case class APIDetailedGroupAccount(id: Int, governmentGatewayGroupId: String, re
 case class IndividualSummary(personLatestDetail: APIIndividualDetails)
 
 case class GroupDetails(addressUnitId: Int, representativeFlag: Boolean, organisationName: String, organisationEmailAddress: String,
-                        organisationTelephoneNumber: Option[String], effectiveFrom: LocalDate)
+                        organisationTelephoneNumber: Option[String])
 
 object GroupDetails {
   implicit val format = Json.format[GroupDetails]
