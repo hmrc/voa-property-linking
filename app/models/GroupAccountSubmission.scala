@@ -16,13 +16,14 @@
 
 package models
 
-import org.joda.time.LocalDate
+import java.time.Instant
+
 import play.api.libs.json.Json
 
 case class GroupAccountSubmission(id: String, companyName: String, addressId: Int, email: String, phone: String,
                                   isAgent: Boolean, individualAccountSubmission: IndividualAccountSubmissionForOrganisation) {
 
-  def toApiAccount = APIGroupAccountSubmission(id, companyName, addressId, email, phone, isAgent, None, LocalDate.now,
+  def toApiAccount = APIGroupAccountSubmission(id, companyName, addressId, email, phone, isAgent, None, Instant.now,
     APIIndividualAccountForOrganisation(
       individualAccountSubmission.trustId,
       individualAccountSubmission.details.firstName,
@@ -32,7 +33,7 @@ case class GroupAccountSubmission(id: String, companyName: String, addressId: In
       individualAccountSubmission.details.phone2,
       individualAccountSubmission.details.email,
       individualAccountSubmission.externalId,
-      LocalDate.now())
+      Instant.now)
   )
 }
 
