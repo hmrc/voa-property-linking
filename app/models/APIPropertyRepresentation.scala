@@ -16,7 +16,7 @@
 
 package models
 
-import org.joda.time.{DateTime, LocalDate}
+import org.joda.time.LocalDate
 import play.api.libs.json.{Json, Reads}
 
 case class APIPropertyRepresentation(representationId: Long,

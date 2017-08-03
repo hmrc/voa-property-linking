@@ -16,24 +16,27 @@
 
 package models
 
-import org.joda.time.LocalDate
+import java.time.{Clock, Instant}
+
 import play.api.libs.json.Json
 
 case class GroupAccountSubmission(id: String, companyName: String, addressId: Int, email: String, phone: String,
                                   isAgent: Boolean, individualAccountSubmission: IndividualAccountSubmissionForOrganisation) {
 
-  def toApiAccount = APIGroupAccountSubmission(id, companyName, addressId, email, phone, isAgent, None, LocalDate.now,
-    APIIndividualAccountForOrganisation(
-      individualAccountSubmission.trustId,
-      individualAccountSubmission.details.firstName,
-      individualAccountSubmission.details.lastName,
-      individualAccountSubmission.details.addressId,
-      individualAccountSubmission.details.phone1,
-      individualAccountSubmission.details.phone2,
-      individualAccountSubmission.details.email,
-      individualAccountSubmission.externalId,
-      LocalDate.now())
-  )
+  def toApiAccount(implicit clock: Clock): APIGroupAccountSubmission = {
+    APIGroupAccountSubmission(id, companyName, addressId, email, phone, isAgent, None, Instant.now(clock),
+      APIIndividualAccountForOrganisation(
+        individualAccountSubmission.trustId,
+        individualAccountSubmission.details.firstName,
+        individualAccountSubmission.details.lastName,
+        individualAccountSubmission.details.addressId,
+        individualAccountSubmission.details.phone1,
+        individualAccountSubmission.details.phone2,
+        individualAccountSubmission.details.email,
+        individualAccountSubmission.externalId,
+        Instant.now(clock))
+    )
+  }
 }
 
 object GroupAccountSubmission {

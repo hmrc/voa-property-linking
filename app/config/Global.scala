@@ -15,6 +15,7 @@
  */
 
 package config
+import java.time.Clock
 import javax.inject._
 
 import com.google.inject.AbstractModule
@@ -74,6 +75,7 @@ class GuiceModule(environment: Environment,
     bindConstant().annotatedWith(Names.named("envelopeCollectionName")).to(configuration.getString("envelope.collection.name").get)
 
     bind(classOf[WSHttp]).annotatedWith(Names.named("VoaBackendWsHttp")).to(classOf[VOABackendWSHttp])
+    bind(classOf[Clock]).toInstance(Clock.systemUTC())
   }
 }
 

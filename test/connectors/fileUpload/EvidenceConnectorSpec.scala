@@ -21,13 +21,13 @@ import java.io.ByteArrayInputStream
 import akka.stream.scaladsl.StreamConverters
 import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.{EvidenceConnector, WireMockSpec}
-import helpers.{AnswerSugar, WithSimpleWsHttpTestApplication}
+import helpers.{AnswerSugar, SimpleWsHttpTestApplication}
 import org.scalatest.mock.MockitoSugar
 import play.api.libs.ws.ahc.AhcWSClient
 import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
 import uk.gov.hmrc.play.http.HeaderCarrier
 
-class EvidenceConnectorSpec extends WireMockSpec with WithSimpleWsHttpTestApplication with MicroserviceFilterSupport
+class EvidenceConnectorSpec extends WireMockSpec with SimpleWsHttpTestApplication with MicroserviceFilterSupport
   with MockitoSugar with AnswerSugar {
   "Evidence connector" should {
     "be able to upload a file" in {

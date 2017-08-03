@@ -16,6 +16,7 @@
 
 package connectors
 
+import java.time.Clock
 import javax.inject.Inject
 
 import com.google.inject.name.Named
@@ -27,9 +28,7 @@ import uk.gov.hmrc.play.http.ws.WSHttp
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class GroupAccountConnector @Inject()(addresses: AddressConnector,
-                                      @Named("VoaBackendWsHttp") http: WSHttp,
-                                      conf: ServicesConfig)(implicit ec: ExecutionContext) {
+class GroupAccountConnector @Inject()(@Named("VoaBackendWsHttp") http: WSHttp, conf: ServicesConfig)(implicit ec: ExecutionContext, clock: Clock) {
 
   lazy val baseUrl: String = conf.baseUrl("external-business-rates-data-platform")
   lazy val url = baseUrl + "/customer-management-api/organisation"

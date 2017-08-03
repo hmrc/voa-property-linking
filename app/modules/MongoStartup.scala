@@ -20,7 +20,7 @@ import java.time.LocalDateTime
 
 import com.google.inject.multibindings.Multibinder
 import com.google.inject.{AbstractModule, Inject, Singleton, TypeLiteral}
-import modules.tasks.{AddEnvelopes, AddTimestamps, RemoveEnvelopes}
+import modules.tasks.AddTimestamps
 import org.joda.time.Duration
 import play.api.{Configuration, Environment, Logger}
 import play.modules.reactivemongo.ReactiveMongoComponent
@@ -29,8 +29,8 @@ import repositories.{MongoTaskExecution, MongoTaskRegister}
 import uk.gov.hmrc.lock.{ExclusiveTimePeriodLock, LockMongoRepository, LockRepository}
 
 import scala.collection.JavaConversions
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.io.Source
 
 class MongoStartup(environment: Environment, configuration: Configuration) extends AbstractModule {
