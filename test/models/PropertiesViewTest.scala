@@ -16,12 +16,12 @@
 
 package models
 
-import helpers.WithSimpleWsHttpTestApplication
+import helpers.SimpleWsHttpTestApplication
 import org.joda.time.{DateTime, LocalDate}
 import play.api.libs.json.Json
 import uk.gov.hmrc.play.test.UnitSpec
 
-class PropertiesViewTest extends UnitSpec with WithSimpleWsHttpTestApplication {
+class PropertiesViewTest extends UnitSpec with SimpleWsHttpTestApplication {
 
   "APIAuthorisation" should {
     "be deserialised property" in {

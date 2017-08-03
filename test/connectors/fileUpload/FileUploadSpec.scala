@@ -20,7 +20,7 @@ import java.util.UUID
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.WireMockSpec
-import helpers.WithSimpleWsHttpTestApplication
+import helpers.SimpleWsHttpTestApplication
 import infrastructure.SimpleWSHttp
 import org.scalatest.mock.MockitoSugar
 import org.mockito.Mockito.{verify => mockitoVerify, _}
@@ -33,7 +33,7 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 
-class FileUploadSpec extends WireMockSpec with WithSimpleWsHttpTestApplication with MicroserviceFilterSupport with MockitoSugar {
+class FileUploadSpec extends WireMockSpec with SimpleWsHttpTestApplication with MicroserviceFilterSupport with MockitoSugar {
 
   "FileUploadConnector" should {
     "be able to download files from the file upload service" in {

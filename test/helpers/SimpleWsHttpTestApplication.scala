@@ -24,7 +24,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.play.http.ws.WSHttp
 import uk.gov.hmrc.play.test.WithFakeApplication
 
-trait WithSimpleWsHttpTestApplication extends WithFakeApplication {
+trait SimpleWsHttpTestApplication extends WithFakeApplication {
 
   this: Suite =>
 
