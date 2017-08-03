@@ -19,7 +19,7 @@ package controllers
 import javax.inject.Inject
 
 import connectors.{BusinessRatesAuthConnector, IndividualAccountConnector}
-import models.IndividualAccountWrite
+import models.IndividualAccountSubmission
 import play.api.libs.json.Json
 import play.api.mvc.Action
 import play.api.mvc.Results.EmptyContent
@@ -27,13 +27,13 @@ import play.api.mvc.Results.EmptyContent
 class IndividualAccountController @Inject() (individuals: IndividualAccountConnector, brAuth: BusinessRatesAuthConnector) extends PropertyLinkingBaseController {
 
   def create() = Action.async(parse.json) { implicit request =>
-    withJsonBody[IndividualAccountWrite] { acc =>
+    withJsonBody[IndividualAccountSubmission] { acc =>
       individuals.create(acc) map { x => Created(x) }
     }
   }
 
   def update(personId: Int) = Action.async(parse.json) { implicit request =>
-    withJsonBody[IndividualAccountWrite] { account =>
+    withJsonBody[IndividualAccountSubmission] { account =>
       for {
         _ <- individuals.update(personId, account)
         _ <- brAuth.clearCache()
