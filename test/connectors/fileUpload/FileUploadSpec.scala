@@ -22,9 +22,9 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import connectors.WireMockSpec
 import helpers.SimpleWsHttpTestApplication
 import infrastructure.SimpleWSHttp
-import org.scalatest.mock.MockitoSugar
-import org.mockito.Mockito.{verify => mockitoVerify, _}
 import org.mockito.ArgumentMatchers.{any => mockitoAny, _}
+import org.mockito.Mockito.{verify => mockitoVerify, _}
+import org.scalatest.mock.MockitoSugar
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.{JsArray, Json}
 import play.api.libs.ws.{StreamedResponse, WSClient, WSRequest}
@@ -78,6 +78,36 @@ class FileUploadSpec extends WireMockSpec with SimpleWsHttpTestApplication with 
       await(connector.downloadFile("someFile.pdf"))
 
       mockitoVerify(mockWsRequest, times(1)).withHeaders("User-Agent" -> "voa-property-linking")
+    }
+
+    "handle 404 responses from FUaaS" in {
+      val envelopeId = UUID.randomUUID().toString
+
+      val wsClient = fakeApplication.injector.instanceOf[WSClient]
+      val http = fakeApplication.injector.instanceOf[SimpleWSHttp]
+
+      val connector = new FileUploadConnector(wsClient, http) {
+        override lazy val url = mockServerUrl
+      }
+
+      stubFor(get(urlEqualTo(s"/file-upload/envelopes/$envelopeId")).willReturn(aResponse().withStatus(404)))
+
+      await(connector.getEnvelopeDetails(envelopeId)(HeaderCarrier())) shouldBe EnvelopeInfo(envelopeId, "NOT_EXISTING", Nil, EnvelopeMetadata("nosubmissionid", 0))
+    }
+
+    "handle other error codes from FUaaS" in {
+      val envelopeId = UUID.randomUUID().toString
+
+      val wsClient = fakeApplication.injector.instanceOf[WSClient]
+      val http = fakeApplication.injector.instanceOf[SimpleWSHttp]
+
+      val connector = new FileUploadConnector(wsClient, http) {
+        override lazy val url = mockServerUrl
+      }
+
+      stubFor(get(urlEqualTo(s"/file-upload/envelopes/$envelopeId")).willReturn(aResponse().withStatus(502)))
+
+      await(connector.getEnvelopeDetails(envelopeId)(HeaderCarrier())) shouldBe EnvelopeInfo(envelopeId, "UNKNOWN_ERROR", Nil, EnvelopeMetadata("nosubmissionid", 0))
     }
 
     "convert envelope metadata into a valid payload" in {

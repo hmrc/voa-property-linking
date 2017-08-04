@@ -31,7 +31,7 @@ import scala.util.Try
 
 @Singleton
 class AddEnvelopes @Inject()(override val env: Environment, envelopeRepo: EnvelopeIdRepository) extends MongoTask[EnvelopeId] {
-  override val upToVersion: Int = 4
+  override val upToVersion: Int = 5
   override def verify: String => Option[EnvelopeId] = line => Try(UUID.fromString(line)).map(_ => Some(EnvelopeId(line, line, Some(Closed), Some(BSONDateTime(System.currentTimeMillis))))).getOrElse(None)
   override def execute: EnvelopeId => Future[Unit] = line => envelopeRepo.insert(line)
     .map(_ => Logger.info(s"Added: $line"))
