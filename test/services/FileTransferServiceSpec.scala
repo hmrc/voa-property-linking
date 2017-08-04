@@ -18,10 +18,14 @@ package services
 
 import java.util.concurrent.atomic.AtomicInteger
 
+import com.codahale.metrics.MetricRegistry
+import com.kenshoo.play.metrics.Metrics
 import connectors.EvidenceConnector
 import connectors.fileUpload.{EnvelopeInfo, EnvelopeMetadata, FileInfo, FileUploadConnector}
 import helpers.AnswerSugar
 import models.Closed
+import org.mockito.ArgumentMatchers
+import org.scalatest.concurrent.Eventually._
 import org.mockito.ArgumentMatchers.{eq => mEq, _}
 import org.mockito.Mockito._
 import org.mockito.invocation.InvocationOnMock
@@ -61,8 +65,9 @@ class FileTransferServiceSpec extends UnitSpec with MockitoSugar with AnswerSuga
 
     val mockStreamedResponse = mock[StreamedResponse]
     val mockHeaders = mock[WSResponseHeaders]
+    val metrics = mock[Metrics]
 
-    val fts = new FileTransferService(fileUploadConnector, evidenceConnector, repo)
+    val fts = new FileTransferService(fileUploadConnector, evidenceConnector, repo, metrics)
 
     implicit val fakeHc = HeaderCarrier()
 
@@ -219,6 +224,24 @@ class FileTransferServiceSpec extends UnitSpec with MockitoSugar with AnswerSuga
 
       verify(repo, times(1)).remove(envelopeId)
       verify(repo, times(1)).create(envelopeId, Closed)
+    }
+
+    "Log metrics for opened and closed envelopes is invoked correctly" in {
+      val fileUploadConnector = mock[FileUploadConnector]
+      val evidenceConnector = mock[EvidenceConnector]
+      val envelopeIdRepo = mock[EnvelopeIdRepo]
+      val metrics = mock[Metrics]
+      val registry = mock[MetricRegistry]
+
+      val service = new FileTransferService(fileUploadConnector, evidenceConnector, envelopeIdRepo, metrics)
+
+      when(metrics.defaultRegistry).thenReturn(registry)
+      when(envelopeIdRepo.get()).thenReturn(Future(Nil))
+
+      await(service.justDoIt()(HeaderCarrier()))
+
+      eventually(verify(registry, times(1)).meter(ArgumentMatchers.eq("mongo.envelope.queue-size.open")))
+      eventually(verify(registry, times(1)).meter(ArgumentMatchers.eq("mongo.envelope.queue-size.closed")))
     }
   }
 }
