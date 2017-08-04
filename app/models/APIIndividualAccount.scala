@@ -18,12 +18,17 @@ package models
 
 import java.time.Instant
 
-import org.joda.time.LocalDate
 import play.api.libs.json.Json
 
-case class APIIndividualAccount(identifyVerificationId: String, firstName: String, lastName: String,
-                                organisationId: Int, addressUnitId: Int, telephoneNumber: String, mobileNumber: Option[String],
-                                emailAddress: String, governmentGatewayExternalId: String, effectiveFrom: LocalDate)
+case class PersonData(identifyVerificationId: String, firstName: String, lastName: String,
+                      organisationId: Int, addressUnitId: Int, telephoneNumber: String, mobileNumber: Option[String],
+                      emailAddress: String, governmentGatewayExternalId: String, effectiveFrom: Instant)
+
+object PersonData {
+  implicit val format = Json.format[PersonData]
+}
+
+case class APIIndividualAccount(personData: PersonData)
 
 object APIIndividualAccount {
   implicit val format = Json.format[APIIndividualAccount]

@@ -16,7 +16,6 @@
 
 package models
 
-import org.joda.time.LocalDate
 import play.api.libs.json._
 
 case class APIDetailedIndividualAccount(id: Int, governmentGatewayExternalId: String, personLatestDetail: APIIndividualDetails,
@@ -31,7 +30,7 @@ case class APIDetailedIndividualAccount(id: Int, governmentGatewayExternalId: St
 }
 
 case class APIIndividualDetails(addressUnitId: Int, firstName: String, lastName: String, emailAddress: String, telephoneNumber: Option[String],
-                                mobileNumber: Option[String], identifyVerificationId: String, effectiveFrom: LocalDate)
+                                mobileNumber: Option[String], identifyVerificationId: String)
 
 object APIIndividualDetails {
   private def withDefault[A](key: String, default: A)(implicit wrts: Writes[A]): Reads[JsObject] = {
