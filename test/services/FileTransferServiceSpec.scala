@@ -191,7 +191,7 @@ class FileTransferServiceSpec extends UnitSpec with MockitoSugar with AnswerSuga
     "delete envelope IDs that don't exist in FUaaS" in {
       val envelopeId = "999"
 
-      when(repo.get()).thenReturn(Future.successful(Seq(EnvelopeId(envelopeId, envelopeId, Some(Closed)))))
+      when(repo.get()).thenReturn(Future.successful(Seq(EnvelopeId(envelopeId, envelopeId, Some(Closed), Some(BSONDateTime(System.currentTimeMillis))))))
       when(fileUploadConnector.getEnvelopeDetails(mEq(envelopeId))(any[HeaderCarrier])) thenReturn {
         Future.successful(EnvelopeInfo(envelopeId, "NOT_EXISTING", Nil, EnvelopeMetadata("nosubmissionid", 1)))
       }
@@ -207,7 +207,7 @@ class FileTransferServiceSpec extends UnitSpec with MockitoSugar with AnswerSuga
     "move envelopes to the back of the queue if there are any other errors when retrieving envelope data" in {
       val envelopeId = "9999"
 
-      when(repo.get()).thenReturn(Future.successful(Seq(EnvelopeId(envelopeId, envelopeId, Some(Closed)))))
+      when(repo.get()).thenReturn(Future.successful(Seq(EnvelopeId(envelopeId, envelopeId, Some(Closed), Some(BSONDateTime(System.currentTimeMillis))))))
       when(fileUploadConnector.getEnvelopeDetails(mEq(envelopeId))(any[HeaderCarrier])) thenReturn {
         Future.successful(EnvelopeInfo(envelopeId, "UNKNOWN_ERROR", Nil, EnvelopeMetadata("nosubmissionid", 1)))
       }
