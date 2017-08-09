@@ -87,7 +87,7 @@ trait FileUpload {
 }
 
 class FileUploadConnector @Inject()(ws: WSClient, http: SimpleWSHttp)(implicit ec: ExecutionContext)
-  extends FileUpload with ServicesConfig with HandleErrors with MicroserviceFilterSupport with AppName {
+  extends FileUpload with ServicesConfig with MicroserviceFilterSupport with AppName {
   lazy val url = baseUrl("file-upload-backend")
 
   override def getEnvelopeDetails(envelopeId: String)(implicit hc: HeaderCarrier): Future[EnvelopeInfo] = {
@@ -123,6 +123,8 @@ class FileUploadConnector @Inject()(ws: WSClient, http: SimpleWSHttp)(implicit e
 
   override def deleteEnvelope(envelopeId: String)(implicit hc: HeaderCarrier): Future[Unit] = {
     Logger.info(s"Deleting envelopeId: $envelopeId from FUAAS")
-    http.DELETE[HttpResponse](s"$url/file-upload/envelopes/$envelopeId").map(_ => ())
+    http.DELETE[HttpResponse](s"$url/file-upload/envelopes/$envelopeId")
+      .map { _ => () }
+      .recover { case e => Logger.warn(s"Unable to delete envelope with ID: $envelopeId due to exception ${e.getMessage}") }
   }
 }

@@ -79,7 +79,7 @@ class FileUploadSpec extends WireMockSpec with WithSimpleWsHttpTestApplication w
       mockitoVerify(mockWsRequest, times(1)).withHeaders("User-Agent" -> "voa-property-linking")
     }
 
-    "handle 404 responses from FUaaS" in {
+    "handle 404 responses when retrieving envelope details from FUaaS" in {
       val envelopeId = UUID.randomUUID().toString
 
       val wsClient = fakeApplication.injector.instanceOf[WSClient]
@@ -94,7 +94,7 @@ class FileUploadSpec extends WireMockSpec with WithSimpleWsHttpTestApplication w
       await(connector.getEnvelopeDetails(envelopeId)(HeaderCarrier())) shouldBe EnvelopeInfo(envelopeId, "NOT_EXISTING", Nil, EnvelopeMetadata("nosubmissionid", 0))
     }
 
-    "handle other error codes from FUaaS" in {
+    "handle other error codes when retrieving envelope details from FUaaS" in {
       val envelopeId = UUID.randomUUID().toString
 
       val wsClient = fakeApplication.injector.instanceOf[WSClient]
@@ -107,6 +107,21 @@ class FileUploadSpec extends WireMockSpec with WithSimpleWsHttpTestApplication w
       stubFor(get(urlEqualTo(s"/file-upload/envelopes/$envelopeId")).willReturn(aResponse().withStatus(502)))
 
       await(connector.getEnvelopeDetails(envelopeId)(HeaderCarrier())) shouldBe EnvelopeInfo(envelopeId, "UNKNOWN_ERROR", Nil, EnvelopeMetadata("nosubmissionid", 0))
+    }
+
+    "ignore errors when deleting envelopes from FUaaS" in {
+      val envelopeId = UUID.randomUUID().toString
+
+      val wsClient = fakeApplication.injector.instanceOf[WSClient]
+      val http = fakeApplication.injector.instanceOf[SimpleWSHttp]
+
+      val connector = new FileUploadConnector(wsClient, http) {
+        override lazy val url = mockServerUrl
+      }
+
+      stubFor(delete(urlEqualTo(s"/file-upload/envelopes/$envelopeId")).willReturn(aResponse().withStatus(404)))
+
+      noException shouldBe thrownBy (await(connector.deleteEnvelope(envelopeId)(HeaderCarrier())))
     }
   }
 }

@@ -51,7 +51,7 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
         envelopeIds = closedEnvelopes.map(_.envelopeId)
         envelopeInfos <- Future.traverse(envelopeIds)( envId => fileUploadConnector.getEnvelopeDetails(envId))
         envelopeFilesNotQuarantine = envelopeInfos.filterNot(env => env.files.map(_.status).contains("QUARANTINED"))
-        r <- envelopeFilesNotQuarantine.foldLeft(Future.successful(())) {
+        _ <- envelopeFilesNotQuarantine.foldLeft(Future.successful(())) {
           case (f, envInfo) => f.flatMap(_ => processEnvelope(envInfo)).recover {
             case ex: FUAASDownloadException =>
               Logger.warn(s"Skipping FUaaS download ${ex.href} as it returned ${ex.status}; continuing processing next envelope")
