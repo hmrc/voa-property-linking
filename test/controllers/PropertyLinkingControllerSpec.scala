@@ -37,6 +37,7 @@ import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.Random
 
 class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
 
@@ -87,8 +88,9 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
       reset(mockWS)
       val testPropertyLinkingController: PropertyLinkingController = fakeApplication.injector.instanceOf[PropertyLinkingController]
       val userOrgId = 111
-      val baseParty1 = APIParty(1001, "APPROVED", 1001, Seq(Permissions(10001, "", "", None)))
-      val baseParty2 = baseParty1.copy(id = 1002, authorisedPartyOrganisationId = 1002)
+      //Authorised Party ID is unique for each relationship, even if it's the same agent
+      def baseParty1 = APIParty(Random.nextInt(Int.MaxValue), "APPROVED", 1001, Seq(Permissions(10001, "", "", None)))
+      def baseParty2 = baseParty1.copy(id = 1002, authorisedPartyOrganisationId = 1002)
 
       val dummyProperties = Seq(
         PropertiesView(101, 101, userOrgId, 103, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
@@ -116,8 +118,8 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
       val repUrl = s"$baseUrl/mdtp-dashboard-management-api/mdtp_dashboard/agent_representation_requests?status=APPROVED&organisationId=$userOrgId&startPoint=1"
       when(mockWS.GET(mockEq(repUrl))(any(classOf[HttpReads[APIPropertyRepresentations]]), any())).thenReturn(APIPropertyRepresentations(0, Some(0), Nil))
 
-      val detailedGroup1 = APIDetailedGroupAccount(11, "ggGroup11", 1111, GroupDetails(1, true, "orgName", "email@add.res", None), Nil)
-      val detailedGroup2 = APIDetailedGroupAccount(22, "ggGroup22", 2222, GroupDetails(1, true, "orgName", "email@add.res", None), Nil)
+      val detailedGroup1 = APIDetailedGroupAccount(1001, "ggGroup11", 1111, GroupDetails(1, true, "orgName", "email@add.res", None), Nil)
+      val detailedGroup2 = APIDetailedGroupAccount(1002, "ggGroup22", 2222, GroupDetails(1, true, "orgName", "email@add.res", None), Nil)
 
       val org1001Url = s"$baseUrl/customer-management-api/organisation?organisationId=1001"
       val org1002Url = s"$baseUrl/customer-management-api/organisation?organisationId=1002"
