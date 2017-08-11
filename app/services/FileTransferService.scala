@@ -70,7 +70,7 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
         envelopeIds = closedEnvelopes.map(_.envelopeId)
         envelopeInfos <- Future.traverse(envelopeIds)( envId => fileUploadConnector.getEnvelopeDetails(envId))
         envelopeFilesNotQuarantine = envelopeInfos.filterNot(env => env.files.map(_.status).contains("QUARANTINED"))
-        r <- envelopeFilesNotQuarantine.foldLeft(Future.successful(())) {
+        _ <- envelopeFilesNotQuarantine.foldLeft(Future.successful(())) {
           case (f, envInfo) => f.flatMap(_ => processEnvelope(envInfo)).recover {
             case ex: FUAASDownloadException =>
               Logger.warn(s"Skipping FUaaS download ${ex.href} as it returned ${ex.status}; continuing processing next envelope")
@@ -88,10 +88,11 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
   }
 
   private def removeEnvelopes(envInfo: EnvelopeInfo)(implicit hc: HeaderCarrier): Future[Unit] = {
-    if (envInfo.status == "NOT_EXISTING")
-      Future.successful(repo.remove(envInfo.id))
-    else
-      fileUploadConnector.deleteEnvelope(envInfo.id).flatMap(_ => repo.remove(envInfo.id))
+    envInfo.status match {
+      case "NOT_EXISTING" => Future.successful(repo.remove(envInfo.id))
+      case "UNKNOWN_ERROR" => moveToBackOfQueue(envInfo.id)(new Exception("Error when retrieving envelope data"))
+      case _ => fileUploadConnector.deleteEnvelope(envInfo.id).flatMap(_ => repo.remove(envInfo.id))
+    }
   }
 
   private[services] def transferFile(fileInfo: FileInfo, metadata: EnvelopeMetadata)(implicit hc: HeaderCarrier): Future[Unit] = {

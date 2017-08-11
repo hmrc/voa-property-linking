@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import connectors.EvidenceConnector
 import connectors.fileUpload.{EnvelopeInfo, EnvelopeMetadata, FileInfo, FileUploadConnector}
 import helpers.AnswerSugar
+import models.Closed
 import org.mockito.ArgumentMatchers.{eq => mEq, _}
 import org.mockito.Mockito._
 import org.mockito.invocation.InvocationOnMock
@@ -34,6 +35,7 @@ import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.Try
 
 object Result {
   sealed trait Result
@@ -184,6 +186,39 @@ class FileTransferServiceSpec extends UnitSpec with MockitoSugar with AnswerSuga
           verify(fileUploadConnector, times(9)).deleteEnvelope(any())(any())
         case Result.Fail => fail("Expected future success")
       })
+    }
+
+    "delete envelope IDs that don't exist in FUaaS" in {
+      val envelopeId = "999"
+
+      when(repo.get()).thenReturn(Future.successful(Seq(EnvelopeId(envelopeId, envelopeId, Some(Closed), Some(BSONDateTime(System.currentTimeMillis))))))
+      when(fileUploadConnector.getEnvelopeDetails(mEq(envelopeId))(any[HeaderCarrier])) thenReturn {
+        Future.successful(EnvelopeInfo(envelopeId, "NOT_EXISTING", Nil, EnvelopeMetadata("nosubmissionid", 1)))
+      }
+
+      when(repo.remove(anyString)).thenReturn(Future.successful(()))
+
+      await(fts.justDoIt())
+
+      verify(repo, times(1)).remove(envelopeId)
+      verify(repo, never).create(envelopeId, Closed)
+    }
+
+    "move envelopes to the back of the queue if there are any other errors when retrieving envelope data" in {
+      val envelopeId = "9999"
+
+      when(repo.get()).thenReturn(Future.successful(Seq(EnvelopeId(envelopeId, envelopeId, Some(Closed), Some(BSONDateTime(System.currentTimeMillis))))))
+      when(fileUploadConnector.getEnvelopeDetails(mEq(envelopeId))(any[HeaderCarrier])) thenReturn {
+        Future.successful(EnvelopeInfo(envelopeId, "UNKNOWN_ERROR", Nil, EnvelopeMetadata("nosubmissionid", 1)))
+      }
+
+      when(repo.remove(anyString)).thenReturn(Future.successful(()))
+      when(repo.create(envelopeId, Closed)).thenReturn(Future.successful(()))
+
+      Try { await(fts.justDoIt()) }
+
+      verify(repo, times(1)).remove(envelopeId)
+      verify(repo, times(1)).create(envelopeId, Closed)
     }
   }
 }

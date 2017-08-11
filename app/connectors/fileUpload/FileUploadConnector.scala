@@ -105,8 +105,13 @@ class FileUploadConnector @Inject()(ws: WSClient, http: SimpleWSHttp)(implicit e
   }
 
   override def getEnvelopeDetails(envelopeId: String)(implicit hc: HeaderCarrier): Future[EnvelopeInfo] = {
-    http.GET[EnvelopeInfo](s"$url/file-upload/envelopes/$envelopeId")
-      .recover { case _ => EnvelopeInfo(envelopeId, "NOT_EXISTING", Nil, EnvelopeMetadata("nosubmissionid", 0)) }
+    http.GET[EnvelopeInfo](s"$url/file-upload/envelopes/$envelopeId").recover {
+      case _: NotFoundException =>
+        Logger.warn(s"Envelope $envelopeId not found")
+        EnvelopeInfo(envelopeId, "NOT_EXISTING", Nil, EnvelopeMetadata("nosubmissionid", 0))
+      case _ =>
+        EnvelopeInfo(envelopeId, "UNKNOWN_ERROR", Nil, EnvelopeMetadata("nosubmissionid", 0))
+    }
   }
 
   override def getFilesInEnvelope(envelopeId: String)(implicit hc: HeaderCarrier): Future[Seq[String]] = {
@@ -132,6 +137,8 @@ class FileUploadConnector @Inject()(ws: WSClient, http: SimpleWSHttp)(implicit e
 
   override def deleteEnvelope(envelopeId: String)(implicit hc: HeaderCarrier): Future[Unit] = {
     Logger.info(s"Deleting envelopeId: $envelopeId from FUAAS")
-    http.DELETE[HttpResponse](s"$url/file-upload/envelopes/$envelopeId").map(_ => ())
+    http.DELETE[HttpResponse](s"$url/file-upload/envelopes/$envelopeId")
+      .map { _ => () }
+      .recover { case e => Logger.warn(s"Unable to delete envelope with ID: $envelopeId due to exception ${e.getMessage}") }
   }
 }
