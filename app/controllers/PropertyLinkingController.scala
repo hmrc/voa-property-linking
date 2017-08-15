@@ -36,6 +36,7 @@ class PropertyLinkingController @Inject()(propertyLinksConnector: PropertyLinkin
                                           groupAccountsConnector: GroupAccountConnector,
                                           representationsConnector: PropertyRepresentationConnector
                                          ) extends PropertyLinkingBaseController {
+  type GroupCache = Memoize[Long, Future[Option[GroupAccount]]]
 
   def create() = Action.async(parse.json) { implicit request =>
     withJsonBody[PropertyLinkRequest] { linkRequest =>
@@ -46,7 +47,7 @@ class PropertyLinkingController @Inject()(propertyLinksConnector: PropertyLinkin
   }
 
   def get(authorisationId: Long) = Action.async { implicit request =>
-    implicit val cache = Memoize[APIParty, Future[Option[(APIParty, GroupAccount)]]]()
+    implicit val cache = Memoize[Long, Future[Option[GroupAccount]]]()
 
     propertyLinksConnector.get(authorisationId) flatMap {
       case Some(authorisation) => detailed(authorisation) map { d => Ok(Json.toJson(d)) }
@@ -59,7 +60,7 @@ class PropertyLinkingController @Inject()(propertyLinksConnector: PropertyLinkin
   }
 
   private def getProperties(organisationId: Long, params: PaginationParams)(implicit hc: HeaderCarrier): Future[PropertyLinkResponse] = {
-    implicit val cache = Memoize[APIParty, Future[Option[(APIParty, GroupAccount)]]]()
+    implicit val cache = Memoize[Long, Future[Option[GroupAccount]]]()
 
     for {
       view <- propertyLinksConnector.find(organisationId, params)
@@ -69,20 +70,17 @@ class PropertyLinkingController @Inject()(propertyLinksConnector: PropertyLinkin
     }
   }
 
-  private def detailed(authorisation: PropertiesView)(implicit hc: HeaderCarrier,
-                                                      memoParty: Memoize[APIParty, Future[Option[(APIParty, GroupAccount)]]]): Future[PropertyLink] = {
+  private def detailed(authorisation: PropertiesView)(implicit hc: HeaderCarrier, cache: GroupCache): Future[PropertyLink] = {
     for {
-      apiPartiesWithGroupAccounts <- getGroupAccounts(authorisation)
+      apiPartiesWithGroupAccounts <- withGroupAccounts(authorisation)
       parties = apiPartiesWithGroupAccounts.flatMap { case (p: APIParty, g: GroupAccount) => Party.fromAPIParty(p, g) }
     } yield PropertyLink.fromAPIAuthorisation(authorisation, parties)
   }
 
-  private def getGroupAccounts(authorisation: PropertiesView)
-                              (implicit hc: HeaderCarrier,
-                               memoParty: Memoize[APIParty, Future[Option[(APIParty, GroupAccount)]]]): Future[Seq[(APIParty, GroupAccount)]] = {
-    Future.traverse(authorisation.parties)(memoParty { party =>
-      groupAccountsConnector.get(party.authorisedPartyOrganisationId).map(_.map(groupAccount => (party, groupAccount)))
-    }).map(_.flatten)
+  private def withGroupAccounts(authorisation: PropertiesView)(implicit hc: HeaderCarrier, cache: GroupCache): Future[Seq[(APIParty, GroupAccount)]] = {
+    Future.traverse(authorisation.parties) { party =>
+      cache(groupAccountsConnector.get)(party.authorisedPartyOrganisationId).map(_.map(groupAccount => (party, groupAccount)))
+    }.map(_.flatten)
   }
 
   def clientProperty(authorisationId: Long, clientOrgId: Long, agentOrgId: Long) = Action.async { implicit request =>
@@ -103,7 +101,7 @@ class PropertyLinkingController @Inject()(propertyLinksConnector: PropertyLinkin
   }
 
   def assessments(authorisationId: Long) = Action.async { implicit request =>
-    implicit val cache = Memoize[APIParty, Future[Option[(APIParty, GroupAccount)]]]()
+    implicit val cache = Memoize[Long, Future[Option[GroupAccount]]]()
 
     propertyLinksConnector.getAssessment(authorisationId) flatMap {
       case Some(assessment) => detailed(assessment) map { x => Ok(Json.toJson(x)) }
