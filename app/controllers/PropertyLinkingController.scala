@@ -78,15 +78,9 @@ class PropertyLinkingController @Inject()(propertyLinksConnector: PropertyLinkin
   }
 
   private def withGroupAccounts(authorisation: PropertiesView)(implicit hc: HeaderCarrier, cache: GroupCache): Future[Seq[(APIParty, GroupAccount)]] = {
-    getUniqueGroups(authorisation) map { groups =>
-      authorisation.parties.map { party =>
-        (party, groups.find(_.id == party.authorisedPartyOrganisationId).getOrElse(throw new Exception(s"Id ${party.authorisedPartyOrganisationId} not in cache")))
-      }
-    }
-  }
-
-  private def getUniqueGroups(authorisation: PropertiesView)(implicit hc: HeaderCarrier, cache: GroupCache): Future[Set[GroupAccount]] = {
-    Future.traverse(authorisation.parties.map(_.authorisedPartyOrganisationId).toSet)(cache { groupAccountsConnector.get } ).map(_.flatten)
+    Future.traverse(authorisation.parties) { party =>
+      cache(groupAccountsConnector.get)(party.authorisedPartyOrganisationId).map(_.map(groupAccount => (party, groupAccount)))
+    }.map(_.flatten)
   }
 
   def clientProperty(authorisationId: Long, clientOrgId: Long, agentOrgId: Long) = Action.async { implicit request =>
