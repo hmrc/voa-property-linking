@@ -18,46 +18,51 @@ package util
 
 import org.scalatest.{FlatSpec, Matchers}
 
-import scala.io.Source
-
 class PostcodeValidatorSpec extends FlatSpec with Matchers {
 
   behavior of "PostcodeValidator"
 
-  it should "validate a correct with space" in {
-    PostcodeValidator.validate("AA1 1AA") shouldBe (true)
+  it should "validate a correct postcode with space" in {
+    PostcodeValidator.validate("AA1 1AA") shouldBe true
   }
 
-  it should "validate a correct postcode without space" in {
-    PostcodeValidator.validate("BN21FG") shouldBe (true)
+  it should "validate a correct postcode without a space" in {
+    PostcodeValidator.validate("BN21FG") shouldBe true
   }
 
   it should "not validate a non postcode text" in {
-    PostcodeValidator.validate("123456") shouldBe (false)
+    PostcodeValidator.validate("123456") shouldBe false
   }
 
   it should "not change a valid postcode to contain a space" in {
-    PostcodeValidator.validateAndFormat("AA1 1AA") shouldBe (Some("AA1 1AA"))
+    PostcodeValidator.validateAndFormat("AA1 1AA") shouldBe Some("AA1 1AA")
   }
 
-  it should " format a valid postcode to contain a space if it doesn't have one" in {
-    PostcodeValidator.validateAndFormat("AA11AA") shouldBe (Some("AA1 1AA"))
+  it should "format a valid postcode to contain a space if it doesn't have one" in {
+    PostcodeValidator.validateAndFormat("AA11AA") shouldBe Some("AA1 1AA")
   }
 
-  it should " format a valid postcode with long prefix to contain a space if it doesn't have one" in {
-    PostcodeValidator.validateAndFormat("AA1A1AA") shouldBe (Some("AA1A 1AA"))
+  it should "format a valid postcode with long prefix to contain a space if it doesn't have one" in {
+    PostcodeValidator.validateAndFormat("AA1A1AA") shouldBe Some("AA1A 1AA")
   }
-
 
   it should "return None for formatting a non postcode text" in {
-    PostcodeValidator.validateAndFormat("123456") shouldBe (None)
+    PostcodeValidator.validateAndFormat("123456") shouldBe None
   }
 
-  it should "return validate all postcodes in the all postcodes list" in {
-    val source = Source.fromFile(getClass.getResource("/all_postcodes.txt").getFile())
-    for (line <- source.getLines()) {
-      withClue(s"using $line validate") {
-        PostcodeValidator.validate(line) shouldBe (true)
+  it should "validate all types of UK postcode" in {
+    val postcodes = Seq(
+      "AA11 1AA",
+      "AA1A 1AA",
+      "AA1 1AA",
+      "A1A 1AA",
+      "A1 1AA",
+      "GIR 0AA"
+    )
+
+    postcodes foreach { pc =>
+      withClue(s"validating postcode $pc") {
+        PostcodeValidator.validate(pc) shouldBe true
       }
     }
   }
