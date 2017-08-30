@@ -20,12 +20,13 @@ import javax.inject.Inject
 
 import akka.stream.Materializer
 import com.google.inject.ImplementedBy
+import com.kenshoo.play.metrics.Metrics
 import infrastructure.SimpleWSHttp
+import metrics.MetricsLogger
 import play.api.Logger
-import play.api.http.HeaderNames.USER_AGENT
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
-import play.api.libs.ws.{StreamedResponse, WSClient}
+import play.api.libs.ws.StreamedResponse
 import uk.gov.hmrc.play.config.{AppName, ServicesConfig}
 import uk.gov.hmrc.play.http._
 
@@ -61,7 +62,7 @@ case class FileInfo(id: String,
                     href: String)
 
 object FileInfo {
-  implicit lazy val fileInfo = Json.format[FileInfo]
+  implicit lazy val fileInfo: OFormat[FileInfo] = Json.format[FileInfo]
 }
 
 case class EnvelopeInfo(id: String,
@@ -91,17 +92,17 @@ trait FileUpload {
   def deleteEnvelope(envelopeId: String)(implicit hc: HeaderCarrier): Future[Unit]
 }
 
-class FileUploadConnector @Inject()(ws: WSClient, http: SimpleWSHttp)(implicit ec: ExecutionContext, mat: Materializer)
-  extends FileUpload with ServicesConfig with AppName {
+class FileUploadConnector @Inject()(http: SimpleWSHttp, override val metrics: Metrics)(implicit ec: ExecutionContext, mat: Materializer)
+  extends FileUpload with ServicesConfig with AppName with MetricsLogger {
 
-  lazy val url = baseUrl("file-upload-backend")
+  lazy val url: String = baseUrl("file-upload-backend")
 
   override def createEnvelope(metadata: EnvelopeMetadata, callbackUrl: String)(implicit hc: HeaderCarrier): Future[Option[String]] = {
     val payload = CreateEnvelopePayload(callbackUrl, metadata, EnvelopeConstraints.defaultConstraints)
-
-    http.POST[CreateEnvelopePayload, HttpResponse](s"$url/file-upload/envelopes", payload) map { res =>
-      res.header("location") flatMap { l => l.split("/").lastOption }
-    }
+    http.POST[CreateEnvelopePayload, HttpResponse](s"$url/file-upload/envelopes", payload)
+      .andThen(logMetrics("file-upload.envelope.create"))
+      .map { _.header("location").flatMap { _.split("/").lastOption } }
+      .recover { case _ => None }
   }
 
   override def getEnvelopeDetails(envelopeId: String)(implicit hc: HeaderCarrier): Future[EnvelopeInfo] = {
@@ -121,24 +122,20 @@ class FileUploadConnector @Inject()(ws: WSClient, http: SimpleWSHttp)(implicit e
   override def downloadFile(href: String)(implicit hc: HeaderCarrier): Future[StreamedResponse] = {
     val fullUrl = s"$url$href"
     Logger.info(s"Downloading file from $fullUrl")
-
-    ws.url(fullUrl)
-      .withHeaders(USER_AGENT -> appName)
-      .withHeaders(hc.headers: _*)
-      .withMethod("GET")
-      .stream() andThen handleResponse(fullUrl)
+    http.buildRequest(fullUrl).withMethod("GET").stream() andThen logMetrics("file-upload.download") andThen handleResponse(fullUrl)
   }
 
   private def handleResponse(url: String): PartialFunction[Try[StreamedResponse], Unit] = {
-    case Success(v) if v.headers.status < 400 => Logger.info(s"Transferred successfully from $url")
-    case Success(v) if v.headers.status >= 400 => Logger.info(s"Transfer failed (${v.headers.status}) from $url")
+    case Success(StreamedResponse(r, _)) if r.status < 400 => Logger.info(s"Transferred successfully from $url")
+    case Success(v) => Logger.info(s"Transfer failed (${v.headers.status}) from $url")
     case Failure(ex) => Logger.error(s"Exception copying $url", ex)
   }
 
   override def deleteEnvelope(envelopeId: String)(implicit hc: HeaderCarrier): Future[Unit] = {
     Logger.info(s"Deleting envelopeId: $envelopeId from FUAAS")
-    http.DELETE[HttpResponse](s"$url/file-upload/envelopes/$envelopeId")
-      .map { _ => () }
-      .recover { case e => Logger.warn(s"Unable to delete envelope with ID: $envelopeId due to exception ${e.getMessage}") }
+
+    http.DELETE[HttpResponse](s"$url/file-upload/envelopes/$envelopeId") andThen logMetrics("file-upload.envelope.delete") andThen {
+      case Failure(e) => Logger.warn(s"Unable to delete envelope with ID: $envelopeId due to exception ${e.getMessage}")
+    } map { _ => () } recover { case _ => () }
   }
 }
