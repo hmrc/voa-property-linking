@@ -59,11 +59,41 @@ class PropertyLinkingController @Inject()(propertyLinksConnector: PropertyLinkin
     getProperties(organisationId, paginationParams).map(x => Ok(Json.toJson(x)))
   }
 
+  def searchAndSort(organisationId: Long,
+                    paginationParams: PaginationParams,
+                    sortfield: Option[String],
+                    sortorder: Option[String],
+                    status: Option[String],
+                    address: Option[String],
+                    baref: Option[String],
+                    agent: Option[String]) = Action.async { implicit request =>
+    searchAndSortProperties(organisationId, paginationParams, sortfield,
+      sortorder, status, address, baref, agent).map(x => Ok(Json.toJson(x)))
+  }
+
   private def getProperties(organisationId: Long, params: PaginationParams)(implicit hc: HeaderCarrier): Future[PropertyLinkResponse] = {
     implicit val cache = Memoize[Long, Future[Option[GroupAccount]]]()
 
     for {
       view <- propertyLinksConnector.find(organisationId, params)
+      detailedLinks <- Future.traverse(view.authorisations)(detailed)
+    } yield {
+      PropertyLinkResponse(view.resultCount, detailedLinks)
+    }
+  }
+
+  private def searchAndSortProperties(organisationId: Long,
+                                      params: PaginationParams,
+                                      sortfield: Option[String],
+                                      sortorder: Option[String],
+                                      status: Option[String],
+                                      address: Option[String],
+                                      baref: Option[String],
+                                      agent: Option[String])(implicit hc: HeaderCarrier): Future[PropertyLinkResponse] = {
+    implicit val cache = Memoize[Long, Future[Option[GroupAccount]]]()
+
+    for {
+      view <- propertyLinksConnector.searchAndSort(organisationId, params, sortfield, sortorder, status, address, baref, agent)
       detailedLinks <- Future.traverse(view.authorisations)(detailed)
     } yield {
       PropertyLinkResponse(view.resultCount, detailedLinks)

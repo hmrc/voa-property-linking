@@ -60,6 +60,29 @@ class PropertyLinkingConnector @Inject() (@Named("VoaBackendWsHttp") http: WSHtt
     http.GET[PropertiesViewResponse](url).map(withValidStatuses.andThen(withValidParties))
   }
 
+  def searchAndSort(organisationId: Long,
+                    params: PaginationParams,
+                    sortfield: Option[String],
+                    sortorder: Option[String],
+                    status: Option[String],
+                    address: Option[String],
+                    baref: Option[String],
+                    agent: Option[String])(implicit hc: HeaderCarrier): Future[PropertiesViewResponse] = {
+    var url = baseUrl +
+      s"/authorisation-search-api/owners/$organisationId/authorisations" +
+      s"?start=${params.startPoint}" +
+      s"&size=${params.pageSize}" +
+      s"&sortfield=${sortfield.get}" +
+      s"&sortorder=${sortorder.get}"
+
+    if(status.get != "") url += s"&status=${status.get}"
+    if(address.get != "") url += s"&address=${address.get}"
+    if(baref.get != "") url += s"&baref=${baref.get}"
+    if(agent.get != "") url += s"&agent=${agent.get}"
+
+    http.GET[PropertiesViewResponse](url).map(withValidStatuses.andThen(withValidParties))
+  }
+
   private val withValidStatuses: PropertiesViewResponse => PropertiesViewResponse = { view =>
     view.copy(authorisations = view.authorisations.filter(_.hasValidStatus))
   }
