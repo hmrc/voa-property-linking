@@ -28,24 +28,21 @@ trait MetricsLogger {
   val metrics: Metrics
   lazy val registry: MetricRegistry = metrics.defaultRegistry
 
-  def logMetrics[T](name: String)(implicit ec: ExecutionContext): PartialFunction[Try[T], Future[Unit]] = {
-    implicit val _ = name
-    implicit val count = 1
+  implicit val intToString: Int => String = _.toString
 
-    {
-      case Success(r: WSResponse) => mark(r.status)
-      case Success(r: HttpResponse) => mark(r.status)
-      case Success(StreamedResponse(r, _)) => mark(r.status)
-      case Success(_) => mark("unknownSuccess")
-      case Failure(ex: HttpException) => mark(ex.responseCode)
-      case Failure(ex: Upstream5xxResponse) => mark(ex.upstreamResponseCode)
-      case Failure(ex: Upstream4xxResponse) => mark(ex.upstreamResponseCode)
-      case Failure(ex) => mark(ex.getClass.getSimpleName)
-    }
+  def logMetrics[T](baseName: String)(implicit ec: ExecutionContext): PartialFunction[Try[T], Future[Unit]] = log(mark(baseName, _, 1))
+  def logMetrics(baseName: String, name: String, count: Int = 1)(implicit ec: ExecutionContext): Future[Unit] = mark(baseName, name, count)(ec)
+
+  private def log[T](fn: String => Future[Unit]): PartialFunction[Try[T], Future[Unit]] = {
+    case Success(r: WSResponse) => fn(r.status)
+    case Success(r: HttpResponse) => fn(r.status)
+    case Success(StreamedResponse(r, _)) => fn(r.status)
+    case Success(_) => fn("unknownSuccess")
+    case Failure(ex: HttpException) => fn(ex.responseCode)
+    case Failure(ex: Upstream5xxResponse) => fn(ex.upstreamResponseCode)
+    case Failure(ex: Upstream4xxResponse) => fn(ex.upstreamResponseCode)
+    case Failure(ex) => fn(ex.getClass.getSimpleName)
   }
 
-  def logMetrics(baseName: String, name: String, count: Int = 1)(implicit ec: ExecutionContext): Future[Unit] = mark(name)(baseName, count, ec)
-
-  private def mark(status: Int)(implicit key: String, count: Int, ec: ExecutionContext) = Future(registry.meter(s"$key.$status").mark(count))
-  private def mark(status: String)(implicit key: String, count: Int, ec: ExecutionContext) = Future(registry.meter(s"$key.$status").mark(count))
+  private def mark(baseName: String, name: String, count: Int)(implicit ec: ExecutionContext) = Future(registry.meter(s"$baseName.$name").mark(count))
 }
