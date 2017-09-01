@@ -19,6 +19,7 @@ package connectors
 import javax.inject.{Inject, Named}
 
 import models._
+import models.searchApi.OwnerAuthResult
 import uk.gov.hmrc.play.config.inject.ServicesConfig
 import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.play.http.ws.WSHttp
@@ -67,22 +68,24 @@ class PropertyLinkingConnector @Inject() (@Named("VoaBackendWsHttp") http: WSHtt
                     status: Option[String],
                     address: Option[String],
                     baref: Option[String],
-                    agent: Option[String])(implicit hc: HeaderCarrier): Future[PropertiesViewResponse] = {
-    var url = baseUrl +
+                    agent: Option[String])(implicit hc: HeaderCarrier): Future[OwnerAuthResult] = {
+    val url = baseUrl +
       s"/authorisation-search-api/owners/$organisationId/authorisations" +
       s"?start=${params.startPoint}" +
       s"&size=${params.pageSize}" +
-      s"&sortfield=${sortfield.get}" +
-      s"&sortorder=${sortorder.get}"
+      buildQueryParams("sortfield", sortfield) +
+      buildQueryParams("sortorder", sortorder) +
+      buildQueryParams("status", status) +
+      buildQueryParams("address", address) +
+      buildQueryParams("baref", baref) +
+      buildQueryParams("agent", agent)
 
-    if(status.get != "") url += s"&status=${status.get}"
-    if(address.get != "") url += s"&address=${address.get}"
-    if(baref.get != "") url += s"&baref=${baref.get}"
-    if(agent.get != "") url += s"&agent=${agent.get}"
-
-    http.GET[PropertiesViewResponse](url).map(withValidStatuses.andThen(withValidParties))
+    http.GET[OwnerAuthResult](url)
   }
 
+  private def buildQueryParams(name : String, value : Option[String]) : String = {
+    value match { case Some(paramValue) if paramValue != "" => s"&$name=$paramValue" ; case _ => ""}
+  }
   private val withValidStatuses: PropertiesViewResponse => PropertiesViewResponse = { view =>
     view.copy(authorisations = view.authorisations.filter(_.hasValidStatus))
   }
