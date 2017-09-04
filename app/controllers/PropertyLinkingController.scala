@@ -72,6 +72,18 @@ class PropertyLinkingController @Inject()(propertyLinksConnector: PropertyLinkin
       sortorder, status, address, baref, agent).map(x => Ok(Json.toJson(x)))
   }
 
+  def forAgentSearchAndSort(organisationId: Long,
+                    paginationParams: PaginationParams,
+                    sortfield: Option[String],
+                    sortorder: Option[String],
+                    status: Option[String],
+                    address: Option[String],
+                    baref: Option[String],
+                    client: Option[String]) = Action.async { implicit request =>
+    agentSearchAndSortProperties(organisationId, paginationParams, sortfield,
+      sortorder, status, address, baref, client).map(x => Ok(Json.toJson(x)))
+  }
+
   private def getProperties(organisationId: Long, params: PaginationParams)(implicit hc: HeaderCarrier): Future[PropertyLinkResponse] = {
     implicit val cache = Memoize[Long, Future[Option[GroupAccount]]]()
 
@@ -94,6 +106,22 @@ class PropertyLinkingController @Inject()(propertyLinksConnector: PropertyLinkin
 
     for {
       view <- propertyLinksConnector.searchAndSort(organisationId, params, sortfield, sortorder, status, address, baref, agent)
+    } yield {
+      view
+    }
+  }
+
+  private def agentSearchAndSortProperties(organisationId: Long,
+                                          params: PaginationParams,
+                                          sortfield: Option[String],
+                                          sortorder: Option[String],
+                                          status: Option[String],
+                                          address: Option[String],
+                                          baref: Option[String],
+                                          client: Option[String])(implicit hc: HeaderCarrier): Future[AgentAuthResult] = {
+
+    for {
+      view <- propertyLinksConnector.agentSearchAndSort(organisationId, params, sortfield, sortorder, status, address, baref, client)
     } yield {
       view
     }
