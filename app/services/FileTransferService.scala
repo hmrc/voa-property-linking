@@ -19,7 +19,6 @@ package services
 import javax.inject.Inject
 
 import akka.stream.scaladsl.Source
-import com.codahale.metrics.MetricRegistry
 import com.google.inject.Singleton
 import com.kenshoo.play.metrics.Metrics
 import connectors.EvidenceConnector
@@ -32,7 +31,6 @@ import uk.gov.hmrc.play.http.{HeaderCarrier, Upstream4xxResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Success
 import scala.util.control.NonFatal
 
 case class FUAASDownloadException(href: String, status: Int) extends Exception(s"Failed to download $href (status: $status)")
