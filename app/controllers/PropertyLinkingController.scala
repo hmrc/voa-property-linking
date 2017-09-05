@@ -20,6 +20,7 @@ import javax.inject.Inject
 
 import connectors.{GroupAccountConnector, PropertyLinkingConnector, PropertyRepresentationConnector}
 import models._
+import models.searchApi.{AgentAuthResult, OwnerAuthResult}
 import play.api.libs.json.Json
 import play.api.mvc.Action
 import uk.gov.hmrc.play.http.{HeaderCarrier, Upstream5xxResponse}
@@ -59,6 +60,30 @@ class PropertyLinkingController @Inject()(propertyLinksConnector: PropertyLinkin
     getProperties(organisationId, paginationParams).map(x => Ok(Json.toJson(x)))
   }
 
+  def searchAndSort(organisationId: Long,
+                    paginationParams: PaginationParams,
+                    sortfield: Option[String],
+                    sortorder: Option[String],
+                    status: Option[String],
+                    address: Option[String],
+                    baref: Option[String],
+                    agent: Option[String]) = Action.async { implicit request =>
+    searchAndSortProperties(organisationId, paginationParams, sortfield,
+      sortorder, status, address, baref, agent).map(x => Ok(Json.toJson(x)))
+  }
+
+  def forAgentSearchAndSort(organisationId: Long,
+                    paginationParams: PaginationParams,
+                    sortfield: Option[String],
+                    sortorder: Option[String],
+                    status: Option[String],
+                    address: Option[String],
+                    baref: Option[String],
+                    client: Option[String]) = Action.async { implicit request =>
+    agentSearchAndSortProperties(organisationId, paginationParams, sortfield,
+      sortorder, status, address, baref, client).map(x => Ok(Json.toJson(x)))
+  }
+
   private def getProperties(organisationId: Long, params: PaginationParams)(implicit hc: HeaderCarrier): Future[PropertyLinkResponse] = {
     implicit val cache = Memoize[Long, Future[Option[GroupAccount]]]()
 
@@ -67,6 +92,38 @@ class PropertyLinkingController @Inject()(propertyLinksConnector: PropertyLinkin
       detailedLinks <- Future.traverse(view.authorisations)(detailed)
     } yield {
       PropertyLinkResponse(view.resultCount, detailedLinks)
+    }
+  }
+
+  private def searchAndSortProperties(organisationId: Long,
+                                      params: PaginationParams,
+                                      sortfield: Option[String],
+                                      sortorder: Option[String],
+                                      status: Option[String],
+                                      address: Option[String],
+                                      baref: Option[String],
+                                      agent: Option[String])(implicit hc: HeaderCarrier): Future[OwnerAuthResult] = {
+
+    for {
+      view <- propertyLinksConnector.searchAndSort(organisationId, params, sortfield, sortorder, status, address, baref, agent)
+    } yield {
+      view
+    }
+  }
+
+  private def agentSearchAndSortProperties(organisationId: Long,
+                                          params: PaginationParams,
+                                          sortfield: Option[String],
+                                          sortorder: Option[String],
+                                          status: Option[String],
+                                          address: Option[String],
+                                          baref: Option[String],
+                                          client: Option[String])(implicit hc: HeaderCarrier): Future[AgentAuthResult] = {
+
+    for {
+      view <- propertyLinksConnector.agentSearchAndSort(organisationId, params, sortfield, sortorder, status, address, baref, client)
+    } yield {
+      view
     }
   }
 

@@ -2,6 +2,7 @@
 
 GET          /property-representations/validate-agent-code/:agentCode/:authorisationId        @controllers.PropertyRepresentationController.validateAgentCode(agentCode:Long, authorisationId: Long)
 GET          /property-representations/agent/:status/:organisationId                          @controllers.PropertyRepresentationController.forAgent(status: String, organisationId: Long, pagination: models.PaginationParams ?= models.DefaultPaginationParams)
+GET          /property-representations-search-sort                                            @controllers.PropertyLinkingController.forAgentSearchAndSort(organisationId: Long, params: models.PaginationParams, sortfield: Option[String], sortorder: Option[String], status: Option[String], address: Option[String], baref: Option[String], client: Option[String])
 
 POST         /property-representations/create                                                 @controllers.PropertyRepresentationController.create()
 
@@ -12,7 +13,9 @@ POST         /property-links                                                    
 GET          /property-links                                                                  @controllers.PropertyLinkingController.find(organisationId: Long, params: models.PaginationParams)
 GET          /property-links/client-property/:authorisationId                                 @controllers.PropertyLinkingController.clientProperty(authorisationId: Long, clientOrganisationId: Long, agentOrganisationId: Long)
 GET          /property-links/:linkId                                                          @controllers.PropertyLinkingController.get(linkId: Long)
+GET          /property-links-search-sort                                                      @controllers.PropertyLinkingController.searchAndSort(organisationId: Long, params: models.PaginationParams, sortfield: Option[String], sortorder: Option[String], status: Option[String], address: Option[String], baref: Option[String], agent: Option[String])
 GET          /dashboard/assessments/:authorisationId                                          @controllers.PropertyLinkingController.assessments(authorisationId: Long)
+
 
 GET          /individuals/:personId                                                           @controllers.IndividualAccountController.get(personId: Int)
 GET          /individuals                                                                     @controllers.IndividualAccountController.withExternalId(externalId)
