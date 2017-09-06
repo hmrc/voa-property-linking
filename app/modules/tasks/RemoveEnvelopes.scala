@@ -29,7 +29,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
 class RemoveEnvelopes @Inject() (override val env: Environment, envelopeRepo: EnvelopeIdRepo) extends MongoTask[String] {
-  override val upToVersion: Int = 6
+  override val upToVersion: Int = 7
   override def verify: String => Option[String] = line => Try(UUID.fromString(line)).map{ _ => Some(line) }.getOrElse(None)
   override def execute: String => Future[Unit] = id => envelopeRepo.delete(id).map(_ => s"Deleted $id")
 }
