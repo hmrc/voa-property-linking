@@ -89,9 +89,9 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
 
   private def removeEnvelopes(envInfo: EnvelopeInfo)(implicit hc: HeaderCarrier): Future[Unit] = {
     envInfo.status match {
-      case "NOT_EXISTING" => Future.successful(repo.remove(envInfo.id))
+      case "NOT_EXISTING" => Future.successful(repo.delete(envInfo.id))
       case "UNKNOWN_ERROR" => moveToBackOfQueue(envInfo.id)(new Exception("Error when retrieving envelope data"))
-      case _ => fileUploadConnector.deleteEnvelope(envInfo.id).flatMap(_ => repo.remove(envInfo.id))
+      case _ => fileUploadConnector.deleteEnvelope(envInfo.id).flatMap(_ => repo.delete(envInfo.id))
     }
   }
 
@@ -129,6 +129,6 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
       Future.failed(e)
     case e: Throwable =>
       Logger.error(s"Error processing file(s) in envelope $envelopeId to backend - moving to back of queue", e)
-      repo.remove(envelopeId).flatMap(_ => repo.create(envelopeId, Closed)).flatMap(_ => Future.failed(e))
+      repo.delete(envelopeId).flatMap(_ => repo.create(envelopeId, Closed)).flatMap(_ => Future.failed(e))
   }
 }

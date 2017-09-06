@@ -104,7 +104,7 @@ class FileTransferServiceSpec extends UnitSpec with MockitoSugar with AnswerSuga
       )
 
       when(repo.get()).thenReturn(Future.successful(envelopes))
-      when(repo.remove(any())).thenReturn(Future(()))
+      when(repo.delete(any())).thenReturn(Future(()))
       when(fileUploadConnector.getEnvelopeDetails(any())(any())).thenAnswer { invocation: InvocationOnMock =>
         val envelopeId = invocation.getArgument[String](0)
 
@@ -151,7 +151,7 @@ class FileTransferServiceSpec extends UnitSpec with MockitoSugar with AnswerSuga
       )
 
       when(repo.get()).thenReturn(Future.successful(envelopes))
-      when(repo.remove(any())).thenReturn(Future(()))
+      when(repo.delete(any())).thenReturn(Future(()))
       when(fileUploadConnector.getEnvelopeDetails(any())(any())).thenAnswer { invocation: InvocationOnMock =>
         val envelopeId = invocation.getArgument[String](0)
 
@@ -196,11 +196,11 @@ class FileTransferServiceSpec extends UnitSpec with MockitoSugar with AnswerSuga
         Future.successful(EnvelopeInfo(envelopeId, "NOT_EXISTING", Nil, EnvelopeMetadata("nosubmissionid", 1)))
       }
 
-      when(repo.remove(anyString)).thenReturn(Future.successful(()))
+      when(repo.delete(anyString)).thenReturn(Future.successful(()))
 
       await(fts.justDoIt())
 
-      verify(repo, times(1)).remove(envelopeId)
+      verify(repo, times(1)).delete(envelopeId)
       verify(repo, never).create(envelopeId, Closed)
     }
 
@@ -212,12 +212,12 @@ class FileTransferServiceSpec extends UnitSpec with MockitoSugar with AnswerSuga
         Future.successful(EnvelopeInfo(envelopeId, "UNKNOWN_ERROR", Nil, EnvelopeMetadata("nosubmissionid", 1)))
       }
 
-      when(repo.remove(anyString)).thenReturn(Future.successful(()))
+      when(repo.delete(anyString)).thenReturn(Future.successful(()))
       when(repo.create(envelopeId, Closed)).thenReturn(Future.successful(()))
 
       Try { await(fts.justDoIt()) }
 
-      verify(repo, times(1)).remove(envelopeId)
+      verify(repo, times(1)).delete(envelopeId)
       verify(repo, times(1)).create(envelopeId, Closed)
     }
   }

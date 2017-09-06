@@ -71,9 +71,9 @@ class EnvelopeIdRepository @Inject()(db: DB, @Named("envelopeCollectionName") va
     }
   }
 
-  override def remove(envelopeId: String): Future[Unit] = {
-    Logger.info(s"Deleting envelopedId: $envelopeId from mongo")
-    removeById(envelopeId).map(_ => ())
+  override def delete(envelopeId: String): Future[Unit] = {
+    Logger.info(s"Deleting envelopeId: $envelopeId from mongo")
+    remove("envelopeId" -> envelopeId) map { _ => () }
   }
 
   private def now = Some(BSONDateTime(System.currentTimeMillis))
@@ -95,7 +95,7 @@ trait EnvelopeIdRepo {
 
   def getStatus(envelopeId: String): Future[Option[EnvelopeStatus]]
 
-  def remove(envelopeId: String): Future[Unit]
+  def delete(envelopeId: String): Future[Unit]
 
   def update(envelopeId: String, status: EnvelopeStatus): Future[Unit]
 }
