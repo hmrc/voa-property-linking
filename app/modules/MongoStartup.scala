@@ -20,7 +20,7 @@ import java.time.LocalDateTime
 
 import com.google.inject.multibindings.Multibinder
 import com.google.inject.{AbstractModule, Inject, Singleton, TypeLiteral}
-import modules.tasks.AddTimestamps
+import modules.tasks.{AddTimestamps, RemoveEnvelopes}
 import org.joda.time.Duration
 import play.api.{Configuration, Environment, Logger}
 import play.modules.reactivemongo.ReactiveMongoComponent
@@ -36,7 +36,7 @@ import scala.io.Source
 class MongoStartup(environment: Environment, configuration: Configuration) extends AbstractModule {
   def configure(): Unit = {
     val mb = Multibinder.newSetBinder(binder(), new TypeLiteral[MongoTask[_]]() {})
-    mb.addBinding().to(classOf[AddTimestamps])
+    mb.addBinding().to(classOf[RemoveEnvelopes])
 
     bind(classOf[MongoStartupRunner]).to(classOf[MongoStartupRunnerImpl]).asEagerSingleton()
   }
