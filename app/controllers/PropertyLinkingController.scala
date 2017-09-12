@@ -68,9 +68,17 @@ class PropertyLinkingController @Inject()(propertyLinksConnector: PropertyLinkin
                     address: Option[String],
                     baref: Option[String],
                     agent: Option[String]) = Action.async { implicit request =>
-    searchAndSortProperties(organisationId, paginationParams, sortfield,
-      sortorder, status, address, baref, agent).map(x => Ok(Json.toJson(x)))
+    propertyLinksConnector.searchAndSort(
+      organisationId = organisationId,
+      params = paginationParams,
+      sortfield = sortfield,
+      sortorder = sortorder,
+      status = status,
+      address = address,
+      baref = baref,
+      agent = agent).map(x => Ok(Json.toJson(x)))
   }
+
 
   def forAgentSearchAndSort(organisationId: Long,
                     paginationParams: PaginationParams,
@@ -80,8 +88,15 @@ class PropertyLinkingController @Inject()(propertyLinksConnector: PropertyLinkin
                     address: Option[String],
                     baref: Option[String],
                     client: Option[String]) = Action.async { implicit request =>
-    agentSearchAndSortProperties(organisationId, paginationParams, sortfield,
-      sortorder, status, address, baref, client).map(x => Ok(Json.toJson(x)))
+    propertyLinksConnector.agentSearchAndSort(
+      organisationId = organisationId,
+      params = paginationParams,
+      sortfield = sortfield,
+      sortorder = sortorder,
+      status = status,
+      address = address,
+      baref = baref,
+      client = client).map(x => Ok(Json.toJson(x)))
   }
 
   private def getProperties(organisationId: Long, params: PaginationParams)(implicit hc: HeaderCarrier): Future[PropertyLinkResponse] = {
@@ -92,38 +107,6 @@ class PropertyLinkingController @Inject()(propertyLinksConnector: PropertyLinkin
       detailedLinks <- Future.traverse(view.authorisations)(detailed)
     } yield {
       PropertyLinkResponse(view.resultCount, detailedLinks)
-    }
-  }
-
-  private def searchAndSortProperties(organisationId: Long,
-                                      params: PaginationParams,
-                                      sortfield: Option[String],
-                                      sortorder: Option[String],
-                                      status: Option[String],
-                                      address: Option[String],
-                                      baref: Option[String],
-                                      agent: Option[String])(implicit hc: HeaderCarrier): Future[OwnerAuthResult] = {
-
-    for {
-      view <- propertyLinksConnector.searchAndSort(organisationId, params, sortfield, sortorder, status, address, baref, agent)
-    } yield {
-      view
-    }
-  }
-
-  private def agentSearchAndSortProperties(organisationId: Long,
-                                          params: PaginationParams,
-                                          sortfield: Option[String],
-                                          sortorder: Option[String],
-                                          status: Option[String],
-                                          address: Option[String],
-                                          baref: Option[String],
-                                          client: Option[String])(implicit hc: HeaderCarrier): Future[AgentAuthResult] = {
-
-    for {
-      view <- propertyLinksConnector.agentSearchAndSort(organisationId, params, sortfield, sortorder, status, address, baref, client)
-    } yield {
-      view
     }
   }
 
