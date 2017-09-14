@@ -40,7 +40,7 @@ case class PropertiesView(authorisationId: Long,
                           parties: Seq[APIParty]) {
 
   def hasValidStatus: Boolean = {
-    !Seq("REVOKED", "DECLINED").contains(authorisationStatus.toUpperCase)
+    !Seq("DECLINED", "REVOKED", "MORE_EVIDENCE_REQUIRED").contains(authorisationStatus.toUpperCase)
   }
 }
 
