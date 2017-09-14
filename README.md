@@ -32,5 +32,3 @@ sm --stop PROPERTY_LINKING
 * Add comments, logs and screenshots where possible.
 
 
-
-
