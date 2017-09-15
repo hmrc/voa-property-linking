@@ -32,5 +32,6 @@ trait SimpleWsHttpTestApplication extends WithFakeApplication {
     .bindings(bindModules: _*)
     .overrides(bind[WSHttp].to[SimpleWSHttp])
     .configure("metrics.enabled" -> "false")
+    .configure("fileTransfer.enabled" -> "false")
     .build()
 }
