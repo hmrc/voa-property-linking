@@ -100,7 +100,7 @@ class PropertyLinkingConnector @Inject() (@Named("VoaBackendWsHttp") http: WSHtt
       buildQueryParams("status", status) +
       buildQueryParams("address", address) +
       buildQueryParams("baref", baref) +
-      buildQueryParams("agent", client)
+      buildQueryParams("client", client)
 
     http.GET[AgentAuthResult](url)
   }
