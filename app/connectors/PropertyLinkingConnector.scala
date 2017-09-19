@@ -19,7 +19,7 @@ package connectors
 import javax.inject.{Inject, Named}
 
 import models._
-import models.searchApi.{AgentAuthResult, OwnerAuthResult}
+import models.searchApi.{AgentAuthResultBE, OwnerAuthResult}
 import uk.gov.hmrc.play.config.inject.ServicesConfig
 import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.play.http.ws.WSHttp
@@ -84,13 +84,15 @@ class PropertyLinkingConnector @Inject() (@Named("VoaBackendWsHttp") http: WSHtt
   }
 
   def agentSearchAndSort(organisationId: Long,
-                    params: PaginationParams,
-                    sortfield: Option[String],
-                    sortorder: Option[String],
-                    status: Option[String],
-                    address: Option[String],
-                    baref: Option[String],
-                    client: Option[String])(implicit hc: HeaderCarrier): Future[AgentAuthResult] = {
+                          params: PaginationParams,
+                          sortfield: Option[String] = None,
+                          sortorder: Option[String] = None,
+                          status: Option[String] = None,
+                          address: Option[String] = None,
+                          baref: Option[String] = None,
+                          client: Option[String] = None,
+                          representationStatus: Option[String]
+                        )(implicit hc: HeaderCarrier): Future[AgentAuthResultBE] = {
     val url = baseUrl +
       s"/authorisation-search-api/agents/$organisationId/authorisations" +
       s"?start=${params.startPoint}" +
@@ -100,9 +102,10 @@ class PropertyLinkingConnector @Inject() (@Named("VoaBackendWsHttp") http: WSHtt
       buildQueryParams("status", status) +
       buildQueryParams("address", address) +
       buildQueryParams("baref", baref) +
-      buildQueryParams("client", client)
+      buildQueryParams("client", client) +
+      buildQueryParams("representationStatus", representationStatus)
 
-    http.GET[AgentAuthResult](url)
+    http.GET[AgentAuthResultBE](url)
   }
 
   private def buildQueryParams(name : String, value : Option[String]) : String = {

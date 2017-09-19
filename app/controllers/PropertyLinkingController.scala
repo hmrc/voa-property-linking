@@ -20,7 +20,7 @@ import javax.inject.Inject
 
 import connectors.{GroupAccountConnector, PropertyLinkingConnector, PropertyRepresentationConnector}
 import models._
-import models.searchApi.{AgentAuthResult, OwnerAuthResult}
+import models.searchApi.{AgentAuthResultBE, AgentAuthResultFE, OwnerAuthResult}
 import play.api.libs.json.Json
 import play.api.mvc.Action
 import uk.gov.hmrc.play.http.{HeaderCarrier, Upstream5xxResponse}
@@ -80,6 +80,11 @@ class PropertyLinkingController @Inject()(propertyLinksConnector: PropertyLinkin
   }
 
 
+  /***
+    * Make two calls to the Search/Sort API
+    * the first call returns the results based on supplied filters and sortfield
+    * the second call is used only to allow us to get the count of PENDING representation requests
+    */
   def forAgentSearchAndSort(organisationId: Long,
                     paginationParams: PaginationParams,
                     sortfield: Option[String],
@@ -88,7 +93,7 @@ class PropertyLinkingController @Inject()(propertyLinksConnector: PropertyLinkin
                     address: Option[String],
                     baref: Option[String],
                     client: Option[String]) = Action.async { implicit request =>
-    propertyLinksConnector.agentSearchAndSort(
+    val eventualAuthResultBE = propertyLinksConnector.agentSearchAndSort(
       organisationId = organisationId,
       params = paginationParams,
       sortfield = sortfield,
@@ -96,7 +101,20 @@ class PropertyLinkingController @Inject()(propertyLinksConnector: PropertyLinkin
       status = status,
       address = address,
       baref = baref,
-      client = client).map(x => Ok(Json.toJson(x)))
+      client = client,
+      representationStatus = Some("APPROVED")) // TODO cater for other statuses
+
+    // required to calculate the pending count - no filtering/sorting required
+    val eventualAuthResultPendingBE = propertyLinksConnector.agentSearchAndSort(
+      organisationId = organisationId,
+      params = paginationParams,
+      representationStatus = Some("PENDING"))
+
+    for {
+      authResultBE <- eventualAuthResultBE
+      authResultPendingBE <- eventualAuthResultPendingBE
+    } yield Ok(Json.toJson(AgentAuthResultFE(authResultBE, authResultPendingBE.authorisations.size)))
+
   }
 
   private def getProperties(organisationId: Long, params: PaginationParams)(implicit hc: HeaderCarrier): Future[PropertyLinkResponse] = {
