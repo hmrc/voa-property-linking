@@ -80,6 +80,11 @@ class PropertyLinkingController @Inject()(propertyLinksConnector: PropertyLinkin
   }
 
 
+  /***
+    * Make two calls to the Search/Sort API
+    * the first call returns the results based on supplied filters and sortfield
+    * the second call is used only to allow us to get the count of PENDING representation requests
+    */
   def forAgentSearchAndSort(organisationId: Long,
                     paginationParams: PaginationParams,
                     sortfield: Option[String],
@@ -99,16 +104,11 @@ class PropertyLinkingController @Inject()(propertyLinksConnector: PropertyLinkin
       client = client,
       representationStatus = Some("APPROVED")) // TODO cater for other statuses
 
+    // required to calculate the pending count - no filtering/sorting required
     val eventualAuthResultPendingBE = propertyLinksConnector.agentSearchAndSort(
       organisationId = organisationId,
       params = paginationParams,
-      sortfield = sortfield,
-      sortorder = sortorder,
-      status = status,
-      address = address,
-      baref = baref,
-      client = client,
-      representationStatus = Some("PENDING")) // required to calculate the pending count
+      representationStatus = Some("PENDING"))
 
     for {
       authResultBE <- eventualAuthResultBE
