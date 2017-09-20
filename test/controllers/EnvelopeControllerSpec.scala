@@ -24,10 +24,11 @@ import org.scalatest.mock.MockitoSugar
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import repositories.EnvelopeIdRepo
-import org.mockito.ArgumentMatchers.{ eq => matching, _ }
+import org.mockito.ArgumentMatchers.{eq => matching, _}
 import org.mockito.Mockito._
 import uk.gov.hmrc.play.http.HeaderCarrier
 import play.api.test.Helpers._
+import uk.gov.hmrc.circuitbreaker.UnhealthyServiceException
 
 import scala.concurrent.Future
 
@@ -77,6 +78,17 @@ class EnvelopeControllerSpec extends ControllerSpec with MockitoSugar {
       status(res) mustBe OK
 
       contentAsJson(res) mustBe Json.obj("envelopeId" -> envelopeId)
+    }
+
+    "return a 503 Service Unavailable when file upload is not available" in {
+      val metadataJson = Json.obj("submissionId" -> UUID.randomUUID().toString, "personId" -> 1)
+
+      when(mockFileUpload.createEnvelope(any[EnvelopeMetadata], any[String])(any[HeaderCarrier])) thenReturn Future.failed { new UnhealthyServiceException("file upload isn't feeling well") }
+
+      val res = testController.create()(FakeRequest().withBody(metadataJson))
+
+      status(res) mustBe SERVICE_UNAVAILABLE
+      contentAsJson(res) mustBe Json.obj("error" -> "file upload service not available")
     }
   }
 

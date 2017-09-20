@@ -23,6 +23,7 @@ import models.Closed
 import play.api.libs.json.Json
 import play.api.mvc.Action
 import repositories.EnvelopeIdRepo
+import uk.gov.hmrc.circuitbreaker.UnhealthyServiceException
 
 class EnvelopeController @Inject()(val repo: EnvelopeIdRepo, fileUploadConnector: FileUploadConnector) extends PropertyLinkingBaseController {
 
@@ -31,6 +32,8 @@ class EnvelopeController @Inject()(val repo: EnvelopeIdRepo, fileUploadConnector
       fileUploadConnector.createEnvelope(metadata, routes.FileTransferController.handleCallback().absoluteURL()) flatMap {
         case Some(id) => repo.create(id) map { _ => Ok(Json.obj("envelopeId" -> id))}
         case None => InternalServerError(Json.obj("error" -> "envelope creation failed"))
+      } recover {
+        case _: UnhealthyServiceException => ServiceUnavailable(Json.obj("error" -> "file upload service not available"))
       }
     }
   }

@@ -21,16 +21,16 @@ import javax.inject._
 import com.google.inject.AbstractModule
 import com.google.inject.name.Names
 import com.typesafe.config.Config
-import infrastructure.{RegularSchedule, Schedule, SimpleWSHttp, VOABackendWSHttp}
+import infrastructure.{RegularSchedule, Schedule, VOABackendWSHttp}
 import net.ceedubs.ficus.Ficus._
 import org.joda.time.Duration
 import play.api.{Application, Configuration, Environment, Play}
 import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.DB
+import uk.gov.hmrc.circuitbreaker.CircuitBreakerConfig
 import uk.gov.hmrc.play.audit.filters.AuditFilter
 import uk.gov.hmrc.play.auth.controllers.AuthParamsControllerConfig
 import uk.gov.hmrc.play.auth.microservice.filters.AuthorisationFilter
-import uk.gov.hmrc.play.config.inject.ConfigModule
 import uk.gov.hmrc.play.config.{AppName, ControllerConfig, RunMode}
 import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
 import uk.gov.hmrc.play.http.logging.filters.LoggingFilter
@@ -76,6 +76,8 @@ class GuiceModule(environment: Environment,
 
     bind(classOf[WSHttp]).annotatedWith(Names.named("VoaBackendWsHttp")).to(classOf[VOABackendWSHttp])
     bind(classOf[Clock]).toInstance(Clock.systemUTC())
+
+    bind(classOf[CircuitBreakerConfig]).toProvider(classOf[CircuitBreakerConfigProvider]).asEagerSingleton()
   }
 }
 
@@ -83,9 +85,18 @@ class MongoDbProvider @Inject() (reactiveMongoComponent: ReactiveMongoComponent)
   def get = reactiveMongoComponent.mongoConnector.db()
 }
 
-object Global extends MicroserviceGlobal {
+class CircuitBreakerConfigProvider @Inject() (config: Configuration) extends Provider[CircuitBreakerConfig] {
+  override def get(): CircuitBreakerConfig = {
+    val serviceName = config.getString("circuitBreaker.serviceName").getOrElse("file-upload")
+    val numberOfCallsToTriggerChange = config.getInt("circuitBreaker.numberOfCallsToTriggerStateChange")
+    val unavailablePeriod = config.getInt("circuitBreaker.unavailablePeriodDuration")
+    val unstablePeriod = config.getInt("circuitBreaker.unstablePeriodDuration")
 
+    CircuitBreakerConfig(serviceName, numberOfCallsToTriggerChange, unavailablePeriod, unstablePeriod)
+  }
 }
+
+object Global extends MicroserviceGlobal
 
 trait MicroserviceGlobal extends DefaultMicroserviceGlobal with RunMode {
   override val auditConnector = MicroserviceAuditConnector
@@ -97,5 +108,4 @@ trait MicroserviceGlobal extends DefaultMicroserviceGlobal with RunMode {
   override val microserviceAuditFilter = MicroserviceAuditFilter
 
   override val authFilter = Some(MicroserviceAuthFilter)
-
 }

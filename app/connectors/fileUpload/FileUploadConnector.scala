@@ -16,7 +16,7 @@
 
 package connectors.fileUpload
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 
 import akka.stream.Materializer
 import com.google.inject.ImplementedBy
@@ -27,6 +27,7 @@ import play.api.Logger
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import play.api.libs.ws.StreamedResponse
+import uk.gov.hmrc.circuitbreaker.{CircuitBreakerConfig, UnhealthyServiceException, UsingCircuitBreaker}
 import uk.gov.hmrc.play.config.{AppName, ServicesConfig}
 import uk.gov.hmrc.play.http._
 
@@ -85,44 +86,48 @@ trait FileUpload {
 
   def getEnvelopeDetails(envelopeId: String)(implicit hc: HeaderCarrier): Future[EnvelopeInfo]
 
-  def getFilesInEnvelope(envelopeId: String)(implicit hc: HeaderCarrier): Future[Seq[String]]
-
   def downloadFile(href: String)(implicit hc: HeaderCarrier): Future[StreamedResponse]
 
   def deleteEnvelope(envelopeId: String)(implicit hc: HeaderCarrier): Future[Unit]
 }
 
-class FileUploadConnector @Inject()(http: SimpleWSHttp, override val metrics: Metrics)(implicit ec: ExecutionContext, mat: Materializer)
-  extends FileUpload with ServicesConfig with AppName with MetricsLogger {
+@Singleton
+class FileUploadConnector @Inject()(http: SimpleWSHttp, override val metrics: Metrics, override protected val circuitBreakerConfig: CircuitBreakerConfig)
+                                   (implicit ec: ExecutionContext, mat: Materializer)
+  extends FileUpload with ServicesConfig with AppName with MetricsLogger with UsingCircuitBreaker {
 
   lazy val url: String = baseUrl("file-upload-backend")
 
   override def createEnvelope(metadata: EnvelopeMetadata, callbackUrl: String)(implicit hc: HeaderCarrier): Future[Option[String]] = {
     val payload = CreateEnvelopePayload(callbackUrl, metadata, EnvelopeConstraints.defaultConstraints)
-    http.POST[CreateEnvelopePayload, HttpResponse](s"$url/file-upload/envelopes", payload)
-      .andThen(logMetrics("file-upload.envelope.create"))
-      .map { _.header("location").flatMap { _.split("/").lastOption } }
-      .recover { case _ => None }
-  }
 
-  override def getEnvelopeDetails(envelopeId: String)(implicit hc: HeaderCarrier): Future[EnvelopeInfo] = {
-    http.GET[EnvelopeInfo](s"$url/file-upload/envelopes/$envelopeId").recover {
-      case _: NotFoundException =>
-        Logger.warn(s"Envelope $envelopeId not found")
-        EnvelopeInfo(envelopeId, "NOT_EXISTING", Nil, EnvelopeMetadata("nosubmissionid", 0))
-      case _ =>
-        EnvelopeInfo(envelopeId, "UNKNOWN_ERROR", Nil, EnvelopeMetadata("nosubmissionid", 0))
+    withCircuitBreaker {
+      http.POST[CreateEnvelopePayload, HttpResponse](s"$url/file-upload/envelopes", payload)
+        .andThen(logMetrics("file-upload.envelope.create"))
+        .map { _.header("location").flatMap { _.split("/").lastOption } }
+    } recover {
+      case e: UnhealthyServiceException => throw e
+      case _ => None
     }
   }
 
-  override def getFilesInEnvelope(envelopeId: String)(implicit hc: HeaderCarrier): Future[Seq[String]] = {
-    http.GET[EnvelopeInfo](s"$url/file-upload/envelopes/$envelopeId").map(_.files.map(_.href))
+  override def getEnvelopeDetails(envelopeId: String)(implicit hc: HeaderCarrier): Future[EnvelopeInfo] = {
+    withCircuitBreaker {
+      http.GET[EnvelopeInfo](s"$url/file-upload/envelopes/$envelopeId")
+    }.recover {
+      case _: NotFoundException =>
+        Logger.warn(s"Envelope $envelopeId not found")
+        EnvelopeInfo(envelopeId, "NOT_EXISTING", Nil, EnvelopeMetadata("nosubmissionid", 0))
+    }
   }
 
   override def downloadFile(href: String)(implicit hc: HeaderCarrier): Future[StreamedResponse] = {
     val fullUrl = s"$url$href"
     Logger.info(s"Downloading file from $fullUrl")
-    http.buildRequest(fullUrl).withMethod("GET").stream() andThen logMetrics("file-upload.download") andThen handleResponse(fullUrl)
+
+    withCircuitBreaker {
+      http.buildRequest(fullUrl).withMethod("GET").stream()
+    } andThen logMetrics("file-upload.download") andThen handleResponse(fullUrl)
   }
 
   private def handleResponse(url: String): PartialFunction[Try[StreamedResponse], Unit] = {
@@ -134,8 +139,15 @@ class FileUploadConnector @Inject()(http: SimpleWSHttp, override val metrics: Me
   override def deleteEnvelope(envelopeId: String)(implicit hc: HeaderCarrier): Future[Unit] = {
     Logger.info(s"Deleting envelopeId: $envelopeId from FUAAS")
 
-    http.DELETE[HttpResponse](s"$url/file-upload/envelopes/$envelopeId") andThen logMetrics("file-upload.envelope.delete") andThen {
+    withCircuitBreaker {
+      http.DELETE[HttpResponse](s"$url/file-upload/envelopes/$envelopeId")
+    } andThen logMetrics("file-upload.envelope.delete") andThen {
       case Failure(e) => Logger.warn(s"Unable to delete envelope with ID: $envelopeId due to exception ${e.getMessage}")
     } map { _ => () } recover { case _ => () }
+  }
+
+  override protected def breakOnException(t: Throwable): Boolean = t match {
+    case _: NotFoundException => false
+    case _ => true
   }
 }

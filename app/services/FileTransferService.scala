@@ -27,6 +27,7 @@ import metrics.MetricsLogger
 import models.{Closed, Open}
 import play.api.Logger
 import repositories.EnvelopeIdRepo
+import uk.gov.hmrc.circuitbreaker.UnhealthyServiceException
 import uk.gov.hmrc.play.http.{HeaderCarrier, Upstream4xxResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -89,6 +90,9 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
     }.recoverWith {
       case e: Upstream4xxResponse if e.upstreamResponseCode == 429 =>
         Logger.warn("Rate limit exceeded, terminating queue processing")
+        Future.successful(FileTransferComplete(None))
+      case _: UnhealthyServiceException =>
+        Logger.error("File upload service not available")
         Future.successful(FileTransferComplete(None))
     }
   }
