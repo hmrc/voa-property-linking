@@ -110,10 +110,17 @@ class PropertyLinkingController @Inject()(propertyLinksConnector: PropertyLinkin
       params = paginationParams,
       representationStatus = Some("PENDING"))
 
+    // required to get the correct filtered amount - no filtering/sorting required
+    val eventualAuthResultApprovedNoFiltersBE = propertyLinksConnector.agentSearchAndSort(
+      organisationId = organisationId,
+      params = paginationParams,
+      representationStatus = Some("APPROVED"))
+
     for {
       authResultBE <- eventualAuthResultBE
       authResultPendingBE <- eventualAuthResultPendingBE
-    } yield Ok(Json.toJson(AgentAuthResultFE(authResultBE, authResultPendingBE.authorisations.size)))
+      authResultApprovedNoFiltersBE <- eventualAuthResultApprovedNoFiltersBE
+    } yield Ok(Json.toJson(AgentAuthResultFE(authResultBE, authResultPendingBE.authorisations.size, authResultApprovedNoFiltersBE.total)))
 
   }
 
