@@ -120,7 +120,7 @@ class PropertyLinkingController @Inject()(propertyLinksConnector: PropertyLinkin
       authResultBE <- eventualAuthResultBE
       authResultPendingBE <- eventualAuthResultPendingBE
       authResultApprovedNoFiltersBE <- eventualAuthResultApprovedNoFiltersBE
-    } yield Ok(Json.toJson(AgentAuthResultFE(authResultBE, authResultPendingBE.authorisations.size, authResultApprovedNoFiltersBE.total)))
+    } yield Ok(Json.toJson(AgentAuthResultFE(authResultBE, authResultPendingBE.filterTotal, authResultApprovedNoFiltersBE.filterTotal)))
 
   }
 
