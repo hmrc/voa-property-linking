@@ -16,8 +16,9 @@
 
 package models
 
-import org.joda.time.{DateTime, LocalDate}
-import play.api.libs.json.Json
+import java.time.LocalDate
+
+import play.api.libs.json.{Json, OFormat}
 
 case class PropertyRepresentation(representationId: Long,
                                   authorisationId: Long,
@@ -34,5 +35,5 @@ case class PropertyRepresentation(representationId: Long,
 }
 
 object PropertyRepresentation {
-  implicit val propertyRepresentationFormat = Json.format[PropertyRepresentation]
+  implicit val propertyRepresentationFormat: OFormat[PropertyRepresentation] = Json.format[PropertyRepresentation]
 }

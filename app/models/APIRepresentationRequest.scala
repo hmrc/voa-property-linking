@@ -16,22 +16,24 @@
 
 package models
 
-import org.joda.time.DateTime
-import play.api.libs.json.{Json, Writes}
+import java.time.Instant
+
+import play.api.libs.json.{Json, OFormat, Reads}
 
 case class APIRepresentationRequest(
-                                          authorisationId: Long,
-                                          submissionId: String,
-                                          authorisedPartyOrganisationId: Long,
-                                          authorisationOwnerPersonId: Long,
-                                          checkPermission: String,
-                                          challengePermission: String,
-                                          createDatetime: DateTime
-                                        )
+                                     authorisationId: Long,
+                                     submissionId: String,
+                                     authorisedPartyOrganisationId: Long,
+                                     authorisationOwnerPersonId: Long,
+                                     checkPermission: String,
+                                     challengePermission: String,
+                                     createDatetime: Instant
+                                   )
 
 object APIRepresentationRequest {
-  implicit val yourJodaDateTimeReads: Writes[DateTime] = Writes.jodaDateWrites("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-  implicit val format = Json.format[APIRepresentationRequest]
+  implicit val instantReads: Reads[Instant] = Reads.instantReads("yyyy-MM-dd'T'HH:mm:ss.SSS[XXX][X]")
+  implicit val format: OFormat[APIRepresentationRequest] = Json.format[APIRepresentationRequest]
+
   def fromRepresentationRequest(reprRequest: RepresentationRequest) = APIRepresentationRequest(
     reprRequest.authorisationId,
     reprRequest.submissionId,

@@ -16,40 +16,41 @@
 
 package models
 
+import java.time.{Instant, LocalDate, LocalDateTime, ZoneOffset}
+
 import helpers.SimpleWsHttpTestApplication
-import org.joda.time.{DateTime, LocalDate}
 import play.api.libs.json.Json
 import uk.gov.hmrc.play.test.UnitSpec
 
-class PropertiesViewTest extends UnitSpec with SimpleWsHttpTestApplication {
+class PropertiesViewSpec extends UnitSpec with SimpleWsHttpTestApplication {
 
   "APIAuthorisation" should {
     "be deserialised property" in {
       val authorisation = Json.parse(DummyData.testData).as[PropertiesView]
       authorisation shouldBe PropertiesView(112, 146440182, 2, 3, "MORE_EVIDENCE_REQUIRED", "OTHER", "OWNER_OCCUPIER",
-        new DateTime(2016, 3, 1, 12, 53, 51),
-        new LocalDate(2016, 5, 7),
-        Some(new LocalDate(2016, 11, 12)),
+        LocalDateTime.of(2016, 3, 1, 12, 53, 51).toInstant(ZoneOffset.UTC),
+        LocalDate.of(2016, 5, 7),
+        Some(LocalDate.of(2016, 11, 12)),
         "ABC99003", Seq(
           APIValuationHistory(
             6505006000L,
             "2005",
             146440182,
-            new LocalDate(2005, 3, 1),
+            LocalDate.of(2005, 3, 1),
             Some(16500),
             "4, HERON ROAD IND UNITS, EXETER, EX2 7LL", "70305000400"),
           APIValuationHistory(
             14345902000L,
             "2010",
             146440182,
-            new LocalDate(2010, 3, 1),
+            LocalDate.of(2010, 3, 1),
             Some(17750),
             "4, HERON ROAD IND UNITS, EXETER, EX2 7LL", "70305000400"),
           APIValuationHistory(
             10176424000L,
             "2010",
             146440182,
-            new LocalDate(2010, 3, 1),
+            LocalDate.of(2010, 3, 1),
             Some(20000),
             "4, HERON ROAD IND UNITS, EXETER, EX2 7LL", "70305000400")),
         Nil

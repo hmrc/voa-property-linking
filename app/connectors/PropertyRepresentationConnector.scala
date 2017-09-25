@@ -16,10 +16,10 @@
 
 package connectors
 
+import java.time.LocalDate
 import javax.inject.{Inject, Named}
 
 import models._
-import org.joda.time.LocalDate
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
@@ -69,7 +69,7 @@ class PropertyRepresentationConnector @Inject()(@Named("VoaBackendWsHttp") http:
   def revoke(authorisedPartyId: Long)(implicit hc: HeaderCarrier): Future[Unit] = {
     val url = baseUrl + s"/authorisation-management-api/authorisedParty/$authorisedPartyId"
     http.PATCH[JsValue, HttpResponse](url,
-      Json.obj("endDate" -> s"${LocalDate.now.toString}",
+      Json.obj("endDate" -> LocalDate.now.toString,
         "authorisedPartyStatus" -> "REVOKED")) map { _ => () }
   }
 

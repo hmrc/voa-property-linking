@@ -16,13 +16,14 @@
 
 package models
 
-import org.joda.time.{DateTime, LocalDate}
-import play.api.libs.json.{Json, Writes}
+import java.time.{Instant, LocalDate}
+
+import play.api.libs.json.{Json, OFormat, Reads}
 
 case class APIPropertyLinkRequest(uarn: Long,
                                   authorisationOwnerOrganisationId: Int,
                                   authorisationOwnerPersonId: Int,
-                                  createDatetime: DateTime,
+                                  createDatetime: Instant,
                                   authorisationMethod: String,
                                   uploadedFiles: Seq[FileInfo],
                                   submissionId: String,
@@ -31,8 +32,8 @@ case class APIPropertyLinkRequest(uarn: Long,
                                   endDate: Option[LocalDate] = None)
 
 object APIPropertyLinkRequest {
-  implicit val yourJodaDateTimeReads: Writes[DateTime] = Writes.jodaDateWrites("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-  implicit val format = Json.format[APIPropertyLinkRequest]
+  implicit val instantReads: Reads[Instant] = Reads.instantReads("yyyy-MM-dd'T'HH:mm:ss.SSS[XXX][X]")
+  implicit val format: OFormat[APIPropertyLinkRequest] = Json.format[APIPropertyLinkRequest]
 
   def fromPropertyLinkRequest(propertyLinkRequest: PropertyLinkRequest) = {
     APIPropertyLinkRequest(

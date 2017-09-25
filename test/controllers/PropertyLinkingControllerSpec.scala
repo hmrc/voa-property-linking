@@ -16,9 +16,10 @@
 
 package controllers
 
+import java.time.{Instant, LocalDate}
+
 import connectors._
 import models._
-import org.joda.time.{DateTime, LocalDate}
 import org.mockito.ArgumentMatchers.{eq => mockEq, _}
 import org.mockito.Mockito.{inOrder => ordered, _}
 import org.scalatest.mock.MockitoSugar
@@ -60,8 +61,8 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
       val userOrgId = 111
 
       val dummyProperties = Seq(
-        PropertiesView(101, 101, userOrgId, 103, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil, Nil),
-        PropertiesView(102, 102, userOrgId, 104, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil, Nil))
+        PropertiesView(101, 101, userOrgId, 103, "AAA", "ASDf", "string", Instant.now(), LocalDate.now(), None, "1231", Nil, Nil),
+        PropertiesView(102, 102, userOrgId, 104, "AAA", "ASDf", "string", Instant.now(), LocalDate.now(), None, "1231", Nil, Nil))
 
       val propertiesUrl = s"$baseUrl/mdtp-dashboard-management-api/mdtp_dashboard/properties_view" +
         s"?listYear=2017" +
@@ -90,19 +91,18 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
       def baseParty2() = baseParty1().copy(id = Random.nextInt, authorisedPartyOrganisationId = 1002)
 
       val dummyProperties = Seq(
-        PropertiesView(101, 101, userOrgId, 103, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
+        PropertiesView(101, 101, userOrgId, 103, "AAA", "ASDf", "string", Instant.now(), LocalDate.now(), None, "1231", Nil,
           Seq(baseParty1(), baseParty2())),
-        PropertiesView(102, 102, userOrgId, 104, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
+        PropertiesView(102, 102, userOrgId, 104, "AAA", "ASDf", "string", Instant.now(), LocalDate.now(), None, "1231", Nil,
           Seq(baseParty1(), baseParty2())),
-        PropertiesView(103, 103, userOrgId, 105, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
+        PropertiesView(103, 103, userOrgId, 105, "AAA", "ASDf", "string", Instant.now(), LocalDate.now(), None, "1231", Nil,
           Seq(baseParty1(), baseParty2())),
-        PropertiesView(104, 104, userOrgId, 106, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
+        PropertiesView(104, 104, userOrgId, 106, "AAA", "ASDf", "string", Instant.now(), LocalDate.now(), None, "1231", Nil,
           Seq(baseParty1(), baseParty2())),
-        PropertiesView(105, 105, userOrgId, 107, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
+        PropertiesView(105, 105, userOrgId, 107, "AAA", "ASDf", "string", Instant.now(), LocalDate.now(), None, "1231", Nil,
           Seq(baseParty1(), baseParty2())),
-        PropertiesView(106, 106, userOrgId, 108, "AAA", "ASDf", "string", DateTime.now(), LocalDate.now(), None, "1231", Nil,
+        PropertiesView(106, 106, userOrgId, 108, "AAA", "ASDf", "string", Instant.now(), LocalDate.now(), None, "1231", Nil,
           Seq(baseParty1(), baseParty2())))
-
 
       val propertiesUrl = s"$baseUrl/mdtp-dashboard-management-api/mdtp_dashboard/properties_view" +
         s"?listYear=2017" +

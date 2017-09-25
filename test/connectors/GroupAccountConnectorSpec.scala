@@ -18,17 +18,14 @@ package connectors
 
 import java.time.{Clock, Instant, ZoneId}
 
+import com.github.tomakehurst.wiremock.client.WireMock._
 import helpers.SimpleWsHttpTestApplication
 import infrastructure.SimpleWSHttp
 import models.{GroupAccountSubmission, IndividualAccountSubmissionForOrganisation, IndividualDetails}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import play.api.libs.json.Json
 import uk.gov.hmrc.play.config.inject.ServicesConfig
 import uk.gov.hmrc.play.http.HeaderCarrier
-import com.github.tomakehurst.wiremock.client.WireMock._
-import play.api.Logger
-import play.api.libs.json.Json
-
-import scala.util.{Failure, Success, Try}
 
 class GroupAccountConnectorSpec extends WireMockSpec with SimpleWsHttpTestApplication {
 
