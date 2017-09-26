@@ -16,7 +16,8 @@
 
 package models
 
-import org.joda.time.{DateTime, LocalDate}
+import java.time.{Instant, LocalDate}
+
 import play.api.libs.json._
 
 case class PropertiesViewResponse(resultCount: Option[Int], authorisations: Seq[PropertiesView])
@@ -32,7 +33,7 @@ case class PropertiesView(authorisationId: Long,
                           authorisationStatus: String,
                           authorisationMethod: String,
                           authorisationOwnerCapacity: String,
-                          createDatetime: DateTime,
+                          createDatetime: Instant,
                           startDate: LocalDate,
                           endDate: Option[LocalDate],
                           submissionId: String,
@@ -45,9 +46,6 @@ case class PropertiesView(authorisationId: Long,
 }
 
 object PropertiesView {
-  implicit val yourJodaDateTimeReads: Reads[DateTime] = Reads.jodaDateReads("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-  implicit val yourJodaDateTimeWrites: Writes[DateTime] = Writes.jodaDateWrites("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-  implicit val yourJodaDateReads: Reads[LocalDate] = Reads.jodaLocalDateReads("yyyy-MM-dd")
-  implicit val yourJodaDateWrites: Writes[LocalDate] = Writes.jodaLocalDateWrites("yyyy-MM-dd")
+  implicit val instantReads: Reads[Instant] = Reads.instantReads("yyyy-MM-dd'T'HH:mm:ss.SSS[XXX][X]")
   implicit val format: Format[PropertiesView] = Json.format[PropertiesView]
 }

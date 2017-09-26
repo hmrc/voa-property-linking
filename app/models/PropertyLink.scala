@@ -16,8 +16,9 @@
 
 package models
 
-import org.joda.time.DateTime
-import play.api.libs.json.{Format, Json, OFormat}
+import java.time.{LocalDate, ZoneId}
+
+import play.api.libs.json.{Format, Json}
 
 case class PropertyLinkResponse(resultCount: Option[Int], propertyLinks: Seq[PropertyLink])
 
@@ -28,7 +29,7 @@ case class PropertyLink(authorisationId: Long,
                         personId: Long,
                         address: String,
                         capacityDeclaration: CapacityDeclaration,
-                        linkedDate: DateTime,
+                        linkedDate: LocalDate,
                         pending: Boolean,
                         assessments: Seq[Assessment],
                         agents: Seq[Party])
@@ -46,7 +47,7 @@ object PropertyLink {
       prop.authorisationOwnerPersonId,
       prop.NDRListValuationHistoryItems.headOption.map(_.address).getOrElse("No address found"),
       capacityDeclaration,
-      prop.createDatetime,
+      prop.createDatetime.atZone(ZoneId.systemDefault).toLocalDate,
       prop.authorisationStatus != "APPROVED",
       prop.NDRListValuationHistoryItems.map(x => Assessment.fromAPIValuationHistory(x, prop.authorisationId, capacityDeclaration)),
       parties

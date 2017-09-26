@@ -18,7 +18,6 @@ package models
 
 import java.time.Instant
 
-import org.joda.time.LocalDate
 import play.api.libs.json.Json
 
 case class IndividualDetails(firstName: String, lastName: String, email: String, phone1: String, phone2: Option[String], addressId: Int)

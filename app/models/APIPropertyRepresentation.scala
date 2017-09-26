@@ -16,8 +16,9 @@
 
 package models
 
-import org.joda.time.LocalDate
-import play.api.libs.json.{Json, Reads}
+import java.time.LocalDate
+
+import play.api.libs.json.{Json, OFormat, Reads}
 
 case class APIPropertyRepresentation(representationId: Long,
                                      authorisationId: Long,
@@ -47,6 +48,5 @@ case class APIPropertyRepresentation(representationId: Long,
 }
 
 object APIPropertyRepresentation {
-  implicit val yourJodaDateReads: Reads[LocalDate] = Reads.jodaLocalDateReads("yyyy-MM-dd")
-  implicit val formats = Json.format[APIPropertyRepresentation]
+  implicit val formats: OFormat[APIPropertyRepresentation] = Json.format[APIPropertyRepresentation]
 }
