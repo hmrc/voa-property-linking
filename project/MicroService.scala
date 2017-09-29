@@ -1,3 +1,4 @@
+import org.scalastyle.sbt.ScalastylePlugin
 import play.routes.compiler.StaticRoutesGenerator
 import play.sbt.PlayImport.PlayKeys
 import play.sbt.PlayScala
@@ -42,6 +43,7 @@ trait MicroService {
     .settings(publishingSettings: _*)
     .settings(defaultSettings(): _*)
     .settings(PlayKeys.playDefaultPort := defaultPort)
+    .settings(ScalastylePlugin.scalastyleFailOnError := false)
     .settings(
       libraryDependencies ++= appDependencies,
       retrieveManaged := true,
