@@ -18,13 +18,10 @@ package models
 
 import play.api.libs.json.Json
 
-case class APIDetailedGroupAccount(id: Int, governmentGatewayGroupId: String, representativeCode: Long, organisationLatestDetail: GroupDetails,
-                                   persons: Seq[IndividualSummary]) {
+case class APIDetailedGroupAccount(id: Long, governmentGatewayGroupId: String, representativeCode: Long, organisationLatestDetail: GroupDetails, persons: Seq[IndividualSummary]) {
 
   def toGroupAccount = {
-    GroupAccount(id, governmentGatewayGroupId, organisationLatestDetail.organisationName, organisationLatestDetail.addressUnitId,
-      organisationLatestDetail.organisationEmailAddress, organisationLatestDetail.organisationTelephoneNumber.getOrElse("not set"),
-      organisationLatestDetail.representativeFlag, representativeCode)
+    GroupAccount(id, governmentGatewayGroupId, organisationLatestDetail.organisationName, organisationLatestDetail.addressUnitId, organisationLatestDetail.organisationEmailAddress, organisationLatestDetail.organisationTelephoneNumber.getOrElse("not set"), organisationLatestDetail.representativeFlag, representativeCode)
   }
 }
 

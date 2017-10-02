@@ -20,16 +20,17 @@ import java.time.{Instant, LocalDate}
 
 import play.api.libs.json.{Json, OFormat, Reads}
 
-case class APIPropertyLinkRequest(uarn: Long,
-                                  authorisationOwnerOrganisationId: Int,
-                                  authorisationOwnerPersonId: Int,
-                                  createDatetime: Instant,
-                                  authorisationMethod: String,
-                                  uploadedFiles: Seq[FileInfo],
-                                  submissionId: String,
-                                  authorisationOwnerCapacity: String,
-                                  startDate: LocalDate,
-                                  endDate: Option[LocalDate] = None)
+case class APIPropertyLinkRequest(
+                                   uarn: Long,
+                                   authorisationOwnerOrganisationId: Long,
+                                   authorisationOwnerPersonId: Int,
+                                   createDatetime: Instant,
+                                   authorisationMethod: String,
+                                   uploadedFiles: Seq[FileInfo],
+                                   submissionId: String,
+                                   authorisationOwnerCapacity: String,
+                                   startDate: LocalDate,
+                                   endDate: Option[LocalDate] = None)
 
 object APIPropertyLinkRequest {
   implicit val instantReads: Reads[Instant] = Reads.instantReads("yyyy-MM-dd'T'HH:mm:ss.SSS[XXX][X]")
@@ -37,16 +38,15 @@ object APIPropertyLinkRequest {
 
   def fromPropertyLinkRequest(propertyLinkRequest: PropertyLinkRequest) = {
     APIPropertyLinkRequest(
-      propertyLinkRequest.uarn,
-      propertyLinkRequest.organisationId,
-      propertyLinkRequest.individualId,
-      propertyLinkRequest.linkedDate,
-      propertyLinkRequest.linkBasis,
-      propertyLinkRequest.fileInfo,
-      propertyLinkRequest.submissionId,
-      propertyLinkRequest.capacityDeclaration.capacity,
-      propertyLinkRequest.capacityDeclaration.fromDate,
-      propertyLinkRequest.capacityDeclaration.toDate
-    )
+      uarn = propertyLinkRequest.uarn,
+      authorisationOwnerOrganisationId = propertyLinkRequest.organisationId,
+      authorisationOwnerPersonId = propertyLinkRequest.individualId,
+      createDatetime = propertyLinkRequest.linkedDate,
+      authorisationMethod = propertyLinkRequest.linkBasis,
+      uploadedFiles = propertyLinkRequest.fileInfo,
+      submissionId = propertyLinkRequest.submissionId,
+      authorisationOwnerCapacity = propertyLinkRequest.capacityDeclaration.capacity,
+      startDate = propertyLinkRequest.capacityDeclaration.fromDate,
+      endDate = propertyLinkRequest.capacityDeclaration.toDate)
   }
 }
