@@ -20,7 +20,15 @@ import java.time.Instant
 
 import play.api.libs.json.Json
 
-case class PropertyLinkRequest(uarn: Long, organisationId: Long, individualId: Int, capacityDeclaration: CapacityDeclaration, linkedDate: Instant, linkBasis: String, fileInfo: Seq[FileInfo], submissionId: String)
+case class PropertyLinkRequest(
+                                uarn: Long,
+                                organisationId: Long,
+                                individualId: Int,
+                                capacityDeclaration: CapacityDeclaration,
+                                linkedDate: Instant,
+                                linkBasis: String,
+                                fileInfo: Seq[FileInfo],
+                                submissionId: String)
 
 object PropertyLinkRequest {
   implicit val propertyLinkRequest = Json.format[PropertyLinkRequest]
