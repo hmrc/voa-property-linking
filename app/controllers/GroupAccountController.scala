@@ -25,7 +25,7 @@ import play.api.mvc.Action
 
 class GroupAccountController @Inject() (groups: GroupAccountConnector, brAuth: BusinessRatesAuthConnector) extends PropertyLinkingBaseController {
 
-  def get(organisationId: Int) = Action.async { implicit request =>
+  def get(organisationId: Long) = Action.async { implicit request =>
     groups.get(organisationId) map {
       case Some(x) => Ok(Json.toJson(x))
       case None => NotFound
