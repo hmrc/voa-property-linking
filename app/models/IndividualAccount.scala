@@ -26,16 +26,26 @@ object IndividualDetails {
   implicit val formats = Json.format[IndividualDetails]
 }
 
-case class IndividualAccount(externalId: String, trustId: String, organisationId: Int, individualId: Int, details: IndividualDetails)
+case class IndividualAccount(externalId: String, trustId: String, organisationId: Long, individualId: Long, details: IndividualDetails)
 
 object IndividualAccount {
   implicit val formats = Json.format[IndividualAccount]
 }
 
-case class IndividualAccountSubmission(externalId: String, trustId: String, organisationId: Int, details: IndividualDetails) {
+case class IndividualAccountSubmission(externalId: String, trustId: String, organisationId: Long, details: IndividualDetails) {
 
   def toAPIIndividualAccount = {
-    APIIndividualAccount(PersonData(trustId, details.firstName, details.lastName, organisationId, details.addressId, details.phone1, details.phone2, details.email, externalId, Instant.now))
+    APIIndividualAccount(PersonData(
+      identifyVerificationId = trustId,
+      firstName = details.firstName,
+      lastName = details.lastName,
+      organisationId = organisationId,
+      addressUnitId = details.addressId,
+      telephoneNumber = details.phone1,
+      mobileNumber = details.phone2,
+      emailAddress = details.email,
+      governmentGatewayExternalId = externalId,
+      effectiveFrom = Instant.now))
   }
 }
 

@@ -17,10 +17,10 @@ GET          /property-links-search-sort                                        
 GET          /dashboard/assessments/:authorisationId                                          @controllers.PropertyLinkingController.assessments(authorisationId: Long)
 
 
-GET          /individuals/:personId                                                           @controllers.IndividualAccountController.get(personId: Int)
+GET          /individuals/:personId                                                           @controllers.IndividualAccountController.get(personId: Long)
 GET          /individuals                                                                     @controllers.IndividualAccountController.withExternalId(externalId)
 POST         /individuals                                                                     @controllers.IndividualAccountController.create()
-PUT          /individuals/:personId                                                           @controllers.IndividualAccountController.update(personId: Int)
+PUT          /individuals/:personId                                                           @controllers.IndividualAccountController.update(personId: Long)
 
 GET          /groups/:organisationId                                                          @controllers.GroupAccountController.get(organisationId: Long)
 GET          /groups                                                                          @controllers.GroupAccountController.withGroupId(groupId)

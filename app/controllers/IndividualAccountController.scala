@@ -32,7 +32,7 @@ class IndividualAccountController @Inject() (individuals: IndividualAccountConne
     }
   }
 
-  def update(personId: Int) = Action.async(parse.json) { implicit request =>
+  def update(personId: Long) = Action.async(parse.json) { implicit request =>
     withJsonBody[IndividualAccountSubmission] { account =>
       for {
         _ <- individuals.update(personId, account)
@@ -43,7 +43,7 @@ class IndividualAccountController @Inject() (individuals: IndividualAccountConne
     }
   }
 
-  def get(personId: Int) = Action.async { implicit request =>
+  def get(personId: Long) = Action.async { implicit request =>
     individuals.get(personId) map {
       case Some(x) => Ok(Json.toJson(x))
       case None => NotFound
