@@ -18,19 +18,37 @@ package models
 
 import play.api.libs.json._
 
-case class APIDetailedIndividualAccount(id: Int, governmentGatewayExternalId: String, personLatestDetail: APIIndividualDetails,
-                                        organisationId: Int, organisationLatestDetail: GroupDetails) {
+case class APIDetailedIndividualAccount(
+                                         id: Long,
+                                         governmentGatewayExternalId: String,
+                                         personLatestDetail: APIIndividualDetails,
+                                         organisationId: Long,
+                                         organisationLatestDetail: GroupDetails) {
 
   def toIndividualAccount = {
-    IndividualAccount(governmentGatewayExternalId, personLatestDetail.identifyVerificationId, organisationId, id,
-      IndividualDetails(personLatestDetail.firstName, personLatestDetail.lastName, personLatestDetail.emailAddress,
-        personLatestDetail.telephoneNumber.getOrElse("not set"), personLatestDetail.mobileNumber, personLatestDetail.addressUnitId)
-    )
+    IndividualAccount(
+      externalId = governmentGatewayExternalId,
+      trustId = personLatestDetail.identifyVerificationId,
+      organisationId = organisationId,
+      individualId = id,
+      details = IndividualDetails(
+        firstName = personLatestDetail.firstName,
+        lastName = personLatestDetail.lastName,
+        email = personLatestDetail.emailAddress,
+        phone1 = personLatestDetail.telephoneNumber.getOrElse("not set"),
+        phone2 = personLatestDetail.mobileNumber,
+        addressId = personLatestDetail.addressUnitId))
   }
 }
 
-case class APIIndividualDetails(addressUnitId: Int, firstName: String, lastName: String, emailAddress: String, telephoneNumber: Option[String],
-                                mobileNumber: Option[String], identifyVerificationId: String)
+case class APIIndividualDetails(
+                                 addressUnitId: Int,
+                                 firstName: String,
+                                 lastName: String,
+                                 emailAddress: String,
+                                 telephoneNumber: Option[String],
+                                 mobileNumber: Option[String],
+                                 identifyVerificationId: String)
 
 object APIIndividualDetails {
   private def withDefault[A](key: String, default: A)(implicit wrts: Writes[A]): Reads[JsObject] = {

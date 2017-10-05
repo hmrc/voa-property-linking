@@ -36,11 +36,11 @@ class IndividualAccountConnector @Inject()(addresses: AddressConnector,
     http.POST[APIIndividualAccount, JsValue](baseUrl, account.toAPIIndividualAccount)
   }
 
-  def update(personId: Int, account: IndividualAccountSubmission)(implicit hc: HeaderCarrier): Future[JsValue] = {
+  def update(personId: Long, account: IndividualAccountSubmission)(implicit hc: HeaderCarrier): Future[JsValue] = {
     http.PUT[APIIndividualAccount, JsValue](baseUrl + s"/$personId", account.toAPIIndividualAccount)
   }
 
-  def get(id: Int)(implicit hc: HeaderCarrier): Future[Option[IndividualAccount]] = {
+  def get(id: Long)(implicit hc: HeaderCarrier): Future[Option[IndividualAccount]] = {
     http.GET[Option[APIDetailedIndividualAccount]](s"$baseUrl?personId=$id") map {
       _.map(a => a.toIndividualAccount)
     }
