@@ -19,7 +19,7 @@ package models
 import play.api.libs.json._
 
 case class APIDetailedIndividualAccount(
-                                         id: Int,
+                                         id: Long,
                                          governmentGatewayExternalId: String,
                                          personLatestDetail: APIIndividualDetails,
                                          organisationId: Long,
