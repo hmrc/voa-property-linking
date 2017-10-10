@@ -18,21 +18,26 @@ package controllers
 
 import javax.inject.Inject
 
+import auth.Authenticated
+import connectors.auth.AuthConnector
 import connectors.{BusinessRatesAuthConnector, IndividualAccountConnector}
 import models.IndividualAccountSubmission
 import play.api.libs.json.Json
 import play.api.mvc.Action
 import play.api.mvc.Results.EmptyContent
 
-class IndividualAccountController @Inject() (individuals: IndividualAccountConnector, brAuth: BusinessRatesAuthConnector) extends PropertyLinkingBaseController {
+class IndividualAccountController @Inject() ( val auth: AuthConnector,
+                                              individuals: IndividualAccountConnector,
+                                             brAuth: BusinessRatesAuthConnector)
+  extends PropertyLinkingBaseController with Authenticated {
 
-  def create() = Action.async(parse.json) { implicit request =>
+  def create() = authenticated(parse.json) { implicit request =>
     withJsonBody[IndividualAccountSubmission] { acc =>
       individuals.create(acc) map { x => Created(x) }
     }
   }
 
-  def update(personId: Long) = Action.async(parse.json) { implicit request =>
+  def update(personId: Long) = authenticated(parse.json) { implicit request =>
     withJsonBody[IndividualAccountSubmission] { account =>
       for {
         _ <- individuals.update(personId, account)
@@ -43,14 +48,14 @@ class IndividualAccountController @Inject() (individuals: IndividualAccountConne
     }
   }
 
-  def get(personId: Long) = Action.async { implicit request =>
+  def get(personId: Long) = authenticated { implicit request =>
     individuals.get(personId) map {
       case Some(x) => Ok(Json.toJson(x))
       case None => NotFound
     }
   }
 
-  def withExternalId(externalId: String) = Action.async { implicit request =>
+  def withExternalId(externalId: String) = authenticated { implicit request =>
     individuals.findByGGID(externalId) map {
       case Some(x) => Ok(Json.toJson(x))
       case None => NotFound

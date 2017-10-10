@@ -18,14 +18,16 @@ package controllers
 
 import javax.inject.Inject
 
+import auth.Authenticated
+import connectors.auth.AuthConnector
 import play.api.libs.json.Json
-import play.api.mvc.Action
 import repositories.SequenceGeneratorMongoRepository
 
-class SubmissionIdController @Inject()(val sequenceGenerator: SequenceGeneratorMongoRepository)
-  extends PropertyLinkingBaseController {
+class SubmissionIdController @Inject()(val auth: AuthConnector,
+                                       val sequenceGenerator: SequenceGeneratorMongoRepository)
+  extends PropertyLinkingBaseController with Authenticated {
 
-  def get(prefix: String) = Action.async { implicit  request =>
+  def get(prefix: String) = authenticated { implicit  request =>
     for {
       id <- sequenceGenerator.getNextSequenceId(prefix)
       strId = formatId(id)

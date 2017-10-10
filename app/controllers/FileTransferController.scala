@@ -18,14 +18,18 @@ package controllers
 
 import javax.inject.Inject
 
+import auth.Authenticated
+import connectors.auth.AuthConnector
 import models.fileUpload.{Available, Callback}
 import play.api.Logger
 import play.api.mvc.Action
 import services.FileTransferService
 
-class FileTransferController @Inject() (val fileTransferService: FileTransferService) extends PropertyLinkingBaseController {
+class FileTransferController @Inject() (val auth: AuthConnector,
+                                        val fileTransferService: FileTransferService)
+   extends PropertyLinkingBaseController with Authenticated {
 
-  def handleCallback() = Action.async(parse.json) { implicit request =>
+  def handleCallback() = authenticated(parse.json) { implicit request =>
     Logger.info(request.body.validate[Callback].toString)
     withJsonBody[Callback] {
       case Callback(envelopeId, _, Available, _) => fileTransferService.transferManually(envelopeId) map { _ => Ok }
@@ -33,7 +37,7 @@ class FileTransferController @Inject() (val fileTransferService: FileTransferSer
     }
   }
 
-  def run() = Action.async { implicit  request =>
+  def run() = authenticated { implicit  request =>
     fileTransferService.justDoIt().map(_ => Ok("File transfer was started manually"))
   }
 }
