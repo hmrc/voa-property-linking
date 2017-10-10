@@ -19,6 +19,7 @@ package controllers
 import java.time.{Instant, LocalDate}
 
 import connectors._
+import connectors.auth.{AuthConnector, Authority, PropertyLinkingAuthConnector, UserIds}
 import models._
 import org.mockito.ArgumentMatchers.{eq => mockEq, _}
 import org.mockito.Mockito.{inOrder => ordered, _}
@@ -29,8 +30,8 @@ import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.play.config.inject.ServicesConfig
-import uk.gov.hmrc.play.http.HttpReads
 import uk.gov.hmrc.play.http.ws.WSHttp
+import uk.gov.hmrc.play.http.{HeaderCarrier, HttpReads}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -50,9 +51,11 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
     .configure("run.mode" -> "Test")
     .overrides(bind[WSHttp].qualifiedWith("VoaBackendWsHttp").toInstance(mockWS))
     .overrides(bind[ServicesConfig].toInstance(mockConf))
+    .overrides(bind[AuthConnector].to[AuthorisedAuthConnector])
     .build()
 
-  "find" should {
+  "given authorised access, find" should {
+
     when(mockConf.baseUrl(any())).thenReturn(baseUrl)
 
     "only return the user's properties" in {
@@ -132,5 +135,13 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
       verify(mockWS, times(1)).GET(mockEq(org1001Url))(any(classOf[HttpReads[Option[APIDetailedGroupAccount]]]), any())
       verify(mockWS, times(1)).GET(mockEq(org1002Url))(any(classOf[HttpReads[Option[APIDetailedGroupAccount]]]), any())
     }
+  }
+}
+
+class AuthorisedAuthConnector extends PropertyLinkingAuthConnector {
+  private def testAuthority(userId: String): Authority = Authority(userId, userId, userId, UserIds(userId, userId))
+
+  override def getCurrentAuthority()(implicit headerCarrier: HeaderCarrier): Future[Option[Authority]] = {
+    Future.successful(Some(testAuthority("testUserId")))
   }
 }

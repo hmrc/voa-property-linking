@@ -18,41 +18,46 @@ package controllers
 
 import javax.inject.Inject
 
+import auth.Authenticated
+import connectors.auth.AuthConnector
 import connectors.{BusinessRatesAuthConnector, GroupAccountConnector}
 import models.{GroupAccountSubmission, UpdatedOrganisationAccount}
 import play.api.libs.json.Json
 import play.api.mvc.Action
 
-class GroupAccountController @Inject() (groups: GroupAccountConnector, brAuth: BusinessRatesAuthConnector) extends PropertyLinkingBaseController {
+class GroupAccountController @Inject() (
+                                       val auth: AuthConnector,
+                                         groups: GroupAccountConnector, brAuth: BusinessRatesAuthConnector)
+  extends PropertyLinkingBaseController with Authenticated {
 
-  def get(organisationId: Long) = Action.async { implicit request =>
+  def get(organisationId: Long) = authenticated { implicit request =>
     groups.get(organisationId) map {
       case Some(x) => Ok(Json.toJson(x))
       case None => NotFound
     }
   }
 
-  def withGroupId(groupId: String) = Action.async { implicit request =>
+  def withGroupId(groupId: String) = authenticated { implicit request =>
     groups.findByGGID(groupId) map {
       case Some(x) => Ok(Json.toJson(x))
       case None => NotFound
     }
   }
 
-  def withAgentCode(agentCode: String) = Action.async { implicit request =>
+  def withAgentCode(agentCode: String) = authenticated { implicit request =>
     groups.withAgentCode(agentCode) map {
       case Some(a) => Ok(Json.toJson(a))
       case None => NotFound
     }
   }
 
-  def create() = Action.async(parse.json) { implicit request =>
+  def create() = authenticated(parse.json) { implicit request =>
     withJsonBody[GroupAccountSubmission] { acc =>
       groups.create(acc) map { Created(_) }
     }
   }
 
-  def update(orgId: Long) = Action.async(parse.json) { implicit request =>
+  def update(orgId: Long) = authenticated(parse.json) { implicit request =>
     withJsonBody[UpdatedOrganisationAccount] { acc =>
       for {
         _ <- groups.update(orgId, acc)

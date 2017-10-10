@@ -24,7 +24,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait PropertyLinkingBaseController extends Controller {
 
-  implicit def hc(implicit request: Request[_]): HeaderCarrier = HeaderCarrier.fromHeadersAndSession(request.headers, Some(request.session))
+  implicit def hc(implicit request: Request[_]): HeaderCarrier = HeaderCarrier.fromHeadersAndSession(request.headers)
+
   implicit def future[A](a: A): Future[A] = Future.successful(a)
   implicit val ec: ExecutionContext = play.api.libs.concurrent.Execution.Implicits.defaultContext
 

@@ -18,16 +18,19 @@ package controllers
 
 import javax.inject.Inject
 
+import auth.Authenticated
+import connectors.auth.AuthConnector
 import connectors.fileUpload.{EnvelopeMetadata, FileUploadConnector}
 import models.Closed
 import play.api.libs.json.Json
-import play.api.mvc.Action
 import repositories.EnvelopeIdRepo
 import uk.gov.hmrc.circuitbreaker.UnhealthyServiceException
 
-class EnvelopeController @Inject()(val repo: EnvelopeIdRepo, fileUploadConnector: FileUploadConnector) extends PropertyLinkingBaseController {
+class EnvelopeController @Inject()(val auth: AuthConnector,
+                                   val repo: EnvelopeIdRepo, fileUploadConnector: FileUploadConnector)
+  extends PropertyLinkingBaseController with Authenticated {
 
-  def create = Action.async(parse.json) { implicit request =>
+  def create = authenticated(parse.json) { implicit request =>
     withJsonBody[EnvelopeMetadata] { metadata =>
       fileUploadConnector.createEnvelope(metadata, routes.FileTransferController.handleCallback().absoluteURL()) flatMap {
         case Some(id) => repo.create(id) map { _ => Ok(Json.obj("envelopeId" -> id))}
@@ -39,11 +42,11 @@ class EnvelopeController @Inject()(val repo: EnvelopeIdRepo, fileUploadConnector
   }
 
   // temporarily kept for backwards compatibility
-  def record(envelopeId: String) = Action.async { implicit request =>
+  def record(envelopeId: String) = authenticated { implicit request =>
     repo.create(envelopeId).map(_=> Ok(envelopeId))
   }
 
-  def close(envelopeId: String) = Action.async { implicit request =>
+  def close(envelopeId: String) = authenticated { implicit request =>
     repo.update(envelopeId, Closed).map(_=> Ok(envelopeId))
   }
 }

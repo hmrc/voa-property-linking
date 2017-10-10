@@ -18,7 +18,9 @@ package controllers
 
 import javax.inject.Inject
 
+import auth.Authenticated
 import connectors.AddressConnector
+import connectors.auth.AuthConnector
 import models.SimpleAddress
 import play.api.libs.json.Json
 import play.api.mvc.Action
@@ -26,23 +28,25 @@ import util.PostcodeValidator
 
 import scala.concurrent.Future
 
-class AddressLookup @Inject() (addresses: AddressConnector) extends PropertyLinkingBaseController {
+class AddressLookup @Inject() (val auth: AuthConnector,
+                               addresses: AddressConnector)
+  extends PropertyLinkingBaseController with Authenticated {
 
-  def find(postcode: String) = Action.async { implicit request =>
+  def find(postcode: String) = authenticated { implicit request =>
     PostcodeValidator.validateAndFormat(postcode) match {
       case Some(s) => addresses.find(s).map(r => Ok(Json.toJson(r)))
       case None => Future.successful(BadRequest)
     }
   }
 
-  def get(addressUnitId: Int) = Action.async { implicit request =>
+  def get(addressUnitId: Int) = authenticated { implicit request =>
     addresses.get(addressUnitId) map {
       case Some(a) => Ok(Json.toJson(a))
       case None => NotFound
     }
   }
 
-  def create = Action.async(parse.json) { implicit request =>
+  def create = authenticated(parse.json) { implicit request =>
     withJsonBody[SimpleAddress] { address =>
       addresses.create(address) map { x => Created(Json.obj("id" -> x)) }
     }

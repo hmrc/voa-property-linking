@@ -14,24 +14,13 @@
  * limitations under the License.
  */
 
-package controllers
+package connectors.auth
 
-import javax.inject.Inject
+import uk.gov.hmrc.play.http.{HttpReads, HttpResponse}
 
-import auth.Authenticated
-import connectors.DVRCaseManagementConnector
-import connectors.auth.AuthConnector
-import models.DetailedValuationRequest
+trait RawResponseReads {
 
-class DVRCaseManagement @Inject() (val auth: AuthConnector,
-                                   dvrCaseManagement: DVRCaseManagementConnector)
-  extends PropertyLinkingBaseController with Authenticated {
-
-  def requestDetailedValuation = authenticated(parse.json) { implicit request =>
-    withJsonBody[DetailedValuationRequest] { dvr =>
-      dvrCaseManagement.requestDetailedValuation(dvr) map { _ => Ok }
-    }
+  implicit val httpReads: HttpReads[HttpResponse] = new HttpReads[HttpResponse] {
+    override def read(method: String, url: String, response: HttpResponse) = response
   }
-
 }
-

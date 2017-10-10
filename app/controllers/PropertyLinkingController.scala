@@ -18,11 +18,12 @@ package controllers
 
 import javax.inject.Inject
 
+import auth.Authenticated
+import connectors.auth.AuthConnector
 import connectors.{GroupAccountConnector, PropertyLinkingConnector, PropertyRepresentationConnector}
 import models._
-import models.searchApi.{AgentAuthResultBE, AgentAuthResultFE, OwnerAuthResult}
+import models.searchApi.AgentAuthResultFE
 import play.api.libs.json.Json
-import play.api.mvc.Action
 import uk.gov.hmrc.play.http.{HeaderCarrier, Upstream5xxResponse}
 
 import scala.collection.mutable
@@ -33,13 +34,14 @@ case class Memoize[K, V]() {
   def apply(f: K => V): K => V = in => cache.getOrElseUpdate(in, f(in))
 }
 
-class PropertyLinkingController @Inject()(propertyLinksConnector: PropertyLinkingConnector,
+class PropertyLinkingController @Inject()(val auth: AuthConnector,
+                                          propertyLinksConnector: PropertyLinkingConnector,
                                           groupAccountsConnector: GroupAccountConnector,
                                           representationsConnector: PropertyRepresentationConnector
-                                         ) extends PropertyLinkingBaseController {
+                                         ) extends PropertyLinkingBaseController with Authenticated {
   type GroupCache = Memoize[Long, Future[Option[GroupAccount]]]
 
-  def create() = Action.async(parse.json) { implicit request =>
+  def create() = authenticated(parse.json) { implicit request =>
     withJsonBody[PropertyLinkRequest] { linkRequest =>
       propertyLinksConnector.create(APIPropertyLinkRequest.fromPropertyLinkRequest(linkRequest))
         .map { _ => Created }
@@ -47,16 +49,16 @@ class PropertyLinkingController @Inject()(propertyLinksConnector: PropertyLinkin
     }
   }
 
-  def get(authorisationId: Long) = Action.async { implicit request =>
-    implicit val cache = Memoize[Long, Future[Option[GroupAccount]]]()
+  def get(authorisationId: Long) = authenticated { implicit request =>
+      implicit val cache = Memoize[Long, Future[Option[GroupAccount]]]()
 
-    propertyLinksConnector.get(authorisationId) flatMap {
-      case Some(authorisation) => detailed(authorisation) map { d => Ok(Json.toJson(d)) }
-      case None => NotFound
-    }
+      propertyLinksConnector.get(authorisationId) flatMap {
+        case Some(authorisation) => detailed(authorisation) map { d => Ok(Json.toJson(d)) }
+        case None => NotFound
+      }
   }
 
-  def find(organisationId: Long, paginationParams: PaginationParams) = Action.async { implicit request =>
+  def find(organisationId: Long, paginationParams: PaginationParams) = authenticated { implicit request =>
     getProperties(organisationId, paginationParams).map(x => Ok(Json.toJson(x)))
   }
 
@@ -67,16 +69,17 @@ class PropertyLinkingController @Inject()(propertyLinksConnector: PropertyLinkin
                     status: Option[String],
                     address: Option[String],
                     baref: Option[String],
-                    agent: Option[String]) = Action.async { implicit request =>
-    propertyLinksConnector.searchAndSort(
-      organisationId = organisationId,
-      params = paginationParams,
-      sortfield = sortfield,
-      sortorder = sortorder,
-      status = status,
-      address = address,
-      baref = baref,
-      agent = agent).map(x => Ok(Json.toJson(x)))
+                    agent: Option[String]) = authenticated { implicit request =>
+
+        propertyLinksConnector.searchAndSort(
+          organisationId = organisationId,
+          params = paginationParams,
+          sortfield = sortfield,
+          sortorder = sortorder,
+          status = status,
+          address = address,
+          baref = baref,
+          agent = agent).map(x => Ok(Json.toJson(x)))
   }
 
 
@@ -92,7 +95,7 @@ class PropertyLinkingController @Inject()(propertyLinksConnector: PropertyLinkin
                     status: Option[String],
                     address: Option[String],
                     baref: Option[String],
-                    client: Option[String]) = Action.async { implicit request =>
+                    client: Option[String]) = authenticated { implicit request =>
     val eventualAuthResultBE = propertyLinksConnector.agentSearchAndSort(
       organisationId = organisationId,
       params = paginationParams,
@@ -148,7 +151,7 @@ class PropertyLinkingController @Inject()(propertyLinksConnector: PropertyLinkin
     }.map(_.flatten)
   }
 
-  def clientProperty(authorisationId: Long, clientOrgId: Long, agentOrgId: Long) = Action.async { implicit request =>
+  def clientProperty(authorisationId: Long, clientOrgId: Long, agentOrgId: Long) = authenticated { implicit request =>
     propertyLinksConnector.get(authorisationId) flatMap {
       case Some(authorisation) if authorisedFor(authorisation, clientOrgId, agentOrgId) => toClientProperty(authorisation) map { p => Ok(Json.toJson(p)) }
       case _ => NotFound
@@ -165,7 +168,7 @@ class PropertyLinkingController @Inject()(propertyLinksConnector: PropertyLinkin
     }
   }
 
-  def assessments(authorisationId: Long) = Action.async { implicit request =>
+  def assessments(authorisationId: Long) = authenticated { implicit request =>
     implicit val cache = Memoize[Long, Future[Option[GroupAccount]]]()
 
     propertyLinksConnector.getAssessment(authorisationId) flatMap {
