@@ -23,15 +23,11 @@ import uk.gov.hmrc.play.http.ws.WSHttp
 import scala.concurrent.Future
 
 trait AzureHeaders extends WSHttp {
-  val voaApiSubscriptionHeader: String
-  val voaApiTraceHeader: String
 
-  val baseModernizerHC = HeaderCarrier(extraHeaders = Seq("Ocp-Apim-Subscription-Key" -> voaApiSubscriptionHeader,
-    "Ocp-Apim-Trace" -> voaApiTraceHeader))
-
-  def buildHeaderCarrier(hc: HeaderCarrier): HeaderCarrier = baseModernizerHC
-    .copy(requestId = hc.requestId, sessionId = hc.sessionId)
-    .withExtraHeaders(hc.extraHeaders: _*)
+  def buildHeaderCarrier(hc: HeaderCarrier): HeaderCarrier = {
+    HeaderCarrier(requestId = hc.requestId, sessionId = hc.sessionId)
+      .withExtraHeaders(hc.extraHeaders: _*)
+  }
 
   override def doGet(url: String)(implicit hc: HeaderCarrier): Future[HttpResponse] =
     super.doGet(url)(buildHeaderCarrier(hc))

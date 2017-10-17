@@ -24,9 +24,9 @@ import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito.when
 import org.scalatest.mock.MockitoSugar
 import uk.gov.hmrc.play.http.HeaderCarrier
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import uk.gov.hmrc.play.test.UnitSpec
 
-class VOABackendWSHttpTest extends UnitSpec with WireMockSpec with SimpleWsHttpTestApplication with MockitoSugar {
+class VOABackendWSHttpSpec extends UnitSpec with WireMockSpec with SimpleWsHttpTestApplication with MockitoSugar {
 
   val metricsMock = mock[Metrics]
   val metricRegistry = mock[MetricRegistry]
@@ -39,7 +39,7 @@ class VOABackendWSHttpTest extends UnitSpec with WireMockSpec with SimpleWsHttpT
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  val wsHttp = new VOABackendWSHttp(metricsMock, "subKey", "true")
+  val wsHttp = new VOABackendWSHttp(metricsMock)
 
   "when extracting the API name to use for the request metrics" should {
     "the API name should be extracted from a simple URL" in {
@@ -63,7 +63,7 @@ class VOABackendWSHttpTest extends UnitSpec with WireMockSpec with SimpleWsHttpT
 
   "when a request succeeds" should {
     "the metrics should be recorded" in {
-      val url = s"http://${mockServerUrl}/customer-management-api/organisation"
+      val url = s"http://$mockServerUrl/customer-management-api/organisation"
 
       wsHttp.doGet(url)
     }

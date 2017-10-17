@@ -71,8 +71,6 @@ class EvidenceConnectorSpec extends WireMockSpec with SimpleWsHttpTestApplicatio
       val metadata = EnvelopeMetadata("aSubmissionId", 12345)
 
       stubFor(put(urlEqualTo("/customer-management-api/customer/evidence"))
-        .withHeader("Ocp-Apim-Subscription-Key", matching(fakeApplication.configuration.getString("voaApi.subscriptionKeyHeader").getOrElse("")))
-        .withHeader("Ocp-Apim-Trace", matching(fakeApplication.configuration.getString("voaApi.traceHeader").getOrElse("")))
         .withRequestBody(containing(file))
         .withRequestBody(containing("aSubmissionId"))
         .withRequestBody(containing("12345"))
@@ -99,8 +97,6 @@ class EvidenceConnectorSpec extends WireMockSpec with SimpleWsHttpTestApplicatio
 
       for ((encoded, decoded) <- filenames) {
         stubFor(put(urlEqualTo("/customer-management-api/customer/evidence"))
-          .withHeader("Ocp-Apim-Subscription-Key", matching(fakeApplication.configuration.getString("voaApi.subscriptionKeyHeader").getOrElse("")))
-          .withHeader("Ocp-Apim-Trace", matching(fakeApplication.configuration.getString("voaApi.traceHeader").getOrElse("")))
           .withRequestBody(containing(s"""filename="$decoded""""))
           .withRequestBody(containing("aSubmissionId"))
           .withRequestBody(containing("12345"))
@@ -128,8 +124,6 @@ class EvidenceConnectorSpec extends WireMockSpec with SimpleWsHttpTestApplicatio
 
       for ((encoded, decoded) <- filenames) {
         stubFor(put(urlEqualTo("/customer-management-api/customer/evidence"))
-          .withHeader("Ocp-Apim-Subscription-Key", matching(fakeApplication.configuration.getString("voaApi.subscriptionKeyHeader").getOrElse("")))
-          .withHeader("Ocp-Apim-Trace", matching(fakeApplication.configuration.getString("voaApi.traceHeader").getOrElse("")))
           .withRequestBody(containing(s"""filename="$decoded""""))
           .withRequestBody(containing("aSubmissionId"))
           .withRequestBody(containing("12345"))
