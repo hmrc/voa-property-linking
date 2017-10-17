@@ -18,12 +18,9 @@ package infrastructure
 
 import javax.inject.Inject
 
-import com.google.inject.name.Named
 import com.kenshoo.play.metrics.Metrics
 import metrics.HasMetrics
 
-class VOABackendWSHttp @Inject()(override val metrics: Metrics,
-                                 @Named("voaApiSubscriptionHeader") val voaApiSubscriptionHeader: String,
-                                 @Named("voaApiTraceHeader") val voaApiTraceHeader: String) extends HasMetrics with AzureHeaders {
+class VOABackendWSHttp @Inject()(override val metrics: Metrics) extends HasMetrics with AzureHeaders {
   override val hooks = NoneRequired
 }

@@ -21,7 +21,6 @@ import javax.inject.Inject
 
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
-import com.codahale.metrics.MetricRegistry
 import com.google.inject.ImplementedBy
 import com.kenshoo.play.metrics.Metrics
 import connectors.fileUpload.EnvelopeMetadata
@@ -29,7 +28,7 @@ import infrastructure.SimpleWSHttp
 import metrics.MetricsLogger
 import play.api.Logger
 import play.api.http.HeaderNames.USER_AGENT
-import play.api.libs.ws.{WSClient, WSResponse}
+import play.api.libs.ws.WSResponse
 import play.api.mvc.MultipartFormData.{DataPart, FilePart}
 import uk.gov.hmrc.play.config.{AppName, ServicesConfig}
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -46,10 +45,8 @@ trait EvidenceTransfer {
 class EvidenceConnector @Inject()(val ws: SimpleWSHttp, override val metrics: Metrics) extends EvidenceTransfer with ServicesConfig with HandleErrors with AppName with MetricsLogger {
   lazy val url: String = baseUrl("external-business-rates-data-platform")
   lazy val uploadEndpoint: String = s"$url/customer-management-api/customer/evidence"
-  lazy val voaApiKey: (String, String) = "Ocp-Apim-Subscription-Key" -> getString("voaApi.subscriptionKeyHeader")
-  lazy val voaApiTrace: (String, String) = "Ocp-Apim-Trace" -> getString("voaApi.traceHeader")
   lazy val userAgent: (String, String) = USER_AGENT -> appName
-  lazy val headers = Seq(voaApiKey, voaApiTrace, userAgent)
+  lazy val headers = Seq(userAgent)
 
   // Temporary fix for windows character issue in filenames - will drop entries to manual with them in their names
   private def decode(fileName: String) = URLDecoder.decode(fileName, "UTF-8").replaceAll("""[:<>"/\\|\?\*]""", "-")
