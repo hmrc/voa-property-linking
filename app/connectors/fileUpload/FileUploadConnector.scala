@@ -41,12 +41,12 @@ object EnvelopeMetadata {
   implicit val format: Format[EnvelopeMetadata] = Json.format[EnvelopeMetadata]
 }
 
-case class EnvelopeConstraints(maxItems: Int, maxSize: String, contentTypes: Seq[String])
+case class EnvelopeConstraints(maxItems: Int, maxSize: String, contentTypes: Seq[String], allowZeroLengthFiles: Boolean)
 
 object EnvelopeConstraints {
   implicit lazy val format: Format[EnvelopeConstraints] = Json.format[EnvelopeConstraints]
 
-  lazy val defaultConstraints = EnvelopeConstraints(1, "10MB", Seq("application/pdf", "image/jpeg"))
+  lazy val defaultConstraints = EnvelopeConstraints(1, "10MB", Seq("application/pdf", "image/jpeg"), false)
 }
 
 case class CreateEnvelopePayload(callbackUrl: String, metadata: EnvelopeMetadata, constraints: EnvelopeConstraints)

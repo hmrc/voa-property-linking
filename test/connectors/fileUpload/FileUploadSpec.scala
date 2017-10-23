@@ -119,7 +119,8 @@ class FileUploadSpec extends WireMockSpec with SimpleWsHttpTestApplication with 
         "constraints" -> Json.obj(
           "maxItems" -> 1,
           "maxSize" -> "10MB",
-          "contentTypes" -> Json.arr("application/pdf", "image/jpeg")
+          "contentTypes" -> Json.arr("application/pdf", "image/jpeg"),
+          "allowZeroLengthFiles" -> false
         )
       ))
 
