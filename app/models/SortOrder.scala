@@ -14,12 +14,22 @@
  * limitations under the License.
  */
 
-package models.messages
+package models
 
-import play.api.libs.json.{Format, Json}
+sealed trait SortOrder extends NamedEnum {
+  val apiQueryString: String
+}
 
-case class MessageSearchResults(start: Int, size: Int, messages: Seq[Message])
+object SortOrder extends NamedEnumSupport[SortOrder] {
+  case object Ascending extends SortOrder {
+    override val apiQueryString: String = "ASC"
+    override def name: String = "asc"
+  }
 
-object MessageSearchResults {
-  implicit val format: Format[MessageSearchResults] = Json.format[MessageSearchResults]
+  case object Descending extends SortOrder {
+    override val apiQueryString: String = "DESC"
+    override def name: String = "desc"
+  }
+
+  override def all: Seq[SortOrder] = Seq(Ascending, Descending)
 }
