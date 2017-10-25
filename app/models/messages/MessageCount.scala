@@ -16,10 +16,19 @@
 
 package models.messages
 
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json._
+import play.api.libs.functional.syntax._
 
-case class MessageCount(messageCount: Int)
+case class MessageCount(unread: Int, total: Int)
 
 object MessageCount {
-  implicit val format: Format[MessageCount] = Json.format[MessageCount]
+  //frontend format
+  val writes: Writes[MessageCount] = Json.writes[MessageCount]
+  //"modernised" format
+  val reads: Reads[MessageCount] = (
+    (__ \ "messageCount").read[Int] and
+      (__ \ "totalMessagesCount").read[Int]
+    )(MessageCount.apply _)
+
+  implicit val format: Format[MessageCount] = Format(reads, writes)
 }

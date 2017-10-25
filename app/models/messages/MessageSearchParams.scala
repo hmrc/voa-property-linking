@@ -16,8 +16,8 @@
 
 package models.messages
 
+import models.SortOrder
 import play.api.mvc.QueryStringBindable
-import play.api.mvc.QueryStringBindable._
 
 case class MessageSearchParams(recipientOrgId: Long,
                                clientOrgId: Option[Long],
@@ -25,7 +25,7 @@ case class MessageSearchParams(recipientOrgId: Long,
                                referenceNumber: Option[String],
                                address: Option[String],
                                sortField: MessageSortField,
-                               sortOrder: String,
+                               sortOrder: SortOrder,
                                startPoint: Int,
                                pageSize: Int) {
 
@@ -37,7 +37,7 @@ case class MessageSearchParams(recipientOrgId: Long,
       |${referenceNumber.fold("")(rn => s"businessKey1=$rn&")}
       |${address.fold("")(a => s"address=$a&")}
       |sortfield=${sortField.apiQueryString}&
-      |sortorder=$sortOrder&
+      |sortorder=${sortOrder.apiQueryString}&
       |start=$startPoint&
       |size=$pageSize
       |""".stripMargin.replaceAll("\n", "")
@@ -57,7 +57,7 @@ object MessageSearchParams {
           refNum <- bindParam[Option[String]]("referenceNumber")
           address <- bindParam[Option[String]]("address")
           sortField <- bindParam[MessageSortField]("sortField")
-          sortOrder <- bindParam[String]("sortOrder")
+          sortOrder <- bindParam[SortOrder]("sortOrder")
           startPoint <- bindParam[Int]("startPoint")
           pageSize <- bindParam[Int]("pageSize")
         } yield {
