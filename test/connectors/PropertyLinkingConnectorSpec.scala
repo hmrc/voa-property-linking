@@ -58,6 +58,147 @@ class PropertyLinkingConnectorSpec
     }
   }
 
+  "PropertyLinkingConnector.searchAndSort" should {
+    "not care if agent status is present or not" in {
+      implicit val hc = HeaderCarrier()
+      val http = fakeApplication.injector.instanceOf[WSHttp]
+
+      val connector = new PropertyLinkingConnector(http, fakeApplication.injector.instanceOf[ServicesConfig]) {
+        override lazy val baseUrl: String = mockServerUrl
+      }
+
+      val organisationId = 123L
+      val searchUrl = s"/authorisation-search-api/owners/$organisationId/authorisations?start=1&size=10"
+
+      stubFor(get(urlEqualTo(searchUrl))
+        .willReturn(aResponse
+          .withStatus(200)
+          .withHeader("Content-Type", JSON)
+          .withBody(clientSearchResultWithAgentStatus)
+        )
+      )
+      await(connector.searchAndSort(organisationId, PaginationParams(1, 10, false))(hc)).authorisations.size shouldBe 3
+
+      stubFor(get(urlEqualTo(searchUrl))
+        .willReturn(aResponse
+          .withStatus(200)
+          .withHeader("Content-Type", JSON)
+          .withBody(clientSearchResultWithoutAgentStatus)
+        )
+      )
+      await(connector.searchAndSort(organisationId, PaginationParams(1, 10, false))(hc)).authorisations.size shouldBe 3
+    }
+  }
+
+  lazy val clientSearchResultWithAgentStatus =
+    """{
+      |  "start": 1,
+      |  "size": 15,
+      |  "filterTotal": 3,
+      |  "total": 10,
+      |  "authorisations": [
+      |    {
+      |      "authorisationId": 10000000000005,
+      |      "status": "PENDING",
+      |      "submissionId": "a0000000000000000000000000000005",
+      |      "uarn": 8735379000,
+      |      "address": "1 CLEMENTS ROAD, LONDON, SE16 4DG",
+      |      "localAuthorityRef": "1940002152213J"
+      |    },
+      |    {
+      |      "authorisationId": 10000000000004,
+      |      "status": "REVOKED",
+      |      "submissionId": "a0000000000000000000000000000004",
+      |      "uarn": 1592189000,
+      |      "address": "1 CHORLEY OLD ROAD, BOLTON, BL1 6AB",
+      |      "localAuthorityRef": "1S2643050002",
+      |      "agents": [
+      |        {
+      |          "authorisedPartyId": 1000000005,
+      |          "organisationId": 1000000005,
+      |          "organisationName": "Automated Stub Agent 1",
+      |          "status": "REVOKED"
+      |        },
+      |        {
+      |          "authorisedPartyId": 5000000006,
+      |          "organisationId": 5000000006,
+      |          "organisationName": "Automated Stub Agent 2",
+      |          "status": "APPROVED"
+      |        }
+      |      ]
+      |    },
+      |    {
+      |      "authorisationId": 10000000000003,
+      |      "status": "DECLINED",
+      |      "submissionId": "a0000000000000000000000000000003",
+      |      "uarn": 8444236000,
+      |      "address": "1 WESTEND TERRACE, EBBW VALE, NP23 6HS",
+      |      "localAuthorityRef": "138030130380000204",
+      |      "agents": [
+      |        {
+      |          "authorisedPartyId": 1000000005,
+      |          "organisationId": 1000000005,
+      |          "organisationName": "Automated Stub Agent 1",
+      |          "status": "APPROVED"
+      |        }
+      |      ]
+      |    }
+      |  ]
+      |}""".stripMargin
+
+  lazy val clientSearchResultWithoutAgentStatus =
+    """{
+      |  "start": 1,
+      |  "size": 15,
+      |  "filterTotal": 3,
+      |  "total": 10,
+      |  "authorisations": [
+      |    {
+      |      "authorisationId": 10000000000005,
+      |      "status": "PENDING",
+      |      "submissionId": "a0000000000000000000000000000005",
+      |      "uarn": 8735379000,
+      |      "address": "1 CLEMENTS ROAD, LONDON, SE16 4DG",
+      |      "localAuthorityRef": "1940002152213J"
+      |    },
+      |    {
+      |      "authorisationId": 10000000000004,
+      |      "status": "REVOKED",
+      |      "submissionId": "a0000000000000000000000000000004",
+      |      "uarn": 1592189000,
+      |      "address": "1 CHORLEY OLD ROAD, BOLTON, BL1 6AB",
+      |      "localAuthorityRef": "1S2643050002",
+      |      "agents": [
+      |        {
+      |          "authorisedPartyId": 1000000005,
+      |          "organisationId": 1000000005,
+      |          "organisationName": "Automated Stub Agent 1"
+      |        },
+      |        {
+      |          "authorisedPartyId": 5000000006,
+      |          "organisationId": 5000000006,
+      |          "organisationName": "Automated Stub Agent 2"
+      |        }
+      |      ]
+      |    },
+      |    {
+      |      "authorisationId": 10000000000003,
+      |      "status": "DECLINED",
+      |      "submissionId": "a0000000000000000000000000000003",
+      |      "uarn": 8444236000,
+      |      "address": "1 WESTEND TERRACE, EBBW VALE, NP23 6HS",
+      |      "localAuthorityRef": "138030130380000204",
+      |      "agents": [
+      |        {
+      |          "authorisedPartyId": 1000000005,
+      |          "organisationId": 1000000005,
+      |          "organisationName": "Automated Stub Agent 1"
+      |        }
+      |      ]
+      |    }
+      |  ]
+      |}""".stripMargin
+
   lazy val declinedAndRevokedProperties =
     """
       |{
