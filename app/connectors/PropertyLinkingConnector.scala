@@ -63,12 +63,12 @@ class PropertyLinkingConnector @Inject() (@Named("VoaBackendWsHttp") http: WSHtt
 
   def searchAndSort(organisationId: Long,
                     params: PaginationParams,
-                    sortfield: Option[String],
-                    sortorder: Option[String],
-                    status: Option[String],
-                    address: Option[String],
-                    baref: Option[String],
-                    agent: Option[String])(implicit hc: HeaderCarrier): Future[OwnerAuthResult] = {
+                    sortfield: Option[String] = None,
+                    sortorder: Option[String] = None,
+                    status: Option[String] = None,
+                    address: Option[String] = None,
+                    baref: Option[String] = None,
+                    agent: Option[String] = None)(implicit hc: HeaderCarrier): Future[OwnerAuthResult] = {
     val url = baseUrl +
       s"/authorisation-search-api/owners/$organisationId/authorisations" +
       s"?start=${params.startPoint}" +
