@@ -26,18 +26,17 @@ import uk.gov.hmrc.play.http.ws.WSHttp
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class PropertyLinkingConnectorSpec
-  extends ContentTypes
+class PropertyLinkingConnectorSpec extends ContentTypes
     with WireMockSpec with SimpleWsHttpTestApplication {
+
+  implicit val hc = HeaderCarrier()
+  val http = fakeApplication.injector.instanceOf[WSHttp]
+  val connector = new PropertyLinkingConnector(http, fakeApplication.injector.instanceOf[ServicesConfig]) {
+    override lazy val baseUrl: String = mockServerUrl
+  }
 
   "PropertyLinkingConnector.find" should {
     "filter properties that are revoked, or declined" in {
-      implicit val hc = HeaderCarrier()
-      val http = fakeApplication.injector.instanceOf[WSHttp]
-
-      val connector = new PropertyLinkingConnector(http, fakeApplication.injector.instanceOf[ServicesConfig]) {
-        override lazy val baseUrl: String = mockServerUrl
-      }
 
       val organisationId = 123
       val propertiesUrl = s"/mdtp-dashboard-management-api/mdtp_dashboard/properties_view" +
