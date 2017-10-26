@@ -44,3 +44,4 @@ POST         /request-detailed-valuation                                        
 
 GET          /messages                                                                        @controllers.MessagesController.getMessages(params: models.messages.MessageSearchParams)
 GET          /unread-messages-count/:orgId                                                    @controllers.MessagesController.messageCountFor(orgId: Long)
+PUT          /message/:messageId                                                              @controllers.MessagesController.readMessage(messageId, readBy)

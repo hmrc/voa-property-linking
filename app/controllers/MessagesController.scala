@@ -37,6 +37,7 @@ class MessagesController @Inject()(val auth: AuthConnector,
     messagesConnector.getMessageCount(organisationId) map { c => Ok(Json.toJson(c)) }
   }
 
-  def getMessage(messageId: String) = TODO
-  def readMessage(messageId: String, readBy: String) = TODO
+  def readMessage(messageId: String, readBy: String) = Action.async { implicit request =>
+    messagesConnector.readMessage(messageId, readBy) map { _ => Ok }
+  }
 }
