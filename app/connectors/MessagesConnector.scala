@@ -16,11 +16,14 @@
 
 package connectors
 
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import javax.inject.{Inject, Named}
 
 import models.messages.{MessageCount, MessageSearchParams, MessageSearchResults}
+import play.api.libs.json.{JsNull, JsValue}
 import uk.gov.hmrc.play.config.inject.ServicesConfig
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.http.ws.WSHttp
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -35,5 +38,11 @@ class MessagesConnector @Inject()(@Named("VoaBackendWsHttp") http: WSHttp, conf:
 
   def getMessageCount(orgId: Long)(implicit hc: HeaderCarrier): Future[MessageCount] = {
     http.GET[MessageCount](s"$baseUrl/messageCount/$orgId")
+  }
+
+  def readMessage(messageId: String, readBy: String)(implicit hc: HeaderCarrier): Future[Unit] = {
+    val now = LocalDateTime.now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"))
+    //no body required
+    http.PATCH[JsValue, HttpResponse](s"$baseUrl/message/$messageId?lastReadBy=$readBy&lastReadAt=$now", JsNull) map { _ => () }
   }
 }
