@@ -21,23 +21,28 @@ import javax.inject.Inject
 import auth.Authenticated
 import connectors.MessagesConnector
 import connectors.auth.AuthConnector
-import models.messages.MessageSearchParams
+import models.messages.{MessageSearchParams, MessageSearchResults}
 import play.api.libs.json.Json
-import play.api.mvc.Action
 
 class MessagesController @Inject()(val auth: AuthConnector,
                                    messagesConnector: MessagesConnector) extends PropertyLinkingBaseController with Authenticated {
 
-  //TODO authenticated endpoints
-  def getMessages(params: MessageSearchParams) = Action.async { implicit request =>
+  def getMessage(recipientOrganisationId: Long, messageId: String) = authenticated { implicit request =>
+    messagesConnector.getMessage(recipientOrganisationId, messageId) map {
+      case MessageSearchResults(_, _, m :: _) => Ok(Json.toJson(m))
+      case _ => NotFound
+    }
+  }
+
+  def getMessages(params: MessageSearchParams) = authenticated { implicit request =>
     messagesConnector.getMessages(params) map { msgs => Ok(Json.toJson(msgs)) }
   }
 
-  def messageCountFor(organisationId: Long) = Action.async { implicit request =>
+  def messageCountFor(organisationId: Long) = authenticated { implicit request =>
     messagesConnector.getMessageCount(organisationId) map { c => Ok(Json.toJson(c)) }
   }
 
-  def readMessage(messageId: String, readBy: String) = Action.async { implicit request =>
+  def readMessage(messageId: String, readBy: String) = authenticated { implicit request =>
     messagesConnector.readMessage(messageId, readBy) map { _ => Ok }
   }
 }

@@ -32,6 +32,10 @@ class MessagesConnector @Inject()(@Named("VoaBackendWsHttp") http: WSHttp, conf:
 
   lazy val baseUrl: String = conf.baseUrl("external-business-rates-data-platform") + "/message-search-api"
 
+  def getMessage(recipientOrgId: Long, messageId: String)(implicit hc: HeaderCarrier): Future[MessageSearchResults] = {
+    http.GET[MessageSearchResults](s"$baseUrl/messages?recipientOrganisationID=$recipientOrgId&nodeRef=$messageId")
+  }
+
   def getMessages(params: MessageSearchParams)(implicit hc: HeaderCarrier): Future[MessageSearchResults] = {
     http.GET[MessageSearchResults](s"$baseUrl/messages?${params.apiQueryString}")
   }
