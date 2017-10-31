@@ -42,6 +42,7 @@ GET          /submissionId/:prefix                                              
 
 POST         /request-detailed-valuation                                                      @controllers.DVRCaseManagement.requestDetailedValuation
 
+GET          /message/:orgId/:messageId                                                       @controllers.MessagesController.getMessage(orgId: Long, messageId)
+PUT          /message/:messageId                                                              @controllers.MessagesController.readMessage(messageId, readBy)
 GET          /messages                                                                        @controllers.MessagesController.getMessages(params: models.messages.MessageSearchParams)
 GET          /unread-messages-count/:orgId                                                    @controllers.MessagesController.messageCountFor(orgId: Long)
-PUT          /message/:messageId                                                              @controllers.MessagesController.readMessage(messageId, readBy)
