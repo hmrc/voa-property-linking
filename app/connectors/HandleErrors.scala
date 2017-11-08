@@ -17,7 +17,7 @@
 package connectors
 
 import play.api.libs.ws.WSResponse
-import uk.gov.hmrc.play.http.{Upstream4xxResponse, Upstream5xxResponse}
+import uk.gov.hmrc.http.{Upstream4xxResponse, Upstream5xxResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 

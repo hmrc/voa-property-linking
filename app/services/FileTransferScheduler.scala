@@ -22,7 +22,7 @@ import akka.actor.ActorSystem
 import com.google.inject.Singleton
 import infrastructure.{Lock, LockedJobScheduler, Schedule}
 import play.api.Logger
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global

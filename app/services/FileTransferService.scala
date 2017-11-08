@@ -28,7 +28,7 @@ import models.{Closed, Open}
 import play.api.Logger
 import repositories.EnvelopeIdRepo
 import uk.gov.hmrc.circuitbreaker.UnhealthyServiceException
-import uk.gov.hmrc.play.http.{HeaderCarrier, Upstream4xxResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, Upstream4xxResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}

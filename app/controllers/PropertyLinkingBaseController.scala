@@ -18,13 +18,13 @@ package controllers
 
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Reads}
 import play.api.mvc.{Controller, Request, Result}
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
 trait PropertyLinkingBaseController extends Controller {
 
-  implicit def hc(implicit request: Request[_]): HeaderCarrier = HeaderCarrier.fromHeadersAndSession(request.headers)
+  implicit def hc(implicit request: Request[_]): HeaderCarrier =  new HeaderCarrier().withExtraHeaders(request.headers.headers:_*)
 
   implicit def future[A](a: A): Future[A] = Future.successful(a)
   implicit val ec: ExecutionContext = play.api.libs.concurrent.Execution.Implicits.defaultContext

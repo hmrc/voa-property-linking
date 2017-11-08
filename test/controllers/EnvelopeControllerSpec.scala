@@ -27,7 +27,7 @@ import play.api.test.FakeRequest
 import repositories.EnvelopeIdRepo
 import org.mockito.ArgumentMatchers.{eq => matching, _}
 import org.mockito.Mockito._
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 import play.api.test.Helpers._
 import uk.gov.hmrc.circuitbreaker.UnhealthyServiceException
 

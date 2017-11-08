@@ -23,7 +23,7 @@ import javax.inject.{Inject, Named}
 import models.messages.{MessageCount, MessageSearchParams, MessageSearchResults}
 import play.api.libs.json.{JsNull, JsValue}
 import uk.gov.hmrc.play.config.inject.ServicesConfig
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.http.ws.WSHttp
 
 import scala.concurrent.{ExecutionContext, Future}
