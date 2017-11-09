@@ -28,13 +28,12 @@ import play.api.{Application, Configuration, Environment, Play}
 import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.DB
 import uk.gov.hmrc.circuitbreaker.CircuitBreakerConfig
-import uk.gov.hmrc.play.audit.filters.AuditFilter
+import uk.gov.hmrc.play.microservice.filters.AuditFilter
 import uk.gov.hmrc.play.auth.controllers.AuthParamsControllerConfig
 import uk.gov.hmrc.play.auth.microservice.filters.AuthorisationFilter
 import uk.gov.hmrc.play.config.{AppName, ControllerConfig, RunMode}
-import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
-import uk.gov.hmrc.play.http.logging.filters.LoggingFilter
-import uk.gov.hmrc.play.http.ws.WSHttp
+import uk.gov.hmrc.play.microservice.filters.MicroserviceFilterSupport
+import uk.gov.hmrc.play.microservice.filters.LoggingFilter
 import uk.gov.hmrc.play.microservice.bootstrap.DefaultMicroserviceGlobal
 
 object ControllerConfiguration extends ControllerConfig {
@@ -63,6 +62,7 @@ object MicroserviceAuthFilter extends AuthorisationFilter with MicroserviceFilte
 class GuiceModule(environment: Environment,
                   configuration: Configuration) extends AbstractModule {
   override def configure() = {
+
     bind(classOf[String]).annotatedWith(Names.named("lockName")).toInstance("FileTransferLock")
     bind(classOf[Duration]).annotatedWith(Names.named("lockTimeout")).toInstance(
       Duration.standardMinutes(configuration.getLong("fileTransfer.lockMinutes").getOrElse(30L)))
@@ -72,7 +72,7 @@ class GuiceModule(environment: Environment,
     
     bindConstant().annotatedWith(Names.named("envelopeCollectionName")).to(configuration.getString("envelope.collection.name").get)
 
-    bind(classOf[WSHttp]).annotatedWith(Names.named("VoaBackendWsHttp")).to(classOf[VOABackendWSHttp])
+    bind(classOf[uk.gov.hmrc.play.http.ws.WSHttp]).annotatedWith(Names.named("VoaBackendWsHttp")).to(classOf[VOABackendWSHttp])
     bind(classOf[Clock]).toInstance(Clock.systemUTC())
 
     bind(classOf[CircuitBreakerConfig]).toProvider(classOf[CircuitBreakerConfigProvider]).asEagerSingleton()

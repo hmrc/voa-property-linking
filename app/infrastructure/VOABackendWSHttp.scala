@@ -20,7 +20,11 @@ import javax.inject.Inject
 
 import com.kenshoo.play.metrics.Metrics
 import metrics.HasMetrics
+import uk.gov.hmrc.http._
+import uk.gov.hmrc.http.hooks.HttpHooks
+import uk.gov.hmrc.play.config.AppName
+import uk.gov.hmrc.play.http.ws._
 
-class VOABackendWSHttp @Inject()(override val metrics: Metrics) extends HasMetrics with AzureHeaders {
+class VOABackendWSHttp @Inject()(override val metrics: Metrics) extends HasMetrics with AzureHeaders with HttpGet with WSGet with HttpPut with WSPut with HttpPost with WSPost with HttpDelete with WSDelete with HttpPatch with WSPatch with AppName with HttpHooks{
   override val hooks = NoneRequired
 }

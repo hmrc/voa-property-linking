@@ -21,7 +21,7 @@ import javax.inject.{Inject, Named}
 import models.{APIAddressLookupResult, DetailedAddress, SimpleAddress}
 import play.api.libs.json.{JsDefined, JsNumber, JsValue}
 import uk.gov.hmrc.play.config.inject.ServicesConfig
-import uk.gov.hmrc.play.http._
+import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.http.ws.WSHttp
 
 import scala.concurrent.{ExecutionContext, Future}

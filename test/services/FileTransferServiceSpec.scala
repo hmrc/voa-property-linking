@@ -34,7 +34,7 @@ import org.scalatest.mock.MockitoSugar
 import play.api.libs.ws.{StreamedResponse, WSResponseHeaders}
 import reactivemongo.bson.BSONDateTime
 import repositories.{EnvelopeId, EnvelopeIdRepo}
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global

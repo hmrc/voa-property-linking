@@ -29,19 +29,19 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import uk.gov.hmrc.http.{HeaderCarrier, HttpReads}
 import uk.gov.hmrc.play.config.inject.ServicesConfig
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext
 import uk.gov.hmrc.play.http.ws.WSHttp
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpReads}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.Random
-
+import scala.concurrent.ExecutionContext.Implicits.global
 class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
 
   implicit val request = FakeRequest()
-
+  
   val mockWS = mock[WSHttp]
   val mockConf = mock[ServicesConfig]
   val mockAddressConnector = mock[AddressConnector]
@@ -73,11 +73,12 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
         s"&startPoint=1" +
         s"&pageSize=25" +
         s"&requestTotalRowCount=false"
+      val ec =  scala.concurrent.ExecutionContext.Implicits.global
 
-      when(mockWS.GET(mockEq(propertiesUrl))(any(classOf[HttpReads[PropertiesViewResponse]]), any())).thenReturn(Future(PropertiesViewResponse(None, dummyProperties)))
+      when(mockWS.GET(mockEq(propertiesUrl))(any(classOf[HttpReads[PropertiesViewResponse]]), any(), any())).thenReturn(Future(PropertiesViewResponse(None, dummyProperties)))
 
       val repUrl = s"$baseUrl/mdtp-dashboard-management-api/mdtp_dashboard/agent_representation_requests?status=APPROVED&organisationId=$userOrgId&startPoint=1"
-      when(mockWS.GET(mockEq(repUrl))(any(classOf[HttpReads[APIPropertyRepresentations]]), any())).thenReturn(APIPropertyRepresentations(0, Some(0), Nil))
+      when(mockWS.GET(mockEq(repUrl))(any(classOf[HttpReads[APIPropertyRepresentations]]), any(), any())).thenReturn(APIPropertyRepresentations(0, Some(0), Nil))
 
       val res = testPropertyLinkingController.find(userOrgId, PaginationParams(1, 25, requestTotalRowCount = false))(FakeRequest())
       status(res) shouldBe OK
@@ -113,27 +114,26 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
         s"&startPoint=1" +
         s"&pageSize=25" +
         s"&requestTotalRowCount=false".toString
-      when(mockWS.GET(mockEq(propertiesUrl))(any(classOf[HttpReads[PropertiesViewResponse]]), any())).thenReturn(Future(PropertiesViewResponse(None, dummyProperties)))
+      when(mockWS.GET(mockEq(propertiesUrl))(any(classOf[HttpReads[PropertiesViewResponse]]), any(), any())).thenReturn(Future(PropertiesViewResponse(None, dummyProperties)))
 
       val repUrl = s"$baseUrl/mdtp-dashboard-management-api/mdtp_dashboard/agent_representation_requests?status=APPROVED&organisationId=$userOrgId&startPoint=1"
-      when(mockWS.GET(mockEq(repUrl))(any(classOf[HttpReads[APIPropertyRepresentations]]), any())).thenReturn(APIPropertyRepresentations(0, Some(0), Nil))
+      when(mockWS.GET(mockEq(repUrl))(any(classOf[HttpReads[APIPropertyRepresentations]]), any(), any())).thenReturn(APIPropertyRepresentations(0, Some(0), Nil))
 
       val detailedGroup1 = APIDetailedGroupAccount(1001, "ggGroup11", 1111, GroupDetails(1, true, "orgName", "email@add.res", None), Nil)
       val detailedGroup2 = APIDetailedGroupAccount(1002, "ggGroup22", 2222, GroupDetails(1, true, "orgName", "email@add.res", None), Nil)
 
       val org1001Url = s"$baseUrl/customer-management-api/organisation?organisationId=1001"
       val org1002Url = s"$baseUrl/customer-management-api/organisation?organisationId=1002"
-      when(mockWS.GET(mockEq(org1001Url))(any(classOf[HttpReads[Option[APIDetailedGroupAccount]]]), any())).thenReturn(Some(detailedGroup1))
-      when(mockWS.GET(mockEq(org1002Url))(any(classOf[HttpReads[Option[APIDetailedGroupAccount]]]), any())).thenReturn(Some(detailedGroup2))
+      when(mockWS.GET(mockEq(org1001Url))(any(classOf[HttpReads[Option[APIDetailedGroupAccount]]]), any(), any())).thenReturn(Some(detailedGroup1))
+      when(mockWS.GET(mockEq(org1002Url))(any(classOf[HttpReads[Option[APIDetailedGroupAccount]]]), any(), any())).thenReturn(Some(detailedGroup2))
 
       val res = testPropertyLinkingController.find(userOrgId, PaginationParams(1, 25, requestTotalRowCount = false))(FakeRequest())
       status(res) shouldBe OK
       val uarns = Json.parse(contentAsString(res)).as[PropertyLinkResponse].propertyLinks.map(_.uarn)
       uarns shouldBe Seq(101, 102, 103, 104, 105, 106)
-
-      verify(mockWS, times(1)).GET(mockEq(propertiesUrl))(any(classOf[HttpReads[PropertiesViewResponse]]), any())
-      verify(mockWS, times(1)).GET(mockEq(org1001Url))(any(classOf[HttpReads[Option[APIDetailedGroupAccount]]]), any())
-      verify(mockWS, times(1)).GET(mockEq(org1002Url))(any(classOf[HttpReads[Option[APIDetailedGroupAccount]]]), any())
+      verify(mockWS, times(1)).GET(mockEq(propertiesUrl))(any(classOf[HttpReads[PropertiesViewResponse]]), any(), any())
+      verify(mockWS, times(1)).GET(mockEq(org1001Url))(any(classOf[HttpReads[Option[APIDetailedGroupAccount]]]), any(), any())
+      verify(mockWS, times(1)).GET(mockEq(org1002Url))(any(classOf[HttpReads[Option[APIDetailedGroupAccount]]]), any(), any())
     }
   }
 }

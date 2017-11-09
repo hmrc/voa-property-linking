@@ -34,8 +34,9 @@ import org.scalatest.concurrent.Eventually.eventually
 import org.scalatest.mock.MockitoSugar
 import play.api.libs.ws.{WSRequest, WSResponse}
 import play.api.mvc.MultipartFormData
-import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
-import uk.gov.hmrc.play.http.{HeaderCarrier, Upstream4xxResponse, Upstream5xxResponse}
+import uk.gov.hmrc.play.microservice.filters.MicroserviceFilterSupport
+import uk.gov.hmrc.http.{HeaderCarrier, Upstream4xxResponse, Upstream5xxResponse}
+import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 
 import scala.concurrent.Future
 

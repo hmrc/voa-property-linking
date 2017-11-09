@@ -25,8 +25,8 @@ import play.api.libs.json.{JsObject, Json}
 import play.api.{Configuration, Environment, Logger}
 import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.{DB, ReadPreference}
-import reactivemongo.json._
-import reactivemongo.json.collection.JSONCollection
+import reactivemongo.play.json._
+import reactivemongo.play.json.collection.JSONCollection
 import uk.gov.hmrc.lock.{ExclusiveTimePeriodLock, LockMongoRepository, LockRepository}
 
 class AdHocQuery(environment: Environment, configuration: Configuration) extends AbstractModule {
