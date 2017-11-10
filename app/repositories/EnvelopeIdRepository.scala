@@ -27,7 +27,7 @@ import reactivemongo.api.DB
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.core.errors.DatabaseException
 import uk.gov.hmrc.mongo.ReactiveRepository
-import reactivemongo.play.json.ImplicitBSONHandlers._
+import reactivemongo.json.ImplicitBSONHandlers._
 import reactivemongo.bson.{BSONDateTime, BSONDocument}
 
 import scala.concurrent.duration._
@@ -83,7 +83,7 @@ class EnvelopeIdRepository @Inject()(db: DB, @Named("envelopeCollectionName") va
 case class EnvelopeId(envelopeId: String, _id: String, status: Option[EnvelopeStatus], createdAt: Option[BSONDateTime])
 
 object EnvelopeId {
-  import reactivemongo.play.json.BSONFormats.BSONDateTimeFormat
+  import reactivemongo.json.BSONFormats.BSONDateTimeFormat
 
   val mongoFormat = Json.format[EnvelopeId]
 }
