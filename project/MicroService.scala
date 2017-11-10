@@ -45,7 +45,6 @@ trait MicroService {
     .settings(PlayKeys.playDefaultPort := defaultPort)
     .settings(ScalastylePlugin.scalastyleFailOnError := false)
     .settings(
-      scalaVersion := "2.11.11",
       libraryDependencies ++= appDependencies,
       retrieveManaged := true,
       evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
