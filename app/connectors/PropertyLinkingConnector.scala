@@ -21,7 +21,7 @@ import javax.inject.{Inject, Named}
 import models._
 import models.searchApi.{AgentAuthResultBE, OwnerAuthResult}
 import uk.gov.hmrc.play.config.inject.ServicesConfig
-import uk.gov.hmrc.play.http._
+import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.http.ws.WSHttp
 
 import scala.concurrent.{ExecutionContext, Future}

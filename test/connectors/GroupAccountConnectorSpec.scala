@@ -25,7 +25,7 @@ import models.{GroupAccountSubmission, IndividualAccountSubmissionForOrganisatio
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.Json
 import uk.gov.hmrc.play.config.inject.ServicesConfig
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 
 class GroupAccountConnectorSpec extends WireMockSpec with SimpleWsHttpTestApplication {
 

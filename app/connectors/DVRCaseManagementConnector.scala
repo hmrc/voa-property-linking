@@ -21,7 +21,7 @@ import models.DetailedValuationRequest
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.ws.WSHttp
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.Future
 

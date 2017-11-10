@@ -20,7 +20,7 @@ import javax.inject.Inject
 
 import infrastructure.SimpleWSHttp
 import uk.gov.hmrc.play.config.inject.ServicesConfig
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 

@@ -17,7 +17,7 @@
 package infrastructure
 
 import play.api.libs.json.Writes
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.http.ws.WSHttp
 
 import scala.concurrent.Future

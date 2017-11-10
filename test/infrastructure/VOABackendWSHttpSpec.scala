@@ -23,7 +23,7 @@ import helpers.SimpleWsHttpTestApplication
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito.when
 import org.scalatest.mock.MockitoSugar
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
 
 class VOABackendWSHttpSpec extends UnitSpec with WireMockSpec with SimpleWsHttpTestApplication with MockitoSugar {

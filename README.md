@@ -25,7 +25,6 @@ sm --stop PROPERTY_LINKING
 * `cd` to the root of the project.
 * `sbt run`
 
-
 ### Found a bug?
 
 * Please raise an issue by selecting Issues near the top right hand side of this page.

@@ -25,9 +25,10 @@ import play.api.Logger
 import play.api.libs.json._
 import reactivemongo.api.DB
 import reactivemongo.api.indexes.{Index, IndexType}
-import reactivemongo.bson.{BSONDateTime, BSONDocument}
 import reactivemongo.core.errors.DatabaseException
 import uk.gov.hmrc.mongo.ReactiveRepository
+import reactivemongo.json.ImplicitBSONHandlers._
+import reactivemongo.bson.{BSONDateTime, BSONDocument}
 
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global

@@ -24,7 +24,7 @@ import connectors.{GroupAccountConnector, PropertyLinkingConnector, PropertyRepr
 import models._
 import models.searchApi.AgentAuthResultFE
 import play.api.libs.json.Json
-import uk.gov.hmrc.play.http.{HeaderCarrier, Upstream5xxResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, Upstream5xxResponse}
 
 import scala.collection.mutable
 import scala.concurrent.Future

@@ -20,7 +20,8 @@ import connectors.auth.{AuthConnector, Authority}
 import play.api.Logger
 import play.api.mvc._
 import play.api.mvc.Results._
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.HeaderCarrierConverter
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -34,7 +35,7 @@ trait Authenticated {
 
   implicit val uuh: UnauthenticatedUserHandler = () => Forbidden
 
-  private implicit def hc(implicit request: Request[_]): HeaderCarrier = HeaderCarrier.fromHeadersAndSession(request.headers)
+  private implicit def hc(implicit request: Request[_]): HeaderCarrier =  HeaderCarrierConverter.fromHeadersAndSession(request.headers)
 
   def authenticated(block: Request[AnyContent] => Future[Result])
                       (implicit uuh: UnauthenticatedUserHandler): Action[AnyContent] =

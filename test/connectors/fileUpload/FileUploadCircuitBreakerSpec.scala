@@ -22,8 +22,8 @@ import helpers.SimpleWsHttpTestApplication
 import infrastructure.SimpleWSHttp
 import org.scalatest.mock.MockitoSugar
 import uk.gov.hmrc.circuitbreaker.{CircuitBreakerConfig, UnhealthyServiceException}
-import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.play.microservice.filters.MicroserviceFilterSupport
+import uk.gov.hmrc.http.HeaderCarrier
 import com.github.tomakehurst.wiremock.client.WireMock._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 

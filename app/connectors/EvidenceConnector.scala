@@ -31,7 +31,7 @@ import play.api.http.HeaderNames.USER_AGENT
 import play.api.libs.ws.WSResponse
 import play.api.mvc.MultipartFormData.{DataPart, FilePart}
 import uk.gov.hmrc.play.config.{AppName, ServicesConfig}
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
