@@ -18,6 +18,7 @@ package controllers
 
 import javax.inject.Inject
 
+import auditing.AuditingService
 import auth.Authenticated
 import connectors.PropertyRepresentationConnector
 import connectors.auth.AuthConnector
@@ -44,18 +45,26 @@ class PropertyRepresentationController @Inject() (val auth: AuthConnector,
 
   def create() = authenticated(parse.json) { implicit request =>
     withJsonBody[RepresentationRequest] { reprRequest =>
-      representations.create(APIRepresentationRequest.fromRepresentationRequest(reprRequest)).map(x => Ok(""))
+      representations.create(APIRepresentationRequest.fromRepresentationRequest(reprRequest)).map{ x =>
+        AuditingService.sendEvent("create agent request success", reprRequest)
+        Ok("")
+      }
     }
   }
 
   def response() = authenticated(parse.json) { implicit request =>
     withJsonBody[APIRepresentationResponse] { r =>
-      representations.response(r) map { _ => Ok("") }
+      representations.response(r) map { _ =>
+        AuditingService.sendEvent("agent response success", r)
+        Ok("") }
     }
   }
 
   def revoke(authorisedPartyId: Long) = authenticated { implicit request =>
-    representations.revoke(authorisedPartyId)  map { _ => Ok("") }
+    representations.revoke(authorisedPartyId)  map { _ =>
+      AuditingService.sendEvent("create agent revoke success", authorisedPartyId)
+      Ok("")
+    }
   }
 
 }

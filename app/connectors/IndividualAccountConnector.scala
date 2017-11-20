@@ -19,7 +19,7 @@ package connectors
 import javax.inject.{Inject, Named}
 
 import models._
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.http.ws.WSHttp
@@ -32,8 +32,8 @@ class IndividualAccountConnector @Inject()(addresses: AddressConnector,
 
   lazy val baseUrl: String = baseUrl("external-business-rates-data-platform") + "/customer-management-api/person"
 
-  def create(account: IndividualAccountSubmission)(implicit hc: HeaderCarrier): Future[JsValue] = {
-    http.POST[APIIndividualAccount, JsValue](baseUrl, account.toAPIIndividualAccount)
+  def create(account: IndividualAccountSubmission)(implicit hc: HeaderCarrier): Future[IndividualAccountId] = {
+    http.POST[APIIndividualAccount, IndividualAccountId](baseUrl, account.toAPIIndividualAccount)
   }
 
   def update(personId: Long, account: IndividualAccountSubmission)(implicit hc: HeaderCarrier): Future[JsValue] = {

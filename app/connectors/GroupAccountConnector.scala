@@ -21,7 +21,7 @@ import javax.inject.Inject
 
 import com.google.inject.name.Named
 import models._
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsValue, Json, OFormat}
 import uk.gov.hmrc.play.config.inject.ServicesConfig
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.http.ws.WSHttp
@@ -33,8 +33,8 @@ class GroupAccountConnector @Inject()(@Named("VoaBackendWsHttp") http: WSHttp, c
   lazy val baseUrl: String = conf.baseUrl("external-business-rates-data-platform")
   lazy val url = baseUrl + "/customer-management-api/organisation"
 
-  def create(account: GroupAccountSubmission)(implicit hc: HeaderCarrier): Future[JsValue] = {
-    http.POST[APIGroupAccountSubmission, JsValue](url, account.toApiAccount)
+  def create(account: GroupAccountSubmission)(implicit hc: HeaderCarrier): Future[GroupId] = {
+    http.POST[APIGroupAccountSubmission, GroupId](url, account.toApiAccount)
   }
 
   def update(orgId: Long, account: UpdatedOrganisationAccount)(implicit hc: HeaderCarrier): Future[Unit] = {
