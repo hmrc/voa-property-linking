@@ -62,7 +62,7 @@ class PropertyRepresentationController @Inject() (val auth: AuthConnector,
 
   def revoke(authorisedPartyId: Long) = authenticated { implicit request =>
     representations.revoke(authorisedPartyId)  map { _ =>
-      AuditingService.sendEvent("create agent revoke success", authorisedPartyId)
+      AuditingService.sendEvent("agent revoke success", Map("authorisedPartyId" -> authorisedPartyId))
       Ok("")
     }
   }
