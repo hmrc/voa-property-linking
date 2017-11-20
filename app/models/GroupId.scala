@@ -18,7 +18,7 @@ package models
 
 import play.api.libs.json.{Json, OFormat}
 
-case class GroupId(id: Long)
+case class GroupId(id: Long, message: String, responseTime: Int)
 
 object GroupId {
   implicit val format: OFormat[GroupId] = Json.format[GroupId]
