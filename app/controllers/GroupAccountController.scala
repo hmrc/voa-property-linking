@@ -20,8 +20,9 @@ import javax.inject.Inject
 
 import auth.Authenticated
 import connectors.auth.AuthConnector
+import auditing.AuditingService
 import connectors.{BusinessRatesAuthConnector, GroupAccountConnector}
-import models.{GroupAccountSubmission, UpdatedOrganisationAccount}
+import models.{GroupAccountSubmission, GroupId, UpdatedOrganisationAccount}
 import play.api.libs.json.Json
 import play.api.mvc.Action
 
@@ -30,6 +31,11 @@ class GroupAccountController @Inject() (
                                          groups: GroupAccountConnector, brAuth: BusinessRatesAuthConnector)
   extends PropertyLinkingBaseController with Authenticated {
 
+  case class GroupAccount(groupId: GroupId, submission: GroupAccountSubmission)
+
+  object GroupAccount {
+    implicit val format = Json.format[GroupAccount]
+  }
   def get(organisationId: Long) = authenticated { implicit request =>
     groups.get(organisationId) map {
       case Some(x) => Ok(Json.toJson(x))
@@ -53,7 +59,9 @@ class GroupAccountController @Inject() (
 
   def create() = authenticated(parse.json) { implicit request =>
     withJsonBody[GroupAccountSubmission] { acc =>
-      groups.create(acc) map { Created(_) }
+      groups.create(acc) map { x =>
+        AuditingService.sendEvent("Created", GroupAccount(x, acc))
+        Created(Json.toJson(x)) }
     }
   }
 

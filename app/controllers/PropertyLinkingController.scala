@@ -18,6 +18,7 @@ package controllers
 
 import javax.inject.Inject
 
+import auditing.AuditingService
 import auth.Authenticated
 import connectors.auth.AuthConnector
 import connectors.{GroupAccountConnector, PropertyLinkingConnector, PropertyRepresentationConnector}
@@ -44,8 +45,13 @@ class PropertyLinkingController @Inject()(val auth: AuthConnector,
   def create() = authenticated(parse.json) { implicit request =>
     withJsonBody[PropertyLinkRequest] { linkRequest =>
       propertyLinksConnector.create(APIPropertyLinkRequest.fromPropertyLinkRequest(linkRequest))
-        .map { _ => Created }
-        .recover { case _: Upstream5xxResponse => InternalServerError }
+        .map { _ =>
+          AuditingService.sendEvent("create property link success", linkRequest)
+          Created
+        }
+        .recover { case _: Upstream5xxResponse =>
+          AuditingService.sendEvent("create property link failure", linkRequest)
+          InternalServerError }
     }
   }
 

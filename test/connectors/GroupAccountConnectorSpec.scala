@@ -56,7 +56,7 @@ class GroupAccountConnectorSpec extends WireMockSpec with SimpleWsHttpTestApplic
           .willReturn(aResponse.withBody(Json.stringify(expectedResponse)))
       )
 
-      await(testConnector.create(testSubmission)(HeaderCarrier())) shouldBe expectedResponse
+      Json.toJson(await(testConnector.create(testSubmission)(HeaderCarrier()))) shouldBe expectedResponse
     }
   }
 
