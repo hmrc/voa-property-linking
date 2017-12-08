@@ -53,5 +53,10 @@ object MessageSortField extends NamedEnumSupport[MessageSortField] {
     override def name: String = "clientName"
   }
 
-  override def all: Seq[MessageSortField] = Seq(EffectiveDate, Address, CaseReference, LastRead, Subject, ClientName)
+  case object AgentName extends MessageSortField {
+    override val apiQueryString: String = "AGENTORGANISATIONNAME"
+    override def name: String = "agentName"
+  }
+
+  override def all: Seq[MessageSortField] = Seq(EffectiveDate, Address, CaseReference, LastRead, Subject, ClientName, AgentName)
 }
