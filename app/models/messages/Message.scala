@@ -26,6 +26,8 @@ case class Message(id: String,
                    templateName: String,
                    clientOrgId: Option[Long],
                    clientName: Option[String],
+                   agentOrgId: Option[Long],
+                   agentName: Option[String],
                    caseReference: String,
                    submissionId: String,
                    timestamp: LocalDateTime,
@@ -43,6 +45,8 @@ object Message {
       (__ \ "templateName").read[String] and
       (__ \ "clientOrganisationID").readNullable[Long] and
       (__ \ "clientOrganisationName").readNullable[String] and
+      (__ \ "agentOrganisationID").readNullable[Long] and
+      (__ \ "agentOrganisationName").readNullable[String] and
       (__ \ "businessKey1").read[String] and
       (__ \ "businessKey2").read[String] and
       (__ \ "dateTimeStamp").read[LocalDateTime] and
