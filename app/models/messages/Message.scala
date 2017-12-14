@@ -40,7 +40,7 @@ case class Message(id: String,
 object Message {
   val writes: Writes[Message] = Json.writes[Message]
   val reads: Reads[Message] = (
-    (__ \ "nodeRef").read[String] and
+    (__ \ "objectID").read[String] and
       (__ \ "recipientOrganisationID").read[Long] and
       (__ \ "templateName").read[String] and
       (__ \ "clientOrganisationID").readNullable[Long] and
