@@ -41,12 +41,12 @@ class MessagesConnector @Inject()(@Named("VoaBackendWsHttp") http: WSHttp, conf:
   }
 
   def getMessageCount(orgId: Long)(implicit hc: HeaderCarrier): Future[MessageCount] = {
-    http.GET[MessageCount](s"$baseUrl/messageCount/$orgId")
+    http.GET[MessageCount](s"$baseUrl/count/$orgId")
   }
 
   def readMessage(messageId: String, readBy: String)(implicit hc: HeaderCarrier): Future[Unit] = {
     val now = LocalDateTime.now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"))
     //no body required
-    http.PATCH[JsValue, HttpResponse](s"$baseUrl/message/$messageId?lastReadBy=$readBy&lastReadAt=$now", JsNull) map { _ => () }
+    http.PATCH[JsValue, HttpResponse](s"$baseUrl/messages/$messageId?lastReadBy=$readBy&lastReadAt=$now", JsNull) map { _ => () }
   }
 }

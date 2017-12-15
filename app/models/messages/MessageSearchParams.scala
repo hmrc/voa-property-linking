@@ -22,8 +22,6 @@ import play.api.mvc.QueryStringBindable
 case class MessageSearchParams(recipientOrgId: Long,
                                clientOrgId: Option[Long],
                                clientName: Option[String],
-                               agentOrgId: Option[Long],
-                               agentName: Option[String],
                                referenceNumber: Option[String],
                                address: Option[String],
                                sortField: MessageSortField,
@@ -36,12 +34,10 @@ case class MessageSearchParams(recipientOrgId: Long,
       |recipientOrganisationID=$recipientOrgId&
       |${clientOrgId.fold("")(id => s"clientOrganisationID=$id&")}
       |${clientName.fold("")(cn => s"clientOrganisationName=$cn&")}
-      |${agentOrgId.fold("")(aid => s"agentOrganisationID=$aid&")}
-      |${agentName.fold("")(an => s"agentOrganisationName=$an&")}
       |${referenceNumber.fold("")(rn => s"businessKey1=$rn&")}
       |${address.fold("")(a => s"address=$a&")}
-      |sortfield=${sortField.apiQueryString}&
-      |sortorder=${sortOrder.apiQueryString}&
+      |sortField=${sortField.apiQueryString}&
+      |sortOrder=${sortOrder.apiQueryString}&
       |start=$startPoint&
       |size=$pageSize
       |""".stripMargin.replaceAll("\n", "")
@@ -58,8 +54,6 @@ object MessageSearchParams {
           orgId <- bindParam[Long]("recipientOrgId")
           clientOrgId <- bindParam[Option[Long]]("clientOrgId")
           clientName <- bindParam[Option[String]]("clientName")
-          agentOrgId <- bindParam[Option[Long]]("agentOrgId")
-          agentName <- bindParam[Option[String]]("agentName")
           refNum <- bindParam[Option[String]]("referenceNumber")
           address <- bindParam[Option[String]]("address")
           sortField <- bindParam[MessageSortField]("sortField")
@@ -67,9 +61,9 @@ object MessageSearchParams {
           startPoint <- bindParam[Int]("startPoint")
           pageSize <- bindParam[Int]("pageSize")
         } yield {
-          (orgId, clientOrgId, clientName, agentOrgId, agentName, refNum, address, sortField, sortOrder, startPoint, pageSize) match {
-            case (Right(oid), Right(cid), Right(cn), Right(aid), Right(an), Right(rn), Right(add), Right(sf), Right(so), Right(sp), Right(ps)) =>
-              Right(MessageSearchParams(oid, cid, cn, aid, an, rn, add, sf, so, sp, ps))
+          (orgId, clientOrgId, clientName, refNum, address, sortField, sortOrder, startPoint, pageSize) match {
+            case (Right(oid), Right(cid), Right(cn), Right(rn), Right(add), Right(sf), Right(so), Right(sp), Right(ps)) =>
+              Right(MessageSearchParams(oid, cid, cn, rn, add, sf, so, sp, ps))
             case _ =>
               Left("Unable to bind to MessageSearchParams")
           }
@@ -81,8 +75,6 @@ object MessageSearchParams {
           |recipientOrgId=${value.recipientOrgId}&
           |clientOrgId=${value.clientOrgId.fold("")(_.toString)}&
           |clientName=${value.clientName.getOrElse("")}&
-          |agentOrgId=${value.agentOrgId.fold("")(_.toString)}&
-          |agentName=${value.agentName.getOrElse("")}&
           |referenceNumber=${value.referenceNumber.getOrElse("")}&
           |address=${value.address.getOrElse("")}&
           |sortField=${value.sortField}&
