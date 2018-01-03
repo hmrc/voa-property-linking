@@ -25,7 +25,7 @@ sealed trait MessageSortField extends NamedEnum {
 object MessageSortField extends NamedEnumSupport[MessageSortField] {
   case object EffectiveDate extends MessageSortField {
     override val name: String = "effectiveDate"
-    override val apiQueryString: String = "EFFECTIVEDATE"
+    override val apiQueryString: String = "EFFECTIVE_DATE"
   }
 
   case object Address extends MessageSortField {
