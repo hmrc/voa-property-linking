@@ -49,7 +49,7 @@ class EvidenceConnector @Inject()(val ws: SimpleWSHttp, override val metrics: Me
   lazy val headers = Seq(userAgent)
 
   // Temporary fix for windows character issue in filenames - will drop entries to manual with them in their names
-  private def decode(fileName: String) = URLDecoder.decode(fileName, "UTF-8").replaceAll("""[:<>"/\\|\?\*]""", "-")
+  private def decode(fileName: String) = fileName.replaceAll("""[:<>"/\\|\?\*]""", "-")
 
   override def uploadFile(fileName: String, content: Source[ByteString, _], metadata: EnvelopeMetadata)(implicit hc: HeaderCarrier): Future[Unit] = {
     Logger.info(s"Uploading file: ${decode(fileName)}, subId: ${metadata.submissionId} to $uploadEndpoint")
