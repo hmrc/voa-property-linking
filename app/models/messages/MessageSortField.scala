@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ sealed trait MessageSortField extends NamedEnum {
 object MessageSortField extends NamedEnumSupport[MessageSortField] {
   case object EffectiveDate extends MessageSortField {
     override val name: String = "effectiveDate"
-    override val apiQueryString: String = "EFFECTIVEDATE"
+    override val apiQueryString: String = "EFFECTIVE_DATE"
   }
 
   case object Address extends MessageSortField {
@@ -53,5 +53,10 @@ object MessageSortField extends NamedEnumSupport[MessageSortField] {
     override def name: String = "clientName"
   }
 
-  override def all: Seq[MessageSortField] = Seq(EffectiveDate, Address, CaseReference, LastRead, Subject, ClientName)
+  case object AgentName extends MessageSortField {
+    override val apiQueryString: String = "AGENTORGANISATIONNAME"
+    override def name: String = "agentName"
+  }
+
+  override def all: Seq[MessageSortField] = Seq(EffectiveDate, Address, CaseReference, LastRead, Subject, ClientName, AgentName)
 }

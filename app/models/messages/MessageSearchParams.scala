@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,8 @@ case class MessageSearchParams(recipientOrgId: Long,
       |${clientName.fold("")(cn => s"clientOrganisationName=$cn&")}
       |${referenceNumber.fold("")(rn => s"businessKey1=$rn&")}
       |${address.fold("")(a => s"address=$a&")}
-      |sortfield=${sortField.apiQueryString}&
-      |sortorder=${sortOrder.apiQueryString}&
+      |sortField=${sortField.apiQueryString}&
+      |sortOrder=${sortOrder.apiQueryString}&
       |start=$startPoint&
       |size=$pageSize
       |""".stripMargin.replaceAll("\n", "")

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@ case class Message(id: String,
                    templateName: String,
                    clientOrgId: Option[Long],
                    clientName: Option[String],
+                   agentOrgId: Option[Long],
+                   agentName: Option[String],
                    caseReference: String,
                    submissionId: String,
                    timestamp: LocalDateTime,
@@ -38,11 +40,13 @@ case class Message(id: String,
 object Message {
   val writes: Writes[Message] = Json.writes[Message]
   val reads: Reads[Message] = (
-    (__ \ "nodeRef").read[String] and
+    (__ \ "objectID").read[String] and
       (__ \ "recipientOrganisationID").read[Long] and
       (__ \ "templateName").read[String] and
       (__ \ "clientOrganisationID").readNullable[Long] and
       (__ \ "clientOrganisationName").readNullable[String] and
+      (__ \ "agentOrganisationID").readNullable[Long] and
+      (__ \ "agentOrganisationName").readNullable[String] and
       (__ \ "businessKey1").read[String] and
       (__ \ "businessKey2").read[String] and
       (__ \ "dateTimeStamp").read[LocalDateTime] and

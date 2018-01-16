@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,33 +80,6 @@ class EvidenceConnectorSpec extends WireMockSpec with SimpleWsHttpTestApplicatio
       noException should be thrownBy await(connector.uploadFile("FileName", StreamConverters.fromInputStream { () => new ByteArrayInputStream(file.getBytes) }, metadata))
     }
 
-    "Properly URL Decode a filename in the PUT body" in {
-      val metrics = mock[Metrics]
-      val connector = new EvidenceConnector(fakeApplication.injector.instanceOf[SimpleWSHttp], metrics) {
-        override lazy val url = mockServerUrl
-      }
-
-      implicit val fakeHc = HeaderCarrier()
-      val file = getClass.getResource("/document.pdf").getFile
-      val metadata = EnvelopeMetadata("aSubmissionId", 12345)
-      val filenames = Map(
-        "Car+Space+16+Access+House%2C+Cray+Avenue+SBizhub+C2817042709470.pdf" -> "Car Space 16 Access House, Cray Avenue SBizhub C2817042709470.pdf",
-        "sharpscanner%40gmail.com.pdf" -> "sharpscanner@gmail.com.pdf",
-        "Scan+15+Jun+2017%2c+13.04.pdf" -> "Scan 15 Jun 2017, 13.04.pdf",
-        "Scan+15+Jun+2017%252c+13.04.pdf" -> "Scan 15 Jun 2017%2c 13.04.pdf"
-      )
-
-      for ((encoded, decoded) <- filenames) {
-        stubFor(put(urlEqualTo("/customer-management-api/customer/evidence"))
-          .withRequestBody(containing(s"""filename="$decoded""""))
-          .withRequestBody(containing("aSubmissionId"))
-          .withRequestBody(containing("12345"))
-          .willReturn(aResponse().withStatus(200)))
-
-        noException should be thrownBy await(connector.uploadFile(encoded, StreamConverters.fromInputStream { () => new ByteArrayInputStream(file.getBytes) }, metadata))
-      }
-    }
-
     "URL Decode a filename with a non windows character in it replacing with a - (temporary fix) in the PUT body" in {
       val metrics = mock[Metrics]
       val connector = new EvidenceConnector(fakeApplication.injector.instanceOf[SimpleWSHttp], metrics) {
@@ -118,9 +91,9 @@ class EvidenceConnectorSpec extends WireMockSpec with SimpleWsHttpTestApplicatio
       val metadata = EnvelopeMetadata("aSubmissionId", 12345)
       val filenames = Map(
         "file:name*.pdf" -> "file-name-.pdf",
-        "sharpscanner:%40:gmail?.com.pdf" -> "sharpscanner-@-gmail-.com.pdf",
-        "Scan+15+Jun+:2017%2c+13.04<>.pdf" -> "Scan 15 Jun -2017, 13.04--.pdf",
-        """Scan+15+Jun+2017%252c+:-13.04|".pdf""" -> "Scan 15 Jun 2017%2c --13.04--.pdf"
+        "sharpscanner:@:gmail?.com.pdf" -> "sharpscanner-@-gmail-.com.pdf",
+        "Scan 15 Jun :2017, 13.04<>.pdf" -> "Scan 15 Jun -2017, 13.04--.pdf",
+        """Scan 15 Jun 2017%2c :-13.04|".pdf""" -> "Scan 15 Jun 2017%2c --13.04--.pdf"
       )
 
       for ((encoded, decoded) <- filenames) {

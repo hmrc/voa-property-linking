@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import models._
 import models.searchApi.AgentAuthResultFE
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.{HeaderCarrier, Upstream5xxResponse}
+import play.api.Logger
 
 import scala.collection.mutable
 import scala.concurrent.Future
@@ -46,10 +47,12 @@ class PropertyLinkingController @Inject()(val auth: AuthConnector,
     withJsonBody[PropertyLinkRequest] { linkRequest =>
       propertyLinksConnector.create(APIPropertyLinkRequest.fromPropertyLinkRequest(linkRequest))
         .map { _ =>
+          Logger.info(s"create property link success: submissionId ${linkRequest.submissionId}")
           AuditingService.sendEvent("create property link success", linkRequest)
           Created
         }
         .recover { case _: Upstream5xxResponse =>
+          Logger.info(s"create property link failure: submissionId ${linkRequest.submissionId}")
           AuditingService.sendEvent("create property link failure", linkRequest)
           InternalServerError }
     }
