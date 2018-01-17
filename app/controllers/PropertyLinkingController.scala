@@ -185,5 +185,7 @@ class PropertyLinkingController @Inject()(val auth: AuthConnector,
       case None => NotFound
     }
   }
+
+  def manageAgents(organisationId: Long) = play.mvc.Results.TODO
 }
 

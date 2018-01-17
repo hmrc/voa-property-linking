@@ -16,6 +16,9 @@ GET          /property-links/:linkId                                            
 GET          /property-links-search-sort                                                      @controllers.PropertyLinkingController.searchAndSort(organisationId: Long, params: models.PaginationParams, sortfield: Option[String], sortorder: Option[String], status: Option[String], address: Option[String], baref: Option[String], agent: Option[String])
 GET          /dashboard/assessments/:authorisationId                                          @controllers.PropertyLinkingController.assessments(authorisationId: Long)
 
+# Manage Agents
+GET          /manage-agents/:id/agents                                                        @controllers.AgentController.manageAgents(id: Long)
+
 GET          /individuals/:personId                                                           @controllers.IndividualAccountController.get(personId: Long)
 GET          /individuals                                                                     @controllers.IndividualAccountController.withExternalId(externalId)
 POST         /individuals                                                                     @controllers.IndividualAccountController.create()
