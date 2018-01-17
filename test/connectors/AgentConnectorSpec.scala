@@ -69,3 +69,4 @@ class AgentConnectorSpec extends ContentTypes
     """.stripMargin
 
 }
+
