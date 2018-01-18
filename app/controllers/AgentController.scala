@@ -22,15 +22,12 @@ import auth.Authenticated
 import connectors.AgentConnector
 import connectors.auth.AuthConnector
 import play.api.libs.json.Json
-import play.api.mvc.{Action, AnyContent}
-
 
 class AgentController @Inject()(val auth: AuthConnector,
                                 agentConnector: AgentConnector)
-                                extends PropertyLinkingBaseController with Authenticated {
+                                  extends PropertyLinkingBaseController with Authenticated  {
 
-
-  def manageAgents(organisationId: Long): Action[AnyContent] = authenticated { implicit request =>
+  def manageAgents(organisationId: Long) = authenticated { implicit request =>
     agentConnector.manageAgents(organisationId) map { agents => Ok(Json.toJson(agents)) }
   }
 

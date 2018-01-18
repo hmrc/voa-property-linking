@@ -24,9 +24,9 @@ import connectors.auth.AuthConnector
 import connectors.{GroupAccountConnector, PropertyLinkingConnector, PropertyRepresentationConnector}
 import models._
 import models.searchApi.AgentAuthResultFE
+import play.api.Logger
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.{HeaderCarrier, Upstream5xxResponse}
-import play.api.Logger
 
 import scala.collection.mutable
 import scala.concurrent.Future
@@ -186,6 +186,5 @@ class PropertyLinkingController @Inject()(val auth: AuthConnector,
     }
   }
 
-  def manageAgents(organisationId: Long) = play.mvc.Results.TODO
 }
 
