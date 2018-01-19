@@ -16,7 +16,7 @@
 
 package controllers
 
-import connectors.auth.AuthConnector
+import connectors.auth.{AuthConnector, Authority, UserIds}
 import models._
 import models.searchApi.{OwnerAgent, OwnerAgents}
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
@@ -44,11 +44,17 @@ class AgentControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplic
   val mockAgentConnector = mock[AgentController]
   val baseUrl = "http://localhost:9999"
 
+  lazy val mockAuthConnector = {
+    val m = mock[AuthConnector]
+    when(m.getCurrentAuthority()(any())) thenReturn Future.successful(Some(Authority("userId", "userId", "userId", UserIds("userId", "userId"))))
+    m
+  }
+
   override lazy val fakeApplication = new GuiceApplicationBuilder()
     .configure("run.mode" -> "Test")
     .overrides(bind[WSHttp].qualifiedWith("VoaBackendWsHttp").toInstance(mockWS))
     .overrides(bind[ServicesConfig].toInstance(mockConf))
-    .overrides(bind[AuthConnector].to[AuthorisedAuthConnector])
+    .overrides(bind[AuthConnector].toInstance(mockAuthConnector))
     .build()
 
   "given authorised access, manage agents" should {
