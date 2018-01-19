@@ -99,6 +99,7 @@ object TestCreateAccountService extends MockitoSugar {
 class TestCreateAccountServiceSpec extends FlatSpec with MustMatchers with MockitoSugar with ScalaFutures with WithFakeApplication {
   val service = TestCreateAccountService
 
+  // NOTE for test to pass, GG stubs needs to be started with -Dfeature.dynamicUsers=true
   ignore should "Create user under org ready for login" in {
     val id = 0
     val result = service.createUser(
