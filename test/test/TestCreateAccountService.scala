@@ -99,7 +99,7 @@ object TestCreateAccountService extends MockitoSugar {
 class TestCreateAccountServiceSpec extends FlatSpec with MustMatchers with MockitoSugar with ScalaFutures with WithFakeApplication {
   val service = TestCreateAccountService
 
-  it should "Create user under org ready for login" in {
+  ignore should "Create user under org ready for login" in {
     val id = 0
     val result = service.createUser(
       username=s"user$id", password=s"pass$id", lastName=s"User $id",
