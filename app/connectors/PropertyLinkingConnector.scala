@@ -42,7 +42,7 @@ class PropertyLinkingConnector @Inject() (@Named("VoaBackendWsHttp") http: WSHtt
       s"&authorisationId=$authorisationId"
 
     http.GET[Option[PropertiesView]](url) map {
-      case Some(view) if view.hasValidStatus => Some(view.copy(parties = filterInvalidParties(view.parties)))
+      case Some(view) if view.hasValidStatus => Some(view.copy(parties = filterInvalidParties(view.parties)).upperCase)
       case _ => None
     } recover {
       case _: NotFoundException => None
@@ -58,7 +58,7 @@ class PropertyLinkingConnector @Inject() (@Named("VoaBackendWsHttp") http: WSHtt
       s"&pageSize=${params.pageSize}" +
       s"&requestTotalRowCount=${params.requestTotalRowCount}"
 
-    http.GET[PropertiesViewResponse](url).map(withValidStatuses.andThen(withValidParties))
+    http.GET[PropertiesViewResponse](url).map(withValidStatuses.andThen(withValidParties).andThen(x => x.uppercase)).map(_.uppercase)
   }
 
   def searchAndSort(organisationId: Long,
@@ -80,7 +80,7 @@ class PropertyLinkingConnector @Inject() (@Named("VoaBackendWsHttp") http: WSHtt
       buildQueryParams("baref", baref) +
       buildQueryParams("agent", agent)
 
-    http.GET[OwnerAuthResult](url)
+    http.GET[OwnerAuthResult](url).map(_.uppercase)
   }
 
   def agentSearchAndSort(organisationId: Long,
@@ -105,7 +105,7 @@ class PropertyLinkingConnector @Inject() (@Named("VoaBackendWsHttp") http: WSHtt
       buildQueryParams("client", client) +
       buildQueryParams("representationStatus", representationStatus)
 
-    http.GET[AgentAuthResultBE](url)
+    http.GET[AgentAuthResultBE](url).map(_.uppercase)
   }
 
   private def buildQueryParams(name : String, value : Option[String]) : String = {
@@ -129,6 +129,6 @@ class PropertyLinkingConnector @Inject() (@Named("VoaBackendWsHttp") http: WSHtt
 
   def getAssessment(authorisationId: Long)(implicit hc: HeaderCarrier): Future[Option[PropertiesView]] = {
     val url = baseUrl + s"/mdtp-dashboard-management-api/mdtp_dashboard/view_assessment?listYear=$listYear&authorisationId=$authorisationId"
-    http.GET[Option[PropertiesView]](url) recover { case _: NotFoundException => None }
+    http.GET[Option[PropertiesView]](url).map(_.map(_.upperCase)) recover { case _: NotFoundException => None }
   }
 }

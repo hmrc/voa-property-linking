@@ -20,7 +20,10 @@ import java.time.{Instant, LocalDate}
 
 import play.api.libs.json._
 
-case class PropertiesViewResponse(resultCount: Option[Int], authorisations: Seq[PropertiesView])
+case class PropertiesViewResponse(resultCount: Option[Int], authorisations: Seq[PropertiesView]){
+
+  def uppercase = this.copy(authorisations = authorisations.map(_.upperCase))
+}
 
 object PropertiesViewResponse {
   implicit val format: Format[PropertiesViewResponse] = Json.format[PropertiesViewResponse]
@@ -39,6 +42,8 @@ case class PropertiesView(authorisationId: Long,
                           submissionId: String,
                           NDRListValuationHistoryItems: Seq[APIValuationHistory],
                           parties: Seq[APIParty]) {
+
+  def upperCase = this.copy(NDRListValuationHistoryItems = NDRListValuationHistoryItems.map(_.capatalise))
 
   def hasValidStatus: Boolean = {
     !Seq("DECLINED", "REVOKED", "MORE_EVIDENCE_REQUIRED").contains(authorisationStatus.toUpperCase)
