@@ -24,7 +24,10 @@ case class OwnerAuthResult(
                       filterTotal: Int,
                       total: Int,
                       authorisations: Seq[OwnerAuthorisation]
-                    )
+                    ){
+
+  def uppercase = this.copy(authorisations = authorisations.map(_.capatilise()))
+}
 
 object OwnerAuthResult {
   implicit val ownerAuthResult = Json.format[OwnerAuthResult]

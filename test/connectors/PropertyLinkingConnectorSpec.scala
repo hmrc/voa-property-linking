@@ -53,7 +53,9 @@ class PropertyLinkingConnectorSpec extends ContentTypes
           .withBody(declinedAndRevokedProperties)
         )
       )
-      await(connector.find(organisationId, PaginationParams(1, 25, requestTotalRowCount = false))(hc)).authorisations.size shouldBe 0
+      val result = await(connector.find(organisationId, PaginationParams(1, 25, requestTotalRowCount = false))(hc))
+      result.authorisations.size shouldBe 0
+      result.authorisations.foreach(_.NDRListValuationHistoryItems.foreach(valuation => valuation.address shouldBe valuation.address.toUpperCase))
     }
   }
 
@@ -76,7 +78,9 @@ class PropertyLinkingConnectorSpec extends ContentTypes
           .withBody(clientSearchResultWithAgentStatus)
         )
       )
-      await(connector.searchAndSort(organisationId, PaginationParams(1, 10, false))(hc)).authorisations.size shouldBe 3
+      val resultWithAgent = await(connector.searchAndSort(organisationId, PaginationParams(1, 10, false))(hc))
+      resultWithAgent.authorisations.size shouldBe 4
+      resultWithAgent.authorisations.foreach(owner => owner.address shouldBe owner.address.toUpperCase)
 
       stubFor(get(urlEqualTo(searchUrl))
         .willReturn(aResponse
@@ -85,7 +89,9 @@ class PropertyLinkingConnectorSpec extends ContentTypes
           .withBody(clientSearchResultWithoutAgentStatus)
         )
       )
-      await(connector.searchAndSort(organisationId, PaginationParams(1, 10, false))(hc)).authorisations.size shouldBe 3
+      val result = await(connector.searchAndSort(organisationId, PaginationParams(1, 10, false))(hc))
+      result.authorisations.size shouldBe 3
+      result.authorisations.foreach(owner => owner.address shouldBe owner.address.toUpperCase)
     }
   }
 
@@ -102,6 +108,14 @@ class PropertyLinkingConnectorSpec extends ContentTypes
       |      "submissionId": "a0000000000000000000000000000005",
       |      "uarn": 8735379000,
       |      "address": "1 CLEMENTS ROAD, LONDON, SE16 4DG",
+      |      "localAuthorityRef": "1940002152213J"
+      |    },
+      |    {
+      |      "authorisationId": 10000000000005,
+      |      "status": "PENDING",
+      |      "submissionId": "a0000000000000000000000000000005",
+      |      "uarn": 8735379000,
+      |      "address": "1 clements road, london, se16 4dg",
       |      "localAuthorityRef": "1940002152213J"
       |    },
       |    {

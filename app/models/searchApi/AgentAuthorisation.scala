@@ -28,7 +28,10 @@ case class AgentAuthorisation(
                                localAuthorityRef: String,
                                client: AgentAuthClient,
                                representationStatus: String
-                             )
+                             ){
+
+  def capatilise() = this.copy(address = address.toUpperCase)
+}
 
 object AgentAuthorisation {
   implicit val agentAuthorisation = Json.format[AgentAuthorisation]

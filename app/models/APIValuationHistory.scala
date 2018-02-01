@@ -28,7 +28,10 @@ case class APIValuationHistory(
                                 rateableValue: Option[Long],
                                 address: String,
                                 billingAuthorityReference: String
-                              )
+                              ){
+
+  def capatalise = this.copy(address = address.toUpperCase)
+}
 
 object APIValuationHistory {
   implicit val formats = Json.format[APIValuationHistory]
