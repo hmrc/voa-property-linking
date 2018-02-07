@@ -16,7 +16,6 @@
 
 package connectors
 
-import java.net.URLDecoder
 import javax.inject.Inject
 
 import akka.stream.scaladsl.Source
@@ -30,8 +29,8 @@ import play.api.Logger
 import play.api.http.HeaderNames.USER_AGENT
 import play.api.libs.ws.WSResponse
 import play.api.mvc.MultipartFormData.{DataPart, FilePart}
-import uk.gov.hmrc.play.config.{AppName, ServicesConfig}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.config.{AppName, ServicesConfig}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -44,27 +43,42 @@ trait EvidenceTransfer {
 
 class EvidenceConnector @Inject()(val ws: SimpleWSHttp, override val metrics: Metrics) extends EvidenceTransfer with ServicesConfig with HandleErrors with AppName with MetricsLogger {
   lazy val url: String = baseUrl("external-business-rates-data-platform")
-  lazy val uploadEndpoint: String = s"$url/customer-management-api/customer/evidence"
+  lazy val uploadEndpoint = getString("endpoints.customerEvidence")
+  lazy val uploadUrl: String = s"$url$uploadEndpoint"
   lazy val userAgent: (String, String) = USER_AGENT -> appName
   lazy val headers = Seq(userAgent)
 
-  // Temporary fix for windows character issue in filenames - will drop entries to manual with them in their names
   private def replaceDangerousCharacters(fileName: String) = fileName.replaceAll("""[:<>"/\\|\?\*]""", "-")
 
   override def uploadFile(fileName: String, content: Source[ByteString, _], metadata: EnvelopeMetadata)(implicit hc: HeaderCarrier): Future[Unit] = {
-    Logger.info(s"Uploading file: ${replaceDangerousCharacters(fileName)}, subId: ${metadata.submissionId} to $uploadEndpoint")
+    Logger.info(s"Uploading file: ${replaceDangerousCharacters(fileName)}, subId: ${metadata.submissionId} to $uploadUrl")
 
-    handleErrors(ws.buildRequest(uploadEndpoint).withHeaders(headers:_*).put {
-        Source(FilePart("file", replaceDangerousCharacters(fileName), Some("application/octet-stream"), content) ::
-          DataPart("customerId", metadata.personId.toString) ::
-          DataPart("filename", replaceDangerousCharacters(fileName)) ::
-          DataPart("submissionId", metadata.submissionId) ::
-          Nil)
-    } andThen logResponse(fileName, metadata.submissionId), uploadEndpoint) andThen logMetrics("modernized.upload") map (_ => ())
+    val fileData = Source(FilePart("file", replaceDangerousCharacters(fileName), Some("application/octet-stream"), content) ::
+      DataPart("customerId", metadata.personId.toString) ::
+      DataPart("filename", replaceDangerousCharacters(fileName)) ::
+      DataPart("submissionId", metadata.submissionId) ::
+      Nil)
+
+    /*
+    Temporary until we can completely move away from
+    '/customer-management-api/customer/evidence' in production
+    due to the fact '/case-documents-app-management-api/external/document'
+    is a POST instead of a PUT.
+     */
+    uploadEndpoint match {
+      case "/customer-management-api/customer/evidence" =>
+        handleErrors(ws.buildRequest(uploadUrl).withHeaders(headers: _*).put {
+          fileData
+        } andThen logResponse(fileName, metadata.submissionId), uploadUrl) andThen logMetrics("modernized.upload") map (_ => ())
+      case "/case-documents-app-management-api/external/document" =>
+        handleErrors(ws.buildRequest(uploadUrl).withHeaders(headers: _*).post {
+          fileData
+        } andThen logResponse(fileName, metadata.submissionId), uploadUrl) andThen logMetrics("modernized.upload") map (_ => ())
+    }
   }
 
   def logResponse(fileName: String, subId: String): PartialFunction[Try[WSResponse], Unit] = {
-    case Success(r) => Logger.info(s"File upload completed: ${replaceDangerousCharacters(fileName)}, subId: $subId to $uploadEndpoint, status: ${r.status}")
-    case Failure(e) => Logger.error(s"File upload failure: ${replaceDangerousCharacters(fileName)}, subId: $subId to $uploadEndpoint, exception: ${e.getMessage}")
+    case Success(r) => Logger.info(s"File upload completed: ${replaceDangerousCharacters(fileName)}, subId: $subId to $uploadUrl, status: ${r.status}")
+    case Failure(e) => Logger.error(s"File upload failure: ${replaceDangerousCharacters(fileName)}, subId: $subId to $uploadUrl, exception: ${e.getMessage}")
   }
 }

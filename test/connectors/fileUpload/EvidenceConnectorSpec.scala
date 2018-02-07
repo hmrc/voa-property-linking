@@ -61,10 +61,11 @@ class EvidenceConnectorSpec extends WireMockSpec with SimpleWsHttpTestApplicatio
   }
 
   "Evidence connector" should {
-    "be able to upload a file" in {
+    "be able to upload a file to the old file submission endpoint using PUT" in {
       val metrics = mock[Metrics]
       val connector = new EvidenceConnector(fakeApplication.injector.instanceOf[SimpleWSHttp], metrics) {
         override lazy val url = mockServerUrl
+        override lazy val uploadEndpoint = "/customer-management-api/customer/evidence"
       }
 
       implicit val fakeHc = HeaderCarrier()
@@ -72,6 +73,26 @@ class EvidenceConnectorSpec extends WireMockSpec with SimpleWsHttpTestApplicatio
       val metadata = EnvelopeMetadata("aSubmissionId", 12345)
 
       stubFor(put(urlEqualTo("/customer-management-api/customer/evidence"))
+        .withRequestBody(containing(file))
+        .withRequestBody(containing("aSubmissionId"))
+        .withRequestBody(containing("12345"))
+        .willReturn(aResponse().withStatus(200)))
+
+      noException should be thrownBy await(connector.uploadFile("FileName", StreamConverters.fromInputStream { () => new ByteArrayInputStream(file.getBytes) }, metadata))
+    }
+
+    "be able to upload a file to the new file submission endpoint using POST" in {
+      val metrics = mock[Metrics]
+      val connector = new EvidenceConnector(fakeApplication.injector.instanceOf[SimpleWSHttp], metrics) {
+        override lazy val url = mockServerUrl
+        override lazy val uploadEndpoint = "/case-documents-app-management-api/external/document"
+      }
+
+      implicit val fakeHc = HeaderCarrier()
+      val file = getClass.getResource("/document.pdf").getFile
+      val metadata = EnvelopeMetadata("aSubmissionId", 12345)
+
+      stubFor(post(urlEqualTo("/case-documents-app-management-api/external/document"))
         .withRequestBody(containing(file))
         .withRequestBody(containing("aSubmissionId"))
         .withRequestBody(containing("12345"))
