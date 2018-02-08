@@ -69,11 +69,11 @@ class EvidenceConnector @Inject()(val ws: SimpleWSHttp, override val metrics: Me
       case "/customer-management-api/customer/evidence" =>
         handleErrors(ws.buildRequest(uploadUrl).withHeaders(headers: _*).put {
           fileData
-        } andThen logResponse(fileName, metadata.submissionId), uploadUrl) andThen logMetrics("modernized.upload") map (_ => ())
+        } andThen logResponse(fileName, metadata.submissionId), s"PUT $uploadUrl") andThen logMetrics("modernized.upload") map (_ => ())
       case "/case-documents-app-management-api/external/document" =>
         handleErrors(ws.buildRequest(uploadUrl).withHeaders(headers: _*).post {
           fileData
-        } andThen logResponse(fileName, metadata.submissionId), uploadUrl) andThen logMetrics("modernized.upload") map (_ => ())
+        } andThen logResponse(fileName, metadata.submissionId), s"POST $uploadUrl") andThen logMetrics("modernized.upload") map (_ => ())
     }
   }
 
