@@ -80,17 +80,41 @@ class PropertyLinkingController @Inject()(val auth: AuthConnector,
                     baref: Option[String],
                     agent: Option[String]) = authenticated { implicit request =>
 
-        propertyLinksConnector.searchAndSort(
-          organisationId = organisationId,
-          params = paginationParams,
-          sortfield = sortfield,
-          sortorder = sortorder,
-          status = status,
-          address = address,
-          baref = baref,
-          agent = agent).map(x => Ok(Json.toJson(x)))
+    propertyLinksConnector.searchAndSort(
+      organisationId = organisationId,
+      params = paginationParams,
+      sortfield = sortfield,
+      sortorder = sortorder,
+      status = status,
+      address = address,
+      baref = baref,
+      agent = agent).map(x => Ok(Json.toJson(x)))
   }
 
+  def appointableToAgent(ownerId: Long,
+                         agentCode: Long,
+                         paginationParams: PaginationParams,
+                         sortfield: Option[String],
+                         sortorder: Option[String],
+                         address: Option[String],
+                         baref: Option[String],
+                         agent: Option[String]) = authenticated { implicit request =>
+
+    groupAccountsConnector.withAgentCode(agentCode.toString) flatMap {
+      case Some(agentGroup) => propertyLinksConnector.appointableToAgent(
+        ownerId = ownerId,
+        agentId = agentGroup.id,
+        params = paginationParams,
+        sortfield = sortfield,
+        sortorder = sortorder,
+        address = address,
+        baref = baref,
+        agent = agent).map(x => Ok(Json.toJson(x)))
+      case None =>
+        Logger.error(s"Agent details lookup failed for agentCode: $agentCode")
+        NotFound
+    }
+  }
 
   /***
     * Make two calls to the Search/Sort API

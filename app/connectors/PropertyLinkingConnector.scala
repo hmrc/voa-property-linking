@@ -83,6 +83,28 @@ class PropertyLinkingConnector @Inject() (@Named("VoaBackendWsHttp") http: WSHtt
     http.GET[OwnerAuthResult](url).map(_.uppercase)
   }
 
+  def appointableToAgent(
+                          ownerId: Long,
+                          agentId: Long,
+                          params: PaginationParams,
+                          sortfield: Option[String] = None,
+                          sortorder: Option[String] = None,
+                          address: Option[String] = None,
+                          baref: Option[String] = None,
+                          agent: Option[String] = None)(implicit hc: HeaderCarrier): Future[OwnerAuthResult] = {
+    val url = baseUrl +
+      s"/authorisation-search-api/owners/$ownerId/authorisations/$agentId" +
+      s"?start=${params.startPoint}" +
+      s"&size=${params.pageSize}" +
+      buildQueryParams("sortfield", sortfield) +
+      buildQueryParams("sortorder", sortorder) +
+      buildQueryParams("address", address) +
+      buildQueryParams("baref", baref) +
+      buildQueryParams("agent", agent)
+
+    http.GET[OwnerAuthResult](url).map(_.uppercase)
+  }
+
   def agentSearchAndSort(organisationId: Long,
                           params: PaginationParams,
                           sortfield: Option[String] = None,
