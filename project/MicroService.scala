@@ -2,6 +2,7 @@ import org.scalastyle.sbt.ScalastylePlugin
 import play.routes.compiler.StaticRoutesGenerator
 import play.sbt.PlayImport.PlayKeys
 import play.sbt.PlayScala
+import play.sbt.routes.RoutesKeys
 import play.sbt.routes.RoutesKeys.routesGenerator
 import sbt.Keys._
 import sbt.Tests.{Group, SubProcess}
@@ -21,7 +22,12 @@ trait MicroService {
 
   lazy val appDependencies : Seq[ModuleID] = ???
   lazy val plugins : Seq[Plugins] = Seq.empty
-  lazy val playSettings : Seq[Setting[_]] = Seq.empty
+  lazy val playSettings : Seq[Setting[_]] = Seq(
+    RoutesKeys.routesImport ++= Seq(
+      "scala.language.reflectiveCalls",
+      "models._"
+    )
+  )
 
   val defaultPort = 9000
 

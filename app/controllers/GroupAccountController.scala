@@ -24,7 +24,7 @@ import auditing.AuditingService
 import connectors.{BusinessRatesAuthConnector, GroupAccountConnector}
 import models.{GroupAccountSubmission, GroupId, UpdatedOrganisationAccount}
 import play.api.libs.json.Json
-import play.api.mvc.Action
+import play.api.mvc.{Action, AnyContent}
 
 class GroupAccountController @Inject() (
                                        val auth: AuthConnector,
