@@ -92,16 +92,14 @@ class PropertyLinkingConnector @Inject() (@Named("VoaBackendWsHttp") http: WSHtt
                           sortfield: Option[String] = None,
                           sortorder: Option[String] = None,
                           address: Option[String] = None,
-                          baref: Option[String] = None,
                           agent: Option[String] = None)(implicit hc: HeaderCarrier): Future[OwnerAuthResult] = {
     val url = baseUrl +
-      s"/authorisation-search-api/owners/$ownerId/authorisations/$agentId/availableAuthorisations" +
+      s"/authorisation-search-api/owners/$ownerId/agents/$agentId/availableAuthorisations" +
       s"?start=${params.startPoint}&size=${params.pageSize}" +
       s"&checkPermission=${checkPermission.name}&challengePermission=${challengePermission.name}" +
       buildQueryParams("sortfield", sortfield) +
       buildQueryParams("sortorder", sortorder) +
       buildQueryParams("address", address) +
-      buildQueryParams("baref", baref) +
       buildQueryParams("agent", agent)
 
     http.GET[OwnerAuthResult](url).map(_.uppercase)
