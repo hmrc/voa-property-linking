@@ -99,7 +99,6 @@ class PropertyLinkingController @Inject()(val auth: AuthConnector,
                          sortfield: Option[String],
                          sortorder: Option[String],
                          address: Option[String],
-                         baref: Option[String],
                          agent: Option[String]) = authenticated { implicit request =>
 
     groupAccountsConnector.withAgentCode(agentCode.toString) flatMap {
@@ -112,7 +111,6 @@ class PropertyLinkingController @Inject()(val auth: AuthConnector,
         sortfield = sortfield,
         sortorder = sortorder,
         address = address,
-        baref = baref,
         agent = agent).map(x => Ok(Json.toJson(x)))
       case None =>
         Logger.error(s"Agent details lookup failed for agentCode: $agentCode")
