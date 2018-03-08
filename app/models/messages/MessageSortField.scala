@@ -34,12 +34,12 @@ object MessageSortField extends NamedEnumSupport[MessageSortField] {
   }
 
   case object CaseReference extends MessageSortField {
-    override val apiQueryString: String = "BUSINESSKEY1"
+    override val apiQueryString: String = "BUSINESS_KEY_1"
     override val name: String = "caseReference"
   }
 
   case object LastRead extends MessageSortField {
-    override val apiQueryString: String = "LASTREADBY"
+    override val apiQueryString: String = "LAST_READ_BY"
     override val name: String = "lastRead"
   }
 
@@ -49,7 +49,7 @@ object MessageSortField extends NamedEnumSupport[MessageSortField] {
   }
 
   case object ClientName extends MessageSortField {
-    override val apiQueryString: String = "CLIENTORGANISATIONNAME"
+    override val apiQueryString: String = "CLIENT_ORGANISATION_NAME"
     override def name: String = "clientName"
   }
 
