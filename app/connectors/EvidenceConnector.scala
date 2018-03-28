@@ -50,11 +50,13 @@ class EvidenceConnector @Inject()(val ws: SimpleWSHttp, override val metrics: Me
   lazy val userAgent: (String, String) = USER_AGENT -> appName
   lazy val headers = Seq(userAgent)
 
+  lazy val dangerousCharacterRegex = """[:<>"/\\|\?\*]"""
+
   private def replaceDangerousCharacters(fileName: String) = {
     if (filenameDecodingEnabled) {
-      URLDecoder.decode(fileName, "UTF-8").replaceAll("""[:<>"/\\|\?\*]""", "-")
+      URLDecoder.decode(fileName, "UTF-8").replaceAll(dangerousCharacterRegex, "-")
     } else {
-      fileName.replaceAll("""[:<>"/\\|\?\*]""", "-")
+      fileName.replaceAll(dangerousCharacterRegex, "-")
     }
   }
 
