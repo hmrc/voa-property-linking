@@ -18,12 +18,12 @@ private object AppDependencies {
   import play.core.PlayVersion
 
   val compile = Seq(
-    "uk.gov.hmrc" %% "play-reactivemongo" % "5.0.0",
+    "uk.gov.hmrc" %% "play-reactivemongo" % "5.2.0",
     ws,
     "uk.gov.hmrc" %% "microservice-bootstrap" % "6.12.0",
     "uk.gov.hmrc" %% "play-url-binders" % "2.1.0",
     "uk.gov.hmrc" %% "mongo-lock" % "4.1.0",
-    "uk.gov.hmrc" %% "domain" % "4.0.0",
+    "uk.gov.hmrc" %% "domain" % "4.1.0",
     "org.typelevel" %% "cats-core" % "0.8.1",
     "com.google.inject.extensions" % "guice-multibindings" % "4.0",
     "uk.gov.hmrc" %% "reactive-circuit-breaker" % "2.1.0"
@@ -37,7 +37,7 @@ private object AppDependencies {
   object Test {
     def apply() = new TestDependencies {
       override lazy val test = Seq(
-        "uk.gov.hmrc" %% "hmrctest" % "2.2.0" % scope,
+        "uk.gov.hmrc" %% "hmrctest" % "2.3.0" % scope,
         "org.scalatest" %% "scalatest" % "2.2.6" % scope,
         "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % scope,
         "org.pegdown" % "pegdown" % "1.6.0" % scope,
