@@ -113,7 +113,8 @@ class EvidenceConnectorSpec extends WireMockSpec with SimpleWsHttpTestApplicatio
       val filenames = Map(
         "file:name*.pdf" -> "file-name-.pdf",
         "sharpscanner:@:gmail?.com.pdf" -> "sharpscanner-@-gmail-.com.pdf",
-        "Scan 15 Jun :2017, 13.04<>.pdf" -> "Scan 15 Jun -2017, 13.04--.pdf"
+        "Scan 15 Jun :2017, 13.04<>.pdf" -> "Scan 15 Jun -2017, 13.04--.pdf",
+        """Scan 15 Jun 2017%2c :-13.04|".pdf""" -> "Scan 15 Jun 2017%2c --13.04--.pdf"
       )
 
       for ((encoded, decoded) <- filenames) {
