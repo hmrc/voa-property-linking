@@ -16,7 +16,6 @@
 
 package connectors
 
-import java.net.URLDecoder
 import javax.inject.Inject
 
 import akka.stream.scaladsl.Source
@@ -45,20 +44,11 @@ trait EvidenceTransfer {
 class EvidenceConnector @Inject()(val ws: SimpleWSHttp, override val metrics: Metrics) extends EvidenceTransfer with ServicesConfig with HandleErrors with AppName with MetricsLogger {
   lazy val url: String = baseUrl("external-business-rates-data-platform")
   lazy val uploadEndpoint = getString("endpoints.customerEvidence")
-  lazy val filenameDecodingEnabled = getString("filenameDecoding.enabled").toBoolean
   lazy val uploadUrl: String = s"$url$uploadEndpoint"
   lazy val userAgent: (String, String) = USER_AGENT -> appName
   lazy val headers = Seq(userAgent)
 
-  lazy val dangerousCharacterRegex = """[:<>"/\\|\?\*]"""
-
-  private def replaceDangerousCharacters(fileName: String) = {
-    if (filenameDecodingEnabled) {
-      URLDecoder.decode(fileName, "UTF-8").replaceAll(dangerousCharacterRegex, "-")
-    } else {
-      fileName.replaceAll(dangerousCharacterRegex, "-")
-    }
-  }
+  private def replaceDangerousCharacters(fileName: String) = fileName.replaceAll("""[:<>"/\\|\?\*]""", "-")
 
   override def uploadFile(fileName: String, content: Source[ByteString, _], metadata: EnvelopeMetadata)(implicit hc: HeaderCarrier): Future[Unit] = {
     Logger.info(s"Uploading file: ${replaceDangerousCharacters(fileName)}, subId: ${metadata.submissionId} to $uploadUrl")
