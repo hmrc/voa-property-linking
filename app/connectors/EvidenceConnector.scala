@@ -45,7 +45,7 @@ trait EvidenceTransfer {
 class EvidenceConnector @Inject()(val ws: SimpleWSHttp, override val metrics: Metrics) extends EvidenceTransfer with ServicesConfig with HandleErrors with AppName with MetricsLogger {
   lazy val url: String = baseUrl("external-business-rates-data-platform")
   lazy val uploadEndpoint = getString("endpoints.customerEvidence")
-  lazy val filenameDecodingEnabled = getBoolean("filenameDecoding.enabled")
+  lazy val filenameDecodingEnabled = getString("filenameDecoding.enabled").toBoolean
   lazy val uploadUrl: String = s"$url$uploadEndpoint"
   lazy val userAgent: (String, String) = USER_AGENT -> appName
   lazy val headers = Seq(userAgent)
