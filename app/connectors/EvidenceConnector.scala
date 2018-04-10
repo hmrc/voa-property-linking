@@ -48,7 +48,7 @@ class EvidenceConnector @Inject()(val ws: SimpleWSHttp, override val metrics: Me
   lazy val userAgent: (String, String) = USER_AGENT -> appName
   lazy val headers = Seq(userAgent)
 
-  private def replaceDangerousCharacters(fileName: String) = fileName.replaceAll("""[:<>"/\\|\?\*]""", "-")
+  private def replaceDangerousCharacters(fileName: String) = fileName.replaceAll("""[:<>"/\\|\?\*–]""", "-")
 
   override def uploadFile(fileName: String, content: Source[ByteString, _], metadata: EnvelopeMetadata)(implicit hc: HeaderCarrier): Future[Unit] = {
     Logger.info(s"Uploading file: ${replaceDangerousCharacters(fileName)}, subId: ${metadata.submissionId} to $uploadUrl")
