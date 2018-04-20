@@ -43,7 +43,7 @@ class PropertyLinkingController @Inject()(val auth: AuthConnector,
                                          ) extends PropertyLinkingBaseController with Authenticated {
   type GroupCache = Memoize[Long, Future[Option[GroupAccount]]]
 
-  def create() = authenticated(parse.json) { implicit request => request
+  def create() = authenticated(parse.json) { implicit request =>
     withJsonBody[PropertyLinkRequest] { linkRequest =>
       propertyLinksConnector.create(APIPropertyLinkRequest.fromPropertyLinkRequest(linkRequest))
         .map { _ =>
