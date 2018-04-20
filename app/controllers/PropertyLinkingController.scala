@@ -47,8 +47,8 @@ class PropertyLinkingController @Inject()(val auth: AuthConnector,
     withJsonBody[PropertyLinkRequest] { linkRequest =>
       propertyLinksConnector.create(APIPropertyLinkRequest.fromPropertyLinkRequest(linkRequest))
         .map { _ =>
-          Logger.info(s"create property link success: submissionId ${linkRequest.submissionId}")
-          AuditingService.sendEvent("create property link success", linkRequest)
+          Logger.info(s"create property link: submissionId ${linkRequest.submissionId}")
+          AuditingService.sendEvent("create property link", linkRequest)
           Created
         }
         .recover { case _: Upstream5xxResponse =>

@@ -18,11 +18,12 @@ package models
 
 import java.time.Instant
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OWrites}
 
 case class RepresentationRequest(
                                   authorisationId: Long,
                                   agentOrganisationId: Long,
+                                  organisationId: Long,
                                   individualId: Long,
                                   submissionId: String,
                                   checkPermission: String,
@@ -32,4 +33,21 @@ case class RepresentationRequest(
 
 object RepresentationRequest {
   implicit val format = Json.format[RepresentationRequest]
+
+}
+object RepresentationRequestAuditWriteFormat {
+
+  val writes: OWrites[RepresentationRequest] = OWrites[RepresentationRequest] { request =>
+    Json.obj(
+      "propertyLinkId" -> Json.toJson(request.authorisationId),
+      "agentOrganisationId" -> Json.toJson(request.agentOrganisationId),
+      "organisationId" -> Json.toJson(request.organisationId),
+      "individualId" -> Json.toJson(request.individualId),
+      "submissionId" -> Json.toJson(request.submissionId),
+      "checkPermission" -> Json.toJson(request.checkPermission),
+      "challengePermission" -> Json.toJson(request.challengePermission),
+      "createDatetime" -> Json.toJson(request.createDatetime)
+
+    )
+  }
 }
