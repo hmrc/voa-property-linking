@@ -46,8 +46,6 @@ class PropertyRepresentationController @Inject() (val auth: AuthConnector,
   def create() = authenticated(parse.json) { implicit request =>
     withJsonBody[RepresentationRequest] { reprRequest =>
       representations.create(APIRepresentationRequest.fromRepresentationRequest(reprRequest)).map{ x =>
-        implicit val auditReads = RepresentationRequestAuditWriteFormat.writes
-        AuditingService.sendEvent("agent representation request", reprRequest)
         Ok("")
       }
     }
@@ -64,7 +62,6 @@ class PropertyRepresentationController @Inject() (val auth: AuthConnector,
    def revoke(authorisedPartyId: Long) =  authenticated(parse.json) { implicit request =>
 
      representations.revoke(authorisedPartyId)  map { _ =>
-       AuditingService.sendEvent("agent representation revoke", Map("authorisedPartyId" -> authorisedPartyId))
        Ok("")
      }
    }
