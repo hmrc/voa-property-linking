@@ -23,7 +23,6 @@ import play.api.libs.json.{Json, OWrites}
 case class RepresentationRequest(
                                   authorisationId: Long,
                                   agentOrganisationId: Long,
-                                  organisationId: Long,
                                   individualId: Long,
                                   submissionId: String,
                                   checkPermission: String,
@@ -41,7 +40,6 @@ object RepresentationRequestAuditWriteFormat {
     Json.obj(
       "propertyLinkId" -> Json.toJson(request.authorisationId),
       "agentOrganisationId" -> Json.toJson(request.agentOrganisationId),
-      "organisationId" -> Json.toJson(request.organisationId),
       "individualId" -> Json.toJson(request.individualId),
       "submissionId" -> Json.toJson(request.submissionId),
       "checkPermission" -> Json.toJson(request.checkPermission),
