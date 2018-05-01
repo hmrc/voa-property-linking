@@ -23,7 +23,7 @@ import play.api.libs.json.Json
 case class PropertyLinkRequest(
                                 uarn: Long,
                                 organisationId: Long,
-                                individualId: Int,
+                                individualId: Long,
                                 capacityDeclaration: CapacityDeclaration,
                                 linkedDate: Instant,
                                 linkBasis: String,

@@ -18,7 +18,7 @@ package models
 
 import play.api.libs.json.Json
 
-case class DetailedAddress(addressUnitId: Option[Int] = None, nonAbpAddressId: Option[Int] = None, organisationName: Option[String] = None,
+case class DetailedAddress(addressUnitId: Option[Long] = None, nonAbpAddressId: Option[Long] = None, organisationName: Option[String] = None,
                            departmentName: Option[String] = None, subBuildingName: Option[String] = None, buildingName: Option[String] = None,
                            buildingNumber: Option[String] = None, dependentThoroughfareName: Option[String] = None, thoroughfareName: Option[String] = None,
                            doubleDependentLocality: Option[String] = None, dependentLocality: Option[String] = None, postTown: String, postcode: String) {

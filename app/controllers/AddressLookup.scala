@@ -39,7 +39,7 @@ class AddressLookup @Inject() (val auth: AuthConnector,
     }
   }
 
-  def get(addressUnitId: Int) = authenticated { implicit request =>
+  def get(addressUnitId: Long) = authenticated { implicit request =>
     addresses.get(addressUnitId) map {
       case Some(a) => Ok(Json.toJson(a))
       case None => NotFound

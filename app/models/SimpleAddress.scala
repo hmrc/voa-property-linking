@@ -18,7 +18,7 @@ package models
 
 import play.api.libs.json.Json
 
-case class SimpleAddress(addressUnitId: Option[Int], line1: String, line2: String, line3: String, line4: String, postcode: String) {
+case class SimpleAddress(addressUnitId: Option[Long], line1: String, line2: String, line3: String, line4: String, postcode: String) {
 
   def toDetailedAddress = (line1, line2, line3, line4) match {
     case (l1, l2, "", "") => DetailedAddress(buildingNumber = Some(l1), postTown = l2, postcode = postcode)

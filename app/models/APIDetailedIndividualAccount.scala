@@ -42,7 +42,7 @@ case class APIDetailedIndividualAccount(
 }
 
 case class APIIndividualDetails(
-                                 addressUnitId: Int,
+                                 addressUnitId: Long,
                                  firstName: String,
                                  lastName: String,
                                  emailAddress: String,

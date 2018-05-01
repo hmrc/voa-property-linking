@@ -18,7 +18,7 @@ package models
 
 import play.api.libs.json.Json
 
-case class DetailedPropertyRepresentation(representationId: String, authorisationId: String, agentId: String, agentName: String, groupId: Int,
+case class DetailedPropertyRepresentation(representationId: String, authorisationId: String, agentId: String, agentName: String, groupId: Long,
                                           groupName: String, uarn: Long, address: PropertyAddress, canCheck: String, canChallenge: String,
                                           pending: Boolean)
 

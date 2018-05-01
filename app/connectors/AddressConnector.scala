@@ -36,22 +36,22 @@ class AddressConnector @Inject() (@Named("VoaBackendWsHttp") http: WSHttp, conf:
     }
   }
 
-  def get(addressUnitId: Int)(implicit hc: HeaderCarrier): Future[Option[SimpleAddress]] = {
+  def get(addressUnitId: Long)(implicit hc: HeaderCarrier): Future[Option[SimpleAddress]] = {
     http.GET[APIAddressLookupResult](s"$url/$addressUnitId").map(_.addressDetails.headOption.map(_.simplify)).recover {
       case _ => None
     }
   }
 
-  def create(address: SimpleAddress)(implicit hc: HeaderCarrier): Future[Int] = {
+  def create(address: SimpleAddress)(implicit hc: HeaderCarrier): Future[Long] = {
     http.POST[DetailedAddress, JsValue](s"$url/non_standard_address", address.toDetailedAddress) map { js =>
       js \ "id" match {
-        case JsDefined(JsNumber(n)) => n.toInt
+        case JsDefined(JsNumber(n)) => n.toLong
         case _ => throw new Exception(s"Failed to create record for address $address")
       }
     }
   }
 
-  def update(nonAbpId: Int, address: DetailedAddress)(implicit hc: HeaderCarrier): Future[Unit] = {
+  def update(nonAbpId: Long, address: DetailedAddress)(implicit hc: HeaderCarrier): Future[Unit] = {
     http.PUT[DetailedAddress, HttpResponse](s"$url/non_standard_address/$nonAbpId", address) map { _ => () }
   }
 }

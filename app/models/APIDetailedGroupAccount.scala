@@ -27,7 +27,7 @@ case class APIDetailedGroupAccount(id: Long, governmentGatewayGroupId: String, r
 
 case class IndividualSummary(personLatestDetail: APIIndividualDetails)
 
-case class GroupDetails(addressUnitId: Int, representativeFlag: Boolean, organisationName: String, organisationEmailAddress: String,
+case class GroupDetails(addressUnitId: Long, representativeFlag: Boolean, organisationName: String, organisationEmailAddress: String,
                         organisationTelephoneNumber: Option[String])
 
 object GroupDetails {

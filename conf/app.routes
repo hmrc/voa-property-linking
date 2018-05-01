@@ -39,7 +39,7 @@ POST         /file-callback                                                     
 GET          /transfer                                                                        @controllers.FileTransferController.run()
 
 GET          /address                                                                         @controllers.AddressLookup.find(postcode)
-GET          /address/:id                                                                     @controllers.AddressLookup.get(id: Int)
+GET          /address/:id                                                                     @controllers.AddressLookup.get(id: Long)
 POST         /address                                                                         @controllers.AddressLookup.create
 
 GET          /submissionId/:prefix                                                            @controllers.SubmissionIdController.get(prefix: String)
