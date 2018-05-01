@@ -29,6 +29,8 @@ trait MicroService {
     )
   )
 
+  lazy val compileScalastyle = taskKey[Unit]("compileScalastyle")
+
   val defaultPort = 9000
 
   lazy val scoverageSettings: Seq[Def.Setting[_ >: String with Double with Boolean]] = {
@@ -54,7 +56,9 @@ trait MicroService {
       libraryDependencies ++= appDependencies,
       retrieveManaged := true,
       evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
-      routesGenerator := StaticRoutesGenerator
+      routesGenerator := StaticRoutesGenerator,
+      compileScalastyle := org.scalastyle.sbt.ScalastylePlugin.scalastyle.in(Compile).toTask("").value,
+      test in Test <<= (test in Test) dependsOn compileScalastyle
     )
     .configs(IntegrationTest)
     .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
