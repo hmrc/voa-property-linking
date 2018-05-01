@@ -23,7 +23,7 @@ import play.api.libs.json.{Json, OFormat, Reads}
 case class APIPropertyLinkRequest(
                                    uarn: Long,
                                    authorisationOwnerOrganisationId: Long,
-                                   authorisationOwnerPersonId: Int,
+                                   authorisationOwnerPersonId: Long,
                                    createDatetime: Instant,
                                    authorisationMethod: String,
                                    uploadedFiles: Seq[FileInfo],

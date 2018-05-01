@@ -20,7 +20,7 @@ import java.time.{Clock, Instant}
 
 import play.api.libs.json.Json
 
-case class GroupAccountSubmission(id: String, companyName: String, addressId: Int, email: String, phone: String,
+case class GroupAccountSubmission(id: String, companyName: String, addressId: Long, email: String, phone: String,
                                   isAgent: Boolean, individualAccountSubmission: IndividualAccountSubmissionForOrganisation) {
 
   def toApiAccount(implicit clock: Clock): APIGroupAccountSubmission = {
