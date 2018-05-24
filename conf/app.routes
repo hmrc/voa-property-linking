@@ -30,6 +30,7 @@ GET          /groups                                                            
 GET          /groups/agentCode/:agentCode                                                     @controllers.GroupAccountController.withAgentCode(agentCode)
 POST         /groups                                                                          @controllers.GroupAccountController.create()
 PUT          /groups/:orgId                                                                   @controllers.GroupAccountController.update(orgId: Long)
+DELETE       /groups/test-only/:orgId                                                         @controllers.TestController.delete(orgId: Long)
 
 POST         /envelopes                                                                       @controllers.EnvelopeController.create
 POST         /envelopes/:envId                                                                @controllers.EnvelopeController.record(envId: String)
