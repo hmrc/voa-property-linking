@@ -22,18 +22,12 @@ import connectors.test.TestConnector
 import controllers.PropertyLinkingBaseController
 import javax.inject.Inject
 
-import scala.util.{Failure, Success, Try}
-
-class TestController @Inject() (val auth: AuthConnector,
-                                testConnector: TestConnector)
+class TestController @Inject()(val auth: AuthConnector,
+                               testConnector: TestConnector)
   extends PropertyLinkingBaseController with Authenticated {
 
-  def deleteOrganisation(organisationId: Long) =
-    authenticated { implicit request => {
-    Try (testConnector.deleteOrganisation(organisationId)) match {
-      case Success(orgId) => Ok(s"Success: $orgId")
-      case Failure(error) => Ok(s"Failed: $error")
-    }}
+  def deleteOrganisation(organisationId: Long) = authenticated { implicit request =>
+    testConnector.deleteOrganisation(organisationId).map(res => Ok)
   }
 
 }

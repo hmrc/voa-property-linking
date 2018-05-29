@@ -17,7 +17,7 @@
 package connectors.test
 
 import javax.inject.{Inject, Named}
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.config.inject.ServicesConfig
 import uk.gov.hmrc.play.http.ws.WSHttp
 
@@ -28,8 +28,8 @@ class TestConnector @Inject()(@Named("VoaBackendWsHttp") http: WSHttp, conf: Ser
   lazy val baseUrl: String = conf.baseUrl("external-business-rates-data-platform")
   lazy val url = baseUrl + "/test-only/customer-management-api/organisation"
 
-  def deleteOrganisation(orgId: Long)(implicit hc: HeaderCarrier): Future[Long] = {
-    http.DELETE[Long](s"$url?organisationId=$orgId")
+  def deleteOrganisation(orgId: Long)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+    http.DELETE[HttpResponse](s"$url?organisationId=$orgId")
   }
 
 }
