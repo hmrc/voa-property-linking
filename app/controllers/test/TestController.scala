@@ -28,11 +28,11 @@ class TestController @Inject() (val auth: AuthConnector,
                                 testConnector: TestConnector)
   extends PropertyLinkingBaseController with Authenticated {
 
-  def delete(organisationId: Long) =
+  def deleteOrganisation(organisationId: Long) =
     authenticated { implicit request => {
-    Try (testConnector.delete(organisationId)) match {
-      case Success(orgId) => Ok("Connected for $orgId")
-      case Failure(error) => Ok(s"Unable to connect: $error")
+    Try (testConnector.deleteOrganisation(organisationId)) match {
+      case Success(orgId) => Ok(s"Success: $orgId")
+      case Failure(error) => Ok(s"Failed: $error")
     }}
   }
 

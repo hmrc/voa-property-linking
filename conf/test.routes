@@ -1,1 +1,1 @@
-DELETE       /de-register/:orgId               @controllers.test.TestController.delete(orgId: Long)
+DELETE       /de-register/:orgId               @controllers.test.TestController.deleteOrganisation(orgId: Long)

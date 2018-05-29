@@ -28,7 +28,7 @@ class TestConnector @Inject()(@Named("VoaBackendWsHttp") http: WSHttp, conf: Ser
   lazy val baseUrl: String = conf.baseUrl("external-business-rates-data-platform")
   lazy val url = baseUrl + "/test-only/customer-management-api/organisation"
 
-  def delete(orgId: Long)(implicit hc: HeaderCarrier): Future[Long] = {
+  def deleteOrganisation(orgId: Long)(implicit hc: HeaderCarrier): Future[Long] = {
     http.DELETE[Long](s"$url?organisationId=$orgId")
   }
 
