@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package connectors
+package connectors.test
 
 import javax.inject.{Inject, Named}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.config.inject.ServicesConfig
 import uk.gov.hmrc.play.http.ws.WSHttp
-
 
 import scala.concurrent.{ExecutionContext, Future}
 

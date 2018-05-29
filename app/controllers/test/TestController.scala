@@ -17,11 +17,12 @@
 package controllers.test
 
 import auth.Authenticated
-import connectors.TestConnector
 import connectors.auth.AuthConnector
+import connectors.test.TestConnector
 import controllers.PropertyLinkingBaseController
 import javax.inject.Inject
-import scala.util.{Try, Success, Failure}
+
+import scala.util.{Failure, Success, Try}
 
 class TestController @Inject() (val auth: AuthConnector,
                                 testConnector: TestConnector)
