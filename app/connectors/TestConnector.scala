@@ -21,15 +21,16 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.config.inject.ServicesConfig
 import uk.gov.hmrc.play.http.ws.WSHttp
 
-import scala.concurrent.ExecutionContext
+
+import scala.concurrent.{ExecutionContext, Future}
 
 class TestConnector @Inject()(@Named("VoaBackendWsHttp") http: WSHttp, conf: ServicesConfig)(implicit ec: ExecutionContext) {
 
   lazy val baseUrl: String = conf.baseUrl("external-business-rates-data-platform")
-  lazy val url = baseUrl + "test-only/customer-management-api/organisation"
+  lazy val url = baseUrl + "/test-only/customer-management-api/organisation"
 
-  def delete(orgId: Long)(implicit hc: HeaderCarrier) = {
-    http.DELETE[Long](s"$baseUrl?organisationId=$orgId")
+  def delete(orgId: Long)(implicit hc: HeaderCarrier): Future[Long] = {
+    http.DELETE[Long](s"$url?organisationId=$orgId")
   }
 
 }

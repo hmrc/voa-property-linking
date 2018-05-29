@@ -14,22 +14,25 @@
  * limitations under the License.
  */
 
-package controllers
+package controllers.test
 
 import auth.Authenticated
-import com.google.inject.name.Named
 import connectors.TestConnector
 import connectors.auth.AuthConnector
+import controllers.PropertyLinkingBaseController
 import javax.inject.Inject
-import play.api.libs.json.Json
+import scala.util.{Try, Success, Failure}
 
 class TestController @Inject() (val auth: AuthConnector,
                                 testConnector: TestConnector)
   extends PropertyLinkingBaseController with Authenticated {
 
-  def delete(organisationId: Long) = authenticated { implicit request => {
-    val persons = testConnector.delete(organisationId)
-    Ok(Json.toJson("Hit backend controller"))}
+  def delete(organisationId: Long) =
+    authenticated { implicit request => {
+    Try (testConnector.delete(organisationId)) match {
+      case Success(orgId) => Ok("Connected for $orgId")
+      case Failure(error) => Ok(s"Unable to connect: $error")
+    }}
   }
 
 }
