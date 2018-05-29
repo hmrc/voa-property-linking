@@ -27,7 +27,7 @@ class TestController @Inject()(val auth: AuthConnector,
   extends PropertyLinkingBaseController with Authenticated {
 
   def deleteOrganisation(organisationId: Long) = authenticated { implicit request =>
-    testConnector.deleteOrganisation(organisationId).map(res => Ok)
+    testConnector.deleteOrganisation(organisationId).map(_ => Ok)
   }
 
 }
