@@ -47,7 +47,7 @@ class DVRCaseManagementSpec extends ControllerSpec with MockitoSugar {
       val res = testController.requestDetailedValuation()(FakeRequest().withBody(dvrJson))
 
       await(res)
-      verify(mockRepo, once).create(matching(1l), matching(3l))
+      verify(mockRepo, times(1)).create(matching(1l), matching(3l))
       verify(mockDvrConnector, times(1)).requestDetailedValuation(matching(testDvr))(any[HeaderCarrier])
       status(res) mustBe OK
     }
