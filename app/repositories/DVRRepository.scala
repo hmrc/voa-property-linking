@@ -19,7 +19,6 @@ package repositories
 import com.google.inject.name.Named
 import com.google.inject.{ImplementedBy, Singleton}
 import javax.inject.Inject
-import models._
 import play.api.Logger
 import play.api.libs.json._
 import reactivemongo.api.DB
@@ -27,19 +26,21 @@ import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.{BSONDateTime, BSONDocument}
 import reactivemongo.core.errors.DatabaseException
 import uk.gov.hmrc.mongo.ReactiveRepository
+import uk.gov.hmrc.play.config.ServicesConfig
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.concurrent.duration._
 import scala.language.postfixOps
 
 @Singleton
 class DVRRepository @Inject()(db: DB, @Named("dvrCollectionName") val dvrCollectionName: String)
   extends ReactiveRepository[DVRRecord, String](dvrCollectionName, () => db, DVRRecord.mongoFormat, implicitly[Format[String]]) with
-    DVRRecordRepository {
+    DVRRecordRepository with ServicesConfig {
+
+  lazy val ttlDuration = getDuration("dvr.record.ttl.duration")
 
   override def indexes: Seq[Index] = Seq(
-    Index(key = Seq("createdAt" -> IndexType.Ascending), name = Some("ttl"), options = BSONDocument("expireAfterSeconds" -> (1 minutes).toSeconds))
+    Index(key = Seq("createdAt" -> IndexType.Ascending), name = Some("ttl"), options = BSONDocument("expireAfterSeconds" -> (ttlDuration).toSeconds))
   )
 
   override def create(organisationId: Long, assessmentRef: Long): Future[Unit] = {
@@ -51,12 +52,11 @@ class DVRRepository @Inject()(db: DB, @Named("dvrCollectionName") val dvrCollect
   }
 
   override def exists(organisationId: Long, assessmentRef: Long): Future[Boolean] = {
-    val organisationDvrRecords = find("organisationId" -> organisationId)
-    organisationDvrRecords.map(dvrRecords =>
-      dvrRecords.find(dvrRecord => dvrRecord.assessmentRef == assessmentRef)).map(option => option match {
+    find("organisationId" -> organisationId).map(dvrRecords =>
+      dvrRecords.find(dvrRecord => dvrRecord.assessmentRef == assessmentRef)).map {
       case Some(dvrRecord) => true
       case None => false
-    })
+    }
   }
 
   private def now = Some(BSONDateTime(System.currentTimeMillis))
@@ -65,8 +65,9 @@ class DVRRepository @Inject()(db: DB, @Named("dvrCollectionName") val dvrCollect
 case class DVRRecord(organisationId: Long, assessmentRef: Long, createdAt: Option[BSONDateTime])
 
 object DVRRecord {
-  import reactivemongo.json.BSONFormats.BSONDateTimeFormat
 
+  import reactivemongo.json.BSONFormats.BSONDateTimeFormat
+  
   val mongoFormat = Json.format[DVRRecord]
 }
 
