@@ -16,11 +16,8 @@
 
 package controllers
 
-import java.util.UUID
-
 import connectors.DVRCaseManagementConnector
 import connectors.auth.{AuthConnector, Authority, UserIds}
-import connectors.fileUpload.EnvelopeMetadata
 import models.DetailedValuationRequest
 import org.mockito.ArgumentMatchers.{eq => matching, _}
 import org.mockito.Mockito._
@@ -51,7 +48,7 @@ class DVRCaseManagementSpec extends ControllerSpec with MockitoSugar {
 
       await(res)
       verify(mockRepo, once).create(matching(1l), matching(3l))
-      verify(mockDvrConnector, once).requestDetailedValuation(matching(testDvr))(any[HeaderCarrier])
+      verify(mockDvrConnector, times(1)).requestDetailedValuation(matching(testDvr))(any[HeaderCarrier])
       status(res) mustBe OK
     }
   }
@@ -62,7 +59,7 @@ class DVRCaseManagementSpec extends ControllerSpec with MockitoSugar {
       val res = testController.dvrExists(1l, 3l)(FakeRequest())
 
       await(res)
-      verify(mockRepo, once).exists(matching(1l), matching(3l))
+      verify(mockRepo, times(1)).exists(matching(1l), matching(3l))
       status(res) mustBe OK
       contentAsJson(res) mustBe Json.toJson(true)
       reset(mockRepo)
@@ -73,7 +70,7 @@ class DVRCaseManagementSpec extends ControllerSpec with MockitoSugar {
       val res = testController.dvrExists(1l, 3l)(FakeRequest())
 
       await(res)
-      verify(mockRepo, once).exists(matching(1l), matching(3l))
+      verify(mockRepo, times(1)).exists(matching(1l), matching(3l))
       status(res) mustBe OK
       contentAsJson(res) mustBe Json.toJson(false)
       reset(mockRepo)
@@ -93,8 +90,6 @@ class DVRCaseManagementSpec extends ControllerSpec with MockitoSugar {
     when(m.requestDetailedValuation(any[DetailedValuationRequest])(any[HeaderCarrier])) thenReturn Future.successful()
     m
   }
-
-  lazy val once = times(1)
 
   lazy val mockAuthConnector = {
     val m = mock[AuthConnector]
