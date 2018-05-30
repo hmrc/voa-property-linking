@@ -39,7 +39,7 @@ class DVRRepository @Inject()(db: DB, @Named("dvrCollectionName") val dvrCollect
     DVRRecordRepository {
 
   override def indexes: Seq[Index] = Seq(
-    Index(key = Seq("createdAt" -> IndexType.Ascending), name = Some("ttl"), options = BSONDocument("expireAfterSeconds" -> (20 days).toSeconds))
+    Index(key = Seq("createdAt" -> IndexType.Ascending), name = Some("ttl"), options = BSONDocument("expireAfterSeconds" -> (1 minutes).toSeconds))
   )
 
   override def create(organisationId: Long, assessmentRef: Long): Future[Unit] = {
@@ -65,6 +65,7 @@ class DVRRepository @Inject()(db: DB, @Named("dvrCollectionName") val dvrCollect
 case class DVRRecord(organisationId: Long, assessmentRef: Long, createdAt: Option[BSONDateTime])
 
 object DVRRecord {
+  import reactivemongo.json.BSONFormats.BSONDateTimeFormat
 
   val mongoFormat = Json.format[DVRRecord]
 }

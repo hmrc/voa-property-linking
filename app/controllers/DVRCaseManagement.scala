@@ -16,20 +16,31 @@
 
 package controllers
 
-import javax.inject.Inject
-
 import auth.Authenticated
 import connectors.DVRCaseManagementConnector
 import connectors.auth.AuthConnector
+import javax.inject.Inject
 import models.DetailedValuationRequest
+import play.api.libs.json.Json
+import play.api.mvc.Action
+import repositories.DVRRecordRepository
 
-class DVRCaseManagement @Inject() (val auth: AuthConnector,
-                                   dvrCaseManagement: DVRCaseManagementConnector)
+class DVRCaseManagement @Inject()(val auth: AuthConnector,
+                                  dvrCaseManagement: DVRCaseManagementConnector,
+                                  dvrRecordRepository: DVRRecordRepository)
   extends PropertyLinkingBaseController with Authenticated {
 
   def requestDetailedValuation = authenticated(parse.json) { implicit request =>
     withJsonBody[DetailedValuationRequest] { dvr =>
-      dvrCaseManagement.requestDetailedValuation(dvr) map { _ => Ok }
+      dvrRecordRepository.create(dvr.organisationId, dvr.assessmentRef).flatMap(_ =>
+        dvrCaseManagement.requestDetailedValuation(dvr) map { _ => Ok })
+    }
+  }
+
+  def dvrExists(organisationId: Long, assessmentRef: Long) = Action.async { implicit request =>
+    dvrRecordRepository.exists(organisationId, assessmentRef).map {
+      case true => Ok(Json.toJson(true))
+      case false => Ok(Json.toJson(false))
     }
   }
 
