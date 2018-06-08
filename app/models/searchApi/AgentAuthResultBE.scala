@@ -26,7 +26,7 @@ case class AgentAuthResultBE(
                             authorisations: Seq[AgentAuthorisation]
                           ){
 
-    def uppercase = this.copy(authorisations = authorisations.map(_.capatilise()))
+    def uppercase = this.copy(authorisations = authorisations.map(_.capitalise()))
 }
 
 object AgentAuthResultBE {

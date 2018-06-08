@@ -36,7 +36,7 @@ case class AgentAuthorisation(
                                challengePermission: String
                              ) {
 
-  def capatilise() = this.copy(address = address.toUpperCase)
+  def capitalise() = this.copy(address = address.toUpperCase)
 
   def toPropertyRepresentation = PropertyRepresentation(
     this.authorisationId,
@@ -47,7 +47,7 @@ case class AgentAuthorisation(
     this.address,
     this.checkPermission,
     this.challengePermission,
-    LocalDate.now(), //TODO Representation creation date to added to authorisation-search-api
+    LocalDate.now(), //TODO Representation creation date needs to be added to the authorisation-search-api for this
     this.status
   )
 }
