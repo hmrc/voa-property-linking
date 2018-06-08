@@ -25,6 +25,7 @@ case class AgentAuthorisation(
                                authorisationId: Long,
                                authorisedPartyId: Long,
                                status: String,
+                               representationSubmissionId: String,
                                submissionId: String,
                                uarn: Long,
                                address: String,
@@ -40,13 +41,13 @@ case class AgentAuthorisation(
   def toPropertyRepresentation = PropertyRepresentation(
     this.authorisationId,
     this.localAuthorityRef,
-    this.submissionId,
+    this.representationSubmissionId,
     this.client.organisationId,
     this.client.organisationName,
     this.address,
     this.checkPermission,
     this.challengePermission,
-    LocalDate.now(), //Why do we need?
+    LocalDate.now(), //TODO Representation creation date to added to authorisation-search-api
     this.status
   )
 }
