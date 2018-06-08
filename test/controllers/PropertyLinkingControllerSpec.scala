@@ -21,6 +21,7 @@ import java.time.{Instant, LocalDate}
 import connectors._
 import connectors.auth.{AuthConnector, Authority, PropertyLinkingAuthConnector, UserIds}
 import models._
+import models.searchApi.AgentAuthResultBE
 import org.mockito.ArgumentMatchers.{eq => mockEq, _}
 import org.mockito.Mockito.{inOrder => ordered, _}
 import org.scalatest.mock.MockitoSugar
@@ -77,8 +78,8 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
 
       when(mockWS.GET(mockEq(propertiesUrl))(any(classOf[HttpReads[PropertiesViewResponse]]), any(), any())).thenReturn(Future(PropertiesViewResponse(None, dummyProperties)))
 
-      val repUrl = s"$baseUrl/mdtp-dashboard-management-api/mdtp_dashboard/agent_representation_requests?status=APPROVED&organisationId=$userOrgId&startPoint=1"
-      when(mockWS.GET(mockEq(repUrl))(any(classOf[HttpReads[APIPropertyRepresentations]]), any(), any())).thenReturn(APIPropertyRepresentations(0, Some(0), Nil))
+      val repUrl = s"$baseUrl/authorisation-search-api/agents/$userOrgId/authorisations?start=1&size=15&representationStatus=PENDING"
+      when(mockWS.GET(mockEq(repUrl))(any(classOf[HttpReads[AgentAuthResultBE]]), any(), any())).thenReturn(AgentAuthResultBE(15, 1, 0, 0, Nil))
 
       val res = testPropertyLinkingController.find(userOrgId, PaginationParams(1, 25, requestTotalRowCount = false))(FakeRequest())
       status(res) shouldBe OK
@@ -116,8 +117,8 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
         s"&requestTotalRowCount=false".toString
       when(mockWS.GET(mockEq(propertiesUrl))(any(classOf[HttpReads[PropertiesViewResponse]]), any(), any())).thenReturn(Future(PropertiesViewResponse(None, dummyProperties)))
 
-      val repUrl = s"$baseUrl/mdtp-dashboard-management-api/mdtp_dashboard/agent_representation_requests?status=APPROVED&organisationId=$userOrgId&startPoint=1"
-      when(mockWS.GET(mockEq(repUrl))(any(classOf[HttpReads[APIPropertyRepresentations]]), any(), any())).thenReturn(APIPropertyRepresentations(0, Some(0), Nil))
+      val repUrl = s"$baseUrl/authorisation-search-api/agents/$userOrgId/authorisations?start=1&size=15&representationStatus=PENDING"
+      when(mockWS.GET(mockEq(repUrl))(any(classOf[HttpReads[AgentAuthResultBE]]), any(), any())).thenReturn(AgentAuthResultBE(1, 15, 0, 0, Nil))
 
       val detailedGroup1 = APIDetailedGroupAccount(1001, "ggGroup11", 1111, GroupDetails(1, true, "orgName", "email@add.res", None), Nil)
       val detailedGroup2 = APIDetailedGroupAccount(1002, "ggGroup22", 2222, GroupDetails(1, true, "orgName", "email@add.res", None), Nil)
