@@ -17,9 +17,10 @@
 package connectors
 
 import java.time.LocalDate
-import javax.inject.{Inject, Named}
 
+import javax.inject.{Inject, Named}
 import models._
+import models.searchApi.AgentAuthResultBE
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.http._
@@ -48,11 +49,14 @@ class PropertyRepresentationConnector @Inject()(@Named("VoaBackendWsHttp") http:
     })
   }
 
-  def forAgent(status: String, organisationId: Long, pagination: PaginationParams)(implicit hc: HeaderCarrier): Future[PropertyRepresentations] = {
-    val params = s"status=$status&organisationId=$organisationId&$pagination"
-    val url = s"$baseUrl/mdtp-dashboard-management-api/mdtp_dashboard/agent_representation_requests?$params"
-    http.GET[APIPropertyRepresentations](url).map(x => {
-      PropertyRepresentations(x.totalPendingRequests, x.resultCount, x.requests.map(_.toPropertyRepresentation))
+  def forAgent(status: String, organisationId: Long, params: PaginationParams)(implicit hc: HeaderCarrier): Future[PropertyRepresentations] = {
+    val url = s"$baseUrl/authorisation-search-api/agents/$organisationId/authorisations" +
+      s"?start=${params.startPoint}" +
+      s"&size=${params.pageSize}" +
+      s"&representationStatus=PENDING"
+    
+    http.GET[AgentAuthResultBE](url).map(x => {
+      PropertyRepresentations(x.filterTotal, Some(x.size.toLong), x.authorisations.map(_.toPropertyRepresentation))
     })
   }
 

@@ -33,7 +33,6 @@ case class APIPropertyRepresentation(representationId: Long,
                                      status: String) {
 
   def toPropertyRepresentation = PropertyRepresentation(
-    this.representationId,
     this.authorisationId,
     this.billingAuthorityReference,
     this.submissionId,

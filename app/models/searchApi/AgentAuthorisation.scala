@@ -16,6 +16,9 @@
 
 package models.searchApi
 
+import java.time.LocalDate
+
+import models.PropertyRepresentation
 import play.api.libs.json.Json
 
 case class AgentAuthorisation(
@@ -27,10 +30,25 @@ case class AgentAuthorisation(
                                address: String,
                                localAuthorityRef: String,
                                client: AgentAuthClient,
-                               representationStatus: String
-                             ){
+                               representationStatus: String,
+                               checkPermission: String,
+                               challengePermission: String
+                             ) {
 
   def capatilise() = this.copy(address = address.toUpperCase)
+
+  def toPropertyRepresentation = PropertyRepresentation(
+    this.authorisationId,
+    this.localAuthorityRef,
+    this.submissionId,
+    this.client.organisationId,
+    this.client.organisationName,
+    this.address,
+    this.checkPermission,
+    this.challengePermission,
+    LocalDate.now(), //Why do we need?
+    this.status
+  )
 }
 
 object AgentAuthorisation {
