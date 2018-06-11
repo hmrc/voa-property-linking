@@ -33,6 +33,7 @@ import scala.concurrent.Future
 
 case class Memoize[K, V]() {
   private val cache = mutable.Map.empty[K, V]
+
   def apply(f: K => V): K => V = in => cache.getOrElseUpdate(in, f(in))
 }
 
@@ -54,17 +55,18 @@ class PropertyLinkingController @Inject()(val auth: AuthConnector,
         .recover { case _: Upstream5xxResponse =>
           Logger.info(s"create property link failure: submissionId ${linkRequest.submissionId}")
           AuditingService.sendEvent("create property link failure", linkRequest)
-          InternalServerError }
+          InternalServerError
+        }
     }
   }
 
   def get(authorisationId: Long) = authenticated { implicit request =>
-      implicit val cache = Memoize[Long, Future[Option[GroupAccount]]]()
+    implicit val cache = Memoize[Long, Future[Option[GroupAccount]]]()
 
-      propertyLinksConnector.get(authorisationId) flatMap {
-        case Some(authorisation) => detailed(authorisation) map { d => Ok(Json.toJson(d)) }
-        case None => NotFound
-      }
+    propertyLinksConnector.get(authorisationId) flatMap {
+      case Some(authorisation) => detailed(authorisation) map { d => Ok(Json.toJson(d)) }
+      case None => NotFound
+    }
   }
 
   def find(organisationId: Long, paginationParams: PaginationParams) = authenticated { implicit request =>
@@ -93,8 +95,8 @@ class PropertyLinkingController @Inject()(val auth: AuthConnector,
 
   def appointableToAgent(ownerId: Long,
                          agentCode: Long,
-                         checkPermission: AgentPermission,
-                         challengePermission: AgentPermission,
+                         checkPermission: Option[String],
+                         challengePermission: Option[String],
                          paginationParams: PaginationParams,
                          sortfield: Option[String],
                          sortorder: Option[String],
@@ -118,19 +120,19 @@ class PropertyLinkingController @Inject()(val auth: AuthConnector,
     }
   }
 
-  /***
+  /** *
     * Make two calls to the Search/Sort API
     * the first call returns the results based on supplied filters and sortfield
     * the second call is used only to allow us to get the count of PENDING representation requests
     */
   def forAgentSearchAndSort(organisationId: Long,
-                    paginationParams: PaginationParams,
-                    sortfield: Option[String],
-                    sortorder: Option[String],
-                    status: Option[String],
-                    address: Option[String],
-                    baref: Option[String],
-                    client: Option[String]) = authenticated { implicit request =>
+                            paginationParams: PaginationParams,
+                            sortfield: Option[String],
+                            sortorder: Option[String],
+                            status: Option[String],
+                            address: Option[String],
+                            baref: Option[String],
+                            client: Option[String]) = authenticated { implicit request =>
     val eventualAuthResultBE = propertyLinksConnector.agentSearchAndSort(
       organisationId = organisationId,
       params = paginationParams,
