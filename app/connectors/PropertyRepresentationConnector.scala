@@ -56,7 +56,7 @@ class PropertyRepresentationConnector @Inject()(@Named("VoaBackendWsHttp") http:
       s"&representationStatus=PENDING"
     
     http.GET[AgentAuthResultBE](url).map(x => {
-      PropertyRepresentations(x.filterTotal, Some(x.size.toLong), x.authorisations.map(_.toPropertyRepresentation))
+      PropertyRepresentations(x.filterTotal, x.authorisations.map(_.toPropertyRepresentation))
     })
   }
 
