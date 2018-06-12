@@ -26,7 +26,7 @@ import uk.gov.hmrc.play.http.ws.WSHttp
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class PropertyLinkingConnector @Inject() (@Named("VoaBackendWsHttp") http: WSHttp, conf: ServicesConfig)(implicit ec: ExecutionContext) {
+class PropertyLinkingConnector @Inject()(@Named("VoaBackendWsHttp") http: WSHttp, conf: ServicesConfig)(implicit ec: ExecutionContext) {
   lazy val baseUrl: String = conf.baseUrl("external-business-rates-data-platform")
   val listYear = 2017
 
@@ -86,8 +86,8 @@ class PropertyLinkingConnector @Inject() (@Named("VoaBackendWsHttp") http: WSHtt
   def appointableToAgent(
                           ownerId: Long,
                           agentId: Long,
-                          checkPermission: AgentPermission,
-                          challengePermission: AgentPermission,
+                          checkPermission: Option[String],
+                          challengePermission: Option[String],
                           params: PaginationParams,
                           sortfield: Option[String] = None,
                           sortorder: Option[String] = None,
@@ -96,7 +96,9 @@ class PropertyLinkingConnector @Inject() (@Named("VoaBackendWsHttp") http: WSHtt
     val url = baseUrl +
       s"/authorisation-search-api/owners/$ownerId/agents/$agentId/availableAuthorisations" +
       s"?start=${params.startPoint}&size=${params.pageSize}" +
-      s"&checkPermission=${checkPermission.name}&challengePermission=${challengePermission.name}" +
+      buildQueryParams("check", checkPermission) +
+      buildQueryParams("challenge", challengePermission) +
+      buildQueryParams("sortfield", sortfield) +
       buildQueryParams("sortfield", sortfield) +
       buildQueryParams("sortorder", sortorder) +
       buildQueryParams("address", address) +
@@ -106,14 +108,14 @@ class PropertyLinkingConnector @Inject() (@Named("VoaBackendWsHttp") http: WSHtt
   }
 
   def agentSearchAndSort(organisationId: Long,
-                          params: PaginationParams,
-                          sortfield: Option[String] = None,
-                          sortorder: Option[String] = None,
-                          status: Option[String] = None,
-                          address: Option[String] = None,
-                          baref: Option[String] = None,
-                          client: Option[String] = None,
-                          representationStatus: Option[String]
+                         params: PaginationParams,
+                         sortfield: Option[String] = None,
+                         sortorder: Option[String] = None,
+                         status: Option[String] = None,
+                         address: Option[String] = None,
+                         baref: Option[String] = None,
+                         client: Option[String] = None,
+                         representationStatus: Option[String]
                         )(implicit hc: HeaderCarrier): Future[AgentAuthResultBE] = {
     val url = baseUrl +
       s"/authorisation-search-api/agents/$organisationId/authorisations" +
@@ -130,9 +132,13 @@ class PropertyLinkingConnector @Inject() (@Named("VoaBackendWsHttp") http: WSHtt
     http.GET[AgentAuthResultBE](url).map(_.uppercase)
   }
 
-  private def buildQueryParams(name : String, value : Option[String]) : String = {
-    value match { case Some(paramValue) if paramValue != "" => s"&$name=$paramValue" ; case _ => ""}
+  private def buildQueryParams(name: String, value: Option[String]): String = {
+    value match {
+      case Some(paramValue) if paramValue != "" => s"&$name=$paramValue";
+      case _ => ""
+    }
   }
+
   private val withValidStatuses: PropertiesViewResponse => PropertiesViewResponse = { view =>
     view.copy(authorisations = view.authorisations.filter(_.hasValidStatus))
   }
@@ -146,7 +152,7 @@ class PropertyLinkingConnector @Inject() (@Named("VoaBackendWsHttp") http: WSHtt
   }
 
   private val withValidParties: PropertiesViewResponse => PropertiesViewResponse = { view =>
-    view.copy(authorisations = view.authorisations map { auth => auth.copy(parties = filterInvalidParties(auth.parties))})
+    view.copy(authorisations = view.authorisations map { auth => auth.copy(parties = filterInvalidParties(auth.parties)) })
   }
 
   def getAssessment(authorisationId: Long)(implicit hc: HeaderCarrier): Future[Option[PropertiesView]] = {
