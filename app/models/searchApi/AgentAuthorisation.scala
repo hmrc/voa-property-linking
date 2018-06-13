@@ -16,21 +16,40 @@
 
 package models.searchApi
 
+import java.time.LocalDate
+
+import models.PropertyRepresentation
 import play.api.libs.json.Json
 
 case class AgentAuthorisation(
                                authorisationId: Long,
                                authorisedPartyId: Long,
                                status: String,
+                               representationSubmissionId: String,
                                submissionId: String,
                                uarn: Long,
                                address: String,
                                localAuthorityRef: String,
                                client: AgentAuthClient,
-                               representationStatus: String
-                             ){
+                               representationStatus: String,
+                               checkPermission: String,
+                               challengePermission: String
+                             ) {
 
-  def capatilise() = this.copy(address = address.toUpperCase)
+  def capitalise() = this.copy(address = address.toUpperCase)
+
+  def toPropertyRepresentation = PropertyRepresentation(
+    this.authorisationId,
+    this.localAuthorityRef,
+    this.representationSubmissionId,
+    this.client.organisationId,
+    this.client.organisationName,
+    this.address,
+    this.checkPermission,
+    this.challengePermission,
+    LocalDate.now(), //TODO This is not being shown on the frontend for now, once the modernised API changes to return this correctly, we will display it again
+    this.status
+  )
 }
 
 object AgentAuthorisation {
