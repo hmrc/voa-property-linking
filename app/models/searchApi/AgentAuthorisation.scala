@@ -47,7 +47,7 @@ case class AgentAuthorisation(
     this.address,
     this.checkPermission,
     this.challengePermission,
-    LocalDate.now(), //TODO Representation creation date needs to be added to the authorisation-search-api for this
+    LocalDate.now(), //TODO This is not being shown on the frontend for now, once the modernised API changes to return this correctly, we will display it again
     this.status
   )
 }
