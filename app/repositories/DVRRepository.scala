@@ -59,6 +59,14 @@ class DVRRepository @Inject()(db: DB, @Named("dvrCollectionName") val dvrCollect
     }
   }
 
+  override def clear(organisationId: Long): Future[Unit] = {
+    remove("organisationId" -> organisationId)
+      .map(_ => ())
+      .recover {
+        case e: DatabaseException => Logger.debug(e.getMessage())
+      }
+  }
+
   private def now = Some(BSONDateTime(System.currentTimeMillis))
 }
 
@@ -67,7 +75,7 @@ case class DVRRecord(organisationId: Long, assessmentRef: Long, createdAt: Optio
 object DVRRecord {
 
   import reactivemongo.json.BSONFormats.BSONDateTimeFormat
-  
+
   val mongoFormat = Json.format[DVRRecord]
 }
 
@@ -76,6 +84,8 @@ trait DVRRecordRepository {
   def create(organisationId: Long, assessmentRef: Long): Future[Unit]
 
   def exists(organisationId: Long, assessmentRef: Long): Future[Boolean]
+
+  def clear(organisationId: Long): Future[Unit]
 }
 
 
