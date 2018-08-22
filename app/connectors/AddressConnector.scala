@@ -28,7 +28,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class AddressConnector @Inject() (@Named("VoaBackendWsHttp") http: WSHttp, conf: ServicesConfig)(implicit ec: ExecutionContext) {
 
-  val url = conf.baseUrl("external-business-rates-data-platform") + "/address-management-api/address"
+  lazy val baseUrl: String = conf.baseUrl("external-business-rates-data-platform")
+  lazy val url = baseUrl + "/address-management-api/address"
 
   def find(postcode: String)(implicit hc: HeaderCarrier): Future[Seq[SimpleAddress]] = {
     http.GET[APIAddressLookupResult](s"""$url?pageSize=100&startPoint=1&searchparams={"postcode": "$postcode"}""") map { res =>

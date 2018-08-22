@@ -17,11 +17,10 @@
 package connectors
 
 import javax.inject.{Inject, Named}
-
 import models._
-import play.api.libs.json.{JsValue, Json}
-import uk.gov.hmrc.play.config.ServicesConfig
+import play.api.libs.json.JsValue
 import uk.gov.hmrc.http._
+import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.ws.WSHttp
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -30,24 +29,25 @@ class IndividualAccountConnector @Inject()(addresses: AddressConnector,
                                            @Named("VoaBackendWsHttp") http: WSHttp)(implicit ec: ExecutionContext)
   extends ServicesConfig {
 
-  lazy val baseUrl: String = baseUrl("external-business-rates-data-platform") + "/customer-management-api/person"
+  lazy val baseUrl: String = baseUrl("external-business-rates-data-platform")
+  lazy val url = baseUrl + "/customer-management-api/person"
 
   def create(account: IndividualAccountSubmission)(implicit hc: HeaderCarrier): Future[IndividualAccountId] = {
-    http.POST[APIIndividualAccount, IndividualAccountId](baseUrl, account.toAPIIndividualAccount)
+    http.POST[APIIndividualAccount, IndividualAccountId](url, account.toAPIIndividualAccount)
   }
 
   def update(personId: Long, account: IndividualAccountSubmission)(implicit hc: HeaderCarrier): Future[JsValue] = {
-    http.PUT[APIIndividualAccount, JsValue](baseUrl + s"/$personId", account.toAPIIndividualAccount)
+    http.PUT[APIIndividualAccount, JsValue](url + s"/$personId", account.toAPIIndividualAccount)
   }
 
   def get(id: Long)(implicit hc: HeaderCarrier): Future[Option[IndividualAccount]] = {
-    http.GET[Option[APIDetailedIndividualAccount]](s"$baseUrl?personId=$id") map {
+    http.GET[Option[APIDetailedIndividualAccount]](s"$url?personId=$id") map {
       _.map(a => a.toIndividualAccount)
     }
   }
 
   def findByGGID(ggId: String)(implicit hc: HeaderCarrier): Future[Option[IndividualAccount]] = {
-    http.GET[Option[APIDetailedIndividualAccount]](s"$baseUrl?governmentGatewayExternalId=$ggId") map {
+    http.GET[Option[APIDetailedIndividualAccount]](s"$url?governmentGatewayExternalId=$ggId") map {
       _.map(_.toIndividualAccount)
     }
   }
