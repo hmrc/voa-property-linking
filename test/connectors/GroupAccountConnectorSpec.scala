@@ -20,75 +20,188 @@ import java.time.{Clock, Instant, ZoneId}
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import helpers.SimpleWsHttpTestApplication
-import infrastructure.SimpleWSHttp
-import models.{GroupAccountSubmission, IndividualAccountSubmissionForOrganisation, IndividualDetails}
+import models._
+import play.api.http.ContentTypes
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import play.api.libs.json.Json
-import uk.gov.hmrc.play.config.inject.ServicesConfig
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.config.inject.ServicesConfig
+import uk.gov.hmrc.play.http.ws.WSHttp
 
-class GroupAccountConnectorSpec extends WireMockSpec with SimpleWsHttpTestApplication {
+class GroupAccountConnectorSpec extends ContentTypes with WireMockSpec with SimpleWsHttpTestApplication {
 
-  "Creating an organisation account" should {
-    "serialise to schema-valid JSON" in {
-      val testSubmission = GroupAccountSubmission(
-        id = "groupId",
-        companyName = "a company",
-        addressId = 1,
-        email = "aa@bb.cc",
-        phone = "123",
-        isAgent = false,
-        individualAccountSubmission = IndividualAccountSubmissionForOrganisation(
-          externalId = "externalId",
-          trustId = "trustId",
-          details = IndividualDetails(
-            firstName = "firstName",
-            lastName = "lastName",
-            email = "aa@bb.cc",
-            phone1 = "123",
-            phone2 = None,
-            addressId = 2
-          )
-        )
-      )
+  implicit val hc = HeaderCarrier()
+  val http = fakeApplication.injector.instanceOf[WSHttp]
+  val testConnector = new GroupAccountConnector(http, fakeApplication.injector.instanceOf[ServicesConfig]) {
+    override lazy val baseUrl = mockServerUrl
+  }
+  val url = s"/customer-management-api/organisation"
 
-      stubFor(post(urlEqualTo("/customer-management-api/organisation")).withRequestBody(equalToJson(Json.stringify(expectedRequest)))
-          .willReturn(aResponse.withBody(Json.stringify(expectedResponse)))
-      )
+  "GroupAccountConnector.get" should {
+    "return the group accounts associated with the provided id" in {
+      val groupId = 1234L
+      val getUrl = s"$url?organisationId=$groupId"
+      val stub = stubFor(get(urlEqualTo(getUrl))
+        .willReturn(aResponse
+          .withStatus(200)
+          .withHeader("Content-Type", JSON)
+          .withBody(getResponseValid)))
 
-      Json.toJson(await(testConnector.create(testSubmission)(HeaderCarrier()))) shouldBe expectedResponse
+      val result = (await(testConnector.get(groupId)(hc))) shouldBe expectedGetValidResponse1
+    }
+
+      "return an empty response if the provided id cannot be found" in {
+        val groupId = 1234L
+        val getUrl = s"$url?organisationId=$groupId"
+        val stub = stubFor(get(urlEqualTo(getUrl))
+          .willReturn(aResponse
+            .withStatus(404)
+            .withHeader("Content-Type", JSON)
+            .withBody(getResponseNotFound)))
+
+        val result = (await(testConnector.get(groupId)(hc))) shouldBe expectedGetEmptyResponse
+      }
+    }
+
+  "GroupAccountConnector.findByGGID" should {
+    "return the group accounts associated with the provided GGID" in {
+      val ggId = "1234"
+      val findByGGIDUrl = s"$url?governmentGatewayGroupId=$ggId"
+      val stub = stubFor(get(urlEqualTo(findByGGIDUrl))
+        .willReturn(aResponse
+          .withStatus(200)
+          .withHeader("Content-Type", JSON)
+          .withBody(getResponseValid)))
+
+      val result = (await(testConnector.findByGGID(ggId)(hc))) shouldBe expectedGetValidResponse1
+    }
+
+    "return an empty response if the provided GGID cannot be found" in {
+      val ggId = "1234"
+      val findByGGIDUrl = s"$url?governmentGatewayGroupId=$ggId"
+      val stub = stubFor(get(urlEqualTo(findByGGIDUrl))
+        .willReturn(aResponse
+          .withStatus(404)
+          .withHeader("Content-Type", JSON)
+          .withBody(getResponseNotFound)))
+
+      val result = (await(testConnector.findByGGID(ggId)(hc))) shouldBe expectedGetEmptyResponse
     }
   }
 
-  lazy val testConnector = new GroupAccountConnector(new SimpleWSHttp, fakeApplication.injector.instanceOf[ServicesConfig]) {
-    override lazy val baseUrl = mockServerUrl
+  "GroupAccountConnector.withAgentCode" should {
+    "return the group accounts associated with the provided agent code" in {
+      val agentCode = "ac234"
+      val withAgentCodeUrl = s"$url?representativeCode=$agentCode"
+      val stub = stubFor(get(urlEqualTo(withAgentCodeUrl))
+        .willReturn(aResponse
+          .withStatus(200)
+          .withHeader("Content-Type", JSON)
+          .withBody(getResponseValid)))
+
+      val result = (await(testConnector.withAgentCode(agentCode)(hc))) shouldBe expectedGetValidResponse1
+    }
+
+
+    "return an empty response if the provided agent code cannot be found" in {
+      val agentCode = "ac234"
+      val withAgentCodeUrl = s"$url?representativeCode=$agentCode"
+      val stub = stubFor(get(urlEqualTo(withAgentCodeUrl))
+        .willReturn(aResponse
+          .withStatus(404)
+          .withHeader("Content-Type", JSON)
+          .withBody(getResponseNotFound)))
+
+      val result = (await(testConnector.withAgentCode(agentCode)(hc))) shouldBe expectedGetEmptyResponse
+    }
   }
 
-  lazy val expectedRequest = Json.obj(
-    "governmentGatewayGroupId" -> "groupId",
-    "addressUnitId" -> 1,
-    "representativeFlag" -> false,
-    "organisationName" -> "a company",
-    "organisationEmailAddress" -> "aa@bb.cc",
-    "organisationTelephoneNumber" -> "123",
-    "effectiveFrom" -> Instant.now(fixedClock).toString,
-    "personData" -> Json.obj(
-      "governmentGatewayExternalId" -> "externalId",
-      "addressUnitId" -> 2,
-      "firstName" -> "firstName",
-      "lastName" -> "lastName",
-      "emailAddress" -> "aa@bb.cc",
-      "telephoneNumber" -> "123",
-      "identifyVerificationId" -> "trustId",
-      "effectiveFrom" -> Instant.now(fixedClock).toString
+  "GroupAccountConnector.create" should {
+    "return the created account's group id" in {
+
+      val stub = stubFor(post(urlEqualTo(url))
+        .willReturn(aResponse
+          .withStatus(200)
+          .withHeader("Content-Type", JSON)
+          .withBody(createResponseValid)))
+
+      val result = (await(testConnector.create(createValidRequest)(hc))) shouldBe expectedCreateValidResponse
+    }
+  }
+
+  lazy val createValidRequest: GroupAccountSubmission = GroupAccountSubmission(
+    id = "acc123",
+    companyName = "Real news Inc",
+    addressId = 9876543L,
+    email = "thewhitehouse@potus.com",
+    phone = "01987654",
+    isAgent = false,
+    individualAccountSubmission = IndividualAccountSubmissionForOrganisation(
+      externalId = "Ext123",
+      trustId= "trust234",
+      details = IndividualDetails(
+        firstName = "Donald",
+        lastName = "Trump",
+        email = "therealdonald@potus.com",
+        phone1= "123456789",
+        phone2= Some("987654321"),
+        addressId= 24680L
+      )
     )
   )
 
-  lazy val expectedResponse = Json.obj(
-    "id" -> 1,
-    "message" -> "Something",
-    "responseTime" -> 99999999
+    lazy val getResponseValid = """{
+    "id": 2,
+    "governmentGatewayGroupId": "gggId",
+    "representativeCode":234,
+    "organisationLatestDetail": {
+      "addressUnitId": 345,
+      "representativeFlag": false,
+      "organisationName": "Fake News Inc",
+      "organisationEmailAddress": "therealdonald@potus.com",
+      "organisationTelephoneNumber": "9876541"
+      },
+      "persons": [
+        {
+          "personLatestDetail": {
+            "addressUnitId": 9876,
+            "firstName": "anotherFirstName",
+            "lastName": "anotherLastName",
+            "emailAddress": "theFakeDonald@potus.com",
+            "telephoneNumber": "24680",
+            "mobileNumber": "13579",
+           "identifyVerificationId": "idv1"
+          }
+        }
+      ]
+  }"""
+
+  lazy val createResponseValid =
+    """{
+      |"id": 654321,
+      |"message": "valid group id",
+      |"responseTime": 45678
+      |}""".stripMargin
+
+  lazy val expectedCreateValidResponse = GroupId(
+    id = 654321L,
+    message="valid group id",
+    responseTime = 45678)
+
+  lazy val expectedGetValidResponse1 = Some(GroupAccount(
+    id = 2,
+    groupId = "gggId",
+    companyName = "Fake News Inc",
+    addressId=345,
+    email="therealdonald@potus.com",
+    phone = "9876541",
+    isAgent = false,
+    agentCode = 234)
   )
+
+  lazy val getResponseNotFound = "{}"
+
+  lazy val expectedGetEmptyResponse = None
+
 
   implicit lazy val fixedClock: Clock = Clock.fixed(Instant.now, ZoneId.systemDefault())
 }
