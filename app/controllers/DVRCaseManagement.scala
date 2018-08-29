@@ -24,6 +24,7 @@ import models.DetailedValuationRequest
 import play.api.libs.json.Json
 import play.api.mvc.Action
 import repositories.DVRRecordRepository
+import play.api.Logger
 
 class DVRCaseManagement @Inject()(val auth: AuthConnector,
                                   dvrCaseManagement: DVRCaseManagementConnector,
@@ -31,9 +32,11 @@ class DVRCaseManagement @Inject()(val auth: AuthConnector,
   extends PropertyLinkingBaseController with Authenticated {
 
   def requestDetailedValuation = authenticated(parse.json) { implicit request =>
-    withJsonBody[DetailedValuationRequest] { dvr =>
+    withJsonBody[DetailedValuationRequest] { dvr => {
+      Logger.info(s"detailed valuation submitted: ${dvr.submissionId}")
       dvrRecordRepository.create(dvr.organisationId, dvr.assessmentRef).flatMap(_ =>
         dvrCaseManagement.requestDetailedValuation(dvr) map { _ => Ok })
+    }
     }
   }
 
