@@ -33,7 +33,7 @@ class DVRCaseManagement @Inject()(val auth: AuthConnector,
 
   def requestDetailedValuation = authenticated(parse.json) { implicit request =>
     withJsonBody[DetailedValuationRequest] { dvr => {
-      Logger.info(s"detailed valuation submitted: ${dvr.submissionId}")
+      Logger.info(s"detailed valuation request submitted: ${dvr.submissionId}")
       dvrRecordRepository.create(dvr.organisationId, dvr.assessmentRef).flatMap(_ =>
         dvrCaseManagement.requestDetailedValuation(dvr) map { _ => Ok })
     }
