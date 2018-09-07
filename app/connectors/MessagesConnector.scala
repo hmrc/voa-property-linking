@@ -30,23 +30,24 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class MessagesConnector @Inject()(@Named("VoaBackendWsHttp") http: WSHttp, conf: ServicesConfig)(implicit ec: ExecutionContext) {
 
-  lazy val baseUrl: String = conf.baseUrl("external-business-rates-data-platform") + "/message-search-api"
+  lazy val baseUrl: String = conf.baseUrl("external-business-rates-data-platform")
+  lazy val url = baseUrl + "/message-search-api"
 
   def getMessage(recipientOrgId: Long, messageId: String)(implicit hc: HeaderCarrier): Future[MessageSearchResults] = {
-    http.GET[MessageSearchResults](s"$baseUrl/messages?recipientOrganisationID=$recipientOrgId&objectID=$messageId")
+    http.GET[MessageSearchResults](s"$url/messages?recipientOrganisationID=$recipientOrgId&objectID=$messageId")
   }
 
   def getMessages(params: MessageSearchParams)(implicit hc: HeaderCarrier): Future[MessageSearchResults] = {
-    http.GET[MessageSearchResults](s"$baseUrl/messages?${params.apiQueryString}")
+    http.GET[MessageSearchResults](s"$url/messages?${params.apiQueryString}")
   }
 
   def getMessageCount(orgId: Long)(implicit hc: HeaderCarrier): Future[MessageCount] = {
-    http.GET[MessageCount](s"$baseUrl/count/$orgId")
+    http.GET[MessageCount](s"$url/count/$orgId")
   }
 
   def readMessage(messageId: String, readBy: String)(implicit hc: HeaderCarrier): Future[Unit] = {
     val now = LocalDateTime.now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"))
     //no body required
-    http.PATCH[JsValue, HttpResponse](s"$baseUrl/messages/$messageId?lastReadBy=$readBy&lastReadAt=$now", JsNull) map { _ => () }
+    http.PATCH[JsValue, HttpResponse](s"$url/messages/$messageId?lastReadBy=$readBy&lastReadAt=$now", JsNull) map { _ => () }
   }
 }

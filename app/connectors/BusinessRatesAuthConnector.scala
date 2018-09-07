@@ -25,7 +25,9 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.{ExecutionContext, Future}
 
 class BusinessRatesAuthConnector @Inject()(http: SimpleWSHttp, servicesConfig: ServicesConfig) {
-  private lazy val url = servicesConfig.baseUrl("business-rates-auth") + "/business-rates-authorisation"
+
+  lazy val baseUrl = servicesConfig.baseUrl("business-rates-auth")
+  lazy val url = baseUrl + "/business-rates-authorisation"
 
   def clearCache()(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] = {
     http.DELETE(url + "/cache") map { _ => () }

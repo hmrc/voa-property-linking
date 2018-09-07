@@ -26,7 +26,8 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import scala.concurrent.Future
 
 class DVRCaseManagementConnector @Inject() (@Named("VoaBackendWsHttp") http: WSHttp) extends ServicesConfig {
-  val url = baseUrl("external-business-rates-data-platform") + "/dvr-case-management-api"
+  lazy val baseURL = baseUrl("external-business-rates-data-platform")
+  lazy val url = baseURL + "/dvr-case-management-api"
 
   def requestDetailedValuation(request: DetailedValuationRequest)(implicit hc: HeaderCarrier): Future[Unit] = {
     http.POST[DetailedValuationRequest, HttpResponse](url + "/dvr_case/create_dvr_case", request) map { _ => () }

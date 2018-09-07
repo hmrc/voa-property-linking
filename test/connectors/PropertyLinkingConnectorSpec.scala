@@ -16,9 +16,11 @@
 
 package connectors
 
-import com.github.tomakehurst.wiremock.client.WireMock._
+import java.time.{LocalDate, ZoneOffset}
+
+import com.github.tomakehurst.wiremock.client.WireMock.{stubFor, _}
 import helpers.SimpleWsHttpTestApplication
-import models.PaginationParams
+import models._
 import play.api.http.ContentTypes
 import uk.gov.hmrc.play.config.inject.ServicesConfig
 import uk.gov.hmrc.http.HeaderCarrier
@@ -33,6 +35,122 @@ class PropertyLinkingConnectorSpec extends ContentTypes
   val http = fakeApplication.injector.instanceOf[WSHttp]
   val connector = new PropertyLinkingConnector(http, fakeApplication.injector.instanceOf[ServicesConfig]) {
     override lazy val baseUrl: String = mockServerUrl
+  }
+
+  "PropertyLinkingConnector.getAssessment" should {
+    "return a properties view for an invalid authorisation Id." in {
+
+      val authorisationId = 123456789
+      val listYear = 2017
+      val getAssessmentUrl =  s"/mdtp-dashboard-management-api/mdtp_dashboard/view_assessment" +
+        s"?listYear=$listYear" +
+        s"&authorisationId=$authorisationId"
+
+      stubFor(get(urlEqualTo(getAssessmentUrl))
+        .willReturn(aResponse
+          .withStatus(200)
+          .withHeader("Content-Type", JSON)
+          .withBody(invalidPropertiesViewResult)
+        ))
+
+      val result = connector.get(authorisationId)
+      result.getOrElse("Passed") shouldBe "Passed"
+    }
+  }
+
+  "PropertyLinkingConnector.getAssessment" should {
+    "return a properties view for a valid authorisation Id." in {
+
+      val authorisationId = 123456789
+      val listYear = 2017
+
+      val getAssessmentUrl =  s"/mdtp-dashboard-management-api/mdtp_dashboard/view_assessment" +
+        s"?listYear=$listYear" +
+        s"&authorisationId=$authorisationId"
+
+      stubFor(get(urlEqualTo(getAssessmentUrl))
+        .willReturn(aResponse
+          .withStatus(200)
+          .withHeader("Content-Type", JSON)
+          .withBody(validPropertiesViewResult)
+        ))
+
+      val result = connector.get(authorisationId)
+      result.getOrElse("Invalid Test: None should not be returned") shouldBe validPropertiesView
+    }
+  }
+
+  "PropertyLinkingConnector.get" should {
+    "not return a properties view for an invalid status." in {
+
+      val authorisationId = 123456789
+      val listYear = 2017
+
+      val getUrl =  s"/mdtp-dashboard-management-api/mdtp_dashboard/view_assessment" +
+        s"?listYear=$listYear" +
+        s"&authorisationId=$authorisationId"
+
+      stubFor(get(urlEqualTo(getUrl))
+          .willReturn(aResponse
+          .withStatus(200)
+          .withHeader("Content-Type", JSON)
+          .withBody(invalidPropertiesViewResult)
+      ))
+
+      val result = connector.get(authorisationId)
+
+      result.getOrElse("Passed") shouldBe "Passed"
+    }
+  }
+
+  "PropertyLinkingConnector.get" should {
+    "return a properties view for a valid authorisation id containing valid status." in {
+
+      val authorisationId = 123456789
+      val listYear = 2017
+      val getUrl =  s"/mdtp-dashboard-management-api/mdtp_dashboard/view_assessment" +
+        s"?listYear=$listYear" +
+        s"&authorisationId=$authorisationId"
+
+      stubFor(get(urlEqualTo(getUrl))
+        .willReturn(aResponse
+          .withStatus(200)
+          .withHeader("Content-Type", JSON)
+          .withBody(validPropertiesViewResult)
+        ))
+
+      val result = connector.get(authorisationId)
+      result.getOrElse("Invalid Test: None should not be returned") shouldBe validPropertiesView
+    }
+  }
+
+  "PropertyLinkingConnector.create" should {
+    "create a property linking request" in {
+
+      val createUrl = "/property-management-api/property/save_property_link"
+      val linkingRequest: APIPropertyLinkRequest = APIPropertyLinkRequest(
+        uarn = 1234567890,
+        authorisationOwnerOrganisationId = 987654,
+        createDatetime = instant,
+        authorisationOwnerPersonId = 13579,
+        authorisationMethod = "OTHER",
+        uploadedFiles = Seq(FileInfo("file1", "council bill")),
+        submissionId = "abcde123",
+        authorisationOwnerCapacity = "OWNER_OCCUPIER",
+        startDate = date,
+        endDate = Some(date)
+      )
+
+      stubFor(post(urlEqualTo(createUrl))
+        .willReturn(aResponse
+          .withStatus(200)
+          .withHeader("Content-Type", JSON)
+          .withBody(emptyResponse)
+        )
+      )
+      val result = await(connector.create(linkingRequest))
+      result shouldBe ()
+    }
   }
 
   "PropertyLinkingConnector.find" should {
@@ -94,6 +212,123 @@ class PropertyLinkingConnectorSpec extends ContentTypes
       result.authorisations.foreach(owner => owner.address shouldBe owner.address.toUpperCase)
     }
   }
+
+  val date = LocalDate.parse("2018-09-05")
+  val instant = date.atStartOfDay().toInstant(ZoneOffset.UTC)
+
+  val validPropertiesView = PropertiesView(
+    authorisationId = 987654,
+    uarn = 1234567890,
+    authorisationOwnerOrganisationId = 987654,
+    authorisationOwnerPersonId = 13579,
+    authorisationStatus = "ALLOW",
+    authorisationMethod = "OTHER",
+    authorisationOwnerCapacity = "OWNER_OCCUPIER",
+    createDatetime = instant,
+    startDate = date,
+    endDate = Some(date),
+    submissionId = "abc123",
+    NDRListValuationHistoryItems = Seq(APIValuationHistory(
+      asstRef = 125689,
+      listYear = "2017",
+      uarn = 923411,
+      effectiveDate = date,
+      rateableValue = Some(2599),
+      address = "1 HIGH STREET, BRIGHTON",
+      billingAuthorityReference = "VOA1"
+    )),
+    parties = Seq(APIParty(
+      id = 24680,
+      authorisedPartyStatus = "APPROVED",
+      authorisedPartyOrganisationId = 123456,
+      permissions = Seq(Permissions(
+        id = 13579,
+        checkPermission = "APPROVED",
+        challengePermission = "APPROVED",
+        endDate = None
+      )
+      )
+    ))
+  )
+
+  lazy val emptyResponse = "{}"
+
+  lazy val invalidPropertiesViewResult = validPropertiesViewResult.replace("ALLOW", "DECLINED")
+
+  lazy val validPropertiesViewResult =
+    s"""{
+       |  "authorisationId": 987654,
+       |	"uarn": 1234567890,
+       |	"authorisationOwnerOrganisationId": 987654,
+       |	"authorisationOwnerPersonId": 13579,
+       |	"authorisationStatus": "ALLOW",
+       |	"authorisationMethod": "OTHER",
+       |	"authorisationOwnerCapacity": "OWNER_OCCUPIER",
+       |	"createDatetime": "2018-09-05T00:00:00.000+0000",
+       |	"startDate": "2018-09-05",
+       |	"endDate": "2018-09-05",
+       |	"submissionId": "abc123",
+       |	"NDRListValuationHistoryItems": [{
+       |		"asstRef": 125689,
+       |		"listYear": "2017",
+       |		"uarn": 923411,
+       |		"effectiveDate": "2018-09-05",
+       |		"rateableValue": 2599,
+       |		"address": "1 High Street, Brighton",
+       |		"billingAuthorityReference": "VOA1"
+       |	}],
+       |	"parties": [{
+       |		"id": 24680,
+       |		"authorisedPartyStatus": "APPROVED",
+       |		"authorisedPartyOrganisationId": 123456,
+       |		"permissions": [{
+       |			"id": 13579,
+       |			"checkPermission": "APPROVED",
+       |			"challengePermission": "APPROVED"
+       |		}]
+       |	}]
+       }""".stripMargin
+
+  lazy val validPropertiesViewResultX =
+    s"""{
+      |"authorisationId": 987654,
+      |"uarn": 1234567890,
+      |"authorisationOwnerOrganisationId": 987654,
+      |"authorisationOwnerPersonId": 13579,
+      |"authorisationStatus": "ALLOW",
+      |"authorisationMethod": "OTHER",
+      |"authorisationOwnerCapacity": "OWNER_OCCUPIER",
+      |"createDatetime": "2018-09-05T00:00:00.000+0000",
+      |"startDate": "2018-09-05",
+      |"endDate": "2018-09-05",
+      |"submissionId": "abc123",
+      |"NDRListValuationHistoryItems": [
+      | {
+      |   "asstRef": 125689,
+      |   "listYear": "2017",
+      |   "uarn": 923411,
+      |   "effectiveDate": "2018-09-05",
+      |   "rateableValue": 2599,
+      |   "address": "1 High Street, Brighton",
+      |   "billingAuthorityReference": "VOA2"
+      | }
+      |],
+      |"parties": [
+      | {
+      |   "id": 24680,
+      |   "authorisedPartyStatus": "AGENT",
+      |   "authorisedPartyOrganisationId": 123456,
+      |   "permissions": [
+      |   {
+      |     "id": 13579,
+      |     "checkPermission": "ALLOWED",
+      |     "challengePermission": "ALLOWED",
+      |     "endDate": "2018-09-02"
+      |   }
+      |  ]
+      | }
+      |]
+    }""".stripMargin
 
   lazy val clientSearchResultWithAgentStatus =
     """{
@@ -331,5 +566,4 @@ class PropertyLinkingConnectorSpec extends ContentTypes
       |  ]
       |}
     """.stripMargin
-
 }
