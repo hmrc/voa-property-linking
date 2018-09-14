@@ -38,7 +38,7 @@ trait MicroService {
     import scoverage.ScoverageKeys
      Seq(
        ScoverageKeys.coverageExcludedPackages := "<empty>;Reverse.*;views.*;config.*;poc.view.*;poc.config.*;.*(AuthService|BuildInfo|Routes).*",
-       ScoverageKeys.coverageMinimum := 36,
+       ScoverageKeys.coverageMinimum := 52.5,
        ScoverageKeys.coverageFailOnMinimum := true,
        ScoverageKeys.coverageHighlighting := true
        )
