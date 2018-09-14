@@ -28,9 +28,9 @@ import play.api.libs.json.Json
 import play.api.mvc.Action
 import play.api.mvc.Results.EmptyContent
 
-class IndividualAccountController @Inject() ( val auth: AuthConnector,
-                                              individuals: IndividualAccountConnector,
-                                             brAuth: BusinessRatesAuthConnector)
+class IndividualAccountController @Inject()(val auth: AuthConnector,
+                                            individuals: IndividualAccountConnector,
+                                            brAuth: BusinessRatesAuthConnector)
   extends PropertyLinkingBaseController with Authenticated {
 
   case class IndividualAccount(id: IndividualAccountId, submission: IndividualAccountSubmission)
@@ -43,7 +43,8 @@ class IndividualAccountController @Inject() ( val auth: AuthConnector,
     withJsonBody[IndividualAccountSubmission] { acc =>
       individuals.create(acc) map { x =>
         AuditingService.sendEvent("Created", IndividualAccount(x, acc))
-        Created(Json.toJson(x)) }
+        Created(Json.toJson(x))
+      }
     }
   }
 

@@ -11,6 +11,7 @@ import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 
 
 trait MicroService {
+
   import uk.gov.hmrc._
   import DefaultBuildSettings._
   import TestPhases._
@@ -20,9 +21,9 @@ trait MicroService {
 
   val appName: String
 
-  lazy val appDependencies : Seq[ModuleID] = ???
-  lazy val plugins : Seq[Plugins] = Seq.empty
-  lazy val playSettings : Seq[Setting[_]] = Seq(
+  lazy val appDependencies: Seq[ModuleID] = ???
+  lazy val plugins: Seq[Plugins] = Seq.empty
+  lazy val playSettings: Seq[Setting[_]] = Seq(
     RoutesKeys.routesImport ++= Seq(
       "scala.language.reflectiveCalls",
       "models._"
@@ -34,19 +35,19 @@ trait MicroService {
   val defaultPort = 9000
 
   lazy val scoverageSettings: Seq[Def.Setting[_ >: String with Double with Boolean]] = {
-       // Semicolon-separated list of regexs matching classes to exclude
+    // Semicolon-separated list of regexs matching classes to exclude
     import scoverage.ScoverageKeys
-     Seq(
-       ScoverageKeys.coverageExcludedPackages := "<empty>;Reverse.*;views.*;config.*;poc.view.*;poc.config.*;.*(AuthService|BuildInfo|Routes).*",
-       ScoverageKeys.coverageMinimum := 52.5,
-       ScoverageKeys.coverageFailOnMinimum := true,
-       ScoverageKeys.coverageHighlighting := true
-       )
-     }
+    Seq(
+      ScoverageKeys.coverageExcludedPackages := "<empty>;Reverse.*;views.*;config.*;connectors.test.*;controllers.test.*;poc.view.*;poc.config.*;.*(AuthService|BuildInfo|Routes).*",
+      ScoverageKeys.coverageMinimum := 52.5,
+      ScoverageKeys.coverageFailOnMinimum := true,
+      ScoverageKeys.coverageHighlighting := true
+    )
+  }
 
   lazy val microservice: Project = Project(appName, file("."))
-    .enablePlugins(Seq(PlayScala,SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin) ++ plugins : _*)
-    .settings(playSettings ++ scoverageSettings : _*)
+    .enablePlugins(Seq(PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin) ++ plugins: _*)
+    .settings(playSettings ++ scoverageSettings: _*)
     .settings(scalaSettings: _*)
     .settings(publishingSettings: _*)
     .settings(defaultSettings(): _*)
@@ -64,7 +65,7 @@ trait MicroService {
     .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
     .settings(
       Keys.fork in IntegrationTest := false,
-      unmanagedSourceDirectories in IntegrationTest := (baseDirectory in IntegrationTest)(base => Seq(base / "it")).value,
+      unmanagedSourceDirectories in IntegrationTest := (baseDirectory in IntegrationTest) (base => Seq(base / "it")).value,
       addTestReportOption(IntegrationTest, "int-test-reports"),
       testGrouping in IntegrationTest := oneForkedJvmPerTest((definedTests in IntegrationTest).value),
       parallelExecution in IntegrationTest := false)
