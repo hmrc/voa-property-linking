@@ -102,8 +102,6 @@ class IndividualAccountConnectorSpec extends ContentTypes with WireMockSpec with
       val result = (await(testConnector.create(individualAccountSubmission)(hc))) shouldBe expectedCreateResponseValid
     }
   }
-//  case class IndividualAccountSubmission(externalId: String, trustId: String, organisationId: Long, details: IndividualDetails) {
-// case class IndividualDetails(firstName: String, lastName: String, email: String, phone1: String, phone2: Option[String], addressId: Long)
 
   "IndividualAccountConnector.update" should {
     "update the person id with the individual account submission" in {

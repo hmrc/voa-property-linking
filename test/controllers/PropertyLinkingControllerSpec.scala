@@ -20,29 +20,29 @@ import java.time.{Instant, LocalDate}
 
 import connectors._
 import connectors.auth.{AuthConnector, Authority, PropertyLinkingAuthConnector, UserIds}
-import models._
+import models.{CapacityDeclaration, _}
 import models.searchApi.AgentAuthResultBE
 import org.mockito.ArgumentMatchers.{eq => mockEq, _}
-import org.mockito.Mockito.{inOrder => ordered, _}
+import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpReads}
+import play.api.test.Helpers.{status, _}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, Upstream5xxResponse}
 import uk.gov.hmrc.play.config.inject.ServicesConfig
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext
 import uk.gov.hmrc.play.http.ws.WSHttp
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.Random
-import scala.concurrent.ExecutionContext.Implicits.global
+
 class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
 
   implicit val request = FakeRequest()
-  
+
   val mockWS = mock[WSHttp]
   val mockConf = mock[ServicesConfig]
   val mockAddressConnector = mock[AddressConnector]
@@ -74,7 +74,7 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
         s"&startPoint=1" +
         s"&pageSize=25" +
         s"&requestTotalRowCount=false"
-      val ec =  scala.concurrent.ExecutionContext.Implicits.global
+      val ec = scala.concurrent.ExecutionContext.Implicits.global
 
       when(mockWS.GET(mockEq(propertiesUrl))(any(classOf[HttpReads[PropertiesViewResponse]]), any(), any())).thenReturn(Future(PropertiesViewResponse(None, dummyProperties)))
 
@@ -91,8 +91,10 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
       reset(mockWS)
       val testPropertyLinkingController: PropertyLinkingController = fakeApplication.injector.instanceOf[PropertyLinkingController]
       val userOrgId = 111
+
       //Authorised Party ID is unique for each relationship, even if it's the same agent
       def baseParty1() = APIParty(Random.nextInt, "APPROVED", 1001, Seq(Permissions(10001, "", "", None)))
+
       def baseParty2() = baseParty1().copy(id = Random.nextInt, authorisedPartyOrganisationId = 1002)
 
       val dummyProperties = Seq(
@@ -137,6 +139,53 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
       verify(mockWS, times(1)).GET(mockEq(org1002Url))(any(classOf[HttpReads[Option[APIDetailedGroupAccount]]]), any(), any())
     }
   }
+
+  "create" should {
+    "create a new property link submission in modernised" in {
+      val testCapacityDeclaration = CapacityDeclaration("TEST_CAPACITY", LocalDate.now(), None)
+      val testPropertyLinkSubmission = PropertyLinkRequest(1, 1, 1, testCapacityDeclaration, Instant.now(), "TEST_BASIS", Seq(FileInfo("filename", "evidenceType")), "PL12345")
+
+      val plSubmissionJson = Json.toJson(testPropertyLinkSubmission)
+
+      when(mockPropertyLinkConnector.create(any())(any[HeaderCarrier])).thenReturn(Future.successful(()))
+
+      val res = testController.create()(FakeRequest().withBody(plSubmissionJson))
+      await(res)
+
+      status(res) shouldBe CREATED
+    }
+
+    "return InternalServerError if property link submission fails" in {
+      val testCapacityDeclaration = CapacityDeclaration("TEST_CAPACITY", LocalDate.now(), None)
+      val testPropertyLinkSubmission = PropertyLinkRequest(1, 1, 1, testCapacityDeclaration, Instant.now(), "TEST_BASIS", Seq(FileInfo("filename", "evidenceType")), "PL12345")
+
+      val plSubmissionJson = Json.toJson(testPropertyLinkSubmission)
+
+      when(mockPropertyLinkConnector.create(any())(any[HeaderCarrier])).thenReturn(Future.failed(new Upstream5xxResponse("Failed to create PL", 501, 501)))
+
+      val res = testController.create()(FakeRequest().withBody(plSubmissionJson))
+      await(res)
+
+      status(res) shouldBe INTERNAL_SERVER_ERROR
+    }
+  }
+
+  lazy val mockPropertyLinkConnector = mock[PropertyLinkingConnector]
+
+  lazy val mockGroupAccountConnector = mock[GroupAccountConnector]
+
+  lazy val mockPropertyRepresentationConnector = mock[PropertyRepresentationConnector]
+
+  lazy val mockBrAuth = mock[BusinessRatesAuthConnector]
+
+  lazy val mockAuthConnector = {
+    val m = mock[AuthConnector]
+    when(m.getCurrentAuthority()(any())) thenReturn Future.successful(Some(Authority("userId", "userId", "userId", UserIds("userId", "userId"))))
+    m
+  }
+
+  lazy val testController = new PropertyLinkingController(mockAuthConnector, mockPropertyLinkConnector, mockGroupAccountConnector, mockPropertyRepresentationConnector)
+
 }
 
 class AuthorisedAuthConnector extends PropertyLinkingAuthConnector {

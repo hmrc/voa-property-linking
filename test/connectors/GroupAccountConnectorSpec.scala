@@ -16,7 +16,7 @@
 
 package connectors
 
-import java.time.{Clock, Instant, ZoneId}
+import java.time._
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import helpers.SimpleWsHttpTestApplication
@@ -128,6 +128,32 @@ class GroupAccountConnectorSpec extends ContentTypes with WireMockSpec with Simp
     }
   }
 
+  "GroupAccountConnector.update" should {
+    "return unit after updating the account" in {
+
+      val orgId = 123456789
+      val updatedOrgAccount = UpdatedOrganisationAccount(
+        governmentGatewayGroupId = "gggId1",
+        addressUnitId = 1234567,
+        representativeFlag = true,
+        organisationName = "Fake News Inc",
+        organisationEmailAddress = "therealdonald@whitehouse.com",
+        organisationTelephoneNumber = "0987612345",
+        effectiveFrom = instant,
+        changedByGGExternalId = "tester1"
+      )
+
+      val stub = stubFor(put(urlEqualTo(s"$url/$orgId"))
+        .willReturn(aResponse
+          .withStatus(200)
+          .withHeader("Content-Type", JSON)
+          .withBody(createResponseValid)))
+
+      val result = (await(testConnector.update(orgId = orgId, updatedOrgAccount)))
+      result should be ()
+    }
+  }
+
   lazy val createValidRequest: GroupAccountSubmission = GroupAccountSubmission(
     id = "acc123",
     companyName = "Real news Inc",
@@ -202,6 +228,8 @@ class GroupAccountConnectorSpec extends ContentTypes with WireMockSpec with Simp
 
   lazy val expectedGetEmptyResponse = None
 
-
   implicit lazy val fixedClock: Clock = Clock.fixed(Instant.now, ZoneId.systemDefault())
+
+  val date = LocalDate.parse("2018-09-05")
+  val instant = date.atStartOfDay().toInstant(ZoneOffset.UTC)
 }

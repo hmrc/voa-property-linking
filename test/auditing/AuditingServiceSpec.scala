@@ -14,22 +14,28 @@
  * limitations under the License.
  */
 
-package connectors
+package auditing
 
-import javax.inject.Inject
-
-import infrastructure.SimpleWSHttp
-import uk.gov.hmrc.play.config.inject.ServicesConfig
+import connectors.WireMockSpec
+import helpers.SimpleWsHttpTestApplication
+import play.api.http.ContentTypes
+import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext.Implicits.global
 
-class BusinessRatesAuthConnector @Inject()(http: SimpleWSHttp, servicesConfig: ServicesConfig) {
+class AuditingServiceSpec
+  extends ContentTypes
+  with WireMockSpec
+  with SimpleWsHttpTestApplication {
 
-  lazy val baseUrl = servicesConfig.baseUrl("business-rates-auth")
-  lazy val url = baseUrl + "/business-rates-authorisation"
+  implicit val hc = HeaderCarrier()
+  implicit val request = FakeRequest()
 
-  def clearCache()(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Unit] = {
-    http.DELETE(url + "/cache") map { _ => () }
+  "AuditingService.sendEvent" should {
+    "audit the extended event" in {
+      AuditingService.sendEvent[Int]("test", 999) shouldBe ()
+    }
   }
+
 }
