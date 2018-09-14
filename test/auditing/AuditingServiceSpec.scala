@@ -38,13 +38,4 @@ class AuditingServiceSpec
     }
   }
 
-//  "AuditingService.eventFor" should {
-//    " return the extended data event" in {
-//      val tags = hc.headers.toMap ++ Map("Ip Address" -> request.remoteAddress)
-//      val detail = Json.toJson(999)
-//      val expectedResult = ExtendedDataEvent("voa-property-linking", "test", tags, detail)
-//      val partialResult = AuditingService.eventFor[Int]("test", 999)
-//      partialResult shouldBe expectedResult
-//    }
-//  }
 }
