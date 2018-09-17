@@ -19,6 +19,7 @@ package models
 import java.time.{Instant, LocalDate}
 
 import play.api.libs.json.{Json, OFormat, Reads}
+import util.Formatters._
 
 case class APIPropertyLinkRequest(
                                    uarn: Long,
@@ -37,13 +38,15 @@ object APIPropertyLinkRequest {
   implicit val format: OFormat[APIPropertyLinkRequest] = Json.format[APIPropertyLinkRequest]
 
   def fromPropertyLinkRequest(propertyLinkRequest: PropertyLinkRequest) = {
+    val cleanFileInfo: Seq[FileInfo] = propertyLinkRequest.fileInfo.map(file => FileInfo(formatFilename(propertyLinkRequest.submissionId, file.name), file.evidenceType))
+
     APIPropertyLinkRequest(
       uarn = propertyLinkRequest.uarn,
       authorisationOwnerOrganisationId = propertyLinkRequest.organisationId,
       authorisationOwnerPersonId = propertyLinkRequest.individualId,
       createDatetime = propertyLinkRequest.linkedDate,
       authorisationMethod = propertyLinkRequest.linkBasis,
-      uploadedFiles = propertyLinkRequest.fileInfo,
+      uploadedFiles = cleanFileInfo,
       submissionId = propertyLinkRequest.submissionId,
       authorisationOwnerCapacity = propertyLinkRequest.capacityDeclaration.capacity,
       startDate = propertyLinkRequest.capacityDeclaration.fromDate,
