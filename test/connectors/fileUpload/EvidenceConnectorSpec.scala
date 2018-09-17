@@ -34,9 +34,8 @@ import org.scalatest.concurrent.Eventually.eventually
 import org.scalatest.mock.MockitoSugar
 import play.api.libs.ws.{WSRequest, WSResponse}
 import play.api.mvc.MultipartFormData
-import uk.gov.hmrc.play.microservice.filters.MicroserviceFilterSupport
 import uk.gov.hmrc.http.{HeaderCarrier, Upstream4xxResponse, Upstream5xxResponse}
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+import uk.gov.hmrc.play.microservice.filters.MicroserviceFilterSupport
 
 import scala.concurrent.Future
 
@@ -61,27 +60,7 @@ class EvidenceConnectorSpec extends WireMockSpec with SimpleWsHttpTestApplicatio
   }
 
   "Evidence connector" should {
-    "be able to upload a file to the old file submission endpoint using PUT" in {
-      val metrics = mock[Metrics]
-      val connector = new EvidenceConnector(fakeApplication.injector.instanceOf[SimpleWSHttp], metrics) {
-        override lazy val url = mockServerUrl
-        override lazy val uploadEndpoint = "/customer-management-api/customer/evidence"
-      }
-
-      implicit val fakeHc = HeaderCarrier()
-      val file = getClass.getResource("/document.pdf").getFile
-      val metadata = EnvelopeMetadata("aSubmissionId", 12345)
-
-      stubFor(put(urlEqualTo("/customer-management-api/customer/evidence"))
-        .withRequestBody(containing(file))
-        .withRequestBody(containing("aSubmissionId"))
-        .withRequestBody(containing("12345"))
-        .willReturn(aResponse().withStatus(200)))
-
-      noException should be thrownBy await(connector.uploadFile("FileName", StreamConverters.fromInputStream { () => new ByteArrayInputStream(file.getBytes) }, metadata))
-    }
-
-    "be able to upload a file to the new file submission endpoint using POST" in {
+    "be able to upload a file to modernised customer evidence endpoint" in {
       val metrics = mock[Metrics]
       val connector = new EvidenceConnector(fakeApplication.injector.instanceOf[SimpleWSHttp], metrics) {
         override lazy val url = mockServerUrl
@@ -101,7 +80,7 @@ class EvidenceConnectorSpec extends WireMockSpec with SimpleWsHttpTestApplicatio
       noException should be thrownBy await(connector.uploadFile("FileName", StreamConverters.fromInputStream { () => new ByteArrayInputStream(file.getBytes) }, metadata))
     }
 
-    "URL Decode a filename with a non windows character in it replacing with a - (temporary fix) in the PUT body" in {
+    "prepend the submissionId and remove all non-alphanumeric characters apart from a space, hyphen or full stop in the filename" in {
       val metrics = mock[Metrics]
       val connector = new EvidenceConnector(fakeApplication.injector.instanceOf[SimpleWSHttp], metrics) {
         override lazy val url = mockServerUrl
@@ -111,15 +90,15 @@ class EvidenceConnectorSpec extends WireMockSpec with SimpleWsHttpTestApplicatio
       val file = getClass.getResource("/document.pdf").getFile
       val metadata = EnvelopeMetadata("aSubmissionId", 12345)
       val filenames = Map(
-        "file:name*.pdf" -> "file-name-.pdf",
-        "sharpscanner:@:gmail?.com.pdf" -> "sharpscanner-@-gmail-.com.pdf",
-        "Scan 15 Jun :2017, 13.04<>.pdf" -> "Scan 15 Jun -2017, 13.04--.pdf",
-        """Scan 15 Jun 2017%2c :-13.04|".pdf""" -> "Scan 15 Jun 2017%2c --13.04--.pdf",
-        "replace–big–dash.pdf" -> "replace-big-dash.pdf"
+        "file:name*.pdf" -> "aSubmissionId-file name .pdf",
+        "sharpscanner:@:gmail?.com.pdf" -> "aSubmissionId-sharpscanner   gmail .com.pdf",
+        "Scan 15 Jun :2017, 13.04<>.pdf" -> "aSubmissionId-Scan 15 Jun  2017  13.04  .pdf",
+        """Scan 15 Jun 2018%2c :-13.04|".pdf""" -> "aSubmissionId-Scan 15 Jun 2018 2c  -13.04  .pdf",
+        "replace–big–dash.pdf" -> "aSubmissionId-replace big dash.pdf"
       )
 
       for ((encoded, decoded) <- filenames) {
-        stubFor(put(urlEqualTo("/customer-management-api/customer/evidence"))
+        stubFor(post(urlEqualTo("/customer-management-api/customer/evidence"))
           .withRequestBody(containing(s"""filename="$decoded""""))
           .withRequestBody(containing("aSubmissionId"))
           .withRequestBody(containing("12345"))
@@ -137,7 +116,7 @@ class EvidenceConnectorSpec extends WireMockSpec with SimpleWsHttpTestApplicatio
 
       "map success status to modernized.upload.200" in {
         when(registry.meter(ArgumentMatchers.eq("modernized.upload.200"))).thenReturn(meter)
-        when(http.put(mockitoAny(classOf[Source[MultipartFormData.Part[Source[ByteString, _]], _]]))).thenReturn(Future.successful(response))
+        when(http.post(mockitoAny(classOf[Source[MultipartFormData.Part[Source[ByteString, _]], _]]))).thenReturn(Future.successful(response))
         when(response.status).thenReturn(200)
 
         await(connector.uploadFile("1", Source.empty, metadata))
@@ -147,7 +126,7 @@ class EvidenceConnectorSpec extends WireMockSpec with SimpleWsHttpTestApplicatio
       "map 4xx failure to modernized.upload.4xx" in {
         when(failResponse.header(ArgumentMatchers.eq("location"))).thenReturn(None)
         when(failResponse.status).thenReturn(400)
-        when(http.put(mockitoAny(classOf[Source[MultipartFormData.Part[Source[ByteString, _]], _]]))).thenReturn(Future.successful(failResponse))
+        when(http.post(mockitoAny(classOf[Source[MultipartFormData.Part[Source[ByteString, _]], _]]))).thenReturn(Future.successful(failResponse))
 
         intercept[Upstream4xxResponse] {
           await(connector.uploadFile("1", Source.empty, metadata))
@@ -158,7 +137,7 @@ class EvidenceConnectorSpec extends WireMockSpec with SimpleWsHttpTestApplicatio
       "map 5xx failure to modernized.upload.5xx" in {
         when(failResponse.header(ArgumentMatchers.eq("location"))).thenReturn(None)
         when(failResponse.status).thenReturn(502)
-        when(http.put(mockitoAny(classOf[Source[MultipartFormData.Part[Source[ByteString, _]], _]]))).thenReturn(Future.successful(failResponse))
+        when(http.post(mockitoAny(classOf[Source[MultipartFormData.Part[Source[ByteString, _]], _]]))).thenReturn(Future.successful(failResponse))
 
         intercept[Upstream5xxResponse] {
           await(connector.uploadFile("1", Source.empty, metadata))
@@ -167,7 +146,7 @@ class EvidenceConnectorSpec extends WireMockSpec with SimpleWsHttpTestApplicatio
       }
 
       "map Upstream5xx exceptions to modernized.upload.5xx" in {
-        when(http.put(mockitoAny(classOf[Source[MultipartFormData.Part[Source[ByteString, _]], _]]))).thenReturn(Future.failed(Upstream5xxResponse("", 502, 502)))
+        when(http.post(mockitoAny(classOf[Source[MultipartFormData.Part[Source[ByteString, _]], _]]))).thenReturn(Future.failed(Upstream5xxResponse("", 502, 502)))
 
         intercept[Upstream5xxResponse] {
           await(connector.uploadFile("1", Source.empty, metadata))
@@ -176,7 +155,7 @@ class EvidenceConnectorSpec extends WireMockSpec with SimpleWsHttpTestApplicatio
       }
 
       "map Upstream4xx exceptions to modernized.upload.4xx" in {
-        when(http.put(mockitoAny(classOf[Source[MultipartFormData.Part[Source[ByteString, _]], _]]))).thenReturn(Future.failed(Upstream4xxResponse("", 400, 400)))
+        when(http.post(mockitoAny(classOf[Source[MultipartFormData.Part[Source[ByteString, _]], _]]))).thenReturn(Future.failed(Upstream4xxResponse("", 400, 400)))
 
         intercept[Upstream4xxResponse] {
           await(connector.uploadFile("1", Source.empty, metadata))
@@ -185,7 +164,7 @@ class EvidenceConnectorSpec extends WireMockSpec with SimpleWsHttpTestApplicatio
       }
 
       "map Other exceptions to modernized.upload.[NAME]" in {
-        when(http.put(mockitoAny(classOf[Source[MultipartFormData.Part[Source[ByteString, _]], _]]))).thenReturn(Future.failed(new NullPointerException()))
+        when(http.post(mockitoAny(classOf[Source[MultipartFormData.Part[Source[ByteString, _]], _]]))).thenReturn(Future.failed(new NullPointerException()))
 
         intercept[NullPointerException] {
           await(connector.uploadFile("1", Source.empty, metadata))
