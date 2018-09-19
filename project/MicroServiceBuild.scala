@@ -18,7 +18,6 @@ private object AppDependencies {
     "uk.gov.hmrc" %% "play-reactivemongo" % "5.2.0",
     ws,
     "uk.gov.hmrc" %% "microservice-bootstrap" % "8.0.0",
-    "uk.gov.hmrc" %% "play-url-binders" % "2.1.0",
     "uk.gov.hmrc" %% "mongo-lock" % "4.1.0",
     "uk.gov.hmrc" %% "domain" % "4.1.0",
     "org.typelevel" %% "cats-core" % "0.8.1",
