@@ -17,6 +17,8 @@ private object AppDependencies {
   val compile = Seq(
     "uk.gov.hmrc" %% "play-reactivemongo" % "5.2.0",
     ws,
+    "ai.x" %% "play-json-extensions" % "0.9.0",
+    "uk.gov.hmrc" %% "auth-client" % "2.5.0",
     "uk.gov.hmrc" %% "microservice-bootstrap" % "8.0.0",
     "uk.gov.hmrc" %% "mongo-lock" % "4.1.0",
     "uk.gov.hmrc" %% "domain" % "4.1.0",

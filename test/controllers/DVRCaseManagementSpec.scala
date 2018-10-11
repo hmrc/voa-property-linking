@@ -17,7 +17,7 @@
 package controllers
 
 import connectors.DVRCaseManagementConnector
-import connectors.auth.{AuthConnector, Authority, UserIds}
+import connectors.auth.{AuthConnector, Authority, DefaultAuthConnector, UserIds}
 import models.DetailedValuationRequest
 import org.mockito.ArgumentMatchers.{eq => matching, _}
 import org.mockito.Mockito._
@@ -26,9 +26,10 @@ import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.DVRRecordRepository
+import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class DVRCaseManagementSpec extends ControllerSpec with MockitoSugar {
 
@@ -92,9 +93,11 @@ class DVRCaseManagementSpec extends ControllerSpec with MockitoSugar {
   }
 
   lazy val mockAuthConnector = {
-    val m = mock[AuthConnector]
-    when(m.getCurrentAuthority()(any())) thenReturn Future.successful(Some(Authority("userId", "userId", "userId", UserIds("userId", "userId"))))
+    val m = mock[DefaultAuthConnector]
+    when(m.authorise[~[Option[String], Option[String]]](any(), any())(any[HeaderCarrier], any[ExecutionContext])) thenReturn Future.successful(
+      new ~(Some("externalId"), Some("groupIdentifier")))
     m
   }
+
 }
 

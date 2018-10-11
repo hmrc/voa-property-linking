@@ -19,7 +19,7 @@ package controllers
 import javax.inject.Inject
 
 import auth.Authenticated
-import connectors.auth.AuthConnector
+import connectors.auth.{AuthConnector, DefaultAuthConnector}
 import auditing.AuditingService
 import connectors.{BusinessRatesAuthConnector, GroupAccountConnector}
 import models.{GroupAccountSubmission, GroupId, UpdatedOrganisationAccount}
@@ -27,7 +27,7 @@ import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent}
 
 class GroupAccountController @Inject() (
-                                       val auth: AuthConnector,
+                                         val authConnector: DefaultAuthConnector,
                                          groups: GroupAccountConnector, brAuth: BusinessRatesAuthConnector)
   extends PropertyLinkingBaseController with Authenticated {
 

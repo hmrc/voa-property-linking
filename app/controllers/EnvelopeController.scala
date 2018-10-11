@@ -19,14 +19,14 @@ package controllers
 import javax.inject.Inject
 
 import auth.Authenticated
-import connectors.auth.AuthConnector
+import connectors.auth.{AuthConnector, DefaultAuthConnector}
 import connectors.fileUpload.{EnvelopeMetadata, FileUploadConnector}
 import models.Closed
 import play.api.libs.json.Json
 import repositories.EnvelopeIdRepo
 import uk.gov.hmrc.circuitbreaker.UnhealthyServiceException
 
-class EnvelopeController @Inject()(val auth: AuthConnector,
+class EnvelopeController @Inject()(val authConnector: DefaultAuthConnector,
                                    val repo: EnvelopeIdRepo, fileUploadConnector: FileUploadConnector)
   extends PropertyLinkingBaseController with Authenticated {
 

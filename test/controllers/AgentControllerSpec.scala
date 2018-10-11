@@ -16,7 +16,7 @@
 
 package controllers
 
-import connectors.auth.{AuthConnector, Authority, UserIds}
+import connectors.auth.{AuthConnector, Authority, DefaultAuthConnector, UserIds}
 import models._
 import models.searchApi.{OwnerAgent, OwnerAgents}
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
@@ -27,13 +27,14 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, _}
-import uk.gov.hmrc.http.HttpReads
+import uk.gov.hmrc.http.{HeaderCarrier, HttpReads}
 import uk.gov.hmrc.play.config.inject.ServicesConfig
 import uk.gov.hmrc.play.http.ws.WSHttp
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import uk.gov.hmrc.auth.core.retrieve.~
 
 class AgentControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
 
@@ -45,8 +46,9 @@ class AgentControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplic
   val baseUrl = "http://localhost:9999"
 
   lazy val mockAuthConnector = {
-    val m = mock[AuthConnector]
-    when(m.getCurrentAuthority()(any())) thenReturn Future.successful(Some(Authority("userId", "userId", "userId", UserIds("userId", "userId"))))
+    val m = mock[DefaultAuthConnector]
+    when(m.authorise[~[Option[String], Option[String]]](any(), any())(any[HeaderCarrier], any[ExecutionContext])) thenReturn Future.successful(
+      new ~(Some("externalId"), Some("groupIdentifier")))
     m
   }
 
@@ -54,7 +56,7 @@ class AgentControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplic
     .configure("run.mode" -> "Test")
     .overrides(bind[WSHttp].qualifiedWith("VoaBackendWsHttp").toInstance(mockWS))
     .overrides(bind[ServicesConfig].toInstance(mockConf))
-    .overrides(bind[AuthConnector].toInstance(mockAuthConnector))
+    .overrides(bind[DefaultAuthConnector].toInstance(mockAuthConnector))
     .build()
 
   "given authorised access, manage agents" should {

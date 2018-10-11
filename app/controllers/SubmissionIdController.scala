@@ -19,11 +19,11 @@ package controllers
 import javax.inject.Inject
 
 import auth.Authenticated
-import connectors.auth.AuthConnector
+import connectors.auth.{AuthConnector, DefaultAuthConnector}
 import play.api.libs.json.Json
 import repositories.SequenceGeneratorMongoRepository
 
-class SubmissionIdController @Inject()(val auth: AuthConnector,
+class SubmissionIdController @Inject()(val authConnector: DefaultAuthConnector,
                                        val sequenceGenerator: SequenceGeneratorMongoRepository)
   extends PropertyLinkingBaseController with Authenticated {
 

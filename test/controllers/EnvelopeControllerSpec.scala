@@ -18,20 +18,31 @@ package controllers
 
 import java.util.UUID
 
-import connectors.auth.{AuthConnector, Authority, PropertyLinkingAuthConnector, UserIds}
+import com.typesafe.config.Config
+import connectors.auth._
 import connectors.fileUpload.{EnvelopeMetadata, FileUploadConnector}
 import models.{EnvelopeStatus, Open}
 import org.scalatest.mock.MockitoSugar
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, Writes}
 import play.api.test.FakeRequest
 import repositories.EnvelopeIdRepo
 import org.mockito.ArgumentMatchers.{eq => matching, _}
 import org.mockito.Mockito._
-import uk.gov.hmrc.http.HeaderCarrier
+import play.api.mvc.AnyContent
+import uk.gov.hmrc.http._
 import play.api.test.Helpers._
+import uk.gov.hmrc.auth.core.PlayAuthConnector
+import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.circuitbreaker.UnhealthyServiceException
+import org.scalatest.Matchers._
+import org.scalatest.WordSpec
+import org.scalatest.concurrent.ScalaFutures
+import play.api.libs.json.{JsValue, Json, Writes}
+import uk.gov.hmrc.auth.core.retrieve.{CompositeRetrieval, EmptyRetrieval, SimpleRetrieval, ~}
+import uk.gov.hmrc.http._
+import uk.gov.hmrc.http.hooks.HttpHook
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class EnvelopeControllerSpec extends ControllerSpec with MockitoSugar {
 
@@ -83,7 +94,6 @@ class EnvelopeControllerSpec extends ControllerSpec with MockitoSugar {
 
     "return a 503 Service Unavailable when file upload is not available" in {
       val metadataJson = Json.obj("submissionId" -> UUID.randomUUID().toString, "personId" -> 1)
-
       when(mockFileUpload.createEnvelope(any[EnvelopeMetadata], any[String])(any[HeaderCarrier])) thenReturn Future.failed { new UnhealthyServiceException("file upload isn't feeling well") }
 
       val res = testController.create()(FakeRequest().withBody(metadataJson))
@@ -92,15 +102,6 @@ class EnvelopeControllerSpec extends ControllerSpec with MockitoSugar {
       contentAsJson(res) mustBe Json.obj("error" -> "file upload service not available")
     }
 
-
-    "return a 403 Forbidden when user is not authorised" in {
-      val metadataJson = Json.obj("submissionId" -> UUID.randomUUID().toString, "personId" -> 1)
-
-      when(mockAuthConnector.getCurrentAuthority()(any())) thenReturn Future.successful(None)
-      val res = testController.create()(FakeRequest().withBody(metadataJson))
-
-      status(res) mustBe FORBIDDEN
-    }
   }
 
   lazy val callbackUrl = routes.FileTransferController.handleCallback().absoluteURL()(FakeRequest().withHeaders(HOST -> "localhost:9524"))
@@ -121,10 +122,14 @@ class EnvelopeControllerSpec extends ControllerSpec with MockitoSugar {
 
   lazy val once = times(1)
 
+
+
   lazy val mockAuthConnector = {
-    val m = mock[AuthConnector]
-    when(m.getCurrentAuthority()(any())) thenReturn Future.successful(Some(Authority("userId", "userId", "userId", UserIds("userId", "userId"))))
+    val m = mock[DefaultAuthConnector]
+    when(m.authorise[~[Option[String], Option[String]]](any(), any())(any[HeaderCarrier], any[ExecutionContext])) thenReturn Future.successful(
+      new ~(Some("externalId"), Some("groupIdentifier")))
     m
   }
+
 }
 

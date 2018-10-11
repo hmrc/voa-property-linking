@@ -18,15 +18,16 @@ package controllers
 
 import auth.Authenticated
 import connectors.DVRCaseManagementConnector
-import connectors.auth.AuthConnector
+import connectors.auth.{AuthConnector, DefaultAuthConnector}
 import javax.inject.Inject
+
 import models.DetailedValuationRequest
 import play.api.libs.json.Json
 import play.api.mvc.Action
 import repositories.DVRRecordRepository
 import play.api.Logger
 
-class DVRCaseManagement @Inject()(val auth: AuthConnector,
+class DVRCaseManagement @Inject()(val authConnector: DefaultAuthConnector,
                                   dvrCaseManagement: DVRCaseManagementConnector,
                                   dvrRecordRepository: DVRRecordRepository)
   extends PropertyLinkingBaseController with Authenticated {

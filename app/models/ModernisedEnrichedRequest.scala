@@ -14,21 +14,8 @@
  * limitations under the License.
  */
 
-package controllers
+package models
 
-import javax.inject.Inject
+import play.api.mvc.{Request, WrappedRequest}
 
-import auth.Authenticated
-import connectors.AgentConnector
-import connectors.auth.{AuthConnector, DefaultAuthConnector}
-import play.api.libs.json.Json
-
-class AgentController @Inject()(val authConnector: DefaultAuthConnector,
-                                agentConnector: AgentConnector)
-                                  extends PropertyLinkingBaseController with Authenticated  {
-
-  def manageAgents(organisationId: Long) = authenticated { implicit request =>
-    agentConnector.manageAgents(organisationId) map { agents => Ok(Json.toJson(agents)) }
-  }
-
-}
+case class ModernisedEnrichedRequest[A](request: Request[A], externalId: String, groupId: String) extends WrappedRequest[A](request)

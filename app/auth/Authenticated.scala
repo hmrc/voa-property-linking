@@ -16,10 +16,12 @@
 
 package auth
 
-import connectors.auth.{AuthConnector, Authority}
-import play.api.Logger
-import play.api.mvc._
+import connectors.auth.DefaultAuthConnector
+import models.ModernisedEnrichedRequest
 import play.api.mvc.Results._
+import play.api.mvc._
+import uk.gov.hmrc.auth.core.AuthorisedFunctions
+import uk.gov.hmrc.auth.core.retrieve.{Retrievals, ~}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 
@@ -27,9 +29,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 
-trait Authenticated {
+trait Authenticated extends AuthorisedFunctions {
 
-  val auth: AuthConnector
+  override val authConnector: DefaultAuthConnector
 
   type UnauthenticatedUserHandler = () => Result
 
@@ -37,18 +39,19 @@ trait Authenticated {
 
   private implicit def hc(implicit request: Request[_]): HeaderCarrier =  HeaderCarrierConverter.fromHeadersAndSession(request.headers)
 
-  def authenticated(block: Request[AnyContent] => Future[Result])
+  def authenticated(block: ModernisedEnrichedRequest[AnyContent] => Future[Result])
                       (implicit uuh: UnauthenticatedUserHandler): Action[AnyContent] =
     authenticated(BodyParsers.parse.default)(block)
 
-  def authenticated[A](bodyParser: BodyParser[A])(block: Request[A] => Future[Result])
+  def authenticated[A](bodyParser: BodyParser[A])(block: ModernisedEnrichedRequest[A] => Future[Result])
                    (implicit uuh: UnauthenticatedUserHandler): Action[A] =
-    Action.async(bodyParser) { implicit request =>
-      auth.getCurrentAuthority() flatMap {
-        case None => Future.successful(uuh())
-        case Some(authority) =>
-          Logger.debug(s"Got authority = $authority")
-          block(request)
+    Action.async(bodyParser){ implicit request =>
+      authorised().retrieve(Retrievals.externalId and Retrievals.groupIdentifier){
+        case (Some(ext) ~ Some(group)) =>
+          block(
+            new ModernisedEnrichedRequest[A](request, ext, group))
+        case _ => Future.successful(uuh())
+
       }
     }
 
