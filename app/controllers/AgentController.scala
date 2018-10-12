@@ -20,7 +20,7 @@ import javax.inject.Inject
 
 import auth.Authenticated
 import connectors.AgentConnector
-import connectors.auth.{AuthConnector, DefaultAuthConnector}
+import connectors.auth.DefaultAuthConnector
 import play.api.libs.json.Json
 
 class AgentController @Inject()(val authConnector: DefaultAuthConnector,

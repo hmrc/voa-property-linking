@@ -18,7 +18,7 @@ package controllers
 
 import auth.Authenticated
 import connectors.DVRCaseManagementConnector
-import connectors.auth.{AuthConnector, DefaultAuthConnector}
+import connectors.auth.DefaultAuthConnector
 import javax.inject.Inject
 
 import models.DetailedValuationRequest

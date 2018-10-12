@@ -20,7 +20,7 @@ import javax.inject.Inject
 
 import auditing.AuditingService
 import auth.Authenticated
-import connectors.auth.{AuthConnector, DefaultAuthConnector}
+import connectors.auth.DefaultAuthConnector
 import connectors.{GroupAccountConnector, PropertyLinkingConnector, PropertyRepresentationConnector}
 import models._
 import models.searchApi.AgentAuthResultFE

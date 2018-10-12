@@ -17,7 +17,7 @@
 package controllers.test
 
 import auth.Authenticated
-import connectors.auth.{AuthConnector, DefaultAuthConnector}
+import connectors.auth.DefaultAuthConnector
 import connectors.test.TestConnector
 import controllers.PropertyLinkingBaseController
 import javax.inject.Inject

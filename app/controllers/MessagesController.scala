@@ -20,7 +20,7 @@ import javax.inject.Inject
 
 import auth.Authenticated
 import connectors.MessagesConnector
-import connectors.auth.{AuthConnector, DefaultAuthConnector}
+import connectors.auth.DefaultAuthConnector
 import models.messages.{MessageSearchParams, MessageSearchResults}
 import play.api.libs.json.Json
 
