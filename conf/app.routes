@@ -51,3 +51,5 @@ GET          /message/:orgId/:messageId                                         
 PUT          /message/:messageId                                                              @controllers.MessagesController.readMessage(messageId, readBy)
 GET          /messages                                                                        @controllers.MessagesController.getMessages(params: models.messages.MessageSearchParams)
 GET          /unread-messages-count/:orgId                                                    @controllers.MessagesController.messageCountFor(orgId: Long)
+
+GET          /check-cases/:authorisationId/:party                                             @controllers.CheckCaseController.getCheckCases(authorisationId: Long, party: String)

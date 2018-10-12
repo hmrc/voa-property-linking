@@ -19,7 +19,7 @@ package controllers
 import javax.inject.Inject
 
 import auth.Authenticated
-import connectors.auth.AuthConnector
+import connectors.auth.{AuthConnector, DefaultAuthConnector}
 import auditing.AuditingService
 import connectors.{BusinessRatesAuthConnector, IndividualAccountConnector}
 import models.{IndividualAccountId, IndividualAccountSubmission}
@@ -28,7 +28,7 @@ import play.api.libs.json.Json
 import play.api.mvc.Action
 import play.api.mvc.Results.EmptyContent
 
-class IndividualAccountController @Inject()(val auth: AuthConnector,
+class IndividualAccountController @Inject()(val authConnector: DefaultAuthConnector,
                                             individuals: IndividualAccountConnector,
                                             brAuth: BusinessRatesAuthConnector)
   extends PropertyLinkingBaseController with Authenticated {

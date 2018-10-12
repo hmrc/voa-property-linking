@@ -20,7 +20,7 @@ import javax.inject.Inject
 
 import auditing.AuditingService
 import auth.Authenticated
-import connectors.auth.AuthConnector
+import connectors.auth.{AuthConnector, DefaultAuthConnector}
 import connectors.{GroupAccountConnector, PropertyLinkingConnector, PropertyRepresentationConnector}
 import models._
 import models.searchApi.AgentAuthResultFE
@@ -37,7 +37,7 @@ case class Memoize[K, V]() {
   def apply(f: K => V): K => V = in => cache.getOrElseUpdate(in, f(in))
 }
 
-class PropertyLinkingController @Inject()(val auth: AuthConnector,
+class PropertyLinkingController @Inject()(val authConnector: DefaultAuthConnector,
                                           propertyLinksConnector: PropertyLinkingConnector,
                                           groupAccountsConnector: GroupAccountConnector,
                                           representationsConnector: PropertyRepresentationConnector

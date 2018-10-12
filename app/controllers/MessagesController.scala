@@ -20,11 +20,11 @@ import javax.inject.Inject
 
 import auth.Authenticated
 import connectors.MessagesConnector
-import connectors.auth.AuthConnector
+import connectors.auth.{AuthConnector, DefaultAuthConnector}
 import models.messages.{MessageSearchParams, MessageSearchResults}
 import play.api.libs.json.Json
 
-class MessagesController @Inject()(val auth: AuthConnector,
+class MessagesController @Inject()(val authConnector: DefaultAuthConnector,
                                    messagesConnector: MessagesConnector) extends PropertyLinkingBaseController with Authenticated {
 
   def getMessage(recipientOrganisationId: Long, messageId: String) = authenticated { implicit request =>

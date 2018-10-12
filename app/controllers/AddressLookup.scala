@@ -20,7 +20,7 @@ import javax.inject.Inject
 
 import auth.Authenticated
 import connectors.AddressConnector
-import connectors.auth.AuthConnector
+import connectors.auth.{AuthConnector, DefaultAuthConnector}
 import models.SimpleAddress
 import play.api.libs.json.Json
 import play.api.mvc.Action
@@ -28,7 +28,7 @@ import util.PostcodeValidator
 
 import scala.concurrent.Future
 
-class AddressLookup @Inject() (val auth: AuthConnector,
+class AddressLookup @Inject() (val authConnector: DefaultAuthConnector,
                                addresses: AddressConnector)
   extends PropertyLinkingBaseController with Authenticated {
 

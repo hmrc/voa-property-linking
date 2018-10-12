@@ -19,7 +19,7 @@ package controllers
 import java.time.{Instant, LocalDate}
 
 import connectors._
-import connectors.auth.{AuthConnector, Authority, PropertyLinkingAuthConnector, UserIds}
+import connectors.auth._
 import models.{CapacityDeclaration, _}
 import models.searchApi.AgentAuthResultBE
 import org.mockito.ArgumentMatchers.{eq => mockEq, _}
@@ -28,15 +28,17 @@ import org.scalatest.mock.MockitoSugar
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
+import play.api.mvc.AnyContent
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{status, _}
+import play.api.test.Helpers._
+import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, Upstream5xxResponse}
 import uk.gov.hmrc.play.config.inject.ServicesConfig
 import uk.gov.hmrc.play.http.ws.WSHttp
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Random
 
 class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
@@ -48,11 +50,18 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
   val mockAddressConnector = mock[AddressConnector]
   val baseUrl = "http://localhost:9999"
 
+  lazy val mockAuthConnector = {
+    val m = mock[DefaultAuthConnector]
+    when(m.authorise[~[Option[String], Option[String]]](any(), any())(any[HeaderCarrier], any[ExecutionContext])) thenReturn Future.successful(
+      new ~(Some("externalId"), Some("groupIdentifier")))
+    m
+  }
+
   override lazy val fakeApplication = new GuiceApplicationBuilder()
     .configure("run.mode" -> "Test")
     .overrides(bind[WSHttp].qualifiedWith("VoaBackendWsHttp").toInstance(mockWS))
     .overrides(bind[ServicesConfig].toInstance(mockConf))
-    .overrides(bind[AuthConnector].to[AuthorisedAuthConnector])
+    .overrides(bind[DefaultAuthConnector].toInstance(mockAuthConnector))
     .build()
 
   "given authorised access, find" should {
@@ -81,7 +90,7 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
       val repUrl = s"$baseUrl/authorisation-search-api/agents/$userOrgId/authorisations?start=1&size=15&representationStatus=PENDING"
       when(mockWS.GET(mockEq(repUrl))(any(classOf[HttpReads[AgentAuthResultBE]]), any(), any())).thenReturn(AgentAuthResultBE(15, 1, 0, 0, Nil))
 
-      val res = testPropertyLinkingController.find(userOrgId, PaginationParams(1, 25, requestTotalRowCount = false))(FakeRequest())
+      val res = testPropertyLinkingController.find(userOrgId, PaginationParams(1, 25, requestTotalRowCount = false))(FakeRequest().withHeaders(AUTHORIZATION -> """Bearer 123456789"""))
       status(res) shouldBe OK
       val uarns = Json.parse(contentAsString(res)).as[PropertyLinkResponse].propertyLinks.map(_.uarn)
       uarns shouldBe Seq(101, 102)
@@ -178,20 +187,6 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
 
   lazy val mockBrAuth = mock[BusinessRatesAuthConnector]
 
-  lazy val mockAuthConnector = {
-    val m = mock[AuthConnector]
-    when(m.getCurrentAuthority()(any())) thenReturn Future.successful(Some(Authority("userId", "userId", "userId", UserIds("userId", "userId"))))
-    m
-  }
-
   lazy val testController = new PropertyLinkingController(mockAuthConnector, mockPropertyLinkConnector, mockGroupAccountConnector, mockPropertyRepresentationConnector)
 
-}
-
-class AuthorisedAuthConnector extends PropertyLinkingAuthConnector {
-  private def testAuthority(userId: String): Authority = Authority(userId, userId, userId, UserIds(userId, userId))
-
-  override def getCurrentAuthority()(implicit headerCarrier: HeaderCarrier): Future[Option[Authority]] = {
-    Future.successful(Some(testAuthority("testUserId")))
-  }
 }

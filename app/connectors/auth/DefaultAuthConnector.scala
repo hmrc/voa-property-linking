@@ -14,21 +14,16 @@
  * limitations under the License.
  */
 
-package controllers
+package connectors.auth
 
 import javax.inject.Inject
 
-import auth.Authenticated
-import connectors.AgentConnector
-import connectors.auth.{AuthConnector, DefaultAuthConnector}
-import play.api.libs.json.Json
+import config.WSHttp
+import uk.gov.hmrc.auth.core.PlayAuthConnector
+import uk.gov.hmrc.http.HttpPost
+import uk.gov.hmrc.play.config.ServicesConfig
 
-class AgentController @Inject()(val authConnector: DefaultAuthConnector,
-                                agentConnector: AgentConnector)
-                                  extends PropertyLinkingBaseController with Authenticated  {
-
-  def manageAgents(organisationId: Long) = authenticated { implicit request =>
-    agentConnector.manageAgents(organisationId) map { agents => Ok(Json.toJson(agents)) }
-  }
-
+class DefaultAuthConnector @Inject()() extends PlayAuthConnector with ServicesConfig {
+  override val http: HttpPost = WSHttp
+  override val serviceUrl: String = baseUrl("auth")
 }

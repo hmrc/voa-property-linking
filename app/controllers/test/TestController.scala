@@ -17,13 +17,14 @@
 package controllers.test
 
 import auth.Authenticated
-import connectors.auth.AuthConnector
+import connectors.auth.{AuthConnector, DefaultAuthConnector}
 import connectors.test.TestConnector
 import controllers.PropertyLinkingBaseController
 import javax.inject.Inject
+
 import repositories.DVRRecordRepository
 
-class TestController @Inject()(val auth: AuthConnector,
+class TestController @Inject()(val authConnector: DefaultAuthConnector,
                                testConnector: TestConnector,
                                dvrRecordRepository: DVRRecordRepository)
   extends PropertyLinkingBaseController with Authenticated {

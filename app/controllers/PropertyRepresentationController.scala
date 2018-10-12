@@ -21,12 +21,12 @@ import javax.inject.Inject
 import auditing.AuditingService
 import auth.Authenticated
 import connectors.PropertyRepresentationConnector
-import connectors.auth.AuthConnector
+import connectors.auth.{AuthConnector, DefaultAuthConnector}
 import models._
 import play.api.libs.json.Json
 import play.api.mvc.Action
 
-class PropertyRepresentationController @Inject() (val auth: AuthConnector,
+class PropertyRepresentationController @Inject() (val authConnector: DefaultAuthConnector,
                                                   representations: PropertyRepresentationConnector)
   extends PropertyLinkingBaseController with Authenticated {
 

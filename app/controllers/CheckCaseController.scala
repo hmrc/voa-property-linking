@@ -19,16 +19,20 @@ package controllers
 import javax.inject.Inject
 
 import auth.Authenticated
-import connectors.AgentConnector
-import connectors.auth.{AuthConnector, DefaultAuthConnector}
+import connectors.CheckCaseConnector
+import connectors.auth.DefaultAuthConnector
 import play.api.libs.json.Json
 
-class AgentController @Inject()(val authConnector: DefaultAuthConnector,
-                                agentConnector: AgentConnector)
-                                  extends PropertyLinkingBaseController with Authenticated  {
+class CheckCaseController @Inject() (val authConnector: DefaultAuthConnector,
+                                     checkCaseConnector: CheckCaseConnector)
+  extends PropertyLinkingBaseController with Authenticated {
 
-  def manageAgents(organisationId: Long) = authenticated { implicit request =>
-    agentConnector.manageAgents(organisationId) map { agents => Ok(Json.toJson(agents)) }
+  def getCheckCases(authorisationId: Long, party: String) = authenticated { implicit request =>
+
+    checkCaseConnector.getCheckCases(authorisationId, party) map {
+      case Some(checkCasesResponse) => Ok(Json.toJson(checkCasesResponse))
+      case _ => NotFound
+    }
   }
-
 }
+
