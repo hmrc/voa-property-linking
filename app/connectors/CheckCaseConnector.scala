@@ -19,13 +19,9 @@ package connectors
 import javax.inject.Inject
 
 import config.WSHttp
-import connectors.auth.Authority
 import models._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import play.api.libs.json.JsValue
-import play.api.libs.openid.Errors.AUTH_CANCEL
-import play.api.mvc.Request
-import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
+import uk.gov.hmrc.http.NotFoundException
 import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.config.inject.ServicesConfig
 

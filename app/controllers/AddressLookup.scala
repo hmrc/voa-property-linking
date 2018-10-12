@@ -20,7 +20,7 @@ import javax.inject.Inject
 
 import auth.Authenticated
 import connectors.AddressConnector
-import connectors.auth.{AuthConnector, DefaultAuthConnector}
+import connectors.auth.DefaultAuthConnector
 import models.SimpleAddress
 import play.api.libs.json.Json
 import play.api.mvc.Action

@@ -19,7 +19,7 @@ package controllers
 import javax.inject.Inject
 
 import auth.Authenticated
-import connectors.auth.{AuthConnector, DefaultAuthConnector}
+import connectors.auth.DefaultAuthConnector
 import connectors.fileUpload.{EnvelopeMetadata, FileUploadConnector}
 import models.Closed
 import play.api.libs.json.Json

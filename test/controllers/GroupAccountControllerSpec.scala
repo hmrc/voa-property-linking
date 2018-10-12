@@ -18,7 +18,7 @@ package controllers
 
 import java.time.Instant
 
-import connectors.auth.{AuthConnector, Authority, DefaultAuthConnector, UserIds}
+import connectors.auth.DefaultAuthConnector
 import connectors.{BusinessRatesAuthConnector, GroupAccountConnector}
 import models._
 import org.mockito.ArgumentMatchers._

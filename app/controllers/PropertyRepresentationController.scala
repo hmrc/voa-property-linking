@@ -21,7 +21,7 @@ import javax.inject.Inject
 import auditing.AuditingService
 import auth.Authenticated
 import connectors.PropertyRepresentationConnector
-import connectors.auth.{AuthConnector, DefaultAuthConnector}
+import connectors.auth.DefaultAuthConnector
 import models._
 import play.api.libs.json.Json
 import play.api.mvc.Action

@@ -17,7 +17,7 @@
 package controllers
 
 import connectors.DVRCaseManagementConnector
-import connectors.auth.{AuthConnector, Authority, DefaultAuthConnector, UserIds}
+import connectors.auth.DefaultAuthConnector
 import models.DetailedValuationRequest
 import org.mockito.ArgumentMatchers.{eq => matching, _}
 import org.mockito.Mockito._

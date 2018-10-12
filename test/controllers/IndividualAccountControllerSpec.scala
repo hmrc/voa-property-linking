@@ -16,7 +16,7 @@
 
 package controllers
 
-import connectors.auth.{AuthConnector, Authority, DefaultAuthConnector, UserIds}
+import connectors.auth.DefaultAuthConnector
 import connectors.{BusinessRatesAuthConnector, IndividualAccountConnector}
 import models.{IndividualAccount, IndividualAccountId, IndividualAccountSubmission, IndividualDetails}
 import org.mockito.ArgumentMatchers._

@@ -16,7 +16,7 @@
 
 package controllers
 
-import connectors.auth.{AuthConnector, Authority, DefaultAuthConnector, UserIds}
+import connectors.auth.DefaultAuthConnector
 import models._
 import models.searchApi.{OwnerAgent, OwnerAgents}
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}

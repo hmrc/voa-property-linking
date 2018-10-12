@@ -19,7 +19,7 @@ package controllers
 import javax.inject.Inject
 
 import auth.Authenticated
-import connectors.auth.{AuthConnector, DefaultAuthConnector}
+import connectors.auth.DefaultAuthConnector
 import auditing.AuditingService
 import connectors.{BusinessRatesAuthConnector, GroupAccountConnector}
 import models.{GroupAccountSubmission, GroupId, UpdatedOrganisationAccount}
