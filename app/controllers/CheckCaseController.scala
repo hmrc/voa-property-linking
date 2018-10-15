@@ -27,9 +27,9 @@ class CheckCaseController @Inject() (val authConnector: DefaultAuthConnector,
                                      checkCaseConnector: CheckCaseConnector)
   extends PropertyLinkingBaseController with Authenticated {
 
-  def getCheckCases(authorisationId: Long, party: String) = authenticated { implicit request =>
+  def getCheckCases(submissionId: Long, party: String) = authenticated { implicit request =>
 
-    checkCaseConnector.getCheckCases(authorisationId, party) map {
+    checkCaseConnector.getCheckCases(submissionId, party) map {
       case Some(checkCasesResponse) => Ok(Json.toJson(checkCasesResponse))
       case _ => NotFound
     }
