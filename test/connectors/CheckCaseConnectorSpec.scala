@@ -40,8 +40,8 @@ class CheckCaseConnectorSpec extends ContentTypes
   "CheckCaseConnector get check cases" should {
     "get agents check cases" in {
 
-      val submissionId = 123
-      val manageAgentsUrl = s"/external-case-management-api/my-organisation/clients/all/property-links/$submissionId/check-cases?start=1&size=15"
+      val submissionId = "123"
+      val manageAgentsUrl = s"/external-case-management-api/my-organisation/clients/all/property-links/$submissionId/check-cases?start=1&size=100"
 
       stubFor(get(urlEqualTo(manageAgentsUrl))
         .willReturn(aResponse
@@ -56,8 +56,8 @@ class CheckCaseConnectorSpec extends ContentTypes
 
     "get client check cases" in {
 
-      val submissionId = 123
-      val manageAgentsUrl = s"/external-case-management-api/my-organisation/property-links/$submissionId/check-cases?start=1&size=15"
+      val submissionId = "123"
+      val manageAgentsUrl = s"/external-case-management-api/my-organisation/property-links/$submissionId/check-cases?start=1&size=100"
 
       stubFor(get(urlEqualTo(manageAgentsUrl))
         .willReturn(aResponse
