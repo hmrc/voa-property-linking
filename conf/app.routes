@@ -52,4 +52,4 @@ PUT          /message/:messageId                                                
 GET          /messages                                                                        @controllers.MessagesController.getMessages(params: models.messages.MessageSearchParams)
 GET          /unread-messages-count/:orgId                                                    @controllers.MessagesController.messageCountFor(orgId: Long)
 
-GET          /check-cases/:authorisationId/:party                                             @controllers.CheckCaseController.getCheckCases(authorisationId: Long, party: String)
+GET          /check-cases/:submissionId/:party                                                @controllers.CheckCaseController.getCheckCases(submissionId: String, party: String)

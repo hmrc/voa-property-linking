@@ -31,14 +31,14 @@ class CheckCaseConnector @Inject()(config: ServicesConfig){
   lazy val baseUrl: String = config.baseUrl("external-business-rates-data-platform")
 
 
-  def getCheckCases(authorisationId: Long, party: String)(implicit request: ModernisedEnrichedRequest[_]): Future[Option[CheckCasesResponse]] = {
+  def getCheckCases(submissionId: String, party: String)(implicit request: ModernisedEnrichedRequest[_]): Future[Option[CheckCasesResponse]] = {
      implicit val hc = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
       .withExtraHeaders("GG-EXTERNAL-ID" -> request.externalId)
       .withExtraHeaders("GG-GROUP-ID" -> request.groupId)
 
     party match {
-      case "agent"  =>  WSHttp.GET[Option[AgentCheckCasesResponse]](s"$baseUrl/external-case-management-api/my-organisation/clients/all/property-links/$authorisationId/check-cases?start=1&size=15&sortField=createdDateTime&sortOrder=ASC") recover { case _: NotFoundException => None }
-      case "client" =>  WSHttp.GET[Option[OwnerCheckCasesResponse]](s"$baseUrl/external-case-management-api/my-organisation/property-links/$authorisationId/check-cases?start=1&size=15&sortField=createdDateTime&sortOrder=ASC") recover { case _: NotFoundException => None }
+      case "agent"  =>  WSHttp.GET[Option[AgentCheckCasesResponse]](s"$baseUrl/external-case-management-api/my-organisation/clients/all/property-links/$submissionId/check-cases?start=1&size=100") recover { case _: NotFoundException => None }
+      case "client" =>  WSHttp.GET[Option[OwnerCheckCasesResponse]](s"$baseUrl/external-case-management-api/my-organisation/property-links/$submissionId/check-cases?start=1&size=100") recover { case _: NotFoundException => None }
       case _       =>  Future.successful(None)
 
     }
