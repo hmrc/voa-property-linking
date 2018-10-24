@@ -37,4 +37,8 @@ class TestController @Inject()(val authConnector: DefaultAuthConnector,
     dvrRecordRepository.clear(organisationId).map(_ => Ok)
   }
 
+  def deleteCheckCases(propertyLinkingSubmissionId: String) = authenticated { implicit request =>
+    testConnector.deleteCheckCases(propertyLinkingSubmissionId).map(_ => Ok)
+  }
+
 }
