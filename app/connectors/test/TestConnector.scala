@@ -17,7 +17,10 @@
 package connectors.test
 
 import javax.inject.{Inject, Named}
+
+import models.ModernisedEnrichedRequest
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.config.inject.ServicesConfig
 import uk.gov.hmrc.play.http.ws.WSHttp
 
@@ -30,6 +33,14 @@ class TestConnector @Inject()(@Named("VoaBackendWsHttp") http: WSHttp, conf: Ser
 
   def deleteOrganisation(orgId: Long)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     http.DELETE[HttpResponse](s"$url?organisationId=$orgId")
+  }
+
+  def deleteCheckCases(propertyLinkingSubmissionId: String)(implicit request: ModernisedEnrichedRequest[_]): Future[HttpResponse] = {
+    implicit val hc = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
+      .withExtraHeaders("GG-EXTERNAL-ID" -> request.externalId)
+      .withExtraHeaders("GG-GROUP-ID" -> request.groupId)
+
+    http.DELETE[HttpResponse](s"$baseUrl/external-case-management-api/check-cases/$propertyLinkingSubmissionId")
   }
 
 }

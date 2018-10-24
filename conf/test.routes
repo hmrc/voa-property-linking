@@ -1,2 +1,3 @@
-DELETE        /de-register/:orgId              @controllers.test.TestController.deleteOrganisation(orgId: Long)
-DELETE        /clear-dvr-records/:orgId        @controllers.test.TestController.clearDvrRecords(orgId: Long)
+DELETE        /de-register/:orgId                        @controllers.test.TestController.deleteOrganisation(orgId: Long)
+DELETE        /clear-dvr-records/:orgId                  @controllers.test.TestController.clearDvrRecords(orgId: Long)
+DELETE        /delete-check-cases/:plSubmissionId        @controllers.test.TestController.deleteCheckCases(plSubmissionId: String)
