@@ -47,11 +47,48 @@ class CheckCaseConnectorSpec extends ContentTypes
         .willReturn(aResponse
           .withStatus(200)
           .withHeader("Content-Type", JSON)
-          .withBody(agentAgents)
+          .withBody(agentCases)
         )
       )
 
       await(connector.getCheckCases(submissionId, "agent")(modernisedEnrichedRequest)).get.filterTotal shouldBe 4
+    }
+    "handle 403 from get agents check cases" in {
+
+      val submissionId = "123"
+      val manageAgentsUrl = s"/external-case-management-api/my-organisation/clients/all/property-links/$submissionId/check-cases?start=1&size=100"
+
+      stubFor(get(urlEqualTo(manageAgentsUrl))
+        .willReturn(aResponse
+          .withStatus(403)
+          .withHeader("Content-Type", JSON)
+          .withBody("""{
+                      |   "errorMessage":"Your Representation Request does not allow you to raise Check cases",
+                      |   "errorTypeDesc":"Invalid request",
+                      |   "errorTypeNum":1003,
+                      |   "result":false,
+                      |   "uniqueId":"2e0d158e-bd02-42f2-9914-db34bddbddbd"
+                      |}""".stripMargin)
+        )
+      )
+
+      await(connector.getCheckCases(submissionId, "agent")(modernisedEnrichedRequest)) shouldBe None
+    }
+
+    "handle 404 get agent check cases" in {
+
+      val submissionId = "123"
+      val manageAgentsUrl = s"/external-case-management-api/my-organisation/property-links/$submissionId/check-cases?start=1&size=100"
+
+      stubFor(get(urlEqualTo(manageAgentsUrl))
+        .willReturn(aResponse
+          .withStatus(404)
+          .withHeader("Content-Type", JSON)
+          .withBody("{}")
+        )
+      )
+
+      await(connector.getCheckCases(submissionId, "agent")(modernisedEnrichedRequest)) shouldBe None
     }
 
     "get client check cases" in {
@@ -63,16 +100,54 @@ class CheckCaseConnectorSpec extends ContentTypes
         .willReturn(aResponse
           .withStatus(200)
           .withHeader("Content-Type", JSON)
-          .withBody(ownerAgents)
+          .withBody(ownerCases)
         )
       )
 
       await(connector.getCheckCases(submissionId, "client")(modernisedEnrichedRequest)).get.filterTotal shouldBe 4
     }
+
+    "handle 403 from get client check cases" in {
+
+      val submissionId = "123"
+      val manageAgentsUrl = s"/external-case-management-api/my-organisation/property-links/$submissionId/check-cases?start=1&size=100"
+
+      stubFor(get(urlEqualTo(manageAgentsUrl))
+        .willReturn(aResponse
+          .withStatus(200)
+          .withHeader("Content-Type", JSON)
+          .withBody("""{
+                      |   "errorMessage":"Your Representation Request does not allow you to raise Check cases",
+                      |   "errorTypeDesc":"Invalid request",
+                      |   "errorTypeNum":1003,
+                      |   "result":false,
+                      |   "uniqueId":"2e0d158e-bd02-42f2-9914-db34bddbddbd"
+                      |}""".stripMargin)
+        )
+      )
+
+      await(connector.getCheckCases(submissionId, "client")(modernisedEnrichedRequest)) shouldBe None
+    }
+
+    "handle 404 get client check cases" in {
+
+      val submissionId = "123"
+      val manageAgentsUrl = s"/external-case-management-api/my-organisation/property-links/$submissionId/check-cases?start=1&size=100"
+
+      stubFor(get(urlEqualTo(manageAgentsUrl))
+        .willReturn(aResponse
+          .withStatus(404)
+          .withHeader("Content-Type", JSON)
+          .withBody("{}")
+        )
+      )
+
+      await(connector.getCheckCases(submissionId, "client")(modernisedEnrichedRequest)) shouldBe None
+    }
   }
 
 
-  val agentAgents =
+  val agentCases =
     """
       |{
       |  "start": 1,
@@ -124,7 +199,7 @@ class CheckCaseConnectorSpec extends ContentTypes
       |}
     """.stripMargin
 
-  val ownerAgents =
+  val ownerCases =
     """
       |{
       |  "start": 1,

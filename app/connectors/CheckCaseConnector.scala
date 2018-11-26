@@ -21,7 +21,8 @@ import javax.inject.Inject
 import config.WSHttp
 import models._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import uk.gov.hmrc.http.NotFoundException
+import play.api.libs.json.Json
+import uk.gov.hmrc.http.{HttpResponse, NotFoundException}
 import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.config.inject.ServicesConfig
 
@@ -37,8 +38,8 @@ class CheckCaseConnector @Inject()(config: ServicesConfig){
       .withExtraHeaders("GG-GROUP-ID" -> request.groupId)
 
     party match {
-      case "agent"  =>  WSHttp.GET[Option[AgentCheckCasesResponse]](s"$baseUrl/external-case-management-api/my-organisation/clients/all/property-links/$submissionId/check-cases?start=1&size=100") recover { case _: NotFoundException => None }
-      case "client" =>  WSHttp.GET[Option[OwnerCheckCasesResponse]](s"$baseUrl/external-case-management-api/my-organisation/property-links/$submissionId/check-cases?start=1&size=100") recover { case _: NotFoundException => None }
+      case "agent"  =>  WSHttp.GET[Option[AgentCheckCasesResponse]](s"$baseUrl/external-case-management-api/my-organisation/clients/all/property-links/$submissionId/check-cases?start=1&size=100") recover { case _ => None }
+      case "client" =>  WSHttp.GET[Option[OwnerCheckCasesResponse]](s"$baseUrl/external-case-management-api/my-organisation/property-links/$submissionId/check-cases?start=1&size=100") recover { case _ => None }
       case _       =>  Future.successful(None)
 
     }
