@@ -15,21 +15,66 @@
  */
 
 package connectors
-import javax.inject.{Inject, Named}
 
-import models.DetailedValuationRequest
+import http.VoaHttpClient
+import javax.inject.{Inject, Named}
+import models.ModernisedEnrichedRequest
+import models.dvr.documents.DvrDocumentFiles
+import models.dvr.{DetailedValuationRequest, StreamedDocument}
+import play.api.http.HeaderNames.{CONTENT_LENGTH, CONTENT_TYPE}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import play.api.libs.ws.{StreamedResponse, WSClient}
+import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.ws.WSHttp
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.Future
 
-class DVRCaseManagementConnector @Inject() (@Named("VoaBackendWsHttp") http: WSHttp) extends ServicesConfig {
+class DVRCaseManagementConnector @Inject()(
+                                            wsClient: WSClient,
+                                            @Named("VoaBackendWsHttp") ws: WSHttp,
+                                            @Named("VoaAuthedBackendHttp") http: VoaHttpClient
+                                          ) extends ServicesConfig with HttpErrorFunctions {
   lazy val baseURL = baseUrl("external-business-rates-data-platform")
   lazy val url = baseURL + "/dvr-case-management-api"
 
   def requestDetailedValuation(request: DetailedValuationRequest)(implicit hc: HeaderCarrier): Future[Unit] = {
-    http.POST[DetailedValuationRequest, HttpResponse](url + "/dvr_case/create_dvr_case", request) map { _ => () }
+    ws.POST[DetailedValuationRequest, HttpResponse](url + "/dvr_case/create_dvr_case", request) map { _ => () }
   }
+
+  //Possibly moving to another API
+  def getDvrDocuments(valuationId: Long, uarn: Long, propertyLinkId: String)(implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]): Future[Option[DvrDocumentFiles]] =
+    http.GET[DvrDocumentFiles](s"$url/dvr_case/$uarn/valuation/$valuationId/files", Seq("propertyLinkId" -> propertyLinkId))
+      .map(Option.apply)
+      .recover {
+        case _: NotFoundException  =>
+          None
+        case e                     =>
+          throw e
+      }
+
+
+  def getDvrDocument(
+                      valuationId: Long,
+                      uarn: Long,
+                      propertyLinkId: String,
+                      fileRef: Long)(implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]): Future[StreamedDocument] =
+    wsClient
+      .url(s"$url/dvr_case/$uarn/valuation/$valuationId/files/$fileRef?propertyLinkId=$propertyLinkId")
+      .withMethod("GET")
+      .withHeaders(hc.withExtraHeaders(
+      "GG-EXTERNAL-ID" -> request.externalId,
+      "GG-GROUP-ID"    -> request.groupId).extraHeaders: _*)
+      .stream().flatMap {
+      case StreamedResponse(hs, body) =>
+
+      val headers = hs.headers.mapValues(_.mkString(","))
+        hs.status match {
+          case s if is4xx(s) => Future.failed(Upstream4xxResponse(s"Upload failed with status ${hs.status}.", s, s))
+          case s if is5xx(s) => Future.failed(Upstream5xxResponse(s"Upload failed with status ${hs.status}.", s, s))
+          case _ => Future.successful(
+            StreamedDocument(headers.get(CONTENT_TYPE), headers.get(CONTENT_LENGTH).map(_.toLong), headers.filter(_._1 != CONTENT_TYPE), body)
+          )
+        }
+    }
 }

@@ -14,15 +14,19 @@
  * limitations under the License.
  */
 
-package connectors.auth
+package models.dvr.documents
 
-import javax.inject.Inject
+import java.time.LocalDateTime
 
-import uk.gov.hmrc.auth.core.PlayAuthConnector
-import uk.gov.hmrc.http.HttpPost
-import uk.gov.hmrc.play.config.ServicesConfig
+import play.api.libs.json.{Json, OFormat}
 
-class DefaultAuthConnector @Inject()() extends PlayAuthConnector with ServicesConfig {
-  override val http: HttpPost = WSHttp
-  override val serviceUrl: String = baseUrl("auth")
+case class DocumentSummary(
+                            documentId: Long,
+                            documentName: String,
+                            createDateTime: LocalDateTime
+                          )
+
+object DocumentSummary {
+  implicit val format: OFormat[DocumentSummary] = Json.format
+
 }

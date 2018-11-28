@@ -16,18 +16,24 @@
 
 package controllers
 
+import java.time.LocalDateTime
+
+import akka.stream.javadsl.FileIO
+import akka.stream.scaladsl.Source
+import akka.util.ByteString
 import connectors.DVRCaseManagementConnector
 import connectors.auth.DefaultAuthConnector
-import models.DetailedValuationRequest
+import models.dvr.{DetailedValuationRequest, StreamedDocument}
+import models.dvr.documents.{Document, DocumentSummary, DvrDocumentFiles}
 import org.mockito.ArgumentMatchers.{eq => matching, _}
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
 import repositories.DVRRecordRepository
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.http.HeaderCarrier
+import play.api.test.Helpers._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -42,7 +48,7 @@ class DVRCaseManagementSpec extends ControllerSpec with MockitoSugar {
     billingAuthorityReferenceNumber = "BAREF"
   )
 
-  "requestDetailedValuation" should {
+  "request detailed valuation" should {
     "create a record of the DVR in mongo and POST the DVR to modernised" in {
       val dvrJson = Json.toJson(testDvr)
       val res = testController.requestDetailedValuation()(FakeRequest().withBody(dvrJson))
@@ -54,7 +60,7 @@ class DVRCaseManagementSpec extends ControllerSpec with MockitoSugar {
     }
   }
 
-  "dvrExists" should {
+  "dvr exists" should {
     "return true if the DVR already exists in mongo" in {
       when(mockRepo.exists(anyLong(), anyLong())) thenReturn Future.successful((true))
       val res = testController.dvrExists(1l, 3l)(FakeRequest())
@@ -75,6 +81,60 @@ class DVRCaseManagementSpec extends ControllerSpec with MockitoSugar {
       status(res) mustBe OK
       contentAsJson(res) mustBe Json.toJson(false)
       reset(mockRepo)
+    }
+  }
+
+  "get dvr documents" should {
+    "return 200 OK with the dvr document information" in {
+      val now = LocalDateTime.now()
+
+      when(mockDvrConnector.getDvrDocuments(any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(Some(DvrDocumentFiles(
+          checkForm = Document(DocumentSummary(1L, "Check Document", now)),
+          detailedValuation = Document(DocumentSummary(2L, "Detailed Valuation Document", now))
+        ))))
+
+      val result = testController.getDvrDocuments(1L, 3L, "PL-12345")(FakeRequest())
+
+      status(result) mustBe OK
+      contentAsJson(result) mustBe Json.parse( s"""
+                                                   |{
+                                                   | "checkForm": {
+                                                   |   "documentSummary": {
+                                                   |     "documentId": 1,
+                                                   |     "documentName": "Check Document",
+                                                   |     "createDateTime": "$now"
+                                                   |     }
+                                                   | },
+                                                   | "detailedValuation": {
+                                                   |    "documentSummary": {
+                                                   |       "documentId": 2,
+                                                   |       "documentName": "Detailed Valuation Document",
+                                                   |       "createDateTime": "$now"
+                                                   |    }
+                                                   | }
+                                                   |}
+            """.stripMargin)
+    }
+
+    "return 404 NOT_FOUND when the dvr documents dont exists" in {
+      when(mockDvrConnector.getDvrDocuments(any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(None))
+
+      val result = testController.getDvrDocuments(1L, 3L, "PL-12345")(FakeRequest())
+
+      status(result) mustBe NOT_FOUND
+    }
+  }
+
+  "get dvr document" should {
+    "return 200 Ok with the file chunked." in {
+      when(mockDvrConnector.getDvrDocument(any(), any(), any(), any())(any(), any()))
+        .thenReturn(Future.successful(StreamedDocument(None, None, Map(), Source.single(ByteString(12)))))
+
+      val result = testController.getDvrDocument(1L, 3L, "PL-12345", 1L)(FakeRequest())
+
+      status(result) mustBe OK
     }
   }
 

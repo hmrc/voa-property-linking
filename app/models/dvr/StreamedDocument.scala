@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package models
+package models.dvr
 
-import play.api.libs.json.{Format, Json}
+import akka.stream.scaladsl.Source
+import akka.util.ByteString
 
-case class DetailedValuationRequest(authorisationId: Long, organisationId: Long, personId: Long,
-                                    submissionId: String, assessmentRef: Long, billingAuthorityReferenceNumber: String)
-
-object DetailedValuationRequest {
-  implicit val format: Format[DetailedValuationRequest] = Json.format[DetailedValuationRequest]
-}
+case class StreamedDocument(
+                             contentType: Option[String],
+                             contentLength: Option[Long],
+                             headers: Map[String, String],
+                             body: Source[ByteString, _])

@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-package connectors.auth
+package models.dvr
 
-import javax.inject.Inject
+import play.api.libs.json.{Format, Json}
 
-import uk.gov.hmrc.auth.core.PlayAuthConnector
-import uk.gov.hmrc.http.HttpPost
-import uk.gov.hmrc.play.config.ServicesConfig
+case class DetailedValuationRequest(
+                                     authorisationId: Long,
+                                     organisationId: Long,
+                                     personId: Long,
+                                     submissionId: String,
+                                     assessmentRef: Long,
+                                     billingAuthorityReferenceNumber: String)
 
-class DefaultAuthConnector @Inject()() extends PlayAuthConnector with ServicesConfig {
-  override val http: HttpPost = WSHttp
-  override val serviceUrl: String = baseUrl("auth")
+object DetailedValuationRequest {
+  implicit val format: Format[DetailedValuationRequest] = Json.format[DetailedValuationRequest]
 }

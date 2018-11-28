@@ -47,7 +47,7 @@ trait Authenticated extends AuthorisedFunctions {
                    (implicit uuh: UnauthenticatedUserHandler): Action[A] =
     Action.async(bodyParser){ implicit request =>
       authorised().retrieve(Retrievals.externalId and Retrievals.groupIdentifier){
-        case (Some(ext) ~ Some(group)) =>
+        case Some(ext) ~ Some(group) =>
           block(
             new ModernisedEnrichedRequest[A](request, ext, group))
         case _ => Future.successful(uuh())
