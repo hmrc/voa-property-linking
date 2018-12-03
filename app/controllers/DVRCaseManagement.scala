@@ -16,29 +16,59 @@
 
 package controllers
 
+import java.io.{BufferedInputStream, File}
+
+import akka.stream.Materializer
+import akka.stream.scaladsl.Sink
 import auth.Authenticated
 import connectors.DVRCaseManagementConnector
 import connectors.auth.DefaultAuthConnector
 import javax.inject.Inject
-
-import models.DetailedValuationRequest
-import play.api.libs.json.Json
-import play.api.mvc.Action
+import models.dvr.DetailedValuationRequest
+import play.api.libs.json.{JsValue, Json}
+import play.api.mvc.{Action, AnyContent, ResponseHeader, Result}
 import repositories.DVRRecordRepository
 import play.api.Logger
+import play.api.http.HttpEntity.Streamed
 
 class DVRCaseManagement @Inject()(val authConnector: DefaultAuthConnector,
                                   dvrCaseManagement: DVRCaseManagementConnector,
                                   dvrRecordRepository: DVRRecordRepository)
   extends PropertyLinkingBaseController with Authenticated {
 
-  def requestDetailedValuation = authenticated(parse.json) { implicit request =>
+  def requestDetailedValuation: Action[JsValue] = authenticated(parse.json) { implicit request =>
     withJsonBody[DetailedValuationRequest] { dvr => {
       Logger.info(s"detailed valuation request submitted: ${dvr.submissionId}")
       dvrRecordRepository.create(dvr.organisationId, dvr.assessmentRef).flatMap(_ =>
         dvrCaseManagement.requestDetailedValuation(dvr) map { _ => Ok })
     }
     }
+  }
+
+  def getDvrDocuments(
+                       valuationId: Long,
+                       uarn: Long,
+                       propertyLinkId: String): Action[AnyContent] = authenticated { implicit request =>
+    dvrCaseManagement
+      .getDvrDocuments(valuationId, uarn, propertyLinkId)
+      .map{
+        case Some(response) => Ok(Json.toJson(response))
+        case None           => NotFound
+      }
+  }
+
+  def getDvrDocument(
+                      valuationId: Long,
+                      uarn: Long,
+                      propertyLinkId: String,
+                      fileRef: Long): Action[AnyContent] = authenticated { implicit request =>
+    dvrCaseManagement
+      .getDvrDocument(valuationId, uarn, propertyLinkId, fileRef)
+      .map(document =>
+        Result(
+          ResponseHeader(200, document.headers),
+          Streamed(document.body, document.contentLength, document.contentType))
+      )
   }
 
   def dvrExists(organisationId: Long, assessmentRef: Long) = Action.async { implicit request =>

@@ -45,6 +45,8 @@ POST         /address                                                           
 GET          /submissionId/:prefix                                                            @controllers.SubmissionIdController.get(prefix: String)
 
 POST         /request-detailed-valuation                                                      @controllers.DVRCaseManagement.requestDetailedValuation
+GET          /properties/:uarn/valuation/:valuationId/files                                   @controllers.DVRCaseManagement.getDvrDocuments(valuationId: Long, uarn: Long, propertyLinkId: String)
+GET          /properties/:uarn/valuation/:valuationId/files/:ref                              @controllers.DVRCaseManagement.getDvrDocument(valuationId: Long, uarn: Long, propertyLinkId: String, ref: Long)
 GET          /dvr-exists                                                                      @controllers.DVRCaseManagement.dvrExists(organisationId: Long, assessmentRef: Long)
 
 GET          /message/:orgId/:messageId                                                       @controllers.MessagesController.getMessage(orgId: Long, messageId)

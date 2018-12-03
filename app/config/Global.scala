@@ -17,11 +17,12 @@
 package config
 
 import java.time.Clock
-import javax.inject._
 
+import javax.inject._
 import com.google.inject.AbstractModule
 import com.google.inject.name.Names
 import com.typesafe.config.Config
+import http.VoaHttpClient
 import infrastructure.{RegularSchedule, Schedule, VOABackendWSHttp}
 import net.ceedubs.ficus.Ficus._
 import org.joda.time.Duration
@@ -67,6 +68,7 @@ class GuiceModule(environment: Environment,
   override def configure() = {
 
     bind(classOf[String]).annotatedWith(Names.named("lockName")).toInstance("FileTransferLock")
+    bind(classOf[VoaHttpClient]).annotatedWith(Names.named("VoaAuthedBackendHttp")).to(classOf[VoaHttpClient])
     bind(classOf[Duration]).annotatedWith(Names.named("lockTimeout")).toInstance(
       Duration.standardMinutes(configuration.getLong("fileTransfer.lockMinutes").getOrElse(30L)))
 
