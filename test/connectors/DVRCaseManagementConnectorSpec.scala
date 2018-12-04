@@ -85,7 +85,7 @@ class DVRCaseManagementConnectorSpec extends ContentTypes
       val uarn = 2L
       val propertyLinkId = "PL-123456789"
 
-      val dvrUrl = s"/dvr-case-management-api/dvr_case/$uarn/valuation/$valuationId/files"
+      val dvrUrl = s"/dvr-case-management-api/dvr_case/$uarn/valuation/$valuationId/files?propertyLinkId=PL-123456789"
 
       val now = LocalDateTime.now()
 
@@ -148,7 +148,7 @@ class DVRCaseManagementConnectorSpec extends ContentTypes
       val propertyLinkId = "PL-123456789"
       val fileRef = 1L
 
-      val dvrUrl = s"/dvr-case-management-api/dvr_case/$uarn/valuation/$valuationId/files/$fileRef"
+      val dvrUrl = s"/dvr-case-management-api/dvr_case/$uarn/valuation/$valuationId/files/$fileRef?propertyLinkId=$propertyLinkId"
 
       stubFor(get(urlEqualTo(dvrUrl))
         .willReturn(aResponse
