@@ -55,3 +55,5 @@ GET          /messages                                                          
 GET          /unread-messages-count/:orgId                                                    @controllers.MessagesController.messageCountFor(orgId: Long)
 
 GET          /check-cases/:submissionId/:party                                                @controllers.CheckCaseController.getCheckCases(submissionId: String, party: String)
+
+GET          /property-links/:plSubmissionId/check-cases/:checkCaseRef/canChallenge           @controllers.ChallengeController.canChallenge(plSubmissionId: String, checkCaseRef: String, valuationId: Long, party: String)
