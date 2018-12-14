@@ -45,4 +45,31 @@ class CheckCaseConnector @Inject()(config: ServicesConfig){
     }
 
   }
+
+  def canChallenge(propertyLinkSubmissionId: String,
+                   checkCaseRef: String,
+                   valuationId: Long,
+                   party: String)(implicit request: ModernisedEnrichedRequest[_]): Future[Option[CanChallengeResponse]] = {
+    implicit val hc = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
+      .withExtraHeaders("GG-EXTERNAL-ID" -> request.externalId)
+      .withExtraHeaders("GG-GROUP-ID" -> request.groupId)
+
+    party match {
+      case "client"  =>  WSHttp.GET[HttpResponse](s"$baseUrl/external-case-management-api/my-organisation/property-links/$propertyLinkSubmissionId/check-cases/$checkCaseRef/canChallenge?valuationId=$valuationId").map{ resp =>
+        handleCanChallengeResponse(resp)
+      } recover { case _ => None }
+      case "agent" =>  WSHttp.GET[HttpResponse](s"$baseUrl/external-case-management-api/my-organisation/clients/all/property-links/$propertyLinkSubmissionId/check-cases/$checkCaseRef/canChallenge?valuationId=$valuationId").map{ resp =>
+        handleCanChallengeResponse(resp)
+      } recover { case _ => None }
+      case _       =>  throw new IllegalArgumentException(s"Unknown party $party")
+
+    }
+  }
+
+  private def handleCanChallengeResponse(resp: HttpResponse): Option[CanChallengeResponse] = {
+    resp.status match {
+      case 200 => Json.parse(resp.body).asOpt[CanChallengeResponse]
+      case _   => None
+    }
+  }
 }
