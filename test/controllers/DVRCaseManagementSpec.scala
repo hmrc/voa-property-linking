@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,22 +18,21 @@ package controllers
 
 import java.time.LocalDateTime
 
-import akka.stream.javadsl.FileIO
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
-import connectors.DVRCaseManagementConnector
 import connectors.auth.DefaultAuthConnector
-import models.dvr.{DetailedValuationRequest, StreamedDocument}
+import connectors.{CCACaseManagementApi, DVRCaseManagementConnector, ExternalValuationManagementApi}
 import models.dvr.documents.{Document, DocumentSummary, DvrDocumentFiles}
+import models.dvr.{DetailedValuationRequest, StreamedDocument}
 import org.mockito.ArgumentMatchers.{eq => matching, _}
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
+import play.api.test.Helpers._
 import repositories.DVRRecordRepository
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.http.HeaderCarrier
-import play.api.test.Helpers._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -56,6 +55,18 @@ class DVRCaseManagementSpec extends ControllerSpec with MockitoSugar {
       await(res)
       verify(mockRepo, times(1)).create(matching(1l), matching(3l))
       verify(mockDvrConnector, times(1)).requestDetailedValuation(matching(testDvr))(any[HeaderCarrier])
+      status(res) mustBe OK
+    }
+  }
+
+  "request detailed valuation v2 " should {
+    "create a record of the DVR in mongo and POST the DVR to modernised" in {
+      val dvrJson = Json.toJson(testDvr)
+      val res = testController.requestDetailedValuationV2()(FakeRequest().withBody(dvrJson))
+
+      await(res)
+      verify(mockRepo, times(2)).create(matching(1l), matching(3l))
+      verify(mockCcaCaseManagementConnector, times(1)).requestDetailedValuation(matching(testDvr))(any[HeaderCarrier])
       status(res) mustBe OK
     }
   }
@@ -88,7 +99,7 @@ class DVRCaseManagementSpec extends ControllerSpec with MockitoSugar {
     "return 200 OK with the dvr document information" in {
       val now = LocalDateTime.now()
 
-      when(mockDvrConnector.getDvrDocuments(any(), any(), any())(any(), any()))
+      when(mockExternalValuationManagementapi.getDvrDocuments(any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(Some(DvrDocumentFiles(
           checkForm = Document(DocumentSummary(1L, "Check Document", now)),
           detailedValuation = Document(DocumentSummary(2L, "Detailed Valuation Document", now))
@@ -118,7 +129,7 @@ class DVRCaseManagementSpec extends ControllerSpec with MockitoSugar {
     }
 
     "return 404 NOT_FOUND when the dvr documents dont exists" in {
-      when(mockDvrConnector.getDvrDocuments(any(), any(), any())(any(), any()))
+      when(mockExternalValuationManagementapi.getDvrDocuments(any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(None))
 
       val result = testController.getDvrDocuments(1L, 3L, "PL-12345")(FakeRequest())
@@ -129,7 +140,7 @@ class DVRCaseManagementSpec extends ControllerSpec with MockitoSugar {
 
   "get dvr document" should {
     "return 200 Ok with the file chunked." in {
-      when(mockDvrConnector.getDvrDocument(any(), any(), any(), any())(any(), any()))
+      when(mockExternalValuationManagementapi.getDvrDocument(any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(StreamedDocument(None, None, Map(), Source.single(ByteString(12)))))
 
       val result = testController.getDvrDocument(1L, 3L, "PL-12345", 1L)(FakeRequest())
@@ -138,11 +149,24 @@ class DVRCaseManagementSpec extends ControllerSpec with MockitoSugar {
     }
   }
 
-  lazy val testController = new DVRCaseManagement(mockAuthConnector, mockDvrConnector, mockRepo)
+  lazy val testController = new DVRCaseManagement(
+    mockAuthConnector,
+    mockDvrConnector,
+    mockCcaCaseManagementConnector,
+    mockExternalValuationManagementapi,
+    mockRepo)
+
+  lazy val mockExternalValuationManagementapi = mock[ExternalValuationManagementApi]
 
   lazy val mockRepo = {
     val m = mock[DVRRecordRepository]
     when(m.create(anyLong(), anyLong())) thenReturn Future.successful(())
+    m
+  }
+
+  lazy val mockCcaCaseManagementConnector = {
+    val m = mock[CCACaseManagementApi]
+    when(m.requestDetailedValuation(any[DetailedValuationRequest])(any[HeaderCarrier])) thenReturn Future.successful()
     m
   }
 

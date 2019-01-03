@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import java.io.{BufferedInputStream, File}
 import akka.stream.Materializer
 import akka.stream.scaladsl.Sink
 import auth.Authenticated
-import connectors.DVRCaseManagementConnector
+import connectors.{CCACaseManagementApi, DVRCaseManagementConnector, ExternalValuationManagementApi}
 import connectors.auth.DefaultAuthConnector
 import javax.inject.Inject
 import models.dvr.DetailedValuationRequest
@@ -33,6 +33,8 @@ import play.api.http.HttpEntity.Streamed
 
 class DVRCaseManagement @Inject()(val authConnector: DefaultAuthConnector,
                                   dvrCaseManagement: DVRCaseManagementConnector,
+                                  dvrCaseManagementV2: CCACaseManagementApi,
+                                  externalValuationManagementApi: ExternalValuationManagementApi,
                                   dvrRecordRepository: DVRRecordRepository)
   extends PropertyLinkingBaseController with Authenticated {
 
@@ -45,11 +47,20 @@ class DVRCaseManagement @Inject()(val authConnector: DefaultAuthConnector,
     }
   }
 
+  def requestDetailedValuationV2: Action[JsValue] = authenticated(parse.json) { implicit request =>
+    withJsonBody[DetailedValuationRequest] { dvr => {
+      Logger.info(s"detailed valuation request submitted: ${dvr.submissionId}")
+      dvrRecordRepository.create(dvr.organisationId, dvr.assessmentRef).flatMap(_ =>
+        dvrCaseManagementV2.requestDetailedValuation(dvr) map { _ => Ok })
+    }
+    }
+  }
+
   def getDvrDocuments(
                        valuationId: Long,
                        uarn: Long,
                        propertyLinkId: String): Action[AnyContent] = authenticated { implicit request =>
-    dvrCaseManagement
+    externalValuationManagementApi
       .getDvrDocuments(valuationId, uarn, propertyLinkId)
       .map{
         case Some(response) => Ok(Json.toJson(response))
@@ -62,7 +73,7 @@ class DVRCaseManagement @Inject()(val authConnector: DefaultAuthConnector,
                       uarn: Long,
                       propertyLinkId: String,
                       fileRef: Long): Action[AnyContent] = authenticated { implicit request =>
-    dvrCaseManagement
+    externalValuationManagementApi
       .getDvrDocument(valuationId, uarn, propertyLinkId, fileRef)
       .map(document =>
         Result(
