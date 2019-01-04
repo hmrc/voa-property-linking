@@ -16,7 +16,7 @@
 
 package connectors
 
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, post, stubFor, urlEqualTo}
 import helpers.SimpleWsHttpTestApplication
 import http.VoaHttpClient
 import models.dvr.DetailedValuationRequest
@@ -25,7 +25,7 @@ import play.api.libs.ws.WSClient
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.ws.WSHttp
 
-class DVRCaseManagementConnectorSpec extends ContentTypes
+class CCACaseManagementApiSpec extends ContentTypes
   with WireMockSpec with SimpleWsHttpTestApplication {
 
   implicit val mat = fakeApplication.materializer
@@ -35,14 +35,14 @@ class DVRCaseManagementConnectorSpec extends ContentTypes
   val wsClient = fakeApplication.injector.instanceOf[WSClient]
   val voaClient = fakeApplication.injector.instanceOf[VoaHttpClient]
   val http = fakeApplication.injector.instanceOf[WSHttp]
-  val connector = new DVRCaseManagementConnector(wsClient, http, voaClient) {
+  val connector = new CCACaseManagementApi(wsClient, http, voaClient) {
     override lazy val baseURL: String = mockServerUrl
   }
 
   "request detailed valuation" should {
     "update the valuation with the detailed valuation request" in {
 
-      val dvrUrl = s"/dvr-case-management-api/dvr_case/create_dvr_case"
+      val dvrUrl = s"/cca-case-management-api/cca_case/dvrSubmission"
 
       val emptyCache ="{}"
 

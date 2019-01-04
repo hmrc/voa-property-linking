@@ -27,15 +27,17 @@ import uk.gov.hmrc.play.http.ws.WSHttp
 
 import scala.concurrent.Future
 
-class DVRCaseManagementConnector @Inject()(
+
+class CCACaseManagementApi @Inject()(
                                             wsClient: WSClient,
                                             @Named("VoaBackendWsHttp") ws: WSHttp,
                                             @Named("VoaAuthedBackendHttp") http: VoaHttpClient
                                           ) extends ServicesConfig with HttpErrorFunctions {
   lazy val baseURL = baseUrl("external-business-rates-data-platform")
-  lazy val url = baseURL + "/dvr-case-management-api"
+  lazy val url = baseURL + "/cca-case-management-api"
 
-  def requestDetailedValuation(request: DetailedValuationRequest)(implicit hc: HeaderCarrier): Future[Unit] = {
-    ws.POST[DetailedValuationRequest, HttpResponse](url + "/dvr_case/create_dvr_case", request) map { _ => () }
-  }
+  def requestDetailedValuation(request: DetailedValuationRequest)(implicit hc: HeaderCarrier): Future[Unit] =
+    ws
+      .POST[DetailedValuationRequest, HttpResponse](url + "/cca_case/dvrSubmission", request) map { _ => () }
 }
+
