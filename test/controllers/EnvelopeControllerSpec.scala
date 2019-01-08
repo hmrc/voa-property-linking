@@ -104,9 +104,12 @@ class EnvelopeControllerSpec extends ControllerSpec with MockitoSugar {
 
   }
 
-  lazy val callbackUrl = routes.FileTransferController.handleCallback().absoluteURL()(FakeRequest().withHeaders(HOST -> "localhost:9524"))
 
-  lazy val testController = new EnvelopeController(mockAuthConnector, mockRepo, mockFileUpload)
+  private val callbackUrl = "http://file-callback/url"
+
+  lazy val testController = new EnvelopeController(mockAuthConnector, mockRepo, mockFileUpload){
+    override lazy val fileUploadCallbackUrl = callbackUrl
+  }
 
   lazy val mockRepo = {
     val m = mock[EnvelopeIdRepo]
