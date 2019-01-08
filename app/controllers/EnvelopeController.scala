@@ -25,14 +25,17 @@ import models.Closed
 import play.api.libs.json.Json
 import repositories.EnvelopeIdRepo
 import uk.gov.hmrc.circuitbreaker.UnhealthyServiceException
+import uk.gov.hmrc.play.config.ServicesConfig
 
 class EnvelopeController @Inject()(val authConnector: DefaultAuthConnector,
                                    val repo: EnvelopeIdRepo, fileUploadConnector: FileUploadConnector)
-  extends PropertyLinkingBaseController with Authenticated {
+  extends PropertyLinkingBaseController with Authenticated with ServicesConfig {
+
+  lazy val mdtpPlatformSsl = getBoolean("mdtp.platformSsl")
 
   def create = authenticated(parse.json) { implicit request =>
     withJsonBody[EnvelopeMetadata] { metadata =>
-      fileUploadConnector.createEnvelope(metadata, routes.FileTransferController.handleCallback().absoluteURL()) flatMap {
+      fileUploadConnector.createEnvelope(metadata, routes.FileTransferController.handleCallback().absoluteURL(mdtpPlatformSsl)) flatMap {
         case Some(id) => repo.create(id) map { _ => Ok(Json.obj("envelopeId" -> id))}
         case None => InternalServerError(Json.obj("error" -> "envelope creation failed"))
       } recover {
