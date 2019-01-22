@@ -40,7 +40,7 @@ class ExternalValuationManagementApi @Inject()(
   lazy val url = baseURL + "/external-valuation-management-api"
 
   def getDvrDocuments(valuationId: Long, uarn: Long, propertyLinkId: String)(implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]): Future[Option[DvrDocumentFiles]] =
-    http.GET[DvrDocumentFiles](s"$url/properties/$uarn/valuation/$valuationId/files", Seq("propertyLinkId" -> propertyLinkId))
+    http.GET[DvrDocumentFiles](s"$url/properties/$uarn/valuations/$valuationId/files", Seq("propertyLinkId" -> propertyLinkId))
       .map(Option.apply)
       .recover {
         case _: NotFoundException  =>
@@ -55,7 +55,7 @@ class ExternalValuationManagementApi @Inject()(
                       propertyLinkId: String,
                       fileRef: Long)(implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]): Future[StreamedDocument] =
     wsClient
-      .url(s"$url/properties/$uarn/valuation/$valuationId/files/$fileRef?propertyLinkId=$propertyLinkId")
+      .url(s"$url/properties/$uarn/valuations/$valuationId/files/$fileRef?propertyLinkId=$propertyLinkId")
       .withMethod("GET")
       .withHeaders(hc.withExtraHeaders(
         "GG-EXTERNAL-ID" -> request.externalId,
