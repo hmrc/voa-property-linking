@@ -52,7 +52,7 @@ class ExternalValuationManagementApiSpec extends ContentTypes
         val uarn = 2L
         val propertyLinkId = "PL-123456789"
 
-        val dvrUrl = s"/external-valuation-management-api/properties/$uarn/valuation/$valuationId/files?propertyLinkId=PL-123456789"
+        val dvrUrl = s"/external-valuation-management-api/properties/$uarn/valuations/$valuationId/files?propertyLinkId=PL-123456789"
 
         val now = LocalDateTime.now()
 
@@ -95,7 +95,7 @@ class ExternalValuationManagementApiSpec extends ContentTypes
         val uarn = 2L
         val propertyLinkId = "PL-123456789"
 
-        val dvrUrl = s"/external-valuation-management-api/properties/$uarn/valuation/$valuationId/files"
+        val dvrUrl = s"/external-valuation-management-api/properties/$uarn/valuations/$valuationId/files"
 
         stubFor(get(urlEqualTo(dvrUrl))
           .willReturn(aResponse.withStatus(404))
@@ -115,7 +115,7 @@ class ExternalValuationManagementApiSpec extends ContentTypes
         val propertyLinkId = "PL-123456789"
         val fileRef = 1L
 
-        val dvrUrl = s"/external-valuation-management-api/properties/$uarn/valuation/$valuationId/files/$fileRef?propertyLinkId=$propertyLinkId"
+        val dvrUrl = s"/external-valuation-management-api/properties/$uarn/valuations/$valuationId/files/$fileRef?propertyLinkId=$propertyLinkId"
 
         stubFor(get(urlEqualTo(dvrUrl))
           .willReturn(aResponse
