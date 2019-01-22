@@ -65,14 +65,14 @@ class ExternalValuationManagementApiSpec extends ContentTypes
                 |{
                 | "checkForm": {
                 |   "documentSummary": {
-                |     "documentId": 1,
+                |     "documentId": "1",
                 |     "documentName": "Check Document",
                 |     "createDateTime": "$now"
                 |     }
                 | },
                 | "detailedValuation": {
                 |    "documentSummary": {
-                |       "documentId": 2,
+                |       "documentId": "2",
                 |       "documentName": "Detailed Valuation Document",
                 |       "createDateTime": "$now"
                 |    }
@@ -84,8 +84,8 @@ class ExternalValuationManagementApiSpec extends ContentTypes
 
         val result = await(connector.getDvrDocuments(valuationId, uarn, propertyLinkId))
         result shouldBe Some(DvrDocumentFiles(
-          checkForm = Document(DocumentSummary(1L, "Check Document", now)),
-          detailedValuation = Document(DocumentSummary(2L, "Detailed Valuation Document", now))
+          checkForm = Document(DocumentSummary("1", "Check Document", now)),
+          detailedValuation = Document(DocumentSummary("2", "Detailed Valuation Document", now))
         ))
       }
 
@@ -113,7 +113,7 @@ class ExternalValuationManagementApiSpec extends ContentTypes
         val valuationId = 1L
         val uarn = 2L
         val propertyLinkId = "PL-123456789"
-        val fileRef = 1L
+        val fileRef = "1L"
 
         val dvrUrl = s"/external-valuation-management-api/properties/$uarn/valuations/$valuationId/files/$fileRef?propertyLinkId=$propertyLinkId"
 

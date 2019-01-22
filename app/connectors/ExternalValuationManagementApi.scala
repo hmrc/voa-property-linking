@@ -53,7 +53,7 @@ class ExternalValuationManagementApi @Inject()(
                       valuationId: Long,
                       uarn: Long,
                       propertyLinkId: String,
-                      fileRef: Long)(implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]): Future[StreamedDocument] =
+                      fileRef: String)(implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]): Future[StreamedDocument] =
     wsClient
       .url(s"$url/properties/$uarn/valuations/$valuationId/files/$fileRef?propertyLinkId=$propertyLinkId")
       .withMethod("GET")
