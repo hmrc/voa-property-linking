@@ -101,8 +101,8 @@ class DVRCaseManagementSpec extends ControllerSpec with MockitoSugar {
 
       when(mockExternalValuationManagementapi.getDvrDocuments(any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(Some(DvrDocumentFiles(
-          checkForm = Document(DocumentSummary(1L, "Check Document", now)),
-          detailedValuation = Document(DocumentSummary(2L, "Detailed Valuation Document", now))
+          checkForm = Document(DocumentSummary("1L", "Check Document", now)),
+          detailedValuation = Document(DocumentSummary("2L", "Detailed Valuation Document", now))
         ))))
 
       val result = testController.getDvrDocuments(1L, 3L, "PL-12345")(FakeRequest())
@@ -112,14 +112,14 @@ class DVRCaseManagementSpec extends ControllerSpec with MockitoSugar {
                                                    |{
                                                    | "checkForm": {
                                                    |   "documentSummary": {
-                                                   |     "documentId": 1,
+                                                   |     "documentId": "1L",
                                                    |     "documentName": "Check Document",
                                                    |     "createDateTime": "$now"
                                                    |     }
                                                    | },
                                                    | "detailedValuation": {
                                                    |    "documentSummary": {
-                                                   |       "documentId": 2,
+                                                   |       "documentId": "2L",
                                                    |       "documentName": "Detailed Valuation Document",
                                                    |       "createDateTime": "$now"
                                                    |    }
@@ -143,7 +143,7 @@ class DVRCaseManagementSpec extends ControllerSpec with MockitoSugar {
       when(mockExternalValuationManagementapi.getDvrDocument(any(), any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(StreamedDocument(None, None, Map(), Source.single(ByteString(12)))))
 
-      val result = testController.getDvrDocument(1L, 3L, "PL-12345", 1L)(FakeRequest())
+      val result = testController.getDvrDocument(1L, 3L, "PL-12345", "1L")(FakeRequest())
 
       status(result) mustBe OK
     }

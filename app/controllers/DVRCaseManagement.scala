@@ -72,7 +72,7 @@ class DVRCaseManagement @Inject()(val authConnector: DefaultAuthConnector,
                       valuationId: Long,
                       uarn: Long,
                       propertyLinkId: String,
-                      fileRef: Long): Action[AnyContent] = authenticated { implicit request =>
+                      fileRef: String): Action[AnyContent] = authenticated { implicit request =>
     externalValuationManagementApi
       .getDvrDocument(valuationId, uarn, propertyLinkId, fileRef)
       .map(document =>
