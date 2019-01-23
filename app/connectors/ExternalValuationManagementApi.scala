@@ -60,10 +60,10 @@ class ExternalValuationManagementApi @Inject()(
     wsClient
       .url(s"$url/properties/$uarn/valuations/$valuationId/files/$fileRef?propertyLinkId=$propertyLinkId")
       .withMethod("GET")
-      .withHeaders(hc.withExtraHeaders(
+      .withHeaders(List(
         "GG-EXTERNAL-ID" -> request.externalId,
         "USER-AGENT" -> appName,
-        "GG-GROUP-ID"    -> request.groupId).extraHeaders: _*)
+        "GG-GROUP-ID"    -> request.groupId): _*)
       .stream().flatMap {
       case StreamedResponse(hs, body) =>
 
