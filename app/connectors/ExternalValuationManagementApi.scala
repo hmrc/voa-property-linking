@@ -36,6 +36,9 @@ class ExternalValuationManagementApi @Inject()(
                                       @Named("VoaBackendWsHttp") ws: WSHttp,
                                       @Named("VoaAuthedBackendHttp") http: VoaHttpClient
                                     ) extends ServicesConfig with HttpErrorFunctions {
+
+  lazy val appName = getConfString("appName", "voa-property-linking")
+
   lazy val baseURL = baseUrl("external-business-rates-data-platform")
   lazy val url = baseURL + "/external-valuation-management-api"
 
@@ -59,6 +62,7 @@ class ExternalValuationManagementApi @Inject()(
       .withMethod("GET")
       .withHeaders(hc.withExtraHeaders(
         "GG-EXTERNAL-ID" -> request.externalId,
+        "USER-AGENT" -> appName,
         "GG-GROUP-ID"    -> request.groupId).extraHeaders: _*)
       .stream().flatMap {
       case StreamedResponse(hs, body) =>
