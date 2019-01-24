@@ -29,6 +29,7 @@ import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.ws.WSHttp
 
 import scala.concurrent.Future
+import play.api.http.HeaderNames._
 
 
 class ExternalValuationManagementApi @Inject()(
@@ -62,7 +63,7 @@ class ExternalValuationManagementApi @Inject()(
       .withMethod("GET")
       .withHeaders(List(
         "GG-EXTERNAL-ID" -> request.externalId,
-        "USER-AGENT" -> appName,
+        USER_AGENT -> appName,
         "GG-GROUP-ID"    -> request.groupId): _*)
       .stream().flatMap {
       case StreamedResponse(hs, body) =>
