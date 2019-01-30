@@ -114,14 +114,14 @@ class DVRCaseManagementSpec extends ControllerSpec with MockitoSugar {
                                                    |   "documentSummary": {
                                                    |     "documentId": "1L",
                                                    |     "documentName": "Check Document",
-                                                   |     "createDateTime": "$now"
+                                                   |     "createDatetime": "$now"
                                                    |     }
                                                    | },
                                                    | "detailedValuation": {
                                                    |    "documentSummary": {
                                                    |       "documentId": "2L",
                                                    |       "documentName": "Detailed Valuation Document",
-                                                   |       "createDateTime": "$now"
+                                                   |       "createDatetime": "$now"
                                                    |    }
                                                    | }
                                                    |}

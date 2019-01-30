@@ -31,6 +31,7 @@ class EnvelopeIdRepositorySpec
     with BeforeAndAfterEach
     with MongoSpecSupport
 {
+
   val repository = new EnvelopeIdRepository(mongo(), s"${this.getClass.getSimpleName}") {
     override def indexes: Seq[Index] = Seq.empty
   }

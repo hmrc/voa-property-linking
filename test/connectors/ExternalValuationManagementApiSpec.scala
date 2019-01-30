@@ -67,14 +67,14 @@ class ExternalValuationManagementApiSpec extends ContentTypes
                 |   "documentSummary": {
                 |     "documentId": "1",
                 |     "documentName": "Check Document",
-                |     "createDateTime": "$now"
+                |     "createDatetime": "$now"
                 |     }
                 | },
                 | "detailedValuation": {
                 |    "documentSummary": {
                 |       "documentId": "2",
                 |       "documentName": "Detailed Valuation Document",
-                |       "createDateTime": "$now"
+                |       "createDatetime": "$now"
                 |    }
                 | }
                 |}
