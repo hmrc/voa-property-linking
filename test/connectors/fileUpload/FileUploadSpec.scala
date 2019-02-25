@@ -19,27 +19,28 @@ package connectors.fileUpload
 import java.util.UUID
 
 import com.codahale.metrics.{Meter, MetricRegistry}
+import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.kenshoo.play.metrics.Metrics
 import connectors.WireMockSpec
 import helpers.SimpleWsHttpTestApplication
 import infrastructure.SimpleWSHttp
-import org.mockito.ArgumentMatchers.{any => mockitoAny, eq => matching, _}
-import org.mockito.Mockito.{verify => mockitoVerify, _}
+import org.mockito.ArgumentMatchers.{any => mockitoAny, _}
+import org.mockito.Mockito._
 import org.mockito.{ArgumentMatchers, Mockito}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.Eventually._
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import play.api.libs.json.{Json, Writes}
+import play.api.libs.json.Json
 import play.api.libs.ws.{StreamedResponse, WSRequest, WSResponseHeaders}
-import uk.gov.hmrc.circuitbreaker.{CircuitBreakerConfig, UnhealthyServiceException}
-import uk.gov.hmrc.play.microservice.filters.MicroserviceFilterSupport
+import uk.gov.hmrc.circuitbreaker.CircuitBreakerConfig
 import uk.gov.hmrc.http._
+import uk.gov.hmrc.play.config.ServicesConfig
 
 import scala.concurrent.Future
 
-class FileUploadSpec extends WireMockSpec with SimpleWsHttpTestApplication with MicroserviceFilterSupport with MockitoSugar with BeforeAndAfterEach {
+class FileUploadSpec extends WireMockSpec with SimpleWsHttpTestApplication with MockitoSugar with BeforeAndAfterEach {
 
   val http = mock[SimpleWSHttp]
   val metrics = mock[Metrics]
@@ -51,6 +52,7 @@ class FileUploadSpec extends WireMockSpec with SimpleWsHttpTestApplication with 
   val strResponse = mock[StreamedResponse]
   val headers = mock[WSResponseHeaders]
 
+  implicit lazy val mat = fakeApplication.materializer
   override def beforeEach(): Unit = {
     super.beforeEach()
     Mockito.reset(http, response, metrics, registry, strResponse, headers)
@@ -68,7 +70,11 @@ class FileUploadSpec extends WireMockSpec with SimpleWsHttpTestApplication with 
 
       val fileBytes = getClass.getResource("/document.pdf").getFile.getBytes
       val fileUrl = s"/file-upload/envelopes/${java.util.UUID.randomUUID()}/files/document.pdf/content"
-      val connector = new FileUploadConnector(fakeApplication.injector.instanceOf[SimpleWSHttp], metrics, unbreakableCircuit) {
+      val connector = new FileUploadConnector(
+        fakeApplication.injector.instanceOf[SimpleWSHttp],
+        metrics,
+        fakeApplication.injector.instanceOf[ServicesConfig]
+      ) {
         override lazy val url = mockServerUrl
       }
 
@@ -88,7 +94,11 @@ class FileUploadSpec extends WireMockSpec with SimpleWsHttpTestApplication with 
 
       val http = fakeApplication.injector.instanceOf[SimpleWSHttp]
 
-      val connector = new FileUploadConnector(http, metrics, unbreakableCircuit) {
+      val connector = new FileUploadConnector(
+        http,
+        metrics,
+        fakeApplication.injector.instanceOf[ServicesConfig]
+      ) {
         override lazy val url = mockServerUrl
       }
 
@@ -98,7 +108,11 @@ class FileUploadSpec extends WireMockSpec with SimpleWsHttpTestApplication with 
     }
 
     "convert envelope metadata into a valid payload" in {
-      val connector = new FileUploadConnector(fakeApplication.injector.instanceOf[SimpleWSHttp], metrics, unbreakableCircuit) {
+      val connector = new FileUploadConnector(
+        fakeApplication.injector.instanceOf[SimpleWSHttp],
+        metrics,
+        fakeApplication.injector.instanceOf[ServicesConfig]
+      ) {
         override lazy val url = mockServerUrl
       }
 
@@ -127,11 +141,15 @@ class FileUploadSpec extends WireMockSpec with SimpleWsHttpTestApplication with 
 
       await(connector.createEnvelope(metadata, "/some-callback")(HeaderCarrier()))
 
-      verify(postRequestedFor(urlEqualTo("/file-upload/envelopes")).withRequestBody(equalToJson(expectedJson)))
+      WireMock.verify(postRequestedFor(urlEqualTo("/file-upload/envelopes")).withRequestBody(equalToJson(expectedJson)))
     }
 
     "extract and return the envelope ID from the response headers" in {
-      val connector = new FileUploadConnector(fakeApplication.injector.instanceOf[SimpleWSHttp], metrics, unbreakableCircuit) {
+      val connector = new FileUploadConnector(
+        fakeApplication.injector.instanceOf[SimpleWSHttp],
+        metrics,
+        fakeApplication.injector.instanceOf[ServicesConfig]
+      ) {
         override lazy val url = mockServerUrl
       }
 
@@ -150,7 +168,11 @@ class FileUploadSpec extends WireMockSpec with SimpleWsHttpTestApplication with 
 
     "ignore errors when deleting envelopes from FUaaS" in {
       val envelopeId = UUID.randomUUID().toString
-      val connector = new FileUploadConnector(fakeApplication.injector.instanceOf[SimpleWSHttp], metrics, unbreakableCircuit) {
+      val connector = new FileUploadConnector(
+        fakeApplication.injector.instanceOf[SimpleWSHttp],
+        metrics,
+        fakeApplication.injector.instanceOf[ServicesConfig]
+      ) {
         override lazy val url = mockServerUrl
       }
 
@@ -318,9 +340,11 @@ class FileUploadSpec extends WireMockSpec with SimpleWsHttpTestApplication with 
     }
   }
 
-  object mockFileUploadConnector extends FileUploadConnector(http, metrics, unbreakableCircuit) {
+  object mockFileUploadConnector extends FileUploadConnector(
+    http,
+    metrics,
+    fakeApplication.injector.instanceOf[ServicesConfig]
+  ) {
     override lazy val url = ""
   }
-
-  lazy val unbreakableCircuit = CircuitBreakerConfig("file-upload", Int.MaxValue, 1, 1)
 }

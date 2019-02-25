@@ -18,22 +18,22 @@ package controllers
 
 import java.time.{Instant, LocalDate}
 
+import auditing.AuditingService
 import connectors._
 import connectors.auth._
-import models.{CapacityDeclaration, _}
 import models.searchApi.AgentAuthResultBE
+import models.{CapacityDeclaration, _}
 import org.mockito.ArgumentMatchers.{eq => mockEq, _}
 import org.mockito.Mockito._
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
-import play.api.mvc.AnyContent
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, Upstream5xxResponse}
-import uk.gov.hmrc.play.config.inject.ServicesConfig
+import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.ws.WSHttp
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
@@ -187,6 +187,6 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
 
   lazy val mockBrAuth = mock[BusinessRatesAuthConnector]
 
-  lazy val testController = new PropertyLinkingController(mockAuthConnector, mockPropertyLinkConnector, mockGroupAccountConnector, mockPropertyRepresentationConnector)
+  lazy val testController = new PropertyLinkingController(mockAuthConnector, mockPropertyLinkConnector, mockGroupAccountConnector, mock[AuditingService], mockPropertyRepresentationConnector)
 
 }

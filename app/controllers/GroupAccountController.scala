@@ -28,6 +28,7 @@ import play.api.mvc.{Action, AnyContent}
 
 class GroupAccountController @Inject() (
                                          val authConnector: DefaultAuthConnector,
+                                         auditingService: AuditingService,
                                          groups: GroupAccountConnector, brAuth: BusinessRatesAuthConnector)
   extends PropertyLinkingBaseController with Authenticated {
 
@@ -60,7 +61,7 @@ class GroupAccountController @Inject() (
   def create() = authenticated(parse.json) { implicit request =>
     withJsonBody[GroupAccountSubmission] { acc =>
       groups.create(acc) map { x =>
-        AuditingService.sendEvent("Created", GroupAccount(x, acc))
+        auditingService.sendEvent("Created", GroupAccount(x, acc))
         Created(Json.toJson(x)) }
     }
   }

@@ -16,19 +16,21 @@
 
 package connectors
 
-import javax.inject.Inject
-
 import config.WSHttp
+import javax.inject.Inject
 import models._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.Json
-import uk.gov.hmrc.http.{HttpResponse, NotFoundException}
+import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.play.HeaderCarrierConverter
-import uk.gov.hmrc.play.config.inject.ServicesConfig
+import uk.gov.hmrc.play.config.ServicesConfig
 
 import scala.concurrent.Future
 
-class CheckCaseConnector @Inject()(config: ServicesConfig){
+class CheckCaseConnector @Inject()(
+                                    wSHttp: WSHttp,
+                                    config: ServicesConfig
+                                  ){
   lazy val baseUrl: String = config.baseUrl("external-business-rates-data-platform")
 
 
@@ -38,9 +40,9 @@ class CheckCaseConnector @Inject()(config: ServicesConfig){
       .withExtraHeaders("GG-GROUP-ID" -> request.groupId)
 
     party match {
-      case "agent"  =>  WSHttp.GET[Option[AgentCheckCasesResponse]](s"$baseUrl/external-case-management-api/my-organisation/clients/all/property-links/$submissionId/check-cases?start=1&size=100") recover { case _ => None }
-      case "client" =>  WSHttp.GET[Option[OwnerCheckCasesResponse]](s"$baseUrl/external-case-management-api/my-organisation/property-links/$submissionId/check-cases?start=1&size=100") recover { case _ => None }
-      case _       =>  Future.successful(None)
+      case "agent"  =>  wSHttp.GET[Option[AgentCheckCasesResponse]](s"$baseUrl/external-case-management-api/my-organisation/clients/all/property-links/$submissionId/check-cases?start=1&size=100") recover { case _ => None }
+      case "client" =>  wSHttp.GET[Option[OwnerCheckCasesResponse]](s"$baseUrl/external-case-management-api/my-organisation/property-links/$submissionId/check-cases?start=1&size=100") recover { case _ => None }
+      case _        =>  Future.successful(None)
 
     }
 
@@ -55,13 +57,13 @@ class CheckCaseConnector @Inject()(config: ServicesConfig){
       .withExtraHeaders("GG-GROUP-ID" -> request.groupId)
 
     party match {
-      case "client"  =>  WSHttp.GET[HttpResponse](s"$baseUrl/external-case-management-api/my-organisation/property-links/$propertyLinkSubmissionId/check-cases/$checkCaseRef/canChallenge?valuationId=$valuationId").map{ resp =>
+      case "client"   =>  wSHttp.GET[HttpResponse](s"$baseUrl/external-case-management-api/my-organisation/property-links/$propertyLinkSubmissionId/check-cases/$checkCaseRef/canChallenge?valuationId=$valuationId").map{ resp =>
         handleCanChallengeResponse(resp)
       } recover { case _ => None }
-      case "agent" =>  WSHttp.GET[HttpResponse](s"$baseUrl/external-case-management-api/my-organisation/clients/all/property-links/$propertyLinkSubmissionId/check-cases/$checkCaseRef/canChallenge?valuationId=$valuationId").map{ resp =>
+      case "agent"    =>  wSHttp.GET[HttpResponse](s"$baseUrl/external-case-management-api/my-organisation/clients/all/property-links/$propertyLinkSubmissionId/check-cases/$checkCaseRef/canChallenge?valuationId=$valuationId").map{ resp =>
         handleCanChallengeResponse(resp)
       } recover { case _ => None }
-      case _       =>  throw new IllegalArgumentException(s"Unknown party $party")
+      case _          =>  throw new IllegalArgumentException(s"Unknown party $party")
 
     }
   }

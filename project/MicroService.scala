@@ -59,6 +59,7 @@ trait MicroService {
       evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
       routesGenerator := StaticRoutesGenerator,
       compileScalastyle := org.scalastyle.sbt.ScalastylePlugin.scalastyle.in(Compile).toTask("").value,
+      testGrouping in Test := TestPhases.oneForkedJvmPerTest((definedTests in Test).value),
       test in Test <<= (test in Test) dependsOn compileScalastyle
     )
     .configs(IntegrationTest)

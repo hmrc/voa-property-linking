@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-package connectors.auth
+package filters
 
-import uk.gov.hmrc.play.config.AppName
-import uk.gov.hmrc.http.hooks.HttpHook
-import uk.gov.hmrc.http.hooks.HttpHooks
+import com.kenshoo.play.metrics.MetricsFilter
+import javax.inject.{Inject, Singleton}
+import play.api.http.DefaultHttpFilters
+import uk.gov.hmrc.play.bootstrap.filters.{CacheControlFilter, LoggingFilter, MDCFilter}
 
-import uk.gov.hmrc.play.http.ws._
-import uk.gov.hmrc.http._
-
-object WSHttp extends HttpGet with WSGet with HttpPut with WSPut with HttpPost with WSPost with HttpDelete with WSDelete with HttpPatch with WSPatch with AppName with HttpHooks{
-  override val hooks: Seq[HttpHook] = NoneRequired
-}
+@Singleton
+class MicroserviceFilters @Inject()(
+      metricsFilter: MetricsFilter,
+      loggingFilter: LoggingFilter,
+      cacheFilter: CacheControlFilter,
+      mdcFilter: MDCFilter
+) extends DefaultHttpFilters(metricsFilter, loggingFilter, cacheFilter, mdcFilter)

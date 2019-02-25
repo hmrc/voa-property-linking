@@ -23,8 +23,8 @@ import play.api.libs.json.Json
 case class GroupAccountSubmission(id: String, companyName: String, addressId: Long, email: String, phone: String,
                                   isAgent: Boolean, individualAccountSubmission: IndividualAccountSubmissionForOrganisation) {
 
-  def toApiAccount(implicit clock: Clock): APIGroupAccountSubmission = {
-    APIGroupAccountSubmission(id, companyName, addressId, email, phone, isAgent, None, Instant.now(clock),
+  def toApiAccount: APIGroupAccountSubmission = {
+    APIGroupAccountSubmission(id, companyName, addressId, email, phone, isAgent, None, Instant.now(),
       APIIndividualAccountForOrganisation(
         individualAccountSubmission.trustId,
         individualAccountSubmission.details.firstName,
@@ -34,7 +34,7 @@ case class GroupAccountSubmission(id: String, companyName: String, addressId: Lo
         individualAccountSubmission.details.phone2,
         individualAccountSubmission.details.email,
         individualAccountSubmission.externalId,
-        Instant.now(clock))
+        Instant.now())
     )
   }
 }

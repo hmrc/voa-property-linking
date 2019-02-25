@@ -18,12 +18,14 @@ package controllers
 
 import java.time.Instant
 
+import auditing.AuditingService
 import connectors.auth.DefaultAuthConnector
 import connectors.{BusinessRatesAuthConnector, GroupAccountConnector}
 import models._
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.play.OneAppPerSuite
 import play.api.libs.json.Json
 import play.api.mvc.AnyContent
 import play.api.test.FakeRequest
@@ -158,7 +160,7 @@ class GroupAccountControllerSpec extends ControllerSpec with MockitoSugar with W
   }
 
 
-  lazy val testController = new GroupAccountController(mockAuthConnector, mockGroupAccountConnector, mockBrAuth)
+  lazy val testController = new GroupAccountController(mockAuthConnector, mock[AuditingService], mockGroupAccountConnector, mockBrAuth)
 
 }
 

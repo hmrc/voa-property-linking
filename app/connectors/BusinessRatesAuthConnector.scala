@@ -16,15 +16,17 @@
 
 package connectors
 
-import javax.inject.Inject
-
 import infrastructure.SimpleWSHttp
-import uk.gov.hmrc.play.config.inject.ServicesConfig
+import javax.inject.Inject
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.config.ServicesConfig
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class BusinessRatesAuthConnector @Inject()(http: SimpleWSHttp, servicesConfig: ServicesConfig) {
+class BusinessRatesAuthConnector @Inject()(
+                                            http: SimpleWSHttp,
+                                            servicesConfig: ServicesConfig
+                                          ) {
 
   lazy val baseUrl = servicesConfig.baseUrl("business-rates-auth")
   lazy val url = baseUrl + "/business-rates-authorisation"

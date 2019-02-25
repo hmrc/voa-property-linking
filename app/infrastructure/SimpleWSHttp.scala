@@ -16,13 +16,20 @@
 
 package infrastructure
 
+import com.typesafe.config.Config
+import javax.inject.Inject
+import play.api.Configuration
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.config.AppName
 import uk.gov.hmrc.http.hooks.HttpHook
 import uk.gov.hmrc.http.hooks.HttpHooks
 import uk.gov.hmrc.play.http.ws._
 
-class SimpleWSHttp extends HttpGet with WSGet with HttpPut with WSPut with HttpPost with WSPost with HttpDelete with WSDelete with HttpPatch with WSPatch with WSHttp with AppName with HttpHooks{
+class SimpleWSHttp @Inject()(
+                              val appNameConfiguration: Configuration
+                            ) extends HttpGet with WSGet with HttpPut with WSPut with HttpPost with WSPost with HttpDelete with WSDelete with HttpPatch with WSPatch with WSHttp with AppName with HttpHooks{
   override val hooks: Seq[HttpHook] = NoneRequired
+
+  override protected def configuration: Option[Config] = Some(appNameConfiguration.underlying)
 }
 

@@ -41,11 +41,15 @@ trait EvidenceTransfer {
   def uploadFile(fileName: String, content: Source[ByteString, _], metadata: EnvelopeMetadata)(implicit hc: HeaderCarrier): Future[Unit]
 }
 
-class EvidenceConnector @Inject()(val ws: SimpleWSHttp, override val metrics: Metrics) extends EvidenceTransfer with ServicesConfig with HandleErrors with AppName with MetricsLogger {
-  lazy val url: String = baseUrl("external-business-rates-data-platform")
-  lazy val uploadEndpoint = getString("endpoints.customerEvidence")
+class EvidenceConnector @Inject()(
+                                   val ws: SimpleWSHttp,
+                                   override val metrics: Metrics,
+                                   config: ServicesConfig
+                                 ) extends EvidenceTransfer with HandleErrors with MetricsLogger {
+  lazy val url: String = config.baseUrl("external-business-rates-data-platform")
+  lazy val uploadEndpoint = config.getString("endpoints.customerEvidence")
   lazy val uploadUrl: String = s"$url$uploadEndpoint"
-  lazy val userAgent: (String, String) = USER_AGENT -> appName
+  lazy val userAgent: (String, String) = USER_AGENT -> config.getString("appName")
   lazy val headers = Seq(userAgent)
 
   override def uploadFile(fileName: String, content: Source[ByteString, _], metadata: EnvelopeMetadata)(implicit hc: HeaderCarrier): Future[Unit] = {

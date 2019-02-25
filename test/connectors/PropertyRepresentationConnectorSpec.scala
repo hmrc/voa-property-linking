@@ -23,6 +23,7 @@ import helpers.SimpleWsHttpTestApplication
 import models._
 import play.api.http.ContentTypes
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.ws.WSHttp
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -32,7 +33,8 @@ class PropertyRepresentationConnectorSpec extends ContentTypes
 
   implicit val hc = HeaderCarrier()
   val http = fakeApplication.injector.instanceOf[WSHttp]
-  val connector = new PropertyRepresentationConnector(http) {
+  val config = fakeApplication.injector.instanceOf[ServicesConfig]
+  val connector = new PropertyRepresentationConnector(http, config) {
     override lazy val baseUrl: String = mockServerUrl
   }
 

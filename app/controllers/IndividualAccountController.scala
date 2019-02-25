@@ -28,10 +28,12 @@ import play.api.libs.json.Json
 import play.api.mvc.Action
 import play.api.mvc.Results.EmptyContent
 
-class IndividualAccountController @Inject()(val authConnector: DefaultAuthConnector,
+class IndividualAccountController @Inject()(
+                                             val authConnector: DefaultAuthConnector,
                                             individuals: IndividualAccountConnector,
-                                            brAuth: BusinessRatesAuthConnector)
-  extends PropertyLinkingBaseController with Authenticated {
+                                             auditingService: AuditingService,
+                                            brAuth: BusinessRatesAuthConnector
+                                           ) extends PropertyLinkingBaseController with Authenticated {
 
   case class IndividualAccount(id: IndividualAccountId, submission: IndividualAccountSubmission)
 
@@ -42,7 +44,7 @@ class IndividualAccountController @Inject()(val authConnector: DefaultAuthConnec
   def create() = authenticated(parse.json) { implicit request =>
     withJsonBody[IndividualAccountSubmission] { acc =>
       individuals.create(acc) map { x =>
-        AuditingService.sendEvent("Created", IndividualAccount(x, acc))
+        auditingService.sendEvent("Created", IndividualAccount(x, acc))
         Created(Json.toJson(x))
       }
     }

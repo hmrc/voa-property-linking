@@ -26,11 +26,12 @@ import infrastructure.VOABackendWSHttp
 import org.mockito.ArgumentMatchers.{eq => matches}
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mock.MockitoSugar
-import org.scalatest.{FlatSpec, MustMatchers}
+import org.scalatest.mockito.MockitoSugar
+import org.scalatest.{FlatSpec, MustMatchers, Outcome}
+import play.api.Configuration
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.config.inject.ServicesConfig
+import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.test.WithFakeApplication
 
 import scala.concurrent.Await
@@ -73,11 +74,13 @@ object TestCreateAccountService extends MockitoSugar {
   val ggStubUrl = "http://localhost:8082"
   val dpStubUrl = "http://localhost:9536"
 
-  val http = new VOABackendWSHttp(new DisabledMetrics())
+  val configuration = mock[Configuration]
+
+  val http = new VOABackendWSHttp(new DisabledMetrics(), configuration)
   val config = mock[ServicesConfig]
   when(config.baseUrl(matches("external-business-rates-data-platform"))).thenReturn(dpStubUrl)
   val addresses = new AddressConnector(http, config)
-  val individuals = new IndividualAccountConnector(addresses, http)
+  val individuals = new IndividualAccountConnector(addresses, http, config)
   val groups = new GroupAccountConnector(http, config)
 
   def createUser(

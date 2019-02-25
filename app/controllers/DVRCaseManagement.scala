@@ -41,7 +41,7 @@ class DVRCaseManagement @Inject()(val authConnector: DefaultAuthConnector,
   def requestDetailedValuation: Action[JsValue] = authenticated(parse.json) { implicit request =>
     withJsonBody[DetailedValuationRequest] { dvr => {
       Logger.info(s"detailed valuation request submitted: ${dvr.submissionId}")
-      dvrRecordRepository.create(dvr.organisationId, dvr.assessmentRef).flatMap(_ =>
+      dvrRecordRepository.create(dvr).flatMap(_ =>
         dvrCaseManagement.requestDetailedValuation(dvr) map { _ => Ok })
     }
     }
@@ -50,7 +50,7 @@ class DVRCaseManagement @Inject()(val authConnector: DefaultAuthConnector,
   def requestDetailedValuationV2: Action[JsValue] = authenticated(parse.json) { implicit request =>
     withJsonBody[DetailedValuationRequest] { dvr => {
       Logger.info(s"detailed valuation request submitted: ${dvr.submissionId}")
-      dvrRecordRepository.create(dvr.organisationId, dvr.assessmentRef).flatMap(_ =>
+      dvrRecordRepository.create(dvr).flatMap(_ =>
         dvrCaseManagementV2.requestDetailedValuation(dvr) map { _ => Ok })
     }
     }

@@ -18,11 +18,13 @@ package infrastructure
 
 import com.codahale.metrics.{Counter, Meter, MetricRegistry, Timer}
 import com.kenshoo.play.metrics.Metrics
+import com.typesafe.config.Config
 import connectors.WireMockSpec
 import helpers.SimpleWsHttpTestApplication
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito.when
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
+import play.api.Configuration
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
 
@@ -30,6 +32,8 @@ class VOABackendWSHttpSpec extends UnitSpec with WireMockSpec with SimpleWsHttpT
 
   val metricsMock = mock[Metrics]
   val metricRegistry = mock[MetricRegistry]
+
+  val configuration = fakeApplication.injector.instanceOf[Configuration]
 
   when(metricsMock.defaultRegistry).thenReturn(metricRegistry)
 
@@ -39,7 +43,7 @@ class VOABackendWSHttpSpec extends UnitSpec with WireMockSpec with SimpleWsHttpT
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  val wsHttp = new VOABackendWSHttp(metricsMock)
+  val wsHttp = new VOABackendWSHttp(metricsMock, configuration)
 
   "when extracting the API name to use for the request metrics" should {
     "the API name should be extracted from a simple URL" in {

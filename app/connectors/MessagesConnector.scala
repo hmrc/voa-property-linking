@@ -18,17 +18,20 @@ package connectors
 
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import javax.inject.{Inject, Named}
 
+import javax.inject.{Inject, Named}
 import models.messages.{MessageCount, MessageSearchParams, MessageSearchResults}
 import play.api.libs.json.{JsNull, JsValue}
-import uk.gov.hmrc.play.config.inject.ServicesConfig
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.ws.WSHttp
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class MessagesConnector @Inject()(@Named("VoaBackendWsHttp") http: WSHttp, conf: ServicesConfig)(implicit ec: ExecutionContext) {
+class MessagesConnector @Inject()(
+                                   @Named("VoaBackendWsHttp") http: WSHttp,
+                                   conf: ServicesConfig
+                                 )(implicit ec: ExecutionContext) {
 
   lazy val baseUrl: String = conf.baseUrl("external-business-rates-data-platform")
   lazy val url = baseUrl + "/message-search-api"

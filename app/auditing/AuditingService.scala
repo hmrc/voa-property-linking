@@ -16,7 +16,7 @@
 
 package auditing
 
-import config.MicroserviceAuditConnector
+import javax.inject.Inject
 import play.api.libs.json.{Json, Writes}
 import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
@@ -25,13 +25,9 @@ import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
 
 import scala.concurrent.ExecutionContext
 
-object AuditingService extends AuditingService {
-  val auditConnector = MicroserviceAuditConnector
-}
-
-trait AuditingService {
-
-  def auditConnector: AuditConnector
+class AuditingService @Inject()(
+                               auditConnector: AuditConnector
+                               ) {
 
   def sendEvent[A: Writes](auditType: String, obj: A)(implicit ec: ExecutionContext, hc: HeaderCarrier, request: Request[_]): Unit = {
     val event = eventFor(auditType, obj)
