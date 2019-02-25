@@ -35,12 +35,13 @@ import play.api.http.HeaderNames._
 class ExternalValuationManagementApi @Inject()(
                                       wsClient: WSClient,
                                       @Named("VoaBackendWsHttp") ws: WSHttp,
-                                      @Named("VoaAuthedBackendHttp") http: VoaHttpClient
-                                    ) extends ServicesConfig with HttpErrorFunctions {
+                                      @Named("VoaAuthedBackendHttp") http: VoaHttpClient,
+                                      config: ServicesConfig
+                                    ) extends HttpErrorFunctions {
 
-  lazy val appName = getConfString("appName", "voa-property-linking")
+  lazy val appName = config.getConfString("appName", "voa-property-linking")
 
-  lazy val baseURL = baseUrl("external-business-rates-data-platform")
+  lazy val baseURL = config.baseUrl("external-business-rates-data-platform")
   lazy val url = baseURL + "/external-valuation-management-api"
 
   def getDvrDocuments(valuationId: Long, uarn: Long, propertyLinkId: String)(implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]): Future[Option[DvrDocumentFiles]] =

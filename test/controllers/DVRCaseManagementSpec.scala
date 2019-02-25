@@ -26,7 +26,7 @@ import models.dvr.documents.{Document, DocumentSummary, DvrDocumentFiles}
 import models.dvr.{DetailedValuationRequest, StreamedDocument}
 import org.mockito.ArgumentMatchers.{eq => matching, _}
 import org.mockito.Mockito._
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -44,6 +44,7 @@ class DVRCaseManagementSpec extends ControllerSpec with MockitoSugar {
     personId = 2l,
     submissionId = "EMAIL123",
     assessmentRef = 3l,
+    agents = None,
     billingAuthorityReferenceNumber = "BAREF"
   )
 
@@ -53,7 +54,7 @@ class DVRCaseManagementSpec extends ControllerSpec with MockitoSugar {
       val res = testController.requestDetailedValuation()(FakeRequest().withBody(dvrJson))
 
       await(res)
-      verify(mockRepo, times(1)).create(matching(1l), matching(3l))
+      verify(mockRepo, times(1)).create(matching(testDvr))
       verify(mockDvrConnector, times(1)).requestDetailedValuation(matching(testDvr))(any[HeaderCarrier])
       status(res) mustBe OK
     }
@@ -65,7 +66,7 @@ class DVRCaseManagementSpec extends ControllerSpec with MockitoSugar {
       val res = testController.requestDetailedValuationV2()(FakeRequest().withBody(dvrJson))
 
       await(res)
-      verify(mockRepo, times(2)).create(matching(1l), matching(3l))
+      verify(mockRepo, times(2)).create(matching(testDvr))
       verify(mockCcaCaseManagementConnector, times(1)).requestDetailedValuation(matching(testDvr))(any[HeaderCarrier])
       status(res) mustBe OK
     }
@@ -160,7 +161,7 @@ class DVRCaseManagementSpec extends ControllerSpec with MockitoSugar {
 
   lazy val mockRepo = {
     val m = mock[DVRRecordRepository]
-    when(m.create(anyLong(), anyLong())) thenReturn Future.successful(())
+    when(m.create(any[DetailedValuationRequest])) thenReturn Future.successful(())
     m
   }
 

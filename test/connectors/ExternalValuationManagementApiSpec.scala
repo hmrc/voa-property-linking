@@ -28,6 +28,7 @@ import play.api.http.ContentTypes
 import play.api.libs.ws.WSClient
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.ws.WSHttp
 
 
@@ -40,8 +41,9 @@ class ExternalValuationManagementApiSpec extends ContentTypes
 
   val wsClient = fakeApplication.injector.instanceOf[WSClient]
   val voaClient = fakeApplication.injector.instanceOf[VoaHttpClient]
+  val config = fakeApplication.injector.instanceOf[ServicesConfig]
   val http = fakeApplication.injector.instanceOf[WSHttp]
-  val connector = new ExternalValuationManagementApi(wsClient, http, voaClient) {
+  val connector = new ExternalValuationManagementApi(wsClient, http, voaClient, config) {
     override lazy val baseURL: String = mockServerUrl
   }
 

@@ -31,15 +31,15 @@ import org.mockito.Mockito.{times, when}
 import org.mockito.{ArgumentMatchers, Mockito}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.Eventually.eventually
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import play.api.libs.ws.{WSRequest, WSResponse}
 import play.api.mvc.MultipartFormData
 import uk.gov.hmrc.http.{HeaderCarrier, Upstream4xxResponse, Upstream5xxResponse}
-import uk.gov.hmrc.play.microservice.filters.MicroserviceFilterSupport
+import uk.gov.hmrc.play.config.ServicesConfig
 
 import scala.concurrent.Future
 
-class EvidenceConnectorSpec extends WireMockSpec with SimpleWsHttpTestApplication with MicroserviceFilterSupport
+class EvidenceConnectorSpec extends WireMockSpec with SimpleWsHttpTestApplication
   with BeforeAndAfterEach with MockitoSugar with AnswerSugar {
 
   val metrics = mock[Metrics]
@@ -62,7 +62,7 @@ class EvidenceConnectorSpec extends WireMockSpec with SimpleWsHttpTestApplicatio
   "Evidence connector" should {
     "be able to upload a file to modernised customer evidence endpoint" in {
       val metrics = mock[Metrics]
-      val connector = new EvidenceConnector(fakeApplication.injector.instanceOf[SimpleWSHttp], metrics) {
+      val connector = new EvidenceConnector(fakeApplication.injector.instanceOf[SimpleWSHttp], metrics, fakeApplication.injector.instanceOf[ServicesConfig]) {
         override lazy val url = mockServerUrl
         override lazy val uploadEndpoint = "/case-documents-app-management-api/external/document"
       }
@@ -82,7 +82,7 @@ class EvidenceConnectorSpec extends WireMockSpec with SimpleWsHttpTestApplicatio
 
     "prepend the submissionId and remove all non-alphanumeric characters apart from a space, hyphen or full stop in the filename" in {
       val metrics = mock[Metrics]
-      val connector = new EvidenceConnector(fakeApplication.injector.instanceOf[SimpleWSHttp], metrics) {
+      val connector = new EvidenceConnector(fakeApplication.injector.instanceOf[SimpleWSHttp], metrics, fakeApplication.injector.instanceOf[ServicesConfig]) {
         override lazy val url = mockServerUrl
       }
 
@@ -112,7 +112,7 @@ class EvidenceConnectorSpec extends WireMockSpec with SimpleWsHttpTestApplicatio
       implicit val fakeHc = HeaderCarrier()
 
       val metadata = EnvelopeMetadata("aSubmissionId", 12345)
-      val connector = new EvidenceConnector(ws, metrics)
+      val connector = new EvidenceConnector(ws, metrics, fakeApplication.injector.instanceOf[ServicesConfig])
 
       "map success status to modernized.upload.200" in {
         when(registry.meter(ArgumentMatchers.eq("modernized.upload.200"))).thenReturn(meter)

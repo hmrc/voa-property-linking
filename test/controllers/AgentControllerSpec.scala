@@ -17,24 +17,25 @@
 package controllers
 
 import connectors.auth.DefaultAuthConnector
-import models._
 import models.searchApi.{OwnerAgent, OwnerAgents}
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
-import org.mockito.Mockito.{reset, when, inOrder => ordered}
-import org.scalatest.mock.MockitoSugar
+import org.mockito.Mockito.{reset, when}
+import org.scalatest.Outcome
+import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.play.OneAppPerSuite
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, _}
+import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads}
-import uk.gov.hmrc.play.config.inject.ServicesConfig
+import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.ws.WSHttp
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.{ExecutionContext, Future}
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import uk.gov.hmrc.auth.core.retrieve.~
 
 class AgentControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
 

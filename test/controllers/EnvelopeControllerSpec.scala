@@ -18,29 +18,20 @@ package controllers
 
 import java.util.UUID
 
-import com.typesafe.config.Config
 import connectors.auth._
 import connectors.fileUpload.{EnvelopeMetadata, FileUploadConnector}
-import models.{EnvelopeStatus, Open}
-import org.scalatest.mock.MockitoSugar
-import play.api.libs.json.{Json, Writes}
-import play.api.test.FakeRequest
-import repositories.EnvelopeIdRepo
+import models.EnvelopeStatus
 import org.mockito.ArgumentMatchers.{eq => matching, _}
 import org.mockito.Mockito._
-import play.api.mvc.AnyContent
-import uk.gov.hmrc.http._
+import org.scalatest.mockito.MockitoSugar
+import play.api.libs.json.Json
+import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.auth.core.PlayAuthConnector
+import repositories.EnvelopeIdRepo
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.circuitbreaker.UnhealthyServiceException
-import org.scalatest.Matchers._
-import org.scalatest.WordSpec
-import org.scalatest.concurrent.ScalaFutures
-import play.api.libs.json.{JsValue, Json, Writes}
-import uk.gov.hmrc.auth.core.retrieve.{CompositeRetrieval, EmptyRetrieval, SimpleRetrieval, ~}
 import uk.gov.hmrc.http._
-import uk.gov.hmrc.http.hooks.HttpHook
+import uk.gov.hmrc.play.config.ServicesConfig
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -106,7 +97,12 @@ class EnvelopeControllerSpec extends ControllerSpec with MockitoSugar {
 
   lazy val callbackUrl = routes.FileTransferController.handleCallback().absoluteURL()(FakeRequest().withHeaders(HOST -> "localhost:9524"))
 
-  lazy val testController = new EnvelopeController(mockAuthConnector, mockRepo, mockFileUpload) {
+  lazy val testController = new EnvelopeController(
+    mockAuthConnector,
+    mockRepo,
+    mockFileUpload,
+    mockServicesConfig
+  ) {
     override lazy val mdtpPlatformSsl = false
   }
 
@@ -116,6 +112,11 @@ class EnvelopeControllerSpec extends ControllerSpec with MockitoSugar {
     m
   }
 
+  lazy val mockServicesConfig = {
+    val m = mock[ServicesConfig]
+    when(m.getBoolean(any[String])).thenReturn(false)
+    m
+  }
   lazy val mockFileUpload = {
     val m = mock[FileUploadConnector]
     when(m.createEnvelope(any[EnvelopeMetadata], matching(callbackUrl))(any[HeaderCarrier])) thenReturn Future.successful(Some(UUID.randomUUID().toString))

@@ -27,11 +27,15 @@ import repositories.EnvelopeIdRepo
 import uk.gov.hmrc.circuitbreaker.UnhealthyServiceException
 import uk.gov.hmrc.play.config.ServicesConfig
 
-class EnvelopeController @Inject()(val authConnector: DefaultAuthConnector,
-                                   val repo: EnvelopeIdRepo, fileUploadConnector: FileUploadConnector)
-  extends PropertyLinkingBaseController with Authenticated with ServicesConfig {
+class EnvelopeController @Inject()(
+                                    val authConnector: DefaultAuthConnector,
+                                    val repo: EnvelopeIdRepo,
+                                    fileUploadConnector: FileUploadConnector,
+                                    config: ServicesConfig
+                                  )
+  extends PropertyLinkingBaseController with Authenticated {
 
-  lazy val mdtpPlatformSsl = getBoolean("mdtp.platformSsl")
+  lazy val mdtpPlatformSsl = config.getBoolean("mdtp.platformSsl")
 
   def create = authenticated(parse.json) { implicit request =>
     withJsonBody[EnvelopeMetadata] { metadata =>

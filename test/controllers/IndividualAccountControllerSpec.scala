@@ -16,18 +16,20 @@
 
 package controllers
 
+import auditing.AuditingService
 import connectors.auth.DefaultAuthConnector
 import connectors.{BusinessRatesAuthConnector, IndividualAccountConnector}
 import models.{IndividualAccount, IndividualAccountId, IndividualAccountSubmission, IndividualDetails}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.AnyContent
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.retrieve.{OptionalRetrieval, ~}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.test.WithFakeApplication
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -137,7 +139,7 @@ class IndividualAccountControllerSpec extends ControllerSpec with MockitoSugar w
     m
   }
 
-  lazy val testController = new IndividualAccountController(mockAuthConnector, mockIndividualAccountConnector, mockBrAuth)
+  lazy val testController = new IndividualAccountController(mockAuthConnector, mockIndividualAccountConnector, mock[AuditingService], mockBrAuth)
 
 }
 

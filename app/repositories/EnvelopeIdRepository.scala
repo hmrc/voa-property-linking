@@ -16,23 +16,21 @@
 
 package repositories
 
-import javax.inject.Inject
-
 import com.google.inject.name.Named
 import com.google.inject.{ImplementedBy, Singleton}
+import javax.inject.Inject
 import models._
 import play.api.Logger
 import play.api.libs.json._
 import reactivemongo.api.DB
 import reactivemongo.api.indexes.{Index, IndexType}
+import reactivemongo.bson.{BSONDateTime, BSONDocument}
 import reactivemongo.core.errors.DatabaseException
 import uk.gov.hmrc.mongo.ReactiveRepository
-import reactivemongo.json.ImplicitBSONHandlers._
-import reactivemongo.bson.{BSONDateTime, BSONDocument}
-
-import scala.concurrent.duration._
+import reactivemongo.play.json.ImplicitBSONHandlers._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.concurrent.duration._
 import scala.language.postfixOps
 
 @Singleton
@@ -83,7 +81,6 @@ class EnvelopeIdRepository @Inject()(db: DB, @Named("envelopeCollectionName") va
 case class EnvelopeId(envelopeId: String, _id: String, status: Option[EnvelopeStatus], createdAt: Option[BSONDateTime])
 
 object EnvelopeId {
-  import reactivemongo.json.BSONFormats.BSONDateTimeFormat
 
   val mongoFormat = Json.format[EnvelopeId]
 }

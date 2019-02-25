@@ -17,10 +17,12 @@
 package repositories
 
 
+import models.dvr.DetailedValuationRequest
 import org.scalatest.BeforeAndAfterEach
 import play.api.inject.guice.GuiceApplicationBuilder
 import reactivemongo.api.indexes.Index
 import uk.gov.hmrc.mongo.MongoSpecSupport
+import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -30,7 +32,9 @@ class DVRRepositorySpec
     with BeforeAndAfterEach
     with MongoSpecSupport
 {
-  val repository = new DVRRepository(mongo(), "test") {
+  val app = appBuilder.build()
+
+  val repository = new DVRRepository(mongo(), "test", app.injector.instanceOf[ServicesConfig]) {
     override def indexes: Seq[Index] = Seq.empty
   }
 
@@ -56,13 +60,30 @@ class DVRRepositorySpec
 
   "repository" should {
     "create a DVRRecord in the repository with the provided organisationId and assessmentRef" in {
-      await(repository.create(organisationId, assessmentRef)) shouldBe ()
+      await(repository.create(DetailedValuationRequest(
+        1L,
+        1L,
+        1L,
+        "DVR-1",
+        1L,
+        None,
+        ""
+      ))) shouldBe ()
     }
   }
 
   "repository" should {
     "return true if a record with the organisationId and assessmentRef exists" in {
-      await(repository.create(organisationId, assessmentRef))
+      await(repository.create(DetailedValuationRequest(
+        1L,
+        organisationId,
+        1L,
+        "DVR-1",
+        assessmentRef,
+        None,
+        ""
+      )))
+
       await(repository.exists(organisationId, assessmentRef)) shouldBe true
     }
   }

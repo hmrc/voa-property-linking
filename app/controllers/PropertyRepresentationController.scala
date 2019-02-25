@@ -26,9 +26,11 @@ import models._
 import play.api.libs.json.Json
 import play.api.mvc.Action
 
-class PropertyRepresentationController @Inject() (val authConnector: DefaultAuthConnector,
-                                                  representations: PropertyRepresentationConnector)
-  extends PropertyLinkingBaseController with Authenticated {
+class PropertyRepresentationController @Inject() (
+                                                   val authConnector: DefaultAuthConnector,
+                                                   representations: PropertyRepresentationConnector,
+                                                   auditingService: AuditingService
+                                                 ) extends PropertyLinkingBaseController with Authenticated {
 
   def validateAgentCode(agentCode:Long, authorisationId: Long) = authenticated { implicit request =>
     representations.validateAgentCode(agentCode, authorisationId).map(
@@ -54,7 +56,7 @@ class PropertyRepresentationController @Inject() (val authConnector: DefaultAuth
   def response() = authenticated(parse.json) { implicit request =>
     withJsonBody[APIRepresentationResponse] { r =>
       representations.response(r) map { _ =>
-        AuditingService.sendEvent("agent representation response", r)
+        auditingService.sendEvent("agent representation response", r)
         Ok("") }
     }
   }

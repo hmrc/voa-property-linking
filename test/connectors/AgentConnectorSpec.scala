@@ -19,10 +19,10 @@ package connectors
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, get, stubFor, urlEqualTo}
 import helpers.SimpleWsHttpTestApplication
 import play.api.http.ContentTypes
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.config.inject.ServicesConfig
-import uk.gov.hmrc.play.http.ws.WSHttp
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.play.http.ws.WSHttp
 
 class AgentConnectorSpec extends ContentTypes
   with WireMockSpec with SimpleWsHttpTestApplication {

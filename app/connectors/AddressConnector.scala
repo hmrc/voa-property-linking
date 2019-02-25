@@ -17,16 +17,18 @@
 package connectors
 
 import javax.inject.{Inject, Named}
-
 import models.{APIAddressLookupResult, DetailedAddress, SimpleAddress}
 import play.api.libs.json.{JsDefined, JsNumber, JsValue}
-import uk.gov.hmrc.play.config.inject.ServicesConfig
 import uk.gov.hmrc.http._
+import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.ws.WSHttp
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class AddressConnector @Inject() (@Named("VoaBackendWsHttp") http: WSHttp, conf: ServicesConfig)(implicit ec: ExecutionContext) {
+class AddressConnector @Inject() (
+                                   @Named("VoaBackendWsHttp") http: WSHttp,
+                                   conf: ServicesConfig
+                                 )(implicit ec: ExecutionContext) {
 
   lazy val baseUrl: String = conf.baseUrl("external-business-rates-data-platform")
   lazy val url = baseUrl + "/address-management-api/address"

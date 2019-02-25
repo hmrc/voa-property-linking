@@ -19,8 +19,8 @@ private object AppDependencies {
     ws,
     "ai.x" %% "play-json-extensions" % "0.9.0",
     "uk.gov.hmrc" %% "auth-client" % "2.5.0",
-    "uk.gov.hmrc" %% "microservice-bootstrap" % "8.0.0",
-    "uk.gov.hmrc" %% "mongo-lock" % "4.1.0",
+    "uk.gov.hmrc" %% "bootstrap-play-25" % "4.3.0",
+    "uk.gov.hmrc" %% "mongo-lock" % "5.1.1",
     "uk.gov.hmrc" %% "domain" % "4.1.0",
     "org.typelevel" %% "cats-core" % "0.8.1",
     "com.google.inject.extensions" % "guice-multibindings" % "4.0",
@@ -35,7 +35,7 @@ private object AppDependencies {
   object Test {
     def apply() = new TestDependencies {
       override lazy val test = Seq(
-        "uk.gov.hmrc" %% "hmrctest" % "2.3.0" % scope,
+        "uk.gov.hmrc" %% "hmrctest" % "3.3.0" % scope,
         "uk.gov.hmrc" %% "reactivemongo-test" % "2.0.0" % "test",
         "org.scalatest" %% "scalatest" % "2.2.6" % scope,
         "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % scope,

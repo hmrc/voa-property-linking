@@ -24,6 +24,7 @@ case class DetailedValuationRequest(
                                      personId: Long,
                                      submissionId: String,
                                      assessmentRef: Long,
+                                     agents: Option[List[Long]],
                                      billingAuthorityReferenceNumber: String)
 
 object DetailedValuationRequest {

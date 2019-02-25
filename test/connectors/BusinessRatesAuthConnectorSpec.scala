@@ -22,7 +22,7 @@ import infrastructure.SimpleWSHttp
 import play.api.http.ContentTypes
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.config.inject.ServicesConfig
+import uk.gov.hmrc.play.config.ServicesConfig
 
 class BusinessRatesAuthConnectorSpec extends ContentTypes
   with WireMockSpec with SimpleWsHttpTestApplication {

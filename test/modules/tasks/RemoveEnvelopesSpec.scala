@@ -19,7 +19,7 @@ package modules.tasks
 import java.util.UUID
 
 import org.scalatest.BeforeAndAfterEach
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import play.api.Environment
 import reactivemongo.api.indexes.Index
 import repositories.EnvelopeIdRepository
@@ -33,7 +33,7 @@ class RemoveEnvelopesSpec extends UnitSpec
   with BeforeAndAfterEach
   with MongoSpecSupport
   with MockitoSugar
-  with WithFakeApplication{
+  with WithFakeApplication {
 
   val repository = new EnvelopeIdRepository(mongo(), s"${this.getClass.getSimpleName}") {
     override def indexes: Seq[Index] = Seq.empty

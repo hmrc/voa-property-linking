@@ -28,9 +28,11 @@ import uk.gov.hmrc.play.http.ws.WSHttp
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class PropertyRepresentationConnector @Inject()(@Named("VoaBackendWsHttp") http: WSHttp)(implicit ec: ExecutionContext)
-  extends ServicesConfig {
-  lazy val baseUrl: String = baseUrl("external-business-rates-data-platform")
+class PropertyRepresentationConnector @Inject()(
+                                                 @Named("VoaBackendWsHttp") http: WSHttp,
+                                                 config: ServicesConfig
+                                               )(implicit ec: ExecutionContext) {
+  lazy val baseUrl: String = config.baseUrl("external-business-rates-data-platform")
 
   def validateAgentCode(agentCode: Long, authorisationId: Long)(implicit hc: HeaderCarrier): Future[Either[Long, String]] = {
     val url = baseUrl + s"/authorisation-management-api/agent/validate_agent_code?agentCode=$agentCode&authorisationId=$authorisationId"

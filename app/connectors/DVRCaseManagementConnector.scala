@@ -30,9 +30,10 @@ import scala.concurrent.Future
 class DVRCaseManagementConnector @Inject()(
                                             wsClient: WSClient,
                                             @Named("VoaBackendWsHttp") ws: WSHttp,
-                                            @Named("VoaAuthedBackendHttp") http: VoaHttpClient
-                                          ) extends ServicesConfig with HttpErrorFunctions {
-  lazy val baseURL = baseUrl("external-business-rates-data-platform")
+                                            @Named("VoaAuthedBackendHttp") http: VoaHttpClient,
+                                            config: ServicesConfig
+                                          ) extends HttpErrorFunctions {
+  lazy val baseURL = config.baseUrl("external-business-rates-data-platform")
   lazy val url = baseURL + "/dvr-case-management-api"
 
   def requestDetailedValuation(request: DetailedValuationRequest)(implicit hc: HeaderCarrier): Future[Unit] = {

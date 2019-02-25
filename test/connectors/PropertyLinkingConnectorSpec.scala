@@ -22,8 +22,8 @@ import com.github.tomakehurst.wiremock.client.WireMock.{stubFor, _}
 import helpers.SimpleWsHttpTestApplication
 import models._
 import play.api.http.ContentTypes
-import uk.gov.hmrc.play.config.inject.ServicesConfig
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.ws.WSHttp
 
 import scala.concurrent.ExecutionContext.Implicits.global

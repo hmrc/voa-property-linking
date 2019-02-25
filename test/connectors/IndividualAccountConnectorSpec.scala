@@ -25,13 +25,15 @@ import play.api.http.ContentTypes
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.ws.WSHttp
 
 class IndividualAccountConnectorSpec extends ContentTypes with WireMockSpec with SimpleWsHttpTestApplication {
 
   implicit val hc = HeaderCarrier()
   val http = fakeApplication.injector.instanceOf[WSHttp]
-  val testConnector = new IndividualAccountConnector(fakeApplication.injector.instanceOf[AddressConnector], http) {
+  val config = fakeApplication.injector.instanceOf[ServicesConfig]
+  val testConnector = new IndividualAccountConnector(fakeApplication.injector.instanceOf[AddressConnector], http, config) {
     override lazy val baseUrl = mockServerUrl
   }
 

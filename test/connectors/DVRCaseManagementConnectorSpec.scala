@@ -23,6 +23,7 @@ import models.dvr.DetailedValuationRequest
 import play.api.http.ContentTypes
 import play.api.libs.ws.WSClient
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.ws.WSHttp
 
 class DVRCaseManagementConnectorSpec extends ContentTypes
@@ -34,8 +35,9 @@ class DVRCaseManagementConnectorSpec extends ContentTypes
 
   val wsClient = fakeApplication.injector.instanceOf[WSClient]
   val voaClient = fakeApplication.injector.instanceOf[VoaHttpClient]
+  val config = fakeApplication.injector.instanceOf[ServicesConfig]
   val http = fakeApplication.injector.instanceOf[WSHttp]
-  val connector = new DVRCaseManagementConnector(wsClient, http, voaClient) {
+  val connector = new DVRCaseManagementConnector(wsClient, http, voaClient, config) {
     override lazy val baseURL: String = mockServerUrl
   }
 
@@ -60,6 +62,7 @@ class DVRCaseManagementConnectorSpec extends ContentTypes
         personId = 1111111,
         submissionId = "submission1",
         assessmentRef = 24680,
+        agents = None,
         billingAuthorityReferenceNumber = "barn1"
       )
 

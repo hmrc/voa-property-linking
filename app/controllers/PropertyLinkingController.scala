@@ -37,11 +37,14 @@ case class Memoize[K, V]() {
   def apply(f: K => V): K => V = in => cache.getOrElseUpdate(in, f(in))
 }
 
-class PropertyLinkingController @Inject()(val authConnector: DefaultAuthConnector,
-                                          propertyLinksConnector: PropertyLinkingConnector,
-                                          groupAccountsConnector: GroupAccountConnector,
-                                          representationsConnector: PropertyRepresentationConnector
-                                         ) extends PropertyLinkingBaseController with Authenticated {
+class PropertyLinkingController @Inject()(
+                                           val authConnector: DefaultAuthConnector,
+                                           propertyLinksConnector: PropertyLinkingConnector,
+                                           groupAccountsConnector: GroupAccountConnector,
+                                           auditingService: AuditingService,
+                                           representationsConnector: PropertyRepresentationConnector)
+  extends PropertyLinkingBaseController with Authenticated {
+
   type GroupCache = Memoize[Long, Future[Option[GroupAccount]]]
 
   def create() = authenticated(parse.json) { implicit request =>
@@ -49,12 +52,12 @@ class PropertyLinkingController @Inject()(val authConnector: DefaultAuthConnecto
       propertyLinksConnector.create(APIPropertyLinkRequest.fromPropertyLinkRequest(linkRequest))
         .map { _ =>
           Logger.info(s"create property link: submissionId ${linkRequest.submissionId}")
-          AuditingService.sendEvent("create property link", linkRequest)
+          auditingService.sendEvent("create property link", linkRequest)
           Created
         }
         .recover { case _: Upstream5xxResponse =>
           Logger.info(s"create property link failure: submissionId ${linkRequest.submissionId}")
-          AuditingService.sendEvent("create property link failure", linkRequest)
+          auditingService.sendEvent("create property link failure", linkRequest)
           InternalServerError
         }
     }

@@ -17,14 +17,13 @@
 package connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, get, stubFor, urlEqualTo}
+import config.WSHttp
 import helpers.SimpleWsHttpTestApplication
 import models.ModernisedEnrichedRequest
 import play.api.http.ContentTypes
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.test.FakeRequest
-import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
-import uk.gov.hmrc.play.config.inject.ServicesConfig
-import uk.gov.hmrc.play.http.ws.WSHttp
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.config.ServicesConfig
 
 class CheckCaseConnectorSpec extends ContentTypes
   with WireMockSpec with SimpleWsHttpTestApplication {
@@ -33,7 +32,7 @@ class CheckCaseConnectorSpec extends ContentTypes
   implicit val modernisedEnrichedRequest = ModernisedEnrichedRequest(FakeRequest(), "XXXXX", "YYYYY")
 
   val http = fakeApplication.injector.instanceOf[WSHttp]
-  val connector = new CheckCaseConnector(fakeApplication.injector.instanceOf[ServicesConfig]) {
+  val connector = new CheckCaseConnector(http, fakeApplication.injector.instanceOf[ServicesConfig]) {
     override lazy val baseUrl: String = mockServerUrl
   }
 

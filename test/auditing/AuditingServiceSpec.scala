@@ -34,7 +34,7 @@ class AuditingServiceSpec
 
   "AuditingService.sendEvent" should {
     "audit the extended event" in {
-      AuditingService.sendEvent[Int]("test", 999) shouldBe ()
+      fakeApplication.injector.instanceOf[AuditingService].sendEvent[Int]("test", 999) shouldBe ()
     }
   }
 

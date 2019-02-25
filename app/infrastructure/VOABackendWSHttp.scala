@@ -17,14 +17,20 @@
 package infrastructure
 
 import javax.inject.Inject
-
 import com.kenshoo.play.metrics.Metrics
+import com.typesafe.config.Config
 import metrics.HasMetrics
+import play.api.Configuration
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.hooks.HttpHooks
 import uk.gov.hmrc.play.config.AppName
 import uk.gov.hmrc.play.http.ws._
 
-class VOABackendWSHttp @Inject()(override val metrics: Metrics) extends HasMetrics with AzureHeaders with HttpGet with WSGet with HttpPut with WSPut with HttpPost with WSPost with HttpDelete with WSDelete with HttpPatch with WSPatch with AppName with HttpHooks{
+class VOABackendWSHttp @Inject()(
+                                  override val metrics: Metrics,
+                                  val appNameConfiguration: Configuration
+                                ) extends HasMetrics with AzureHeaders with HttpGet with WSGet with HttpPut with WSPut with HttpPost with WSPost with HttpDelete with WSDelete with HttpPatch with WSPatch with AppName with HttpHooks{
   override val hooks = NoneRequired
+
+  override protected def configuration: Option[Config] = Some(appNameConfiguration.underlying)
 }
