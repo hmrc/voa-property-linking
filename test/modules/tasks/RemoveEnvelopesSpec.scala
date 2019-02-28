@@ -21,6 +21,7 @@ import java.util.UUID
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.mockito.MockitoSugar
 import play.api.Environment
+import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.indexes.Index
 import repositories.EnvelopeIdRepository
 import uk.gov.hmrc.mongo.MongoSpecSupport
@@ -35,7 +36,7 @@ class RemoveEnvelopesSpec extends UnitSpec
   with MockitoSugar
   with WithFakeApplication {
 
-  val repository = new EnvelopeIdRepository(mongo(), s"${this.getClass.getSimpleName}") {
+  val repository = new EnvelopeIdRepository(fakeApplication.injector.instanceOf[ReactiveMongoComponent], s"${this.getClass.getSimpleName}") {
     override def indexes: Seq[Index] = Seq.empty
   }
 

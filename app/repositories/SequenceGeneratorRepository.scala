@@ -16,14 +16,13 @@
 
 package repositories
 
-import javax.inject.Inject
-
 import com.google.inject.Singleton
+import javax.inject.Inject
 import play.api.libs.json._
-import reactivemongo.api.DB
+import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.bson.{BSONDocument, BSONInteger, BSONString}
-import uk.gov.hmrc.mongo.{ReactiveRepository, Repository}
 import reactivemongo.play.json.ImplicitBSONHandlers._
+import uk.gov.hmrc.mongo.{ReactiveRepository, Repository}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -40,8 +39,10 @@ trait SequenceGeneratorRepository extends Repository[Sequence, String] {
 }
 
 @Singleton
-class SequenceGeneratorMongoRepository @Inject()(db: DB) extends
-  ReactiveRepository[Sequence, String]("sequences", () => db, Json.format[Sequence], implicitly[Format[String]])
+class SequenceGeneratorMongoRepository @Inject()(
+                                                  mongo: ReactiveMongoComponent
+                                                ) extends
+  ReactiveRepository[Sequence, String]("sequences", mongo.mongoConnector.db, Json.format[Sequence], implicitly[Format[String]])
   with SequenceGeneratorRepository {
 
 

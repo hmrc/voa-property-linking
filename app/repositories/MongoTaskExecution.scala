@@ -17,16 +17,18 @@
 package repositories
 
 import java.time.LocalDateTime
-import javax.inject.Inject
 
 import com.google.inject.Singleton
+import javax.inject.Inject
 import play.api.libs.json._
-import reactivemongo.api.DB
+import play.modules.reactivemongo.ReactiveMongoComponent
 import uk.gov.hmrc.mongo.ReactiveRepository
 
 @Singleton
-class MongoTaskExecution @Inject()(db: DB)
-  extends ReactiveRepository[MongoTaskRegister, String]("mongoTaskExecution", () => db, MongoTaskRegister.mongoFormat, implicitly[Format[String]]) {
+class MongoTaskExecution @Inject()(
+                                    mongo: ReactiveMongoComponent
+                                  )
+  extends ReactiveRepository[MongoTaskRegister, String]("mongoTaskExecution", mongo.mongoConnector.db, MongoTaskRegister.mongoFormat, implicitly[Format[String]]) {
 }
 
 case class MongoTaskRegister(taskName: String, version: Int, executionDateTime: LocalDateTime)

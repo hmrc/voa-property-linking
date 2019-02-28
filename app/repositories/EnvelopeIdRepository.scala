@@ -22,20 +22,25 @@ import javax.inject.Inject
 import models._
 import play.api.Logger
 import play.api.libs.json._
+import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.DB
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.{BSONDateTime, BSONDocument}
 import reactivemongo.core.errors.DatabaseException
 import uk.gov.hmrc.mongo.ReactiveRepository
 import reactivemongo.play.json.ImplicitBSONHandlers._
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
 @Singleton
-class EnvelopeIdRepository @Inject()(db: DB, @Named("envelopeCollectionName") val envelopeCollectionName: String)
-  extends ReactiveRepository[EnvelopeId, String](envelopeCollectionName, () => db, EnvelopeId.mongoFormat, implicitly[Format[String]]) with
+class EnvelopeIdRepository @Inject()(
+                                      mongo: ReactiveMongoComponent,
+                                      @Named("envelopeCollectionName") val envelopeCollectionName: String
+                                    )
+  extends ReactiveRepository[EnvelopeId, String](envelopeCollectionName, mongo.mongoConnector.db, EnvelopeId.mongoFormat, implicitly[Format[String]]) with
     EnvelopeIdRepo {
 
   override def indexes: Seq[Index] = Seq(

@@ -19,6 +19,7 @@ package repositories
 import models.{Closed, Open}
 import org.scalatest.BeforeAndAfterEach
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.indexes.Index
 import reactivemongo.bson.BSONDateTime
 import uk.gov.hmrc.mongo.MongoSpecSupport
@@ -32,7 +33,9 @@ class EnvelopeIdRepositorySpec
     with MongoSpecSupport
 {
 
-  val repository = new EnvelopeIdRepository(mongo(), s"${this.getClass.getSimpleName}") {
+  val app = appBuilder.build()
+
+  val repository = new EnvelopeIdRepository(app.injector.instanceOf[ReactiveMongoComponent], s"${this.getClass.getSimpleName}") {
     override def indexes: Seq[Index] = Seq.empty
   }
 

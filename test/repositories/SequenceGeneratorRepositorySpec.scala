@@ -17,7 +17,8 @@
 package repositories
 
 import org.scalatest.BeforeAndAfterEach
-import uk.gov.hmrc.mongo.MongoSpecSupport
+import play.modules.reactivemongo.ReactiveMongoComponent
+import uk.gov.hmrc.mongo.{MongoConnector, MongoSpecSupport}
 import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -27,9 +28,10 @@ class SequenceGeneratorRepositorySpec
     with BeforeAndAfterEach
     with MongoSpecSupport
 {
-  val repository = new SequenceGeneratorMongoRepository(mongo()) {
 
-  }
+  val repository = new SequenceGeneratorMongoRepository(new ReactiveMongoComponent {
+    override def mongoConnector: MongoConnector = mongoConnectorForTest
+  })
 
   override def beforeEach(): Unit = {
     super.beforeEach()

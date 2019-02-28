@@ -20,6 +20,7 @@ package repositories
 import models.dvr.DetailedValuationRequest
 import org.scalatest.BeforeAndAfterEach
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.indexes.Index
 import uk.gov.hmrc.mongo.MongoSpecSupport
 import uk.gov.hmrc.play.config.ServicesConfig
@@ -34,7 +35,7 @@ class DVRRepositorySpec
 {
   val app = appBuilder.build()
 
-  val repository = new DVRRepository(mongo(), "test", app.injector.instanceOf[ServicesConfig]) {
+  val repository = new DVRRepository(app.injector.instanceOf[ReactiveMongoComponent], "test", app.injector.instanceOf[ServicesConfig]) {
     override def indexes: Seq[Index] = Seq.empty
   }
 

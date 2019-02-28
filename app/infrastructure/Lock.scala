@@ -17,17 +17,20 @@
 package infrastructure
 
 import javax.inject.{Inject, Named}
-
 import com.google.inject.Singleton
 import org.joda.time.Duration
+import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.DB
 import uk.gov.hmrc.lock.{ExclusiveTimePeriodLock, LockMongoRepository, LockRepository}
 
 @Singleton
-class Lock @Inject()(@Named("lockName") val name: String, @Named("lockTimeout") val timeout: Duration, val db: DB)
+class Lock @Inject()(
+                      @Named("lockName") val name: String,
+                      @Named("lockTimeout") val timeout: Duration,
+                      reactiveMongoComponent: ReactiveMongoComponent)
   extends ExclusiveTimePeriodLock {
 
-  override def repo: LockRepository = LockMongoRepository(() => db)
+  override def repo: LockRepository = LockMongoRepository(reactiveMongoComponent.mongoConnector.db)
   override val lockId: String = name
   override val holdLockFor: Duration = timeout
 }

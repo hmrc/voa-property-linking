@@ -22,24 +22,26 @@ import javax.inject.Inject
 import models.dvr.DetailedValuationRequest
 import play.api.Logger
 import play.api.libs.json._
+import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.DB
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.{BSONDateTime, BSONDocument}
 import reactivemongo.core.errors.DatabaseException
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.play.config.ServicesConfig
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.language.postfixOps
 
 @Singleton
 class DVRRepository @Inject()(
-                               db: DB,
+                               mongo: ReactiveMongoComponent,
                                @Named("dvrCollectionName") val dvrCollectionName: String,
                                config: ServicesConfig
                              ) extends ReactiveRepository[DVRRecord, String](
   dvrCollectionName,
-  () => db,
+  mongo.mongoConnector.db,
   DVRRecord.mongoFormat,
   implicitly[Format[String]]) with DVRRecordRepository {
 
