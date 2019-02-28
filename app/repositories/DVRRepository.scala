@@ -56,7 +56,7 @@ class DVRRepository @Inject()(
       DVRRecord(
         request.organisationId,
         request.assessmentRef,
-        request.agents.getOrElse(Nil),
+        request.agents,
         now))
       .map(_ => ())
       .recover {
@@ -85,7 +85,7 @@ class DVRRepository @Inject()(
 case class DVRRecord(
                       organisationId: Long,
                       assessmentRef: Long,
-                      agents: List[Long],
+                      agents: Option[List[Long]],
                       createdAt: Option[BSONDateTime]
                     )
 
