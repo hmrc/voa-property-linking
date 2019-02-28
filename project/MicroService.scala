@@ -39,7 +39,7 @@ trait MicroService {
     Seq(
       ScoverageKeys.coverageExcludedPackages := "<empty>;Reverse.*;views.*;config.*;connectors.test.*;controllers.test.*;poc.view.*;poc.config.*;.*(AuthService|BuildInfo|Routes).*",
       ScoverageKeys.coverageMinimum := 60,
-      ScoverageKeys.coverageFailOnMinimum := true,
+      ScoverageKeys.coverageFailOnMinimum := false,
       ScoverageKeys.coverageHighlighting := true
     )
   }
