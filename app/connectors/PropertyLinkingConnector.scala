@@ -101,7 +101,6 @@ class PropertyLinkingConnector @Inject()(
       buildQueryParams("check", checkPermission) +
       buildQueryParams("challenge", challengePermission) +
       buildQueryParams("sortfield", sortfield) +
-      buildQueryParams("sortfield", sortfield) +
       buildQueryParams("sortorder", sortorder) +
       buildQueryParams("address", address) +
       buildQueryParams("agent", agent)
