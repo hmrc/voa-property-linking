@@ -22,7 +22,8 @@ import connectors.{BusinessRatesAuthConnector, IndividualAccountConnector}
 import models.{IndividualAccount, IndividualAccountId, IndividualAccountSubmission, IndividualDetails}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
+//import org.scalatest.mockito.MockitoSugar
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.AnyContent
 import play.api.test.FakeRequest

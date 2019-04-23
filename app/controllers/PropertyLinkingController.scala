@@ -19,6 +19,7 @@ package controllers
 import javax.inject.Inject
 import auditing.AuditingService
 import auth.Authenticated
+import binders.GetPropertyLinksParameters
 import connectors.auth.DefaultAuthConnector
 import connectors.{GroupAccountConnector, PropertyLinkingConnector, PropertyRepresentationConnector}
 import models._
@@ -26,7 +27,11 @@ import models.searchApi.AgentAuthResultFE
 import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.AnyContent
+import services.PropertyLinkingService
 import uk.gov.hmrc.http.{HeaderCarrier, Upstream5xxResponse}
+import play.api.mvc.{Action, AnyContent}
+import util.Cats
 
 import scala.collection.mutable
 import scala.concurrent.Future
@@ -40,16 +45,17 @@ case class Memoize[K, V]() {
 class PropertyLinkingController @Inject()(
                                            val authConnector: DefaultAuthConnector,
                                            propertyLinksConnector: PropertyLinkingConnector,
+                                           service: PropertyLinkingService,
                                            groupAccountsConnector: GroupAccountConnector,
                                            auditingService: AuditingService,
                                            representationsConnector: PropertyRepresentationConnector)
-  extends PropertyLinkingBaseController with Authenticated {
+  extends PropertyLinkingBaseController with Authenticated with Cats {
 
   type GroupCache = Memoize[Long, Future[Option[GroupAccount]]]
 
   def create() = authenticated(parse.json) { implicit request =>
     withJsonBody[PropertyLinkRequest] { linkRequest =>
-      propertyLinksConnector.create(APIPropertyLinkRequest.fromPropertyLinkRequest(linkRequest))
+      service.create(APIPropertyLinkRequest.fromPropertyLinkRequest(linkRequest))
         .map { _ =>
           Logger.info(s"create property link: submissionId ${linkRequest.submissionId}")
           auditingService.sendEvent("create property link", linkRequest)
@@ -63,6 +69,7 @@ class PropertyLinkingController @Inject()(
     }
   }
 
+  //TODO can be deleted once working
   def get(authorisationId: Long) = authenticated { implicit request =>
     implicit val cache = Memoize[Long, Future[Option[GroupAccount]]]()
 
@@ -72,10 +79,52 @@ class PropertyLinkingController @Inject()(
     }
   }
 
+
+//  def getMyPropertyLink(submissionId: String, owner: Boolean) = authenticated { implicit request =>
+//    if(owner)
+//      service.getMyOrganisationsPropertyLink(submissionId) flatMap {
+//        case Some(authorisation) => authorisation map {d => Ok(Json.toJson(d))}
+//        case None => NotFound
+//      }
+//    else
+//      service.getClientsPropertyLink(submissionId) flatMap {
+//        case Some(authorisation) => authorisation map {d => Ok(Json.toJson(d))}
+//        case None => NotFound
+//      }
+//  }
+
+  def getMyPropertyLink(submissionId: String, owner: Boolean) = authenticated { implicit request =>
+    if(owner)
+      service.getMyOrganisationsPropertyLink(submissionId).fold(Ok(Json.toJson(submissionId))) {authorisation => Ok(Json.toJson(authorisation))}
+    else
+      service.getClientsPropertyLink(submissionId).fold(Ok(Json.toJson(submissionId))) {authorisation => Ok(Json.toJson(authorisation))}
+  }
+
+  def getMyPropertyLinks(searchParams: GetPropertyLinksParameters,
+                         organisationId: Long,
+                         owner: Boolean,
+                         paginationParams: Option[PaginationParams]) = authenticated { implicit request =>
+
+    if(owner)
+      service.getMyOrganisationsPropertyLinks(searchParams, paginationParams) flatMap {
+        case Some(authorisation) => authorisation map {d => Ok(Json.toJson(d))}
+        case None => NotFound
+      }
+    else
+      service.getClientsPropertyLinks(searchParams, paginationParams) flatMap {
+        case Some(authorisation) => authorisation map {d => Ok(Json.toJson(d))}
+        case None => NotFound
+      }
+  }
+
+
+
+  //TODO can be deleted once working
   def find(organisationId: Long, paginationParams: PaginationParams) = authenticated { implicit request =>
     getProperties(organisationId, paginationParams).map(x => Ok(Json.toJson(x)))
   }
 
+  //TODO can be deleted once working
   def searchAndSort(organisationId: Long,
                     paginationParams: PaginationParams,
                     sortfield: Option[String],

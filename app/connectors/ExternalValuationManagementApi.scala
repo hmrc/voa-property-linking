@@ -21,6 +21,7 @@ import javax.inject.{Inject, Named}
 import models.ModernisedEnrichedRequest
 import models.dvr.StreamedDocument
 import models.dvr.documents.DvrDocumentFiles
+import models.modernised.ValuationHistoryResponse
 import play.api.http.HeaderNames.{CONTENT_LENGTH, CONTENT_TYPE}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.ws.{StreamedResponse, WSClient}
@@ -36,6 +37,7 @@ class ExternalValuationManagementApi @Inject()(
                                       wsClient: WSClient,
                                       @Named("VoaBackendWsHttp") ws: WSHttp,
                                       @Named("VoaAuthedBackendHttp") http: VoaHttpClient,
+                                      @Named("voa.authValuationHistoryUrl") valuationHistoryUrl: String,
                                       config: ServicesConfig
                                     ) extends HttpErrorFunctions {
 
@@ -78,4 +80,14 @@ class ExternalValuationManagementApi @Inject()(
           )
         }
     }
+
+  def getValuationHistory(uarn: Long, propertyLinkSubmissionId: String)(implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]): Future[Option[ValuationHistoryResponse]] = {
+    http
+      .GET[Option[ValuationHistoryResponse]](
+      valuationHistoryUrl.replace("{uarn}", uarn.toString),
+        modernisedValuationHistoryQueryParameters(propertyLinkSubmissionId))
+  }
+
+  private def modernisedValuationHistoryQueryParameters(propertyLinkSubmissionId: String) =
+    Seq("propertyLinkId" -> propertyLinkSubmissionId)
 }

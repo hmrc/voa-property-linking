@@ -21,7 +21,8 @@ import models.searchApi.{OwnerAgent, OwnerAgents}
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
 import org.mockito.Mockito.{reset, when}
 import org.scalatest.Outcome
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
+//import org.scalatest.mockito.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder

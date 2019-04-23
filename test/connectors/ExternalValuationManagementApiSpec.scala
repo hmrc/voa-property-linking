@@ -31,10 +31,11 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.ws.WSHttp
+import uk.gov.hmrc.play.test.WithFakeApplication
 
 
 class ExternalValuationManagementApiSpec extends ContentTypes
-  with WireMockSpec with SimpleWsHttpTestApplication {
+  with WireMockSpec with SimpleWsHttpTestApplication with WithFakeApplication{
 
   implicit val mat = fakeApplication.materializer
 
@@ -44,7 +45,12 @@ class ExternalValuationManagementApiSpec extends ContentTypes
   val voaClient = fakeApplication.injector.instanceOf[VoaHttpClient]
   val config = fakeApplication.injector.instanceOf[ServicesConfig]
   val http = fakeApplication.injector.instanceOf[WSHttp]
-  val connector = new ExternalValuationManagementApi(wsClient, http, voaClient, config) {
+
+  val voaApiUrl = "http://voa-modernised-api/external-valuation-management-api"
+  val valuationHistoryUrl = s"$voaApiUrl/properties/{uarn}/valuations"
+
+
+  val connector = new ExternalValuationManagementApi(wsClient, http, voaClient, valuationHistoryUrl, config) {
     override lazy val baseURL: String = mockServerUrl
   }
 

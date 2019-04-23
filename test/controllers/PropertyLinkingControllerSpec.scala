@@ -22,17 +22,19 @@ import auditing.AuditingService
 import connectors._
 import connectors.auth._
 import models.searchApi.AgentAuthResultBE
-import models.{CapacityDeclaration, _}
+import models.{APIPropertyLinkRequest, CapacityDeclaration, _}
 import org.mockito.ArgumentMatchers.{eq => mockEq, _}
 import org.mockito.Mockito._
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
+//import org.scalatest.mockito.MockitoSugar
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import services.PropertyLinkingService
 import uk.gov.hmrc.auth.core.retrieve.~
-import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, Upstream5xxResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, HttpResponse, Upstream5xxResponse}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.ws.WSHttp
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
@@ -44,6 +46,9 @@ import scala.util.Random
 class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
 
   implicit val request = FakeRequest()
+  implicit val modernisedEnrichedRequest = ModernisedEnrichedRequest(FakeRequest(), "XXXXX", "YYYYY")
+  implicit val ec: ExecutionContext = play.api.libs.concurrent.Execution.Implicits.defaultContext
+  implicit val fakeHc = HeaderCarrier()
 
   val mockWS = mock[WSHttp]
   val mockConf = mock[ServicesConfig]
@@ -153,24 +158,30 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
     "create a new property link submission in modernised" in {
       val testCapacityDeclaration = CapacityDeclaration("TEST_CAPACITY", LocalDate.now(), None)
       val testPropertyLinkSubmission = PropertyLinkRequest(1, 1, 1, testCapacityDeclaration, Instant.now(), "TEST_BASIS", Seq(FileInfo("filename", "evidenceType")), "PL12345")
+      val testAPIPropertyLinkRequest = APIPropertyLinkRequest.fromPropertyLinkRequest(testPropertyLinkSubmission)
 
       val plSubmissionJson = Json.toJson(testPropertyLinkSubmission)
 
-      when(mockPropertyLinkConnector.create(any())(any[HeaderCarrier])).thenReturn(Future.successful(()))
+      when(mockPropertyLinkService.create(testAPIPropertyLinkRequest)(fakeHc, modernisedEnrichedRequest)).thenReturn(Future.successful(HttpResponse(200)))
 
       val res = testController.create()(FakeRequest().withBody(plSubmissionJson))
       await(res)
 
       status(res) shouldBe CREATED
+
+      //val testPropertyLinkingController: PropertyLinkingController = fakeApplication.injector.instanceOf[PropertyLinkingController]
+
+
     }
 
     "return InternalServerError if property link submission fails" in {
       val testCapacityDeclaration = CapacityDeclaration("TEST_CAPACITY", LocalDate.now(), None)
       val testPropertyLinkSubmission = PropertyLinkRequest(1, 1, 1, testCapacityDeclaration, Instant.now(), "TEST_BASIS", Seq(FileInfo("filename", "evidenceType")), "PL12345")
+      val testAPIPropertyLinkRequest = APIPropertyLinkRequest.fromPropertyLinkRequest(testPropertyLinkSubmission)
 
       val plSubmissionJson = Json.toJson(testPropertyLinkSubmission)
 
-      when(mockPropertyLinkConnector.create(any())(any[HeaderCarrier])).thenReturn(Future.failed(new Upstream5xxResponse("Failed to create PL", 501, 501)))
+      when(mockPropertyLinkService.create(testAPIPropertyLinkRequest)).thenReturn(Future.failed(new Upstream5xxResponse("Failed to create PL", 501, 501)))
 
       val res = testController.create()(FakeRequest().withBody(plSubmissionJson))
       await(res)
@@ -179,7 +190,17 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
     }
   }
 
+  "getMyPropertyLink" should {
+    "return a single my org proprty link" in {
+      //val res = testController.getMyPropertyLink(11111)()
+    }
+  }
+
   lazy val mockPropertyLinkConnector = mock[PropertyLinkingConnector]
+
+  lazy val mockPropertyLinkService = mock[PropertyLinkingService]
+
+  lazy val mockService = mock[PropertyLinkingService]
 
   lazy val mockGroupAccountConnector = mock[GroupAccountConnector]
 
@@ -187,6 +208,6 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
 
   lazy val mockBrAuth = mock[BusinessRatesAuthConnector]
 
-  lazy val testController = new PropertyLinkingController(mockAuthConnector, mockPropertyLinkConnector, mockGroupAccountConnector, mock[AuditingService], mockPropertyRepresentationConnector)
+  lazy val testController = new PropertyLinkingController(mockAuthConnector, mockPropertyLinkConnector, mockService, mockGroupAccountConnector, mock[AuditingService], mockPropertyRepresentationConnector)
 
 }

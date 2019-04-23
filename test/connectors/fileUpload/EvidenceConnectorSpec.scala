@@ -31,7 +31,8 @@ import org.mockito.Mockito.{times, when}
 import org.mockito.{ArgumentMatchers, Mockito}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.Eventually.eventually
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
+//import org.scalatest.mockito.MockitoSugar
 import play.api.libs.ws.{WSRequest, WSResponse}
 import play.api.mvc.MultipartFormData
 import uk.gov.hmrc.http.{HeaderCarrier, Upstream4xxResponse, Upstream5xxResponse}

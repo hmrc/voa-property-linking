@@ -16,7 +16,7 @@
 
 package controllers
 
-import org.scalatest.{BeforeAndAfterEach, MustMatchers, WordSpec}
+import org.scalatest._
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 
-class ControllerSpec extends WordSpec with FutureAwaits with DefaultAwaitTimeout with BeforeAndAfterEach with MustMatchers
+abstract class ControllerSpec extends WordSpec with FutureAwaits with DefaultAwaitTimeout with BeforeAndAfterEach with MustMatchers

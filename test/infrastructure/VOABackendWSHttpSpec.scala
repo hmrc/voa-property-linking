@@ -23,7 +23,8 @@ import connectors.WireMockSpec
 import helpers.SimpleWsHttpTestApplication
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito.when
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
+//import org.scalatest.mockito.MockitoSugar
 import play.api.Configuration
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec

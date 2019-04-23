@@ -16,8 +16,19 @@
 
 package util
 
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+
+import play.api.libs.json.{JsString, Writes}
+
 object Formatters {
 
   def formatFilename(submissionId: String, fileName: String) = s"$submissionId-$fileName".replaceAll("[^A-Za-z0-9 .-]", " ");
+
+  val voaLocalDateTimeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+
+  implicit val writes = new Writes[LocalDateTime] {
+    def writes(date: LocalDateTime) = JsString(voaLocalDateTimeFormat.format(date))
+  }
 
 }

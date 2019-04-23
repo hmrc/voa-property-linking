@@ -16,6 +16,7 @@
 
 package models.searchApi
 
+import models.modernised.{PropertyLinksWithAgents, PropertyLinksWithClient}
 import play.api.libs.json.Json
 
 case class OwnerAuthResult(
@@ -31,5 +32,20 @@ case class OwnerAuthResult(
 
 object OwnerAuthResult {
   implicit val ownerAuthResult = Json.format[OwnerAuthResult]
+
+  def apply(propertLinks: PropertyLinksWithClient)
+  : OwnerAuthResult = OwnerAuthResult(start = propertLinks.start,
+    size = propertLinks.size,
+    filterTotal = propertLinks.filterTotal,
+    total = propertLinks.total,
+    authorisations = propertLinks.authorisations.map(auth => OwnerAuthorisation(auth)))
+
+
+  def apply(propertLinks: PropertyLinksWithAgents)
+  : OwnerAuthResult = OwnerAuthResult(start = propertLinks.start,
+    size = propertLinks.size,
+    filterTotal = propertLinks.filterTotal,
+    total = propertLinks.total,
+    authorisations = propertLinks.authorisations.map(auth => OwnerAuthorisation(auth)))
 
 }
