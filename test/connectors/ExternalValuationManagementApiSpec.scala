@@ -24,6 +24,7 @@ import http.VoaHttpClient
 import models.ModernisedEnrichedRequest
 import models.dvr.StreamedDocument
 import models.dvr.documents.{Document, DocumentSummary, DvrDocumentFiles}
+import org.scalatest.Outcome
 import play.api.http.ContentTypes
 import play.api.libs.ws.WSClient
 import play.api.test.FakeRequest
@@ -131,6 +132,5 @@ class ExternalValuationManagementApiSpec extends ContentTypes
         result shouldBe a[StreamedDocument]
       }
     }
-
 }
 

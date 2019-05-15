@@ -235,6 +235,8 @@ class PropertyLinkingConnectorSpec extends ContentTypes
       effectiveDate = date,
       rateableValue = Some(2599),
       address = "1 HIGH STREET, BRIGHTON",
+      currentFromDate = None,
+      currentToDate = None,
       billingAuthorityReference = "VOA1"
     )),
     parties = Seq(APIParty(
