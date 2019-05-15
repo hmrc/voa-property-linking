@@ -29,14 +29,18 @@ case class Assessment(
                        rateableValue: Option[Long],
                        address: PropertyAddress,
                        billingAuthorityReference: String,
+                       currentFromDate: Option[LocalDate],
+                       currentToDate: Option[LocalDate],
                        capacity: CapacityDeclaration
                      )
 
 object Assessment {
   implicit val formats = Json.format[Assessment]
 
-  def fromAPIValuationHistory(valuationHistory: APIValuationHistory, authorisationId: Long,
-                              capacityDeclaration: CapacityDeclaration) = {
+  def fromAPIValuationHistory(
+                               valuationHistory: APIValuationHistory,
+                               authorisationId: Long,
+                               capacityDeclaration: CapacityDeclaration) = {
     Assessment(
       authorisationId,
       valuationHistory.asstRef,
@@ -46,6 +50,8 @@ object Assessment {
       valuationHistory.rateableValue,
       PropertyAddress.fromString(valuationHistory.address),
       valuationHistory.billingAuthorityReference,
+      valuationHistory.currentFromDate,
+      valuationHistory.currentToDate,
       capacityDeclaration
     )
   }
