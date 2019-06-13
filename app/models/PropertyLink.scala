@@ -25,11 +25,7 @@ case class PropertyLinkResponse(resultCount: Option[Int], propertyLinks: Seq[Pro
 case class PropertyLink(authorisationId: Long,
                         submissionId: String,
                         uarn: Long,
-                        organisationId: Long,
-                        personId: Long,
                         address: String,
-                        capacityDeclaration: CapacityDeclaration,
-                        linkedDate: LocalDate,
                         pending: Boolean,
                         assessments: Seq[Assessment],
                         agents: Seq[Party])
@@ -38,18 +34,13 @@ object PropertyLink {
   implicit val formats: Format[PropertyLink] = Json.format[PropertyLink]
 
   def fromAPIAuthorisation(prop: PropertiesView, parties: Seq[Party]) = {
-    val capacityDeclaration = CapacityDeclaration(prop.authorisationOwnerCapacity, prop.startDate, prop.endDate)
     PropertyLink(
       prop.authorisationId,
       prop.submissionId,
       prop.uarn,
-      prop.authorisationOwnerOrganisationId,
-      prop.authorisationOwnerPersonId,
       prop.NDRListValuationHistoryItems.headOption.map(_.address).getOrElse("No address found"),
-      capacityDeclaration,
-      prop.createDatetime.atZone(ZoneId.systemDefault).toLocalDate,
       prop.authorisationStatus != "APPROVED",
-      prop.NDRListValuationHistoryItems.map(x => Assessment.fromAPIValuationHistory(x, prop.authorisationId, capacityDeclaration)),
+      prop.NDRListValuationHistoryItems.map(x => Assessment.fromAPIValuationHistory(x, prop.authorisationId)),
       parties
     )
   }

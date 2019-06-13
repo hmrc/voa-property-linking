@@ -35,25 +35,8 @@ class PropertyLinkingService @Inject()(
 
   def create(propertyLink: APIPropertyLinkRequest) (implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]) = {
       val createPropertyLink = CreatePropertyLink(propertyLink)
-      val result = propertyLinksConnector.createPropertyLink(createPropertyLink)
-    result
+      propertyLinksConnector.createPropertyLink(createPropertyLink)
   }
-
-//  def getClientsPropertyLink(submissionId: String)(implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_], ec: ExecutionContext): Future[Option[PropertiesView]] = {
-//    for {
-//      propertyLink  <- propertyLinksConnector.getClientsPropertyLink(submissionId)
-//      history       <- Future.traverse(propertyLink)(pl => externalValuationManagementApi.getValuationHistory(pl.authorisation.uarn, submissionId)) // get History call.
-//    } yield (propertyLink, history) match {
-//      case (Some(pl), Some(h)) => PropertiesView(pl.authorisation)
-//      case _                   => None
-//    }
-//
-//    propertyLinksConnector.getClientsPropertyLink(submissionId) map {
-//      case Some(propertyLink) => Some(PropertiesView(propertyLink.authorisation))
-//      case None => None
-//    }
-//  }
-
 
   def getClientsPropertyLink(submissionId: String)(implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_], ec: ExecutionContext, F: cats.Functor[scala.concurrent.Future], f: cats.Monad[scala.concurrent.Future]): OptionT[Future, PropertiesView] = {
     for {
@@ -61,14 +44,6 @@ class PropertyLinkingService @Inject()(
       history  <- OptionT(externalValuationManagementApi.getValuationHistory(propertyLink.authorisation.uarn, submissionId))
     } yield PropertiesView(propertyLink.authorisation, history.NDRListValuationHistoryItems)
   }
-
-
-//  def getMyOrganisationsPropertyLink(submissionId: String)(implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_], ec: ExecutionContext): Future[Option[PropertiesView]] = {
-//    propertyLinksConnector.getMyOrganisationsPropertyLink(submissionId) map {
-//      case Some(propertyLink) => Some(PropertiesView(propertyLink.authorisation))
-//      case None => None
-//    }
-//  }
 
   def getMyOrganisationsPropertyLink(submissionId: String)(implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_], ec: ExecutionContext, F: cats.Functor[scala.concurrent.Future], f: cats.Monad[scala.concurrent.Future]): OptionT[Future, PropertiesView] = {
     for {

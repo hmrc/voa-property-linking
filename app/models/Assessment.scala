@@ -30,8 +30,7 @@ case class Assessment(
                        address: PropertyAddress,
                        billingAuthorityReference: String,
                        currentFromDate: Option[LocalDate],
-                       currentToDate: Option[LocalDate],
-                       capacity: CapacityDeclaration
+                       currentToDate: Option[LocalDate]
                      )
 
 object Assessment {
@@ -39,8 +38,7 @@ object Assessment {
 
   def fromAPIValuationHistory(
                                valuationHistory: APIValuationHistory,
-                               authorisationId: Long,
-                               capacityDeclaration: CapacityDeclaration) = {
+                               authorisationId: Long) = {
     Assessment(
       authorisationId,
       valuationHistory.asstRef,
@@ -51,8 +49,7 @@ object Assessment {
       PropertyAddress.fromString(valuationHistory.address),
       valuationHistory.billingAuthorityReference,
       valuationHistory.currentFromDate,
-      valuationHistory.currentToDate,
-      capacityDeclaration
+      valuationHistory.currentToDate
     )
   }
 

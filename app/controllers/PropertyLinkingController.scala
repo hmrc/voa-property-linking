@@ -69,30 +69,6 @@ class PropertyLinkingController @Inject()(
     }
   }
 
-  //TODO can be deleted once working
-  def get(authorisationId: Long) = authenticated { implicit request =>
-    implicit val cache = Memoize[Long, Future[Option[GroupAccount]]]()
-
-    propertyLinksConnector.get(authorisationId) flatMap {
-      case Some(authorisation) => detailed(authorisation) map { d => Ok(Json.toJson(d)) }
-      case None => NotFound
-    }
-  }
-
-
-//  def getMyPropertyLink(submissionId: String, owner: Boolean) = authenticated { implicit request =>
-//    if(owner)
-//      service.getMyOrganisationsPropertyLink(submissionId) flatMap {
-//        case Some(authorisation) => authorisation map {d => Ok(Json.toJson(d))}
-//        case None => NotFound
-//      }
-//    else
-//      service.getClientsPropertyLink(submissionId) flatMap {
-//        case Some(authorisation) => authorisation map {d => Ok(Json.toJson(d))}
-//        case None => NotFound
-//      }
-//  }
-
   def getMyPropertyLink(submissionId: String, owner: Boolean) = authenticated { implicit request =>
     if(owner)
       service.getMyOrganisationsPropertyLink(submissionId).fold(Ok(Json.toJson(submissionId))) {authorisation => Ok(Json.toJson(authorisation))}
@@ -115,36 +91,6 @@ class PropertyLinkingController @Inject()(
         case Some(authorisation) => authorisation map {d => Ok(Json.toJson(d))}
         case None => NotFound
       }
-  }
-
-
-
-  //TODO can be deleted once working
-  def find(organisationId: Long, paginationParams: PaginationParams) = authenticated { implicit request =>
-    getProperties(organisationId, paginationParams).map(x => Ok(Json.toJson(x)))
-  }
-
-  //TODO can be deleted once working
-  def searchAndSort(organisationId: Long,
-                    paginationParams: PaginationParams,
-                    sortfield: Option[String],
-                    sortorder: Option[String],
-                    status: Option[String],
-                    address: Option[String],
-                    baref: Option[String],
-                    agent: Option[String],
-                    agentAppointed: Option[String]) = authenticated { implicit request =>
-
-    propertyLinksConnector.searchAndSort(
-      organisationId = organisationId,
-      params = paginationParams,
-      sortfield = sortfield,
-      sortorder = sortorder,
-      status = status,
-      address = address,
-      baref = baref,
-      agent = agent,
-      agentAppointed = agentAppointed).map(x => Ok(Json.toJson(x)))
   }
 
   def appointableToAgent(ownerId: Long,
@@ -223,22 +169,23 @@ class PropertyLinkingController @Inject()(
     }.map(_.flatten)
   }
 
-  def clientProperty(authorisationId: Long, clientOrgId: Long, agentOrgId: Long) = authenticated { implicit request =>
-    propertyLinksConnector.get(authorisationId) flatMap {
-      case Some(authorisation) if authorisedFor(authorisation, clientOrgId, agentOrgId) => toClientProperty(authorisation) map { p => Ok(Json.toJson(p)) }
-      case _ => NotFound
-    }
-  }
+  //Do we did this interface???
+//  def clientProperty(authorisationId: Long, clientOrgId: Long, agentOrgId: Long) = authenticated { implicit request =>
+//    propertyLinksConnector.get(authorisationId) flatMap {
+//      case Some(authorisation) if authorisedFor(authorisation, clientOrgId, agentOrgId) => toClientProperty(authorisation) map { p => Ok(Json.toJson(p)) }
+//      case _ => NotFound
+//    }
+//  }
 
-  private def authorisedFor(authorisation: PropertiesView, clientOrgId: Long, agentOrgId: Long) = {
-    authorisation.authorisationOwnerOrganisationId == clientOrgId && authorisation.parties.exists(_.authorisedPartyOrganisationId == agentOrgId)
-  }
-
-  private def toClientProperty(authorisation: PropertiesView)(implicit hc: HeaderCarrier): Future[ClientProperty] = {
-    groupAccountsConnector.get(authorisation.authorisationOwnerOrganisationId) map { acc =>
-      ClientProperty.build(authorisation, acc)
-    }
-  }
+//  private def authorisedFor(authorisation: PropertiesView, clientOrgId: Long, agentOrgId: Long) = {
+//    authorisation.authorisationOwnerOrganisationId == clientOrgId && authorisation.parties.exists(_.authorisedPartyOrganisationId == agentOrgId)
+//  }
+//
+//  private def toClientProperty(authorisation: PropertiesView)(implicit hc: HeaderCarrier): Future[ClientProperty] = {
+//    groupAccountsConnector.get(authorisation.authorisationOwnerOrganisationId) map { acc =>
+//      ClientProperty.build(authorisation, acc)
+//    }
+//  }
 
   def assessments(authorisationId: Long) = authenticated { implicit request =>
     implicit val cache = Memoize[Long, Future[Option[GroupAccount]]]()

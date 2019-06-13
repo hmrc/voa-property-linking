@@ -27,8 +27,7 @@ class PropertiesViewSpec extends UnitSpec with SimpleWsHttpTestApplication {
   "APIAuthorisation" should {
     "be deserialised property" in {
       val authorisation = Json.parse(DummyData.testData).as[PropertiesView]
-      authorisation shouldBe PropertiesView(112, 146440182, 2, 3, "MORE_EVIDENCE_REQUIRED", "OTHER", "OWNER_OCCUPIER",
-        LocalDateTime.of(2016, 3, 1, 12, 53, 51).toInstant(ZoneOffset.UTC),
+      authorisation shouldBe PropertiesView(112, 146440182, "MORE_EVIDENCE_REQUIRED",
         LocalDate.of(2016, 5, 7),
         Some(LocalDate.of(2016, 11, 12)),
         "ABC99003", Seq(

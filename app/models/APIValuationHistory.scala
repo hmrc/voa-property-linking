@@ -18,6 +18,7 @@ package models
 
 import java.time.LocalDate
 
+import models.modernised.ValuationHistory
 import play.api.libs.json.Json
 
 case class APIValuationHistory(
@@ -35,6 +36,18 @@ case class APIValuationHistory(
   def capatalise = this.copy(address = address.toUpperCase)
 }
 
+
+
 object APIValuationHistory {
   implicit val formats = Json.format[APIValuationHistory]
+
+  def apply(history: ValuationHistory) :APIValuationHistory =
+    APIValuationHistory(asstRef = history.asstRef,
+    listYear = history.listYear,
+    uarn = history.uarn,
+    effectiveDate = history.effectiveDate.get,
+    rateableValue = history.rateableValue.map {d => d.longValue()},
+    address = history.address,
+    billingAuthorityReference = history.billingAuthorityReference)
+
 }
