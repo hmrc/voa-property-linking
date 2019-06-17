@@ -83,7 +83,8 @@ class PropertyLinkingController @Inject()(
                     status: Option[String],
                     address: Option[String],
                     baref: Option[String],
-                    agent: Option[String]) = authenticated { implicit request =>
+                    agent: Option[String],
+                    agentAppointed: Option[String]) = authenticated { implicit request =>
 
     propertyLinksConnector.searchAndSort(
       organisationId = organisationId,
@@ -93,7 +94,8 @@ class PropertyLinkingController @Inject()(
       status = status,
       address = address,
       baref = baref,
-      agent = agent).map(x => Ok(Json.toJson(x)))
+      agent = agent,
+      agentAppointed = agentAppointed).map(x => Ok(Json.toJson(x)))
   }
 
   def appointableToAgent(ownerId: Long,

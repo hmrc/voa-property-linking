@@ -187,7 +187,7 @@ class PropertyLinkingConnectorSpec extends ContentTypes
       }
 
       val organisationId = 123L
-      val searchUrl = s"/authorisation-search-api/owners/$organisationId/authorisations?start=1&size=10"
+      val searchUrl = s"/authorisation-search-api/owners/$organisationId/authorisations?start=1&size=10&agentAppointed=BOTH"
 
       stubFor(get(urlEqualTo(searchUrl))
         .willReturn(aResponse
