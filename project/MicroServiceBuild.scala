@@ -19,7 +19,7 @@ private object AppDependencies {
     ws,
     "ai.x" %% "play-json-extensions" % "0.9.0",
     "uk.gov.hmrc" %% "auth-client" % "2.5.0",
-    "uk.gov.hmrc" %% "bootstrap-play-25" % "4.3.0",
+    "uk.gov.hmrc" %% "bootstrap-play-25" % "4.13.0",
     "uk.gov.hmrc" %% "mongo-lock" % "5.1.1",
     "uk.gov.hmrc" %% "domain" % "4.1.0",
     "org.typelevel" %% "cats-core" % "0.8.1",

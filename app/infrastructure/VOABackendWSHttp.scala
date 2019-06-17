@@ -17,10 +17,12 @@
 package infrastructure
 
 import javax.inject.Inject
+
+import akka.actor.ActorSystem
 import com.kenshoo.play.metrics.Metrics
 import com.typesafe.config.Config
 import metrics.HasMetrics
-import play.api.Configuration
+import play.api.{Configuration, Play}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.hooks.HttpHooks
 import uk.gov.hmrc.play.config.AppName
@@ -33,4 +35,5 @@ class VOABackendWSHttp @Inject()(
   override val hooks = NoneRequired
 
   override protected def configuration: Option[Config] = Some(appNameConfiguration.underlying)
+  override protected def actorSystem: ActorSystem = Play.current.actorSystem
 }

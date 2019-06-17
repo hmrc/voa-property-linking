@@ -18,7 +18,9 @@ package config
 
 import com.typesafe.config.Config
 import javax.inject.Inject
-import play.api.Configuration
+
+import akka.actor.ActorSystem
+import play.api.{Configuration, Play}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.hooks.HttpHooks
 import uk.gov.hmrc.play.audit.http.HttpAuditing
@@ -36,5 +38,6 @@ class WSHttp @Inject()(
                       )extends HttpGet with WSGet with HttpPut with WSPut with HttpPost with WSPost with HttpDelete with WSDelete with Hooks with AppName {
 
   override protected def configuration: Option[Config] = Some(appNameConfiguration.underlying)
+  override protected def actorSystem: ActorSystem = Play.current.actorSystem
 }
 

@@ -18,7 +18,9 @@ package infrastructure
 
 import com.typesafe.config.Config
 import javax.inject.Inject
-import play.api.Configuration
+
+import akka.actor.ActorSystem
+import play.api.{Configuration, Play}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.config.AppName
 import uk.gov.hmrc.http.hooks.HttpHook
@@ -31,5 +33,6 @@ class SimpleWSHttp @Inject()(
   override val hooks: Seq[HttpHook] = NoneRequired
 
   override protected def configuration: Option[Config] = Some(appNameConfiguration.underlying)
+  override protected def actorSystem: ActorSystem = Play.current.actorSystem
 }
 
