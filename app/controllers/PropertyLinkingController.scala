@@ -31,7 +31,7 @@ import play.api.mvc.AnyContent
 import services.PropertyLinkingService
 import uk.gov.hmrc.http.{HeaderCarrier, Upstream5xxResponse}
 import play.api.mvc.{Action, AnyContent}
-import util.Cats
+import utils.Cats
 
 import scala.collection.mutable
 import scala.concurrent.Future

@@ -14,13 +14,19 @@
  * limitations under the License.
  */
 
-package util
+package utils
 
-object FileNameSanitisationUtils {
+import org.apache.commons.lang3.exception.ExceptionUtils.getStackFrames
 
-  def formatFileName(submissionId: String, fileName: String): String =
-    s"$submissionId-${sanitiseFileName(fileName)}"
+object ErrorHandlingUtils {
 
-  def sanitiseFileName(fileName: String): String =
-    fileName.replaceAll("[^A-Za-z0-9 .-]", " ")
+  val LINES_OF_STACK_TRACE = 5
+
+  def failureReason(t: Throwable): String =
+    Seq(
+      Some("Message: " + t.getMessage),
+      Option(t.getCause).map("Cause: " + _.getMessage),
+      Some("Stack Trace: " + getStackFrames(t).take(LINES_OF_STACK_TRACE).mkString("\n"))
+    ).flatten.mkString("\n")
+
 }

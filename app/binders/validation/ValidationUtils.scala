@@ -22,7 +22,7 @@ import java.time.LocalDate
 import cats.data.Validated.Valid
 import cats.data.{Validated, ValidatedNel}
 import org.apache.commons.lang3.StringUtils
-import util.Cats
+import utils.Cats
 
 import scala.language.implicitConversions
 import scala.util.Try

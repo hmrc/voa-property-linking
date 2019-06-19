@@ -19,7 +19,7 @@ package models
 import java.time.{Instant, LocalDate}
 
 import play.api.libs.json.{Json, OFormat, Reads}
-import util.Formatters._
+import utils.Formatters._
 
 case class APIPropertyLinkRequest(
                                    uarn: Long,

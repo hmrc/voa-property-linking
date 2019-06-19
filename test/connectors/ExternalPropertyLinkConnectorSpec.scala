@@ -29,7 +29,7 @@ import uk.gov.hmrc.play.config.ServicesConfig
 //import org.scalatest.mockito.MockitoSugar
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
-import util.Cats
+import utils.Cats
 import org.mockito.ArgumentMatchers.{any, eq => mEq}
 import org.mockito.Mockito._
 

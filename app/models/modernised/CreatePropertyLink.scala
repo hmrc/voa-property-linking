@@ -23,8 +23,8 @@ import models.APIPropertyLinkRequest
 import models.modernised.Capacity.Capacity
 import models.modernised.ProvidedEvidence.{ProvidedEvidence => Method}
 import play.api.libs.json.{Json, OFormat, Writes}
-import util.Formatters
-import util.FileNameSanitisationUtils.formatFileName
+import utils.Formatters
+import utils.FileNameSanitisationUtils.formatFileName
 
 case class CreatePropertyLink(
                                uarn: Long,

@@ -14,21 +14,12 @@
  * limitations under the License.
  */
 
-package util
+package errorhandler
 
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
+import play.api.libs.json.{Json, OFormat}
 
-import play.api.libs.json.{JsString, Writes}
+case class NestedError(code: String, message: String, path: String)
 
-object Formatters {
-
-  def formatFilename(submissionId: String, fileName: String) = s"$submissionId-$fileName".replaceAll("[^A-Za-z0-9 .-]", " ");
-
-  val voaLocalDateTimeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-
-  implicit val writes = new Writes[LocalDateTime] {
-    def writes(date: LocalDateTime) = JsString(voaLocalDateTimeFormat.format(date))
-  }
-
+object NestedError {
+  implicit val format: OFormat[NestedError] = Json.format[NestedError]
 }

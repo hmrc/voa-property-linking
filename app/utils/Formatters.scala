@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-package models.modernised
+package utils
 
-import play.api.libs.json.Format
-import utils.JsonUtils.enumFormat
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
-object ApiVersion extends Enumeration {
+import play.api.libs.json.{JsString, Writes}
 
-  type ApiVersion = Value
+object Formatters {
 
-  val VERSION_1_0 = Value("1.0")
-  val VERSION_1_1 = Value("1.1")
-  val VERSION_1_2 = Value("1.2")
+  def formatFilename(submissionId: String, fileName: String) = s"$submissionId-$fileName".replaceAll("[^A-Za-z0-9 .-]", " ");
 
-  implicit val format: Format[ApiVersion] = enumFormat(ApiVersion)
+  val voaLocalDateTimeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+
+  implicit val writes = new Writes[LocalDateTime] {
+    def writes(date: LocalDateTime) = JsString(voaLocalDateTimeFormat.format(date))
+  }
 
 }

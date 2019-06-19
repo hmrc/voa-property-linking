@@ -35,7 +35,7 @@ import play.api.test.FakeRequest
 import org.scalatestplus.mockito
 import org.scalatestplus.mockito.MockitoSugar
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import util.Cats
+import utils.Cats
 import cats.instances.{FutureInstances, ListInstances, OptionInstances, VectorInstances}
 import cats.syntax._
 import scala.concurrent.duration._

@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package util
+package utils
 
-import play.api.libs.json.{Format, Reads, Writes}
+import org.scalatest.{FlatSpec, Matchers}
 
-object JsonUtils {
+class FormattersSpec extends FlatSpec with Matchers {
 
-  def enumFormat[E <: Enumeration](e: E): Format[E#Value] =
-    Format(Reads.enumNameReads(e), Writes.enumNameWrites)
+  "formatFilename" should "prepend the submissionId and remove all non-alphanumeric characters apart from a space, hyphen or full stop" in {
+    Formatters.formatFilename("PL12345", "Test/£file   name£with bad»characters.pdf") shouldBe "PL12345-Test  file   name with bad characters.pdf"
+  }
 
 }

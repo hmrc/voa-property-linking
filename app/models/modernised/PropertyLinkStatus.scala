@@ -16,7 +16,7 @@
 
 package models.modernised
 
-import util.JsonUtils.enumFormat
+import utils.JsonUtils.enumFormat
 
 object PropertyLinkStatus extends Enumeration {
   type PropertyLinkStatus = Value

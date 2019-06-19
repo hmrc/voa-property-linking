@@ -14,19 +14,13 @@
  * limitations under the License.
  */
 
-package models.modernised
+package utils
 
-import play.api.libs.json.Format
-import utils.JsonUtils.enumFormat
+object FileNameSanitisationUtils {
 
-object ApiVersion extends Enumeration {
+  def formatFileName(submissionId: String, fileName: String): String =
+    s"$submissionId-${sanitiseFileName(fileName)}"
 
-  type ApiVersion = Value
-
-  val VERSION_1_0 = Value("1.0")
-  val VERSION_1_1 = Value("1.1")
-  val VERSION_1_2 = Value("1.2")
-
-  implicit val format: Format[ApiVersion] = enumFormat(ApiVersion)
-
+  def sanitiseFileName(fileName: String): String =
+    fileName.replaceAll("[^A-Za-z0-9 .-]", " ")
 }

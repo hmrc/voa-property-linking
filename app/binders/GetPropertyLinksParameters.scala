@@ -18,8 +18,8 @@ package binders
 
 import binders.validation.ValidationUtils
 import play.api.mvc.QueryStringBindable
-import util.Cats
-import util.QueryParamUtils.toQueryString
+import utils.Cats
+import utils.QueryParamUtils.toQueryString
 
 case class GetPropertyLinksParameters(address: Option[String] = None, baref: Option[String] = None, agent: Option[String] = None,
                                       status: Option[String] = None, sortfield: Option[String] = None, sortorder: Option[String] = None)

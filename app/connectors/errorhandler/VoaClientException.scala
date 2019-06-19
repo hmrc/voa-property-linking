@@ -14,19 +14,9 @@
  * limitations under the License.
  */
 
-package models.modernised
+package connectors.errorhandler
 
-import play.api.libs.json.Format
-import utils.JsonUtils.enumFormat
+import uk.gov.hmrc.http.HttpException
 
-object ApiVersion extends Enumeration {
-
-  type ApiVersion = Value
-
-  val VERSION_1_0 = Value("1.0")
-  val VERSION_1_1 = Value("1.1")
-  val VERSION_1_2 = Value("1.2")
-
-  implicit val format: Format[ApiVersion] = enumFormat(ApiVersion)
-
-}
+case class VoaClientException(override val message: String, override val responseCode: Int)
+  extends HttpException(message, responseCode)

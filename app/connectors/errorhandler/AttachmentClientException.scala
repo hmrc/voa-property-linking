@@ -14,19 +14,15 @@
  * limitations under the License.
  */
 
-package models.modernised
+package connectors.errorhandler
 
-import play.api.libs.json.Format
-import utils.JsonUtils.enumFormat
+import uk.gov.hmrc.http.HttpException
 
-object ApiVersion extends Enumeration {
+class AttachmentClientException(message: String, responseCode: Int) extends HttpException(message, responseCode)
 
-  type ApiVersion = Value
+object AttachmentClientException {
 
-  val VERSION_1_0 = Value("1.0")
-  val VERSION_1_1 = Value("1.1")
-  val VERSION_1_2 = Value("1.2")
-
-  implicit val format: Format[ApiVersion] = enumFormat(ApiVersion)
+  def apply(message: String, responseCode: Int = 400) =
+    new AttachmentClientException(message, responseCode)
 
 }
