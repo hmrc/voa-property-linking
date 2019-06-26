@@ -19,30 +19,23 @@ package services
 import java.time._
 
 import binders.GetPropertyLinksParameters
-import connectors.{ExternalPropertyLinkConnector, ExternalPropertyLinkConnectorSpec, ExternalValuationManagementApi, PropertyLinkingConnector}
+import connectors.{ExternalPropertyLinkConnector, ExternalValuationManagementApi}
 import models._
-import models.modernised.PropertyLinkStatus.PropertyLinkStatus
 import models.modernised.{PropertyLinksWithAgents, _}
 import models.searchApi.{OwnerAuthResult, OwnerAuthorisation}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
-import org.mockito.ArgumentMatchers
-import org.scalatest.concurrent.Eventually._
-import org.mockito.ArgumentMatchers.{eq => mEq, _}
+import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
-import org.mockito.invocation.InvocationOnMock
-import org.scalatest.BeforeAndAfterEach
 import play.api.test.FakeRequest
-import org.scalatestplus.mockito
 import org.scalatestplus.mockito.MockitoSugar
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import utils.Cats
-import cats.instances.{FutureInstances, ListInstances, OptionInstances, VectorInstances}
-import cats.syntax._
-import scala.concurrent.duration._
+import org.scalatest.concurrent.{Futures, ScalaFutures}
 
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, Future}
 
-class PropertyLinkingServiceSpec extends UnitSpec with MockitoSugar with WithFakeApplication with Cats {
+class PropertyLinkingServiceSpec
+  extends UnitSpec with MockitoSugar with WithFakeApplication with Cats with ScalaFutures {
 
   val mockPropertyLinkingConnector = mock[ExternalPropertyLinkConnector]
   val mockExternalValuationManagementApi = mock[ExternalValuationManagementApi]
@@ -54,19 +47,12 @@ class PropertyLinkingServiceSpec extends UnitSpec with MockitoSugar with WithFak
 
   val date = LocalDate.parse("2018-09-05")
   val instant = date.atStartOfDay().toInstant(ZoneOffset.UTC)
-  //val service :PropertyLinkingService = fakeApplication.injector.instanceOf[PropertyLinkingService]
   val service = new PropertyLinkingService(propertyLinksConnector = mockPropertyLinkingConnector, mockExternalValuationManagementApi)
 
   val validPropertiesView = PropertiesView(
     authorisationId = 11111,
     uarn = 33333,
-    //authorisationOwnerOrganisationId = 11111,
-    //authorisationOwnerPersonId = 11111,
     authorisationStatus = "APPROVED",
-    //authorisationMethod = "",
-    //authorisationOwnerCapacity = "",
-    //createDatetime = Clock.fixed(Instant.parse("2018-04-29T10:15:30.00Z"),
-      //ZoneId.of("Europe/London")).instant(), //Unknown just for testing equality atm,
     startDate = date,
     endDate = Some(date),
     submissionId = "22222",
@@ -83,11 +69,30 @@ class PropertyLinkingServiceSpec extends UnitSpec with MockitoSugar with WithFak
                 authorisedPartyStatus = "APPROVED",
                 authorisedPartyOrganisationId = 123456,
                 permissions = Seq(Permissions(
-                  id = 13579,
+                  id = 24680,
                   checkPermission = "APPROVED",
                   challengePermission = "APPROVED",
                   endDate = None))
   )))
+
+  val clientValidPropertiesView = PropertiesView(
+    authorisationId = 11111,
+    uarn = 33333,
+    authorisationStatus = "APPROVED",
+    startDate = date,
+    endDate = Some(date),
+    submissionId = "22222",
+    NDRListValuationHistoryItems = Seq(APIValuationHistory(
+      asstRef = 125689,
+      listYear = "2017",
+      uarn = 923411,
+      effectiveDate = date,
+      rateableValue = Some(2599),
+      address = "1 HIGH STREET, BRIGHTON",
+      billingAuthorityReference = "VOA1"
+    )),
+    parties = Seq()
+    )
 
   val  propertyLinkWithAgents = PropertyLinkWithAgents(authorisationId = 11111,
     status = PropertyLinkStatus.APPROVED,
@@ -160,92 +165,79 @@ class PropertyLinkingServiceSpec extends UnitSpec with MockitoSugar with WithFak
 
 
 
-//  "getMyOrganisationsPropertyLink" should {
-//    "call connector and return a properties view for a valid authorisation id containing valid status" in {
-//
-//      when(mockPropertyLinkingConnector.getMyOrganisationsPropertyLink("11111")).thenReturn(Future.successful(Some(ownerPropertyLink)))
-//      when(mockExternalValuationManagementApi.getValuationHistory(33333, "11111")).thenReturn(Future.successful(Some(valuationHistoryResponse)))
-//
-//      val result = Await.result(service.getMyOrganisationsPropertyLink("11111"), 1000 millis)// shouldBe validPropertiesView
-//
-//      result shouldBe Some(validPropertiesView)
-//
-//      //result.getOrElse("None returned") shouldBe validPropertiesView
-//
-////      rez.authorisationId shouldBe validPropertiesView.authorisationId
-////      rez.authorisationStatus shouldBe validPropertiesView.authorisationStatus
-////      rez.startDate shouldBe validPropertiesView.startDate
-////      rez.endDate shouldBe validPropertiesView.endDate
-////      rez.submissionId shouldBe validPropertiesView.submissionId
-////      rez.uarn shouldBe validPropertiesView.uarn
-//
-//      verify(mockPropertyLinkingConnector).getMyOrganisationsPropertyLink("11111")
-//
-//    }
-//
-//    "return none when nothing is return from connector" in {
-//      when(mockPropertyLinkingConnector.getMyOrganisationsPropertyLink("11111")).thenReturn(Future.successful(None))
-//
-//      service.getMyOrganisationsPropertyLink("11111") shouldBe "None returned"
-//
-//      //result.getOrElse("None returned") shouldBe "None returned"
-//
-//      verify(mockPropertyLinkingConnector).getMyOrganisationsPropertyLink("11111")
-//    }
-//  }
-//
-//  "getClientsPropertyLink" should {
-//    "call connector and return a properties view for a valid authorisation id containing valid status" in {
-//
-//      when(mockPropertyLinkingConnector.getClientsPropertyLink("11111")).thenReturn(Future.successful(Some(clientPropertyLink)))
-//      when(mockExternalValuationManagementApi.getValuationHistory(33333, "11111")).thenReturn(Future.successful(Some(valuationHistoryResponse)))
-//
-//      service.getClientsPropertyLink("11111") shouldBe validPropertiesView
-//
-//      //result.getOrElse("None returned") shouldBe validPropertiesView
-//
-//      verify(mockPropertyLinkingConnector).getClientsPropertyLink("11111")
-//
-//    }
-//
-//    "return none when nothing is return from connector" in {
-//      when(mockPropertyLinkingConnector.getClientsPropertyLink("11111")).thenReturn(Future.successful(None))
-//
-//      service.getMyOrganisationsPropertyLink("11111") shouldBe "None returned"
-//
-//      //result.getOrElse("None returned") shouldBe "None returned"
-//
-//      verify(mockPropertyLinkingConnector).getClientsPropertyLink("11111")
-//
-//    }
-//  }
-//
-//  "create" should {
-//    "call create connector method with correct params" in {
-//
-//      val request = APIPropertyLinkRequest(
-//        uarn = 11111,
-//        authorisationOwnerOrganisationId = 2222,
-//        authorisationOwnerPersonId = 33333,
-//        createDatetime = Instant.now(),
-//        authorisationMethod = "mock method",
-//        uploadedFiles = Seq(),
-//        submissionId = "44444",
-//        authorisationOwnerCapacity = "OWNER",
-//        startDate = date,
-//        endDate = Some(date))
-//
-//      val propertyLink = CreatePropertyLink(request)
-//
-//      val httpResponse = HttpResponse(200)
-//
-//      when(mockPropertyLinkingConnector.createPropertyLink(any()) (any(), any())).thenReturn(Future.successful(mockHttpResponse))
-//
-//      service.create(request) shouldBe Future.successful(mockHttpResponse)
-//
-//      verify(mockPropertyLinkingConnector).createPropertyLink(any())
-//    }
-//  }
+  "getMyOrganisationsPropertyLink" should {
+    "call connector and return a properties view for a valid authorisation id containing valid status" in {
+
+      when(mockPropertyLinkingConnector.getMyOrganisationsPropertyLink("11111")).thenReturn(Future.successful(Some(ownerPropertyLink)))
+      when(mockExternalValuationManagementApi.getValuationHistory(33333, "11111")).thenReturn(Future.successful(Some(valuationHistoryResponse)))
+
+      service.getMyOrganisationsPropertyLink("11111").value.futureValue.get shouldBe validPropertiesView
+
+      verify(mockPropertyLinkingConnector).getMyOrganisationsPropertyLink("11111")
+
+    }
+
+    "return none when nothing is return from connector" in {
+      when(mockPropertyLinkingConnector.getMyOrganisationsPropertyLink("11111")).thenReturn(Future.successful(None))
+
+      service.getMyOrganisationsPropertyLink("11111").value.futureValue shouldBe None
+
+      //verify(mockPropertyLinkingConnector).getMyOrganisationsPropertyLink("11111")
+    }
+  }
+
+  "getClientsPropertyLink" should {
+    "call connector and return a properties view for a valid authorisation id containing valid status" in {
+
+      when(mockPropertyLinkingConnector.getClientsPropertyLink("11111")).thenReturn(Future.successful(Some(clientPropertyLink)))
+      when(mockExternalValuationManagementApi.getValuationHistory(33333, "11111")).thenReturn(Future.successful(Some(valuationHistoryResponse)))
+
+      service.getClientsPropertyLink("11111").value.futureValue.get shouldBe clientValidPropertiesView
+
+      //result.getOrElse("None returned") shouldBe validPropertiesView
+
+      verify(mockPropertyLinkingConnector).getClientsPropertyLink("11111")
+
+    }
+
+    "return none when nothing is return from connector" in {
+      when(mockPropertyLinkingConnector.getClientsPropertyLink("11111")).thenReturn(Future.successful(None))
+
+      service.getClientsPropertyLink("11111").value.futureValue shouldBe None
+
+      //verify(mockPropertyLinkingConnector).getClientsPropertyLink("11111")
+
+    }
+  }
+
+  "create" should {
+    "call create connector method with correct params" in {
+
+      val request = APIPropertyLinkRequest(
+        uarn = 11111,
+        authorisationOwnerOrganisationId = 2222,
+        authorisationOwnerPersonId = 33333,
+        createDatetime = Instant.now(),
+        authorisationMethod = "mock method",
+        uploadedFiles = Seq(),
+        submissionId = "44444",
+        authorisationOwnerCapacity = "OWNER",
+        startDate = date,
+        endDate = Some(date))
+
+      val propertyLink = CreatePropertyLink(request)
+
+      val httpResponse = HttpResponse(200)
+
+      when(mockPropertyLinkingConnector.createPropertyLink(any())(any(), any())).thenReturn(Future.successful(mockHttpResponse))
+
+      val response = service.create(request).futureValue
+
+      response shouldBe mockHttpResponse
+
+      verify(mockPropertyLinkingConnector).createPropertyLink(any())(any(), any())
+    }
+  }
 
   "getClientsPropertyLinks" should {
     "call connector and return a Owner Auth Result for a valid authorisation id" in {
