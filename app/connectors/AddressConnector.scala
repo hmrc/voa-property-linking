@@ -33,9 +33,9 @@ class AddressConnector @Inject() (
   lazy val baseUrl: String = conf.baseUrl("external-business-rates-data-platform")
   lazy val url = baseUrl + "/address-management-api/address"
 
-  def find(postcode: String)(implicit hc: HeaderCarrier): Future[Seq[SimpleAddress]] = {
+  def find(postcode: String)(implicit hc: HeaderCarrier): Future[Seq[DetailedAddress]] = {
     http.GET[APIAddressLookupResult](s"""$url?pageSize=100&startPoint=1&searchparams={"postcode": "$postcode"}""") map { res =>
-      res.addressDetails.map(_.simplify)
+      res.addressDetails
     }
   }
 
