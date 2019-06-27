@@ -23,20 +23,18 @@ case class AgentAuthResultFE(
                               size: Int,
                               filterTotal: Int,
                               total: Int,
-                              pendingRepresentations: Int,
                               authorisations: Seq[AgentAuthorisation]
                             )
 
 object AgentAuthResultFE {
   implicit val agentAuthResult = Json.format[AgentAuthResultFE]
 
-  def apply(results: AgentAuthResultBE, pendingRepresentationsCount: Int, approvedUnfilteredCount: Int): AgentAuthResultFE = {
+  def apply(results: AgentAuthResultBE): AgentAuthResultFE = {
     AgentAuthResultFE(
       start = results.start,
       size = results.size,
       filterTotal = results.filterTotal,
-      total = approvedUnfilteredCount,
-      pendingRepresentations = pendingRepresentationsCount,
+      total = results.total,
       authorisations = results.authorisations
     )
   }
