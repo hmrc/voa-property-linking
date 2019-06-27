@@ -2,7 +2,7 @@
 
 GET          /property-representations/validate-agent-code/:agentCode/:authorisationId        @controllers.PropertyRepresentationController.validateAgentCode(agentCode:Long, authorisationId: Long)
 GET          /property-representations/agent/:status/:organisationId                          @controllers.PropertyRepresentationController.forAgent(status: String, organisationId: Long, pagination: models.PaginationParams ?= models.DefaultPaginationParams)
-GET          /property-representations-search-sort                                            @controllers.PropertyLinkingController.forAgentSearchAndSort(organisationId: Long, params: models.PaginationParams, sortfield: Option[String], sortorder: Option[String], status: Option[String], address: Option[String], baref: Option[String], client: Option[String])
+GET          /property-representations-search-sort                                            @controllers.PropertyLinkingController.forAgentSearchAndSort(organisationId: Long, params: models.PaginationParams, sortfield: Option[String], sortorder: Option[String], status: Option[String], address: Option[String], baref: Option[String], client: Option[String], representationStatus: Option[String])
 
 POST         /property-representations/create                                                 @controllers.PropertyRepresentationController.create()
 

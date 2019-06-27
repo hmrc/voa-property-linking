@@ -17,7 +17,6 @@
 package controllers
 
 import javax.inject.Inject
-
 import auditing.AuditingService
 import auth.Authenticated
 import connectors.auth.DefaultAuthConnector
@@ -26,6 +25,7 @@ import models._
 import models.searchApi.AgentAuthResultFE
 import play.api.Logger
 import play.api.libs.json.Json
+import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.http.{HeaderCarrier, Upstream5xxResponse}
 
 import scala.collection.mutable
@@ -125,11 +125,6 @@ class PropertyLinkingController @Inject()(
     }
   }
 
-  /** *
-    * Make two calls to the Search/Sort API
-    * the first call returns the results based on supplied filters and sortfield
-    * the second call is used only to allow us to get the count of PENDING representation requests
-    */
   def forAgentSearchAndSort(organisationId: Long,
                             paginationParams: PaginationParams,
                             sortfield: Option[String],
@@ -137,8 +132,9 @@ class PropertyLinkingController @Inject()(
                             status: Option[String],
                             address: Option[String],
                             baref: Option[String],
-                            client: Option[String]) = authenticated { implicit request =>
-    val eventualAuthResultBE = propertyLinksConnector.agentSearchAndSort(
+                            client: Option[String],
+                            representationStatus: Option[String]): Action[AnyContent] = authenticated { implicit request =>
+    propertyLinksConnector.agentSearchAndSort(
       organisationId = organisationId,
       params = paginationParams,
       sortfield = sortfield,
@@ -147,26 +143,11 @@ class PropertyLinkingController @Inject()(
       address = address,
       baref = baref,
       client = client,
-      representationStatus = Some("APPROVED")) // TODO cater for other statuses
-
-    // required to calculate the pending count - no filtering/sorting required
-    val eventualAuthResultPendingBE = propertyLinksConnector.agentSearchAndSort(
-      organisationId = organisationId,
-      params = paginationParams,
-      representationStatus = Some("PENDING"))
-
-    // required to get the correct filtered amount - no filtering/sorting required
-    val eventualAuthResultApprovedNoFiltersBE = propertyLinksConnector.agentSearchAndSort(
-      organisationId = organisationId,
-      params = paginationParams,
-      representationStatus = Some("APPROVED"))
-
-    for {
-      authResultBE <- eventualAuthResultBE
-      authResultPendingBE <- eventualAuthResultPendingBE
-      authResultApprovedNoFiltersBE <- eventualAuthResultApprovedNoFiltersBE
-    } yield Ok(Json.toJson(AgentAuthResultFE(authResultBE, authResultPendingBE.filterTotal, authResultApprovedNoFiltersBE.filterTotal)))
-
+      representationStatus = representationStatus
+    )
+      .map( authResultBE =>
+        Ok(Json.toJson(AgentAuthResultFE(authResultBE)))
+    )
   }
 
   private def getProperties(organisationId: Long, params: PaginationParams)(implicit hc: HeaderCarrier): Future[PropertyLinkResponse] = {
