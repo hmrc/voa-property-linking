@@ -32,6 +32,7 @@ class CheckCaseConnector @Inject()(
                                     config: ServicesConfig
                                   ){
   lazy val baseUrl: String = config.baseUrl("external-business-rates-data-platform")
+  lazy val voaModernisedApiStubBaseUrl: String = config.baseUrl("voa-modernised-api-stub")
 
 
   def getCheckCases(submissionId: String, party: String)(implicit request: ModernisedEnrichedRequest[_]): Future[Option[CheckCasesResponse]] = {
@@ -57,10 +58,10 @@ class CheckCaseConnector @Inject()(
       .withExtraHeaders("GG-GROUP-ID" -> request.groupId)
 
     party match {
-      case "client"   =>  wSHttp.GET[HttpResponse](s"$baseUrl/external-case-management-api/my-organisation/property-links/$propertyLinkSubmissionId/check-cases/$checkCaseRef/canChallenge?valuationId=$valuationId").map{ resp =>
+      case "client"   =>  wSHttp.GET[HttpResponse](s"$voaModernisedApiStubBaseUrl/external-case-management-api/my-organisation/property-links/$propertyLinkSubmissionId/check-cases/$checkCaseRef/canChallenge?valuationId=$valuationId").map{ resp =>
         handleCanChallengeResponse(resp)
       } recover { case _ => None }
-      case "agent"    =>  wSHttp.GET[HttpResponse](s"$baseUrl/external-case-management-api/my-organisation/clients/all/property-links/$propertyLinkSubmissionId/check-cases/$checkCaseRef/canChallenge?valuationId=$valuationId").map{ resp =>
+      case "agent"    =>  wSHttp.GET[HttpResponse](s"$voaModernisedApiStubBaseUrl/external-case-management-api/my-organisation/clients/all/property-links/$propertyLinkSubmissionId/check-cases/$checkCaseRef/canChallenge?valuationId=$valuationId").map{ resp =>
         handleCanChallengeResponse(resp)
       } recover { case _ => None }
       case _          =>  throw new IllegalArgumentException(s"Unknown party $party")
