@@ -135,6 +135,12 @@ class PropertyLinkingConnector @Inject()(
     http.GET[AgentAuthResultBE](url).map(_.uppercase)
   }
 
+  def getCapacity(authorisationId: Long)(implicit hc: HeaderCarrier): Future[Option[Capacity]] = {
+    val url = baseUrl + s"/authorisation-management-api/authorisation/$authorisationId"
+
+    http.GET[Option[Capacity]](url)
+  }
+
   private def buildQueryParams(name: String, value: Option[String]): String = {
     value match {
       case Some(paramValue) if paramValue != "" => s"&$name=$paramValue";

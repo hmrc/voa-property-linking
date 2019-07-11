@@ -18,6 +18,7 @@ package models
 
 import java.time.LocalDate
 
+import models.modernised.{PropertyLinkWithAgents, PropertyLinkWithClient, ValuationHistory}
 import play.api.libs.json.Json
 
 case class Assessment(
@@ -29,9 +30,21 @@ case class Assessment(
                        rateableValue: Option[Long],
                        address: PropertyAddress,
                        billingAuthorityReference: String,
-                       currentFromDate: Option[LocalDate],
-                       currentToDate: Option[LocalDate]
+                       currentFromDate: Option[LocalDate] = None,
+                       currentToDate: Option[LocalDate] = None
+
                      )
+
+
+case class Assessments(submissionId: String,
+                      uarn: Long,
+                      address: String,
+                      pending: Boolean,
+                      capacity: Option[String],
+                      assessments: Seq[Assessment],
+                      agents: Seq[Party])
+
+
 
 object Assessment {
   implicit val formats = Json.format[Assessment]
@@ -53,4 +66,48 @@ object Assessment {
     )
   }
 
+  def fromValuationHistory(valuationHistory: ValuationHistory, authorisationId: Long) = {
+    Assessment(
+      authorisationId,
+      valuationHistory.asstRef,
+      valuationHistory.listYear,
+      valuationHistory.uarn,
+      valuationHistory.effectiveDate.getOrElse(LocalDate.now()),
+      valuationHistory.rateableValue.map {d => d.longValue()},
+      PropertyAddress.fromString(valuationHistory.address),
+      valuationHistory.billingAuthorityReference
+    )
+  }
+
+}
+
+object Assessments {
+  implicit val formats = Json.format[Assessments]
+
+  def apply(propertyLink: PropertyLinkWithAgents, history: Seq[ValuationHistory], capacity: Option[String])
+    :Assessments =
+    Assessments(propertyLink.submissionId,
+      propertyLink.uarn,
+      history.headOption.map(_.address).getOrElse("No address found"),
+      propertyLink.status != "APPROVED",
+      capacity = capacity,
+      assessments = history.map(x => Assessment.fromValuationHistory(x, propertyLink.authorisationId)),
+      agents = propertyLink.agents.map(agent => Party(agent.authorisedPartyId,
+        agent.representativeCode,
+        agent.organisationName,
+        agent.organisationId,
+        agent.checkPermission,
+        agent.challengePermission))
+    )
+
+  def apply(propertyLink: PropertyLinkWithClient, history: Seq[ValuationHistory], capacity: Option[String])
+  :Assessments =
+    Assessments(propertyLink.submissionId,
+      propertyLink.uarn,
+      history.headOption.map(_.address).getOrElse("No address found"),
+      propertyLink.status != "APPROVED",
+      capacity = capacity,
+      history.map(x => Assessment.fromValuationHistory(x, propertyLink.authorisationId)),
+      Seq()
+    )
 }

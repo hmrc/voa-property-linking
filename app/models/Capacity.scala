@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package models.modernised
+package models
 
-import models.modernised.EvidenceType.EvidenceType
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{Format, Json}
 
-case class Evidence(name: String, evidenceType: EvidenceType)
 
-object Evidence {
-  implicit val format: OFormat[Evidence] = Json.format
+case class Capacity(authorisationOwnerCapacity: String)
+
+object Capacity {
+  implicit val format: Format[Capacity] = Json.format[Capacity]
 }
+

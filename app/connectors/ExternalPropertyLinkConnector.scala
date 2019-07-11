@@ -43,16 +43,19 @@ class ExternalPropertyLinkConnector @Inject() //(@Named("VoaNewAuthedBackendHttp
 
 
   def getMyOrganisationsPropertyLinks(searchParams: GetPropertyLinksParameters, params: Option[PaginationParams])
-                                     (implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]): Future[Option[PropertyLinksWithAgents]] =
+                                     (implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]): Future[Option[PropertyLinksWithAgents]] = {
+
+    println(myOrganisationsPropertyLinksUrl)
     http.GET[Option[PropertyLinksWithAgents]](
       myOrganisationsPropertyLinksUrl,
       modernisedPaginationParams(params) ++
         List(searchParams.address.map("address" -> _),
-        searchParams.address.map("baref" -> _),
-        searchParams.address.map("agent" -> _),
-        searchParams.address.map("status" -> _),
-        searchParams.address.map("sortfield" -> _),
-        searchParams.address.map("sortorder" -> _)).flatten)
+          searchParams.baref.map("baref" -> _),
+          searchParams.agent.map("agent" -> _),
+          searchParams.status.map("status" -> _),
+          searchParams.sortfield.map("sortfield" -> _),
+          searchParams.sortorder.map("sortorder" -> _)).flatten)
+  }
 
 
   def getMyOrganisationsPropertyLink(submissionId: String)

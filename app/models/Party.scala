@@ -16,6 +16,7 @@
 
 package models
 
+import models.modernised.AgentDetails
 import play.api.libs.json.Json
 
 case class Party (
@@ -23,7 +24,6 @@ case class Party (
                   agentCode: Long,
                   organisationName: String,
                   organisationId: Long,
-                  permissionId: Long,
                   checkPermission: String,
                   challengePermission: String
                  )
@@ -33,9 +33,17 @@ object Party {
   def fromAPIParty(party: APIParty, agentDetails: GroupAccount) = {
     party.permissions.headOption.map(permissions => {
       Party(party.id, agentDetails.agentCode, agentDetails.companyName, agentDetails.id,
-        permissions.id, permissions.checkPermission,
+        permissions.checkPermission,
         permissions.challengePermission
       )
     })
   }
+
+  def apply(agentDetails: AgentDetails)
+    :Party = Party(agentDetails.authorisedPartyId,
+    agentDetails.representativeCode,
+    agentDetails.organisationName,
+    agentDetails.organisationId,
+    agentDetails.checkPermission,
+    agentDetails.challengePermission)
 }

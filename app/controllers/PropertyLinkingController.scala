@@ -25,7 +25,7 @@ import connectors.{GroupAccountConnector, PropertyLinkingConnector, PropertyRepr
 import models._
 import play.api.Logger
 import play.api.libs.json.Json
-import services.PropertyLinkingService
+import services.{PropertyLinkingService, AssessmentService}
 import uk.gov.hmrc.http.{HeaderCarrier, Upstream5xxResponse}
 import utils.Cats
 
@@ -42,6 +42,7 @@ class PropertyLinkingController @Inject()(
                                            val authConnector: DefaultAuthConnector,
                                            propertyLinksConnector: PropertyLinkingConnector,
                                            propertyLinkService: PropertyLinkingService,
+                                           assessmentService: AssessmentService,
                                            groupAccountsConnector: GroupAccountConnector,
                                            auditingService: AuditingService,
                                            representationsConnector: PropertyRepresentationConnector)
@@ -65,28 +66,34 @@ class PropertyLinkingController @Inject()(
     }
   }
 
-  def getMyPropertyLink(submissionId: String, owner: Boolean) = authenticated { implicit request =>
-    if(owner)
-      propertyLinkService.getMyOrganisationsPropertyLink(submissionId).fold(Ok(Json.toJson(submissionId))) {authorisation => Ok(Json.toJson(authorisation))}
-    else
+  def getMyOrganisationsPropertyLink(submissionId: String) = authenticated { implicit request =>
+    propertyLinkService.getMyOrganisationsPropertyLink(submissionId).fold(Ok(Json.toJson(submissionId))) {authorisation => Ok(Json.toJson(authorisation))}
+  }
+
+  def getClientsPropertyLink(submissionId: String) = authenticated { implicit request =>
       propertyLinkService.getClientsPropertyLink(submissionId).fold(Ok(Json.toJson(submissionId))) {authorisation => Ok(Json.toJson(authorisation))}
   }
 
-  def getMyPropertyLinks(searchParams: GetPropertyLinksParameters,
-                         organisationId: Long,
-                         owner: Boolean,
+
+
+  def getMyOrganisationsPropertyLinks(searchParams: GetPropertyLinksParameters,
+                                      paginationParams: Option[PaginationParams]) = authenticated { implicit request =>
+
+    propertyLinkService.getMyOrganisationsPropertyLinks(searchParams, paginationParams) flatMap {
+      response => {
+        Ok(Json.toJson(response))
+      }
+    }
+  }
+
+  def getClientsPropertyLinks(searchParams: GetPropertyLinksParameters,
                          paginationParams: Option[PaginationParams]) = authenticated { implicit request =>
 
-    if(owner)
-      propertyLinkService.getMyOrganisationsPropertyLinks(searchParams, paginationParams) flatMap {
-        case Some(authorisation) => authorisation map {d => Ok(Json.toJson(d))}
-        case None => NotFound
+    propertyLinkService.getClientsPropertyLinks(searchParams, paginationParams) flatMap {
+      response => {
+        Ok(Json.toJson(response))
       }
-    else
-      propertyLinkService.getClientsPropertyLinks(searchParams, paginationParams) flatMap {
-        case Some(authorisation) => authorisation map {d => Ok(Json.toJson(d))}
-        case None => NotFound
-      }
+    }
   }
 
   private def getProperties(organisationId: Long, params: PaginationParams)(implicit hc: HeaderCarrier): Future[PropertyLinkResponse] = {
@@ -113,13 +120,36 @@ class PropertyLinkingController @Inject()(
     }.map(_.flatten)
   }
 
-  def assessments(authorisationId: Long) = authenticated { implicit request =>
+  def getMyOrganisationsAssessments(submissionId: String) = authenticated { implicit request =>
     implicit val cache = Memoize[Long, Future[Option[GroupAccount]]]()
 
-    propertyLinksConnector.getAssessment(authorisationId) flatMap {
-      case Some(assessment) => detailed(assessment) map { x => Ok(Json.toJson(x)) }
-      case None => NotFound
-    }
+    assessmentService.getMyOrganisationsAssessments(submissionId).fold(Ok(Json.toJson(submissionId))) {authorisation =>
+      println(Json.toJson(authorisation))
+      Ok(Json.toJson(authorisation))}
+  }
+
+  def getClientsAssessments(submissionId: String) = authenticated { implicit request =>
+    implicit val cache = Memoize[Long, Future[Option[GroupAccount]]]()
+
+    assessmentService.getClientsAssessments(submissionId).fold(Ok(Json.toJson(submissionId))) {authorisation =>
+      println(Json.toJson(authorisation))
+      Ok(Json.toJson(authorisation))}
+  }
+
+  def getMyOrganisationsAssessmentsWithCapacity(submissionId: String, authorisationId: Long) = authenticated { implicit request =>
+    implicit val cache = Memoize[Long, Future[Option[GroupAccount]]]()
+
+    assessmentService.getMyOrganisationsAssessmentsWithCapacity(submissionId, authorisationId).fold(Ok(Json.toJson(submissionId))) {authorisation =>
+      println(Json.toJson(authorisation))
+      Ok(Json.toJson(authorisation))}
+  }
+
+  def getClientsAssessmentsWithCapacity(submissionId: String, authorisationId: Long) = authenticated { implicit request =>
+    implicit val cache = Memoize[Long, Future[Option[GroupAccount]]]()
+
+    assessmentService.getClientsAssessmentsWithCapacity(submissionId, authorisationId).fold(Ok(Json.toJson(submissionId))) {authorisation =>
+      println(Json.toJson(authorisation))
+      Ok(Json.toJson(authorisation))}
   }
 
 }

@@ -18,7 +18,7 @@ package services
 
 import binders.GetPropertyLinksParameters
 import cats.data.OptionT
-import connectors.{ExternalPropertyLinkConnector, ExternalValuationManagementApi}
+import connectors.{ExternalPropertyLinkConnector, ExternalValuationManagementApi, PropertyLinkingConnector}
 import javax.inject.Inject
 import models.modernised.CreatePropertyLink
 import models._
@@ -29,7 +29,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class PropertyLinkingService @Inject()(
                                         val propertyLinksConnector: ExternalPropertyLinkConnector,
-                                        val externalValuationManagementApi: ExternalValuationManagementApi
+                                        val externalValuationManagementApi: ExternalValuationManagementApi,
+                                        val legacyPropertyLinksConnector: PropertyLinkingConnector
                                       ) (implicit executionContext: ExecutionContext){
 
 
@@ -39,6 +40,7 @@ class PropertyLinkingService @Inject()(
   }
 
   def getClientsPropertyLink(submissionId: String)(implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_], ec: ExecutionContext, F: cats.Functor[scala.concurrent.Future], f: cats.Monad[scala.concurrent.Future]): OptionT[Future, PropertiesView] = {
+
     for {
       propertyLink <- OptionT(propertyLinksConnector.getClientsPropertyLink(submissionId))
       history  <- OptionT(externalValuationManagementApi.getValuationHistory(propertyLink.authorisation.uarn, submissionId))

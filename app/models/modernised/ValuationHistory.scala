@@ -39,7 +39,10 @@ case class ValuationHistory(
                              transitionalCertificate: Option[Boolean],
                              deletedIndicator: Option[Boolean],
                              valuationDetailsAvailable: Option[Boolean],
-                             billingAuthorityCode: Option[String])
+                             billingAuthorityCode: Option[String],
+                             currentFromDate: Option[LocalDate] = None,
+                             currentToDate: Option[LocalDate] = None)
+
 
 object ValuationHistory {
   implicit val valuationHistoryFormats: OFormat[ValuationHistory] = Json.format

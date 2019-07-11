@@ -48,6 +48,8 @@ object APIValuationHistory {
     effectiveDate = history.effectiveDate.get,
     rateableValue = history.rateableValue.map {d => d.longValue()},
     address = history.address,
-    billingAuthorityReference = history.billingAuthorityReference)
+    billingAuthorityReference = history.billingAuthorityReference,
+    currentFromDate = history.currentFromDate,
+    currentToDate = history.currentToDate)
 
 }
