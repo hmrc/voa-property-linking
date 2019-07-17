@@ -29,8 +29,8 @@ case class APIValuationHistory(
                                 rateableValue: Option[Long],
                                 address: String,
                                 billingAuthorityReference: String,
-                                currentFromDate: Option[LocalDate] = None,
-                                currentToDate: Option[LocalDate] = None
+                                currentFromDate: Option[LocalDate],
+                                currentToDate: Option[LocalDate]
                               ){
 
   def capatalise = this.copy(address = address.toUpperCase)
