@@ -32,6 +32,8 @@ import utils.Cats
 import scala.collection.mutable
 import scala.concurrent.Future
 
+import play.api.mvc.{Action, AnyContent, Result}
+
 case class Memoize[K, V]() {
   private val cache = mutable.Map.empty[K, V]
 
@@ -65,6 +67,7 @@ class PropertyLinkingController @Inject()(
         }
     }
   }
+
 
   def getMyOrganisationsPropertyLink(submissionId: String) = authenticated { implicit request =>
     propertyLinkService.getMyOrganisationsPropertyLink(submissionId).fold(Ok(Json.toJson(submissionId))) {authorisation => Ok(Json.toJson(authorisation))}
@@ -124,7 +127,6 @@ class PropertyLinkingController @Inject()(
     implicit val cache = Memoize[Long, Future[Option[GroupAccount]]]()
 
     assessmentService.getMyOrganisationsAssessments(submissionId).fold(Ok(Json.toJson(submissionId))) {authorisation =>
-      println(Json.toJson(authorisation))
       Ok(Json.toJson(authorisation))}
   }
 
@@ -132,7 +134,6 @@ class PropertyLinkingController @Inject()(
     implicit val cache = Memoize[Long, Future[Option[GroupAccount]]]()
 
     assessmentService.getClientsAssessments(submissionId).fold(Ok(Json.toJson(submissionId))) {authorisation =>
-      println(Json.toJson(authorisation))
       Ok(Json.toJson(authorisation))}
   }
 
@@ -140,7 +141,6 @@ class PropertyLinkingController @Inject()(
     implicit val cache = Memoize[Long, Future[Option[GroupAccount]]]()
 
     assessmentService.getMyOrganisationsAssessmentsWithCapacity(submissionId, authorisationId).fold(Ok(Json.toJson(submissionId))) {authorisation =>
-      println(Json.toJson(authorisation))
       Ok(Json.toJson(authorisation))}
   }
 
@@ -148,7 +148,6 @@ class PropertyLinkingController @Inject()(
     implicit val cache = Memoize[Long, Future[Option[GroupAccount]]]()
 
     assessmentService.getClientsAssessmentsWithCapacity(submissionId, authorisationId).fold(Ok(Json.toJson(submissionId))) {authorisation =>
-      println(Json.toJson(authorisation))
       Ok(Json.toJson(authorisation))}
   }
 

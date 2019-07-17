@@ -134,6 +134,14 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
 
   val ownerAuthResult = OwnerAuthResult(1,1,1,1, Seq())
 
+  val assessments = Assessments("11111",
+    111111,
+    "address",
+    false,
+    Some("OWNER"),
+    Seq(),
+    Seq())
+
   "create" should {
     "create a new property link submission in modernised" in {
       val testCapacityDeclaration = CapacityDeclaration("TEST_CAPACITY", LocalDate.now(), None)
@@ -205,16 +213,6 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
 
     }
 
-//    "return not found when no owner property links exist" in {
-//
-//      when(mockPropertyLinkService.getMyOrganisationsPropertyLinks(any(), any())(any(), any())).thenReturn(Future.successful(None))
-//      val res = testController.getClientsPropertyLinks(GetPropertyLinksParameters(), None)(FakeRequest())
-//
-//      status(res) shouldBe NOT_FOUND
-//
-//
-//    }
-
 
     "return client proprty links" in {
 
@@ -227,14 +225,8 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
 
     }
 
-//    "return not found when no client property links exist" in {
-//
-//      when(mockPropertyLinkService.getMyOrganisationsPropertyLinks(any(), any())(any(), any())).thenReturn(Future.successful(None))
-//      val res = testController.getClientsPropertyLinks(GetPropertyLinksParameters(), None)(FakeRequest())
-//
-//      status(res) shouldBe NOT_FOUND
-//
-//    }
+
+
 
   }
 }

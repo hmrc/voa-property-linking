@@ -17,7 +17,7 @@
 package errorhandler
 
 import connectors.auth.Principal
-import connectors.errorhandler.{AttachmentClientException, VoaClientException}
+import connectors.errorhandler.VoaClientException
 import javax.inject.Inject
 import play.api._
 import play.api.http.HttpErrorHandler
@@ -76,10 +76,6 @@ class CustomHttpErrorHandler @Inject()() extends HttpErrorHandler with EventLogg
       case e: VoaClientException =>
         logResponse(VoaErrorOccurred, exceptionDetails: _*)
         ErrorResponse(e.responseCode, HttpStatusCodes.codeName(e.responseCode), e.message)
-
-      case e: AttachmentClientException =>
-        logResponse(AttachmentsErrorOccurred, exceptionDetails: _*)
-        ErrorResponse.badRequest(e.message)
 
       // Auth exceptions
       case _: MissingBearerToken => ErrorResponse.unauthorized("Missing bearer token.")

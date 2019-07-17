@@ -26,7 +26,7 @@ case class Assessment(
                        assessmentRef: Long,
                        listYear: String,
                        uarn: Long,
-                       effectiveDate: LocalDate,
+                       effectiveDate: Option[LocalDate],
                        rateableValue: Option[Long],
                        address: PropertyAddress,
                        billingAuthorityReference: String,
@@ -72,7 +72,7 @@ object Assessment {
       valuationHistory.asstRef,
       valuationHistory.listYear,
       valuationHistory.uarn,
-      valuationHistory.effectiveDate.getOrElse(LocalDate.now()),
+      valuationHistory.effectiveDate,
       valuationHistory.rateableValue.map {d => d.longValue()},
       PropertyAddress.fromString(valuationHistory.address),
       valuationHistory.billingAuthorityReference

@@ -48,10 +48,9 @@ object CreatePropertyLink {
       capacity = Capacity.withName(request.authorisationOwnerCapacity),
       startDate = request.startDate,
       endDate = request.endDate,
-      //TODO how do we get method?
-      method = ProvidedEvidence.OTHER,
+      method = ProvidedEvidence.withName(request.authorisationMethod),
       PLsubmissionId = request.submissionId,
       createDatetime = LocalDateTime.now(),
       uploadedFiles = request.uploadedFiles.map(e => Evidence(formatFileName(request.submissionId, e.name), EvidenceType.withName(e.evidenceType))),
-      submissionSource = "EXTERNAL_API")
+      submissionSource = "DFE_UI")
 }

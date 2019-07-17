@@ -29,6 +29,7 @@ object GetPropertyLinksParameters extends ValidationUtils {
   implicit object Binder extends QueryStringBindable[GetPropertyLinksParameters] with Cats {
 
     override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, GetPropertyLinksParameters]] =
+
       Some(validate(params).leftMap(_.map(_.show).toList.mkString(", ")).toEither)
 
     override def unbind(key: String, value: GetPropertyLinksParameters): String = toQueryString(value)
@@ -38,7 +39,6 @@ object GetPropertyLinksParameters extends ValidationUtils {
         .mapN(GetPropertyLinksParameters.apply)
 
     def validateString(implicit key: String, params: Params): ValidationResult[Option[String]] =
-      readOption(key, params) ifPresent maxLength(1000)
-
+      readOption(key, params)
   }
 }

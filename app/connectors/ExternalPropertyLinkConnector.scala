@@ -29,7 +29,7 @@ import models.PaginationParams
 import scala.concurrent.{ExecutionContext, Future}
 
 
-class ExternalPropertyLinkConnector @Inject() //(@Named("VoaNewAuthedBackendHttp") http: VoaHttpClientAuth,
+class ExternalPropertyLinkConnector @Inject()
                                               (@Named("VoaAuthedBackendHttp") val http: VoaHttpClient,
                                               @Named("voa.myOrganisationsPropertyLinks") myOrganisationsPropertyLinksUrl: String,
                                               @Named("voa.myOrganisationsPropertyLink") myOrganisationsPropertyLinkUrl: String,
@@ -45,7 +45,6 @@ class ExternalPropertyLinkConnector @Inject() //(@Named("VoaNewAuthedBackendHttp
   def getMyOrganisationsPropertyLinks(searchParams: GetPropertyLinksParameters, params: Option[PaginationParams])
                                      (implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]): Future[Option[PropertyLinksWithAgents]] = {
 
-    println(myOrganisationsPropertyLinksUrl)
     http.GET[Option[PropertyLinksWithAgents]](
       myOrganisationsPropertyLinksUrl,
       modernisedPaginationParams(params) ++
