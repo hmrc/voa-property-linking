@@ -20,10 +20,12 @@ import binders.GetPropertyLinksParameters
 import cats.data.OptionT
 import connectors.{ExternalPropertyLinkConnector, ExternalValuationManagementApi, PropertyLinkingConnector}
 import javax.inject.Inject
-import models.modernised.CreatePropertyLink
 import models._
-import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
+import models.mdtp.propertylinking.requests.APIPropertyLinkRequest
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, NotFoundException}
 import models.searchApi.OwnerAuthResult
+import models.voa.propertylinking.requests.CreatePropertyLink
+import utils.Cats
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -31,57 +33,35 @@ class PropertyLinkingService @Inject()(
                                         val propertyLinksConnector: ExternalPropertyLinkConnector,
                                         val externalValuationManagementApi: ExternalValuationManagementApi,
                                         val legacyPropertyLinksConnector: PropertyLinkingConnector
-                                      ) (implicit executionContext: ExecutionContext){
+                                      ) (implicit executionContext: ExecutionContext) extends Cats {
 
 
-  def create(propertyLink: APIPropertyLinkRequest) (implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]) = {
+  def create(propertyLink: APIPropertyLinkRequest)(implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]): Future[HttpResponse] = {
       val createPropertyLink = CreatePropertyLink(propertyLink)
       propertyLinksConnector.createPropertyLink(createPropertyLink)
   }
 
-  def getClientsPropertyLink(submissionId: String)(implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_], ec: ExecutionContext, F: cats.Functor[scala.concurrent.Future], f: cats.Monad[scala.concurrent.Future]): OptionT[Future, PropertiesView] = {
-
+  def getClientsPropertyLink(submissionId: String)(implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]): OptionT[Future, PropertiesView] = {
     for {
       propertyLink <- OptionT(propertyLinksConnector.getClientsPropertyLink(submissionId))
       history  <- OptionT(externalValuationManagementApi.getValuationHistory(propertyLink.authorisation.uarn, submissionId))
     } yield PropertiesView(propertyLink.authorisation, history.NDRListValuationHistoryItems)
   }
 
-  def getMyOrganisationsPropertyLink(submissionId: String)(implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_], ec: ExecutionContext, F: cats.Functor[scala.concurrent.Future], f: cats.Monad[scala.concurrent.Future]): OptionT[Future, PropertiesView] = {
+  def getMyOrganisationsPropertyLink(submissionId: String)(implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]): OptionT[Future, PropertiesView] = {
     for {
       propertyLink <- OptionT(propertyLinksConnector.getMyOrganisationsPropertyLink(submissionId))
       history  <- OptionT(externalValuationManagementApi.getValuationHistory(propertyLink.authorisation.uarn, submissionId))
     } yield PropertiesView(propertyLink.authorisation, history.NDRListValuationHistoryItems)
   }
 
-
   def getClientsPropertyLinks( searchParams: GetPropertyLinksParameters, paginationParams: Option[PaginationParams])
-                             (implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]):Future[Option[OwnerAuthResult]] = {
-    propertyLinksConnector.getClientsPropertyLinks(searchParams, paginationParams) map {
-      case Some(propertyLinks) => Some(OwnerAuthResult(propertyLinks))
-      case None => None
-    }
+                             (implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]):OptionT[Future, OwnerAuthResult] = {
+    OptionT(propertyLinksConnector.getClientsPropertyLinks(searchParams, paginationParams)).map(OwnerAuthResult.apply)
   }
 
   def getMyOrganisationsPropertyLinks( searchParams: GetPropertyLinksParameters, paginationParams: Option[PaginationParams])
-                                     (implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]):Future[Option[OwnerAuthResult]] = {
-    propertyLinksConnector.getMyOrganisationsPropertyLinks(searchParams, paginationParams) map {
-      case Some(propertyLinks) => Some(OwnerAuthResult(propertyLinks))
-      case None => None
-    }
+                                     (implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]):OptionT[Future, OwnerAuthResult] = {
+    OptionT(propertyLinksConnector.getMyOrganisationsPropertyLinks(searchParams, paginationParams)).map(OwnerAuthResult.apply)
   }
-
-
-  private val filterInvalidParties: Seq[APIParty] => Seq[APIParty] = { parties =>
-    parties.withFilter(withValidPermissions).map(p => p.copy(permissions = p.permissions.filter(_.endDate.isEmpty)))
-  }
-
-  private val withValidParties: PropertiesViewResponse => PropertiesViewResponse = { view =>
-    view.copy(authorisations = view.authorisations map { auth => auth.copy(parties = filterInvalidParties(auth.parties)) })
-  }
-
-  private val withValidPermissions: APIParty => Boolean = { party =>
-    List("APPROVED", "PENDING").contains(party.authorisedPartyStatus) && party.permissions.exists(_.endDate.isEmpty)
-  }
-
 }

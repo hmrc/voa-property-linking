@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package models.modernised
+package models.voa.valuation.dvr.documents
 
-import play.api.libs.json.Format
-import utils.JsonUtils.enumFormat
+import java.time.LocalDateTime
 
-object ApiVersion extends Enumeration {
+import play.api.libs.json.{Json, OFormat}
 
-  type ApiVersion = Value
+case class DocumentSummary(
+                            documentId: String,
+                            documentName: String,
+                            createDatetime: LocalDateTime
+                          )
 
-  val VERSION_1_0 = Value("1.0")
-  val VERSION_1_1 = Value("1.1")
-  val VERSION_1_2 = Value("1.2")
-
-  implicit val format: Format[ApiVersion] = enumFormat(ApiVersion)
+object DocumentSummary {
+  implicit val format: OFormat[DocumentSummary] = Json.format
 
 }

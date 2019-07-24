@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package models.modernised
+package models.voa.propertylinking.requests
 
 import java.time.{LocalDate, LocalDateTime}
 
-import cats.Now
-import models.APIPropertyLinkRequest
+import models.mdtp.propertylinking.requests.APIPropertyLinkRequest
 import models.modernised.Capacity.Capacity
 import models.modernised.ProvidedEvidence.{ProvidedEvidence => Method}
+import models.modernised._
 import play.api.libs.json.{Json, OFormat, Writes}
-import utils.Formatters
 import utils.FileNameSanitisationUtils.formatFileName
+import utils.Formatters
 
 case class CreatePropertyLink(
                                uarn: Long,
@@ -42,9 +42,9 @@ object CreatePropertyLink {
   implicit val voaDateTimeWrites: Writes[LocalDateTime] = Formatters.writes
   implicit val format: OFormat[CreatePropertyLink] = Json.format
 
-  def apply(request: APIPropertyLinkRequest)
-    :CreatePropertyLink =
-    CreatePropertyLink(uarn = request.uarn,
+  def apply(request: APIPropertyLinkRequest):CreatePropertyLink =
+    CreatePropertyLink(
+      uarn = request.uarn,
       capacity = Capacity.withName(request.authorisationOwnerCapacity),
       startDate = request.startDate,
       endDate = request.endDate,

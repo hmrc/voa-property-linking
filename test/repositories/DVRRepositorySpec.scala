@@ -17,7 +17,7 @@
 package repositories
 
 
-import models.dvr.DetailedValuationRequest
+import models.voa.valuation.dvr.DetailedValuationRequest
 import org.scalatest.BeforeAndAfterEach
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.modules.reactivemongo.ReactiveMongoComponent

@@ -14,15 +14,22 @@
  * limitations under the License.
  */
 
-package models.dvr.documents
+package models.searchApi
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.Json
 
-case class DvrDocumentFiles(
-                             checkForm: Document,
-                             detailedValuation: Document
-                           )
+case class Agent(
+                  name: String,
+                  ref: Long
+                )
 
-object DvrDocumentFiles {
-  implicit val format: OFormat[DvrDocumentFiles] = Json.format
+object Agent {
+  implicit val format = Json.format[Agent]
 }
+
+case class Agents(agents: Seq[Agent])
+
+object Agents {
+  implicit val format = Json.format[Agents]
+}
+

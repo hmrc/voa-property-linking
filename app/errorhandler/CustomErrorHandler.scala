@@ -72,17 +72,14 @@ class CustomHttpErrorHandler @Inject()() extends HttpErrorHandler with EventLogg
 
     val errorResponse = ex match {
 
-      // Handle exceptions propagated from the modernised layer.
       case e: VoaClientException =>
         logResponse(VoaErrorOccurred, exceptionDetails: _*)
         ErrorResponse(e.responseCode, HttpStatusCodes.codeName(e.responseCode), e.message)
 
-      // Auth exceptions
       case _: MissingBearerToken => ErrorResponse.unauthorized("Missing bearer token.")
       case _: BearerTokenExpired => ErrorResponse.unauthorized("The bearer token has expired.")
       case _: InvalidBearerToken => ErrorResponse.unauthorized("Invalid bearer token.")
 
-      // Obfuscate all other system exceptions.
       case _: Throwable =>
         logResponse(InternalServerErrorEvent, exceptionDetails: _*)
         ErrorResponse.internalServerError(supportRequestMessage("An unexpected exception has occurred."))

@@ -9,8 +9,6 @@ PATCH        /property-representations/revoke/:authorisedPartyId                
 PUT          /property-representations/response                                               @controllers.PropertyRepresentationController.response()
 
 GET          /property-links-appointable                                                      @controllers.PropertyRepresentationController.appointableToAgent(ownerId: Long, agentCode: Long, checkPermission: Option[String], challengePermission: Option[String], params: models.PaginationParams, sortfield: Option[String], sortorder: Option[String], address: Option[String], agent: Option[String])
-GET          /property-representations-search-sort                                            @controllers.PropertyRepresentationController.forAgentSearchAndSort(organisationId: Long, params: models.PaginationParams, sortfield: Option[String], sortorder: Option[String], status: Option[String], address: Option[String], baref: Option[String], client: Option[String])
-
 
 GET          /owner/property-links                                                            @controllers.PropertyLinkingController.getMyOrganisationsPropertyLinks(searchParams: binders.GetPropertyLinksParameters, params: Option[models.PaginationParams])
 GET          /agent/property-links                                                            @controllers.PropertyLinkingController.getClientsPropertyLinks(searchParams: binders.GetPropertyLinksParameters, params: Option[models.PaginationParams])
@@ -61,10 +59,6 @@ GET          /properties/:uarn/valuation/:valuationId/files                     
 GET          /properties/:uarn/valuation/:valuationId/files/:ref                              @controllers.DVRCaseManagement.getDvrDocument(valuationId: Long, uarn: Long, propertyLinkId: String, ref: String)
 GET          /dvr-exists                                                                      @controllers.DVRCaseManagement.dvrExists(organisationId: Long, assessmentRef: Long)
 
-GET          /message/:orgId/:messageId                                                       @controllers.MessagesController.getMessage(orgId: Long, messageId)
-PUT          /message/:messageId                                                              @controllers.MessagesController.readMessage(messageId, readBy)
-GET          /messages                                                                        @controllers.MessagesController.getMessages(params: models.messages.MessageSearchParams)
-GET          /unread-messages-count/:orgId                                                    @controllers.MessagesController.messageCountFor(orgId: Long)
 
 GET          /check-cases/:submissionId/:party                                                @controllers.CheckCaseController.getCheckCases(submissionId: String, party: String)
 

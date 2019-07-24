@@ -47,11 +47,9 @@ import org.mockito.{ArgumentMatchers, Mockito}
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.Eventually._
 import org.scalatestplus.mockito.MockitoSugar
-//import org.scalatest.mockito.MockitoSugar
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.Json
 import play.api.libs.ws.{StreamedResponse, WSRequest, WSResponseHeaders}
-import uk.gov.hmrc.circuitbreaker.CircuitBreakerConfig
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.config.ServicesConfig
 

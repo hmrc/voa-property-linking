@@ -17,12 +17,11 @@
 package connectors.auth
 
 import auth.RequestWithPrincipal
-import models.modernised.ApiVersion.ApiVersion
 import play.api.mvc.WrappedRequest
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 
-class AuthenticatedApiRequest[A](val requestWithPrincipal: RequestWithPrincipal[A], val apiVersion: ApiVersion)
+case class AuthenticatedApiRequest[A](requestWithPrincipal: RequestWithPrincipal[A])
   extends WrappedRequest[A](requestWithPrincipal) {
 
   implicit val headerCarrier: HeaderCarrier =

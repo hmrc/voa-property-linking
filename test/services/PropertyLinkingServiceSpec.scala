@@ -21,11 +21,15 @@ import java.time._
 import binders.GetPropertyLinksParameters
 import connectors.{ExternalPropertyLinkConnector, ExternalValuationManagementApi, PropertyLinkingConnector}
 import models._
+import models.mdtp.propertylinking.requests.APIPropertyLinkRequest
 import models.modernised.{PropertyLinksWithAgents, _}
 import models.searchApi.{OwnerAuthResult, OwnerAuthorisation}
+import models.voa.propertylinking.requests.CreatePropertyLink
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import org.mockito.ArgumentMatchers._
+import org.mockito.Mockito
 import org.mockito.Mockito._
+import org.scalatest.BeforeAndAfterEach
 import play.api.test.FakeRequest
 import org.scalatestplus.mockito.MockitoSugar
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -35,7 +39,7 @@ import org.scalatest.concurrent.{Futures, ScalaFutures}
 import scala.concurrent.{ExecutionContext, Future}
 
 class PropertyLinkingServiceSpec
-  extends UnitSpec with MockitoSugar with WithFakeApplication with Cats with ScalaFutures {
+  extends UnitSpec with BeforeAndAfterEach with MockitoSugar with WithFakeApplication with Cats with ScalaFutures {
 
   val mockPropertyLinkingConnector = mock[ExternalPropertyLinkConnector]
   val mockExternalValuationManagementApi = mock[ExternalValuationManagementApi]
@@ -60,26 +64,28 @@ class PropertyLinkingServiceSpec
     submissionId = "22222",
     address = "address",
     NDRListValuationHistoryItems = Seq(APIValuationHistory(
-            asstRef = 125689,
-            listYear = "2017",
-            uarn = 923411,
-            effectiveDate = date,
-            rateableValue = Some(2599),
-            address = "1 HIGH STREET, BRIGHTON",
-            billingAuthorityReference = "VOA1"
-          )),
+      asstRef = 125689,
+      listYear = "2017",
+      uarn = 923411,
+      effectiveDate = Some(date),
+      rateableValue = Some(2599),
+      address = "1 HIGH STREET, BRIGHTON",
+      billingAuthorityReference = "VOA1",
+      currentFromDate = None,
+      currentToDate = None
+    )),
     parties = Seq(APIParty(id = 24680,
                 authorisedPartyStatus = "APPROVED",
                 authorisedPartyOrganisationId = 123456,
                 permissions = Seq(Permissions(
                   id = 24680,
-                  checkPermission = "APPROVED",
-                  challengePermission = "APPROVED",
+                  checkPermission = "START_AND_CONTINUE",
+                  challengePermission = "NOT_PERMITTED",
                   endDate = None)))),
-    agents = Seq(Party(authorisedPartyId = 11111,
-      agentCode = 11111,
-      organisationName = "OrgName",
-      organisationId = 11111,
+    agents = Seq(Party(authorisedPartyId = 24680,
+      agentCode = 1111,
+      organisationName = "org name",
+      organisationId = 123456,
       checkPermission = "START_AND_CONTINUE",
       challengePermission = "NOT_PERMITTED")))
 
@@ -95,10 +101,12 @@ class PropertyLinkingServiceSpec
       asstRef = 125689,
       listYear = "2017",
       uarn = 923411,
-      effectiveDate = date,
+      effectiveDate = Some(date),
       rateableValue = Some(2599),
       address = "1 HIGH STREET, BRIGHTON",
-      billingAuthorityReference = "VOA1"
+      billingAuthorityReference = "VOA1",
+      currentFromDate = None,
+      currentToDate = None
     )),
     parties = Seq(),
     agents = Seq()
@@ -110,16 +118,18 @@ class PropertyLinkingServiceSpec
     endDate = Some(date),
     submissionId = "22222",
     uarn = 33333,
-    address = "mock Address",
+    address = "address",
     localAuthorityRef = "44444",
-    agents = Seq(AgentDetails(authorisedPartyId = 24680,
-      organisationId = 123456,
-      organisationName = "org name",
-      status = "APPROVED",
-      representationSubmissionId = "",
-      representativeCode =  111111,
-      checkPermission = "APPROVED",
-      challengePermission = "APPROVED"))
+    agents = Seq(
+      AgentDetails(
+        authorisedPartyId = 24680,
+        organisationId = 123456,
+        organisationName = "org name",
+        status = "APPROVED",
+        representationSubmissionId = "",
+        representativeCode =  1111,
+        checkPermission = "START_AND_CONTINUE",
+        challengePermission = "NOT_PERMITTED"))
   )
   val ownerPropertyLink = OwnerPropertyLink(propertyLinkWithAgents)
 
@@ -131,7 +141,7 @@ class PropertyLinkingServiceSpec
     endDate = Some(date),
     submissionId = "22222",
     uarn = 33333,
-    address = "mock address",
+    address = "address",
     localAuthorityRef = "44444",
     client = ClientDetails(55555, "mock org"),
     representationStatus = "APPROVED")
@@ -176,16 +186,16 @@ class PropertyLinkingServiceSpec
 
 
   "getMyOrganisationsPropertyLink" should {
-//    "call connector and return a properties view for a valid authorisation id containing valid status" in {
-//
-//      when(mockPropertyLinkingConnector.getMyOrganisationsPropertyLink("11111")).thenReturn(Future.successful(Some(ownerPropertyLink)))
-//      when(mockExternalValuationManagementApi.getValuationHistory(33333, "11111")).thenReturn(Future.successful(Some(valuationHistoryResponse)))
-//
-//      service.getMyOrganisationsPropertyLink("11111").value.futureValue.get shouldBe validPropertiesView
-//
-//      verify(mockPropertyLinkingConnector).getMyOrganisationsPropertyLink("11111")
-//
-//    }
+    "call connector and return a properties view for a valid authorisation id containing valid status" in {
+
+      when(mockPropertyLinkingConnector.getMyOrganisationsPropertyLink("11111")).thenReturn(Future.successful(Some(ownerPropertyLink)))
+      when(mockExternalValuationManagementApi.getValuationHistory(33333, "11111")).thenReturn(Future.successful(Some(valuationHistoryResponse)))
+
+      service.getMyOrganisationsPropertyLink("11111").value.futureValue.get shouldBe validPropertiesView
+
+      verify(mockPropertyLinkingConnector).getMyOrganisationsPropertyLink("11111")
+
+    }
 
     "return none when nothing is return from connector" in {
       when(mockPropertyLinkingConnector.getMyOrganisationsPropertyLink("11111")).thenReturn(Future.successful(None))
@@ -197,25 +207,25 @@ class PropertyLinkingServiceSpec
   }
 
   "getClientsPropertyLink" should {
-//    "call connector and return a properties view for a valid authorisation id containing valid status" in {
-//
-//      when(mockPropertyLinkingConnector.getClientsPropertyLink("11111")).thenReturn(Future.successful(Some(clientPropertyLink)))
-//      when(mockExternalValuationManagementApi.getValuationHistory(33333, "11111")).thenReturn(Future.successful(Some(valuationHistoryResponse)))
-//
-//      service.getClientsPropertyLink("11111").value.futureValue.get shouldBe clientValidPropertiesView
-//
-//      //result.getOrElse("None returned") shouldBe validPropertiesView
-//
-//      verify(mockPropertyLinkingConnector).getClientsPropertyLink("11111")
-//
-//    }
+    "call connector and return a properties view for a valid authorisation id containing valid status" in {
+
+      when(mockPropertyLinkingConnector.getClientsPropertyLink("11111")).thenReturn(Future.successful(Some(clientPropertyLink)))
+      when(mockExternalValuationManagementApi.getValuationHistory(33333, "11111")).thenReturn(Future.successful(Some(valuationHistoryResponse)))
+
+      service.getClientsPropertyLink("11111").value.futureValue.get shouldBe clientValidPropertiesView
+
+      //result.getOrElse("None returned") shouldBe validPropertiesView
+
+      verify(mockPropertyLinkingConnector).getClientsPropertyLink("11111")
+
+    }
 
     "return none when nothing is return from connector" in {
       when(mockPropertyLinkingConnector.getClientsPropertyLink("11111")).thenReturn(Future.successful(None))
 
       service.getClientsPropertyLink("11111").value.futureValue shouldBe None
 
-      //verify(mockPropertyLinkingConnector).getClientsPropertyLink("11111")
+      verify(mockPropertyLinkingConnector).getClientsPropertyLink("11111")
 
     }
   }
@@ -228,7 +238,7 @@ class PropertyLinkingServiceSpec
         authorisationOwnerOrganisationId = 2222,
         authorisationOwnerPersonId = 33333,
         createDatetime = Instant.now(),
-        authorisationMethod = "mock method",
+        authorisationMethod = "RATES_BILL",
         uploadedFiles = Seq(),
         submissionId = "44444",
         authorisationOwnerCapacity = "OWNER",
@@ -254,7 +264,7 @@ class PropertyLinkingServiceSpec
 
       when(mockPropertyLinkingConnector.getClientsPropertyLinks(searchParams, Some(paginationParams))).thenReturn(Future.successful(Some(propertyLinksWithClient)))
 
-      val result = service.getClientsPropertyLinks(searchParams, Some(paginationParams))
+      val result = service.getClientsPropertyLinks(searchParams, Some(paginationParams)).value
 
       result.getOrElse("None returned") shouldBe ownerAuthResultClient
 
@@ -265,12 +275,11 @@ class PropertyLinkingServiceSpec
 
       when(mockPropertyLinkingConnector.getClientsPropertyLinks(searchParams, Some(paginationParams))).thenReturn(Future.successful(None))
 
-      val result = service.getClientsPropertyLinks(searchParams, Some(paginationParams))
+      val result = service.getClientsPropertyLinks(searchParams, Some(paginationParams)).value.futureValue
 
-      result.getOrElse("None returned") shouldBe "None returned"
+      result shouldBe None
 
-      //verify(mockPropertyLinkingConnector).getClientsPropertyLinks(searchParams, Some(paginationParams))
-
+      verify(mockPropertyLinkingConnector).getClientsPropertyLinks(searchParams, Some(paginationParams))
     }
   }
 
@@ -280,7 +289,7 @@ class PropertyLinkingServiceSpec
 
       when(mockPropertyLinkingConnector.getMyOrganisationsPropertyLinks(searchParams, Some(paginationParams))).thenReturn(Future.successful(Some(propertyLinksWithAgents)))
 
-      val result = service.getMyOrganisationsPropertyLinks(searchParams, Some(paginationParams))
+      val result = service.getMyOrganisationsPropertyLinks(searchParams, Some(paginationParams)).value
 
       result.getOrElse("None returned") shouldBe ownerAuthResultAgent
 
@@ -291,13 +300,16 @@ class PropertyLinkingServiceSpec
 
       when(mockPropertyLinkingConnector.getMyOrganisationsPropertyLinks(searchParams, Some(paginationParams))).thenReturn(Future.successful(None))
 
-      val result = service.getMyOrganisationsPropertyLinks(searchParams, Some(paginationParams))
+      val result = service.getMyOrganisationsPropertyLinks(searchParams, Some(paginationParams)).value
 
       result.getOrElse("None returned") shouldBe "None returned"
 
-      //verify(mockPropertyLinkingConnector).getMyOrganisationsPropertyLinks(searchParams, Some(paginationParams))
+      verify(mockPropertyLinkingConnector).getMyOrganisationsPropertyLinks(searchParams, Some(paginationParams))
 
     }
   }
 
+  override def beforeEach() = {
+    Mockito.reset(mockPropertyLinkingConnector)
+  }
 }

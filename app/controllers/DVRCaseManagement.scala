@@ -24,7 +24,7 @@ import auth.Authenticated
 import connectors.{CCACaseManagementApi, DVRCaseManagementConnector, ExternalValuationManagementApi}
 import connectors.auth.DefaultAuthConnector
 import javax.inject.Inject
-import models.dvr.DetailedValuationRequest
+import models.voa.valuation.dvr.DetailedValuationRequest
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ResponseHeader, Result}
 import repositories.DVRRecordRepository

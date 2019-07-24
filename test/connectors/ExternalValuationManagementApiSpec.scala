@@ -22,8 +22,8 @@ import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, stubFor, urlE
 import helpers.SimpleWsHttpTestApplication
 import http.VoaHttpClient
 import models.ModernisedEnrichedRequest
-import models.dvr.StreamedDocument
-import models.dvr.documents.{Document, DocumentSummary, DvrDocumentFiles}
+import models.voa.valuation.dvr.StreamedDocument
+import models.voa.valuation.dvr.documents.{Document, DocumentSummary, DvrDocumentFiles}
 import org.scalatest.Outcome
 import play.api.http.ContentTypes
 import play.api.libs.ws.WSClient

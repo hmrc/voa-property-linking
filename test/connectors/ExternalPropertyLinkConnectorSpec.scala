@@ -19,14 +19,13 @@ package connectors
 import binders.GetPropertyLinksParameters
 import http.VoaHttpClient
 import models.modernised._
+import models.voa.propertylinking.requests.CreatePropertyLink
 import models.{ModernisedEnrichedRequest, PaginationParams}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest._
 import org.scalatestplus.mockito.MockitoSugar
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.config.ServicesConfig
-//import org.scalatest.mock.MockitoSugar
-//import org.scalatest.mockito.MockitoSugar
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import utils.Cats
@@ -74,7 +73,6 @@ class ExternalPropertyLinkConnectorSpec extends UnitSpec with MockitoSugar with 
         myClientsPropertyLinksUrl = clientAuthorisationsUrl,
         createPropertyLinkUrl = createPropertyLinkUrl,
         conf = fakeApplication.injector.instanceOf[ServicesConfig]
-        //voaClientExceptionMapper = new VoaClientExceptionMapper(List.empty)
       )
 
       val paginationParams = PaginationParams(1, 1, true)
@@ -156,7 +154,6 @@ class ExternalPropertyLinkConnectorSpec extends UnitSpec with MockitoSugar with 
 
       "call modernised createPropertyLink endpoint" in new Setup {
 
-        //val mockSubmissionId: CreatePropertyLinkResponse = mock[CreatePropertyLinkResponse]
         val mockHttpResponse: HttpResponse = mock[HttpResponse]
         val mockVoaCreatePropertyLink: CreatePropertyLink = mock[CreatePropertyLink]
 

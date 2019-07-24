@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package models.fileUpload
+package models.mdtp.fileupload
 
 import models.{NamedEnum, NamedEnumSupport}
 

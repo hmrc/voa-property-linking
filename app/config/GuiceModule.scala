@@ -38,7 +38,7 @@ import com.google.inject.AbstractModule
 import com.google.inject.name.Names
 import com.google.inject.name.Names.named
 import com.typesafe.config.ConfigException
-import http.{VoaHttpClient, VoaHttpClientAuth}
+import http.VoaHttpClient
 import infrastructure.{RegularSchedule, Schedule, VOABackendWSHttp}
 import org.joda.time.Duration
 import play.api.Mode.Mode

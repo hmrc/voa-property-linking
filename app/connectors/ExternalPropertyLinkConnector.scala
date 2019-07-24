@@ -17,14 +17,13 @@
 package connectors
 
 import binders.GetPropertyLinksParameters
-import http.VoaHttpClientAuth
 import http.VoaHttpClient
 import javax.inject.{Inject, Named}
-import models.modernised.{ClientPropertyLink, CreatePropertyLink, OwnerPropertyLink, PropertyLinksWithAgents, PropertyLinksWithClient}
+import models.{ModernisedEnrichedRequest, PaginationParams}
+import models.modernised._
+import models.voa.propertylinking.requests.CreatePropertyLink
 import uk.gov.hmrc.http._
-import models.ModernisedEnrichedRequest
 import uk.gov.hmrc.play.config.ServicesConfig
-import models.PaginationParams
 
 import scala.concurrent.{ExecutionContext, Future}
 

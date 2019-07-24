@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package models
+package models.mdtp.propertylinking.requests
 
 import java.time.{Instant, LocalDate}
 
+import models.FileInfo
 import play.api.libs.json.{Json, OFormat, Reads}
 import utils.Formatters._
 

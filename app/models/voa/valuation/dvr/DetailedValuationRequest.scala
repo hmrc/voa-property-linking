@@ -14,12 +14,19 @@
  * limitations under the License.
  */
 
-package models.messages
+package models.voa.valuation.dvr
 
 import play.api.libs.json.{Format, Json}
 
-case class MessageSearchResults(start: Int, size: Int, messages: Seq[Message])
+case class DetailedValuationRequest(
+                                     authorisationId: Long,
+                                     organisationId: Long,
+                                     personId: Long,
+                                     submissionId: String,
+                                     assessmentRef: Long,
+                                     agents: Option[List[Long]],
+                                     billingAuthorityReferenceNumber: String)
 
-object MessageSearchResults {
-  implicit val format: Format[MessageSearchResults] = Json.format[MessageSearchResults]
+object DetailedValuationRequest {
+  implicit val format: Format[DetailedValuationRequest] = Json.format[DetailedValuationRequest]
 }

@@ -19,7 +19,7 @@ package repositories
 import com.google.inject.name.Named
 import com.google.inject.{ImplementedBy, Singleton}
 import javax.inject.Inject
-import models.dvr.DetailedValuationRequest
+import models.voa.valuation.dvr.DetailedValuationRequest
 import play.api.Logger
 import play.api.libs.json._
 import play.modules.reactivemongo.ReactiveMongoComponent

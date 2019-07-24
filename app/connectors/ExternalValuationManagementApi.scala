@@ -19,8 +19,8 @@ package connectors
 import http.VoaHttpClient
 import javax.inject.{Inject, Named}
 import models.ModernisedEnrichedRequest
-import models.dvr.StreamedDocument
-import models.dvr.documents.DvrDocumentFiles
+import models.voa.valuation.dvr.StreamedDocument
+import models.voa.valuation.dvr.documents.DvrDocumentFiles
 import models.modernised.ValuationHistoryResponse
 import play.api.http.HeaderNames.{CONTENT_LENGTH, CONTENT_TYPE}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext

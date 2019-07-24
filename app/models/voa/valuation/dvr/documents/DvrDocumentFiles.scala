@@ -14,21 +14,15 @@
  * limitations under the License.
  */
 
-package models.messages
+package models.voa.valuation.dvr.documents
 
-import play.api.libs.json._
-import play.api.libs.functional.syntax._
+import play.api.libs.json.{Json, OFormat}
 
-case class MessageCount(unread: Int, total: Int)
+case class DvrDocumentFiles(
+                             checkForm: Document,
+                             detailedValuation: Document
+                           )
 
-object MessageCount {
-  //frontend format
-  val writes: Writes[MessageCount] = Json.writes[MessageCount]
-  //"modernised" format
-  val reads: Reads[MessageCount] = (
-    (__ \ "messageCount").read[Int] and
-      (__ \ "totalMessagesCount").read[Int]
-    )(MessageCount.apply _)
-
-  implicit val format: Format[MessageCount] = Format(reads, writes)
+object DvrDocumentFiles {
+  implicit val format: OFormat[DvrDocumentFiles] = Json.format
 }

@@ -17,8 +17,7 @@
 package controllers
 
 import javax.inject.Inject
-
-import models.fileUpload.{Available, Callback}
+import models.mdtp.fileupload.{Available, Callback}
 import play.api.Logger
 import play.api.mvc.Action
 import services.FileTransferService

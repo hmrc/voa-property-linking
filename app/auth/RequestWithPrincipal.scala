@@ -16,17 +16,11 @@
 
 package auth
 
-import connectors.auth.{AuthenticatedApiRequest, Principal}
-import models.modernised.ApiVersion.ApiVersion
+import connectors.auth.Principal
 import play.api.mvc.{Request, WrappedRequest}
 
 class RequestWithPrincipal[A](val wrappedRequest: Request[A], val principal: Principal)
-  extends WrappedRequest[A](wrappedRequest) {
-
-  def versioned(apiVersion: ApiVersion): AuthenticatedApiRequest[A] =
-    new AuthenticatedApiRequest[A](this, apiVersion)
-
-}
+  extends WrappedRequest[A](wrappedRequest)
 
 object RequestWithPrincipal {
   def apply[A](request: Request[A], principal: Principal): RequestWithPrincipal[A] =

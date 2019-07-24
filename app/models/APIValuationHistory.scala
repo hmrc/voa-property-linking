@@ -42,14 +42,16 @@ object APIValuationHistory {
   implicit val formats = Json.format[APIValuationHistory]
 
   def apply(history: ValuationHistory) :APIValuationHistory =
-    APIValuationHistory(asstRef = history.asstRef,
-    listYear = history.listYear,
-    uarn = history.uarn,
+    APIValuationHistory(
+      asstRef = history.asstRef,
+      listYear = history.listYear,
+      uarn = history.uarn,
       effectiveDate = history.effectiveDate,
       rateableValue = history.rateableValue.map {d => d.longValue()},
-    address = history.address,
-    billingAuthorityReference = history.billingAuthorityReference,
-    currentFromDate = history.currentFromDate,
-    currentToDate = history.currentToDate)
+      address = history.address,
+      billingAuthorityReference = history.billingAuthorityReference,
+      currentFromDate = history.currentFromDate,
+      currentToDate = history.currentToDate
+    )
 
 }

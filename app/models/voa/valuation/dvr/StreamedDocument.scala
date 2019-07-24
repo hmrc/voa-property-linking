@@ -14,19 +14,13 @@
  * limitations under the License.
  */
 
-package models.dvr.documents
+package models.voa.valuation.dvr
 
-import java.time.LocalDateTime
+import akka.stream.scaladsl.Source
+import akka.util.ByteString
 
-import play.api.libs.json.{Json, OFormat}
-
-case class DocumentSummary(
-                            documentId: String,
-                            documentName: String,
-                            createDatetime: LocalDateTime
-                          )
-
-object DocumentSummary {
-  implicit val format: OFormat[DocumentSummary] = Json.format
-
-}
+case class StreamedDocument(
+                             contentType: Option[String],
+                             contentLength: Option[Long],
+                             headers: Map[String, String],
+                             body: Source[ByteString, _])

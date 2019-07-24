@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package models.dvr.documents
+package models.mdtp.fileupload
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.Json
 
-case class Document(
-                   documentSummary: DocumentSummary
-                   )
+case class Callback(envelopeId: String, fileId: String, status: FileStatus, reason: Option[String])
 
-object Document {
-  implicit val format: OFormat[Document] = Json.format
+object Callback {
+  implicit val format = Json.format[Callback]
 }

@@ -16,23 +16,22 @@
 
 package controllers
 
-import javax.inject.Inject
 import auditing.AuditingService
 import auth.Authenticated
 import binders.GetPropertyLinksParameters
 import connectors.auth.DefaultAuthConnector
-import connectors.{GroupAccountConnector, PropertyLinkingConnector, PropertyRepresentationConnector}
+import connectors.{GroupAccountConnector, PropertyRepresentationConnector}
+import javax.inject.Inject
 import models._
+import models.mdtp.propertylinking.requests.{APIPropertyLinkRequest, PropertyLinkRequest}
 import play.api.Logger
 import play.api.libs.json.Json
-import services.{PropertyLinkingService, AssessmentService}
+import services.{AssessmentService, PropertyLinkingService}
 import uk.gov.hmrc.http.{HeaderCarrier, Upstream5xxResponse}
 import utils.Cats
 
 import scala.collection.mutable
 import scala.concurrent.Future
-
-import play.api.mvc.{Action, AnyContent, Result}
 
 case class Memoize[K, V]() {
   private val cache = mutable.Map.empty[K, V]
@@ -42,7 +41,6 @@ case class Memoize[K, V]() {
 
 class PropertyLinkingController @Inject()(
                                            val authConnector: DefaultAuthConnector,
-                                           propertyLinksConnector: PropertyLinkingConnector,
                                            propertyLinkService: PropertyLinkingService,
                                            assessmentService: AssessmentService,
                                            groupAccountsConnector: GroupAccountConnector,
@@ -68,7 +66,6 @@ class PropertyLinkingController @Inject()(
     }
   }
 
-
   def getMyOrganisationsPropertyLink(submissionId: String) = authenticated { implicit request =>
     propertyLinkService.getMyOrganisationsPropertyLink(submissionId).fold(Ok(Json.toJson(submissionId))) {authorisation => Ok(Json.toJson(authorisation))}
   }
@@ -77,12 +74,10 @@ class PropertyLinkingController @Inject()(
       propertyLinkService.getClientsPropertyLink(submissionId).fold(Ok(Json.toJson(submissionId))) {authorisation => Ok(Json.toJson(authorisation))}
   }
 
-
-
   def getMyOrganisationsPropertyLinks(searchParams: GetPropertyLinksParameters,
                                       paginationParams: Option[PaginationParams]) = authenticated { implicit request =>
 
-    propertyLinkService.getMyOrganisationsPropertyLinks(searchParams, paginationParams) flatMap {
+    propertyLinkService.getMyOrganisationsPropertyLinks(searchParams, paginationParams).value flatMap {
       response => {
         Ok(Json.toJson(response))
       }
@@ -91,22 +86,10 @@ class PropertyLinkingController @Inject()(
 
   def getClientsPropertyLinks(searchParams: GetPropertyLinksParameters,
                          paginationParams: Option[PaginationParams]) = authenticated { implicit request =>
-
-    propertyLinkService.getClientsPropertyLinks(searchParams, paginationParams) flatMap {
+    propertyLinkService.getClientsPropertyLinks(searchParams, paginationParams).value flatMap {
       response => {
         Ok(Json.toJson(response))
       }
-    }
-  }
-
-  private def getProperties(organisationId: Long, params: PaginationParams)(implicit hc: HeaderCarrier): Future[PropertyLinkResponse] = {
-    implicit val cache = Memoize[Long, Future[Option[GroupAccount]]]()
-
-    for {
-      view <- propertyLinksConnector.find(organisationId, params)
-      detailedLinks <- Future.traverse(view.authorisations)(detailed)
-    } yield {
-      PropertyLinkResponse(view.resultCount, detailedLinks)
     }
   }
 

@@ -18,7 +18,7 @@ package connectors
 
 import http.VoaHttpClient
 import javax.inject.{Inject, Named}
-import models.dvr.DetailedValuationRequest
+import models.voa.valuation.dvr.DetailedValuationRequest
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.ws.WSClient
 import uk.gov.hmrc.http._

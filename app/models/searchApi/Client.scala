@@ -14,22 +14,15 @@
  * limitations under the License.
  */
 
-package models
-
-import java.time.Instant
+package models.searchApi
 
 import play.api.libs.json.Json
 
-case class PropertyLinkRequest(
-                                uarn: Long,
-                                organisationId: Long,
-                                individualId: Long,
-                                capacityDeclaration: CapacityDeclaration,
-                                linkedDate: Instant,
-                                linkBasis: String,
-                                fileInfo: Seq[FileInfo],
-                                submissionId: String)
+case class Client(
+                            organisationId: Long,
+                            organisationName: String
+                          )
 
-object PropertyLinkRequest {
-  implicit val propertyLinkRequest = Json.format[PropertyLinkRequest]
+object Client {
+  implicit val agentAuthClient = Json.format[Client]
 }

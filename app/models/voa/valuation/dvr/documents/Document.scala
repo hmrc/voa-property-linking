@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package models.dvr
+package models.voa.valuation.dvr.documents
 
-import akka.stream.scaladsl.Source
-import akka.util.ByteString
+import play.api.libs.json.{Json, OFormat}
 
-case class StreamedDocument(
-                             contentType: Option[String],
-                             contentLength: Option[Long],
-                             headers: Map[String, String],
-                             body: Source[ByteString, _])
+case class Document(
+                   documentSummary: DocumentSummary
+                   )
+
+object Document {
+  implicit val format: OFormat[Document] = Json.format
+}
