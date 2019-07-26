@@ -17,7 +17,7 @@
 package connectors
 
 import javax.inject.{Inject, Named}
-import models.searchApi.OwnerAgents
+import models.searchApi.Agents
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.ws.WSHttp
@@ -30,9 +30,9 @@ class AgentConnector @Inject()(
 
   lazy val baseUrl: String = conf.baseUrl("external-business-rates-data-platform")
 
-  def manageAgents (organisationId: Long)(implicit hc: HeaderCarrier): Future[OwnerAgents] = {
+  def manageAgents (organisationId: Long)(implicit hc: HeaderCarrier): Future[Agents] = {
     val url = baseUrl +
       s"/authorisation-search-api/owners/$organisationId/agents"
-      http.GET[OwnerAgents](url)
+      http.GET[Agents](url)
   }
 }

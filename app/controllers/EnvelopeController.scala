@@ -48,7 +48,6 @@ class EnvelopeController @Inject()(
     }
   }
 
-  // temporarily kept for backwards compatibility
   def record(envelopeId: String) = authenticated { implicit request =>
     repo.create(envelopeId).map(_=> Ok(envelopeId))
   }

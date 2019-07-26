@@ -30,7 +30,7 @@ import play.api.libs.ws.WSResponse
 import play.api.mvc.MultipartFormData.{DataPart, FilePart}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.config.{AppName, ServicesConfig}
-import util.Formatters._
+import utils.Formatters._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

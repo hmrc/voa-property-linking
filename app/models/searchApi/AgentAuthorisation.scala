@@ -30,7 +30,7 @@ case class AgentAuthorisation(
                                uarn: Long,
                                address: String,
                                localAuthorityRef: String,
-                               client: AgentAuthClient,
+                               client: Client,
                                representationStatus: String,
                                checkPermission: String,
                                challengePermission: String

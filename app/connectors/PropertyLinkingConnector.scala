@@ -32,61 +32,6 @@ class PropertyLinkingConnector @Inject()(
   lazy val baseUrl: String = conf.baseUrl("external-business-rates-data-platform")
   val listYear = 2017
 
-  def create(linkingRequest: APIPropertyLinkRequest)(implicit hc: HeaderCarrier): Future[Unit] = {
-    val url = baseUrl + s"/property-management-api/property/save_property_link"
-    http.POST[APIPropertyLinkRequest, HttpResponse](url, linkingRequest) map { _ => () }
-  }
-
-  def get(authorisationId: Long)(implicit hc: HeaderCarrier): Future[Option[PropertiesView]] = {
-    val url = baseUrl +
-      s"/mdtp-dashboard-management-api/mdtp_dashboard/view_assessment" +
-      s"?listYear=$listYear" +
-      s"&authorisationId=$authorisationId"
-
-    http.GET[Option[PropertiesView]](url) map {
-      case Some(view) if view.hasValidStatus => Some(view.copy(parties = filterInvalidParties(view.parties)).upperCase)
-      case _ => None
-    } recover {
-      case _: NotFoundException => None
-    }
-  }
-
-  def find(organisationId: Long, params: PaginationParams)(implicit hc: HeaderCarrier): Future[PropertiesViewResponse] = {
-    val url = baseUrl +
-      s"/mdtp-dashboard-management-api/mdtp_dashboard/properties_view" +
-      s"?listYear=$listYear" +
-      s"&organisationId=$organisationId" +
-      s"&startPoint=${params.startPoint}" +
-      s"&pageSize=${params.pageSize}" +
-      s"&requestTotalRowCount=${params.requestTotalRowCount}"
-
-    http.GET[PropertiesViewResponse](url).map(withValidStatuses.andThen(withValidParties).andThen(x => x.uppercase)).map(_.uppercase)
-  }
-
-  def searchAndSort(organisationId: Long,
-                    params: PaginationParams,
-                    sortfield: Option[String] = None,
-                    sortorder: Option[String] = None,
-                    status: Option[String] = None,
-                    address: Option[String] = None,
-                    baref: Option[String] = None,
-                    agent: Option[String] = None,
-                    agentAppointed: Option[String] = Some("BOTH"))(implicit hc: HeaderCarrier): Future[OwnerAuthResult] = {
-    val url = baseUrl +
-      s"/authorisation-search-api/owners/$organisationId/authorisations" +
-      s"?start=${params.startPoint}" +
-      s"&size=${params.pageSize}" +
-      buildQueryParams("sortfield", sortfield) +
-      buildQueryParams("sortorder", sortorder) +
-      buildQueryParams("status", status) +
-      buildQueryParams("address", address) +
-      buildQueryParams("baref", baref) +
-      buildQueryParams("agent", agent) +
-    s"&agentAppointed=${agentAppointed.getOrElse("BOTH")}"
-
-    http.GET[OwnerAuthResult](url).map(_.uppercase)
-  }
-
   def appointableToAgent(
                           ownerId: Long,
                           agentId: Long,
@@ -110,29 +55,10 @@ class PropertyLinkingConnector @Inject()(
     http.GET[OwnerAuthResult](url).map(_.uppercase)
   }
 
-  def agentSearchAndSort(organisationId: Long,
-                         params: PaginationParams,
-                         sortfield: Option[String] = None,
-                         sortorder: Option[String] = None,
-                         status: Option[String] = None,
-                         address: Option[String] = None,
-                         baref: Option[String] = None,
-                         client: Option[String] = None,
-                         representationStatus: Option[String]
-                        )(implicit hc: HeaderCarrier): Future[AgentAuthResultBE] = {
-    val url = baseUrl +
-      s"/authorisation-search-api/agents/$organisationId/authorisations" +
-      s"?start=${params.startPoint}" +
-      s"&size=${params.pageSize}" +
-      buildQueryParams("sortfield", sortfield) +
-      buildQueryParams("sortorder", sortorder) +
-      buildQueryParams("status", status) +
-      buildQueryParams("address", address) +
-      buildQueryParams("baref", baref) +
-      buildQueryParams("client", client) +
-      buildQueryParams("representationStatus", representationStatus)
+  def getCapacity(authorisationId: Long)(implicit hc: HeaderCarrier): Future[Option[Capacity]] = {
+    val url = baseUrl + s"/authorisation-management-api/authorisation/$authorisationId"
 
-    http.GET[AgentAuthResultBE](url).map(_.uppercase)
+    http.GET[Option[Capacity]](url)
   }
 
   private def buildQueryParams(name: String, value: Option[String]): String = {
@@ -140,26 +66,5 @@ class PropertyLinkingConnector @Inject()(
       case Some(paramValue) if paramValue != "" => s"&$name=$paramValue";
       case _ => ""
     }
-  }
-
-  private val withValidStatuses: PropertiesViewResponse => PropertiesViewResponse = { view =>
-    view.copy(authorisations = view.authorisations.filter(_.hasValidStatus))
-  }
-
-  private val withValidPermissions: APIParty => Boolean = { party =>
-    List("APPROVED", "PENDING").contains(party.authorisedPartyStatus) && party.permissions.exists(_.endDate.isEmpty)
-  }
-
-  private val filterInvalidParties: Seq[APIParty] => Seq[APIParty] = { parties =>
-    parties.withFilter(withValidPermissions).map(p => p.copy(permissions = p.permissions.filter(_.endDate.isEmpty)))
-  }
-
-  private val withValidParties: PropertiesViewResponse => PropertiesViewResponse = { view =>
-    view.copy(authorisations = view.authorisations map { auth => auth.copy(parties = filterInvalidParties(auth.parties)) })
-  }
-
-  def getAssessment(authorisationId: Long)(implicit hc: HeaderCarrier): Future[Option[PropertiesView]] = {
-    val url = baseUrl + s"/mdtp-dashboard-management-api/mdtp_dashboard/view_assessment?listYear=$listYear&authorisationId=$authorisationId"
-    http.GET[Option[PropertiesView]](url).map(_.map(_.upperCase)) recover { case _: NotFoundException => None }
   }
 }

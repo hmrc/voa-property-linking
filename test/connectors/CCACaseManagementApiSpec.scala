@@ -19,7 +19,7 @@ package connectors
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, post, stubFor, urlEqualTo}
 import helpers.SimpleWsHttpTestApplication
 import http.VoaHttpClient
-import models.dvr.DetailedValuationRequest
+import models.voa.valuation.dvr.DetailedValuationRequest
 import play.api.http.ContentTypes
 import play.api.libs.ws.WSClient
 import uk.gov.hmrc.http.HeaderCarrier

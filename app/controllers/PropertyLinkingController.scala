@@ -16,17 +16,19 @@
 
 package controllers
 
-import javax.inject.Inject
 import auditing.AuditingService
 import auth.Authenticated
+import binders.GetPropertyLinksParameters
 import connectors.auth.DefaultAuthConnector
-import connectors.{GroupAccountConnector, PropertyLinkingConnector, PropertyRepresentationConnector}
+import connectors.{GroupAccountConnector, PropertyRepresentationConnector}
+import javax.inject.Inject
 import models._
-import models.searchApi.AgentAuthResultFE
+import models.mdtp.propertylinking.requests.{APIPropertyLinkRequest, PropertyLinkRequest}
 import play.api.Logger
 import play.api.libs.json.Json
-import play.api.mvc.{Action, AnyContent}
+import services.{AssessmentService, PropertyLinkingService}
 import uk.gov.hmrc.http.{HeaderCarrier, Upstream5xxResponse}
+import utils.Cats
 
 import scala.collection.mutable
 import scala.concurrent.Future
@@ -39,17 +41,18 @@ case class Memoize[K, V]() {
 
 class PropertyLinkingController @Inject()(
                                            val authConnector: DefaultAuthConnector,
-                                           propertyLinksConnector: PropertyLinkingConnector,
+                                           propertyLinkService: PropertyLinkingService,
+                                           assessmentService: AssessmentService,
                                            groupAccountsConnector: GroupAccountConnector,
                                            auditingService: AuditingService,
                                            representationsConnector: PropertyRepresentationConnector)
-  extends PropertyLinkingBaseController with Authenticated {
+  extends PropertyLinkingBaseController with Authenticated with Cats {
 
   type GroupCache = Memoize[Long, Future[Option[GroupAccount]]]
 
   def create() = authenticated(parse.json) { implicit request =>
     withJsonBody[PropertyLinkRequest] { linkRequest =>
-      propertyLinksConnector.create(APIPropertyLinkRequest.fromPropertyLinkRequest(linkRequest))
+      propertyLinkService.create(APIPropertyLinkRequest.fromPropertyLinkRequest(linkRequest))
         .map { _ =>
           Logger.info(s"create property link: submissionId ${linkRequest.submissionId}")
           auditingService.sendEvent("create property link", linkRequest)
@@ -63,101 +66,30 @@ class PropertyLinkingController @Inject()(
     }
   }
 
-  def get(authorisationId: Long) = authenticated { implicit request =>
-    implicit val cache = Memoize[Long, Future[Option[GroupAccount]]]()
+  def getMyOrganisationsPropertyLink(submissionId: String) = authenticated { implicit request =>
+    propertyLinkService.getMyOrganisationsPropertyLink(submissionId).fold(Ok(Json.toJson(submissionId))) {authorisation => Ok(Json.toJson(authorisation))}
+  }
 
-    propertyLinksConnector.get(authorisationId) flatMap {
-      case Some(authorisation) => detailed(authorisation) map { d => Ok(Json.toJson(d)) }
-      case None => NotFound
+  def getClientsPropertyLink(submissionId: String) = authenticated { implicit request =>
+      propertyLinkService.getClientsPropertyLink(submissionId).fold(Ok(Json.toJson(submissionId))) {authorisation => Ok(Json.toJson(authorisation))}
+  }
+
+  def getMyOrganisationsPropertyLinks(searchParams: GetPropertyLinksParameters,
+                                      paginationParams: Option[PaginationParams]) = authenticated { implicit request =>
+
+    propertyLinkService.getMyOrganisationsPropertyLinks(searchParams, paginationParams).value flatMap {
+      response => {
+        Ok(Json.toJson(response))
+      }
     }
   }
 
-  def find(organisationId: Long, paginationParams: PaginationParams) = authenticated { implicit request =>
-    getProperties(organisationId, paginationParams).map(x => Ok(Json.toJson(x)))
-  }
-
-  def searchAndSort(organisationId: Long,
-                    paginationParams: PaginationParams,
-                    sortfield: Option[String],
-                    sortorder: Option[String],
-                    status: Option[String],
-                    address: Option[String],
-                    baref: Option[String],
-                    agent: Option[String],
-                    agentAppointed: Option[String]) = authenticated { implicit request =>
-
-    propertyLinksConnector.searchAndSort(
-      organisationId = organisationId,
-      params = paginationParams,
-      sortfield = sortfield,
-      sortorder = sortorder,
-      status = status,
-      address = address,
-      baref = baref,
-      agent = agent,
-      agentAppointed = agentAppointed).map(x => Ok(Json.toJson(x)))
-  }
-
-  def appointableToAgent(ownerId: Long,
-                         agentCode: Long,
-                         checkPermission: Option[String],
-                         challengePermission: Option[String],
-                         paginationParams: PaginationParams,
-                         sortfield: Option[String],
-                         sortorder: Option[String],
-                         address: Option[String],
-                         agent: Option[String]) = authenticated { implicit request =>
-
-    groupAccountsConnector.withAgentCode(agentCode.toString) flatMap {
-      case Some(agentGroup) => propertyLinksConnector.appointableToAgent(
-        ownerId = ownerId,
-        agentId = agentGroup.id,
-        checkPermission = checkPermission,
-        challengePermission = challengePermission,
-        params = paginationParams,
-        sortfield = sortfield,
-        sortorder = sortorder,
-        address = address,
-        agent = agent).map(x => Ok(Json.toJson(x)))
-      case None =>
-        Logger.error(s"Agent details lookup failed for agentCode: $agentCode")
-        NotFound
-    }
-  }
-
-  def forAgentSearchAndSort(organisationId: Long,
-                            paginationParams: PaginationParams,
-                            sortfield: Option[String],
-                            sortorder: Option[String],
-                            status: Option[String],
-                            address: Option[String],
-                            baref: Option[String],
-                            client: Option[String],
-                            representationStatus: Option[String]): Action[AnyContent] = authenticated { implicit request =>
-    propertyLinksConnector.agentSearchAndSort(
-      organisationId = organisationId,
-      params = paginationParams,
-      sortfield = sortfield,
-      sortorder = sortorder,
-      status = status,
-      address = address,
-      baref = baref,
-      client = client,
-      representationStatus = representationStatus
-    )
-      .map( authResultBE =>
-        Ok(Json.toJson(AgentAuthResultFE(authResultBE)))
-    )
-  }
-
-  private def getProperties(organisationId: Long, params: PaginationParams)(implicit hc: HeaderCarrier): Future[PropertyLinkResponse] = {
-    implicit val cache = Memoize[Long, Future[Option[GroupAccount]]]()
-
-    for {
-      view <- propertyLinksConnector.find(organisationId, params)
-      detailedLinks <- Future.traverse(view.authorisations)(detailed)
-    } yield {
-      PropertyLinkResponse(view.resultCount, detailedLinks)
+  def getClientsPropertyLinks(searchParams: GetPropertyLinksParameters,
+                         paginationParams: Option[PaginationParams]) = authenticated { implicit request =>
+    propertyLinkService.getClientsPropertyLinks(searchParams, paginationParams).value flatMap {
+      response => {
+        Ok(Json.toJson(response))
+      }
     }
   }
 
@@ -174,30 +106,32 @@ class PropertyLinkingController @Inject()(
     }.map(_.flatten)
   }
 
-  def clientProperty(authorisationId: Long, clientOrgId: Long, agentOrgId: Long) = authenticated { implicit request =>
-    propertyLinksConnector.get(authorisationId) flatMap {
-      case Some(authorisation) if authorisedFor(authorisation, clientOrgId, agentOrgId) => toClientProperty(authorisation) map { p => Ok(Json.toJson(p)) }
-      case _ => NotFound
-    }
-  }
-
-  private def authorisedFor(authorisation: PropertiesView, clientOrgId: Long, agentOrgId: Long) = {
-    authorisation.authorisationOwnerOrganisationId == clientOrgId && authorisation.parties.exists(_.authorisedPartyOrganisationId == agentOrgId)
-  }
-
-  private def toClientProperty(authorisation: PropertiesView)(implicit hc: HeaderCarrier): Future[ClientProperty] = {
-    groupAccountsConnector.get(authorisation.authorisationOwnerOrganisationId) map { acc =>
-      ClientProperty.build(authorisation, acc)
-    }
-  }
-
-  def assessments(authorisationId: Long) = authenticated { implicit request =>
+  def getMyOrganisationsAssessments(submissionId: String) = authenticated { implicit request =>
     implicit val cache = Memoize[Long, Future[Option[GroupAccount]]]()
 
-    propertyLinksConnector.getAssessment(authorisationId) flatMap {
-      case Some(assessment) => detailed(assessment) map { x => Ok(Json.toJson(x)) }
-      case None => NotFound
-    }
+    assessmentService.getMyOrganisationsAssessments(submissionId).fold(Ok(Json.toJson(submissionId))) {authorisation =>
+      Ok(Json.toJson(authorisation))}
+  }
+
+  def getClientsAssessments(submissionId: String) = authenticated { implicit request =>
+    implicit val cache = Memoize[Long, Future[Option[GroupAccount]]]()
+
+    assessmentService.getClientsAssessments(submissionId).fold(Ok(Json.toJson(submissionId))) {authorisation =>
+      Ok(Json.toJson(authorisation))}
+  }
+
+  def getMyOrganisationsAssessmentsWithCapacity(submissionId: String, authorisationId: Long) = authenticated { implicit request =>
+    implicit val cache = Memoize[Long, Future[Option[GroupAccount]]]()
+
+    assessmentService.getMyOrganisationsAssessmentsWithCapacity(submissionId, authorisationId).fold(Ok(Json.toJson(submissionId))) {authorisation =>
+      Ok(Json.toJson(authorisation))}
+  }
+
+  def getClientsAssessmentsWithCapacity(submissionId: String, authorisationId: Long) = authenticated { implicit request =>
+    implicit val cache = Memoize[Long, Future[Option[GroupAccount]]]()
+
+    assessmentService.getClientsAssessmentsWithCapacity(submissionId, authorisationId).fold(Ok(Json.toJson(submissionId))) {authorisation =>
+      Ok(Json.toJson(authorisation))}
   }
 
 }

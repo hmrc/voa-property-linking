@@ -17,12 +17,10 @@
 package controllers
 
 import connectors.auth.DefaultAuthConnector
-import models.searchApi.{OwnerAgent, OwnerAgents}
+import models.searchApi.{Agent, Agents}
 import org.mockito.ArgumentMatchers.{any, eq => mockEq}
 import org.mockito.Mockito.{reset, when}
-import org.scalatest.Outcome
-import org.scalatest.mockito.MockitoSugar
-import org.scalatestplus.play.OneAppPerSuite
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
@@ -67,23 +65,20 @@ class AgentControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplic
     "return owner agents" in {
       reset(mockWS)
 
-      // setup
       val testAgentController = fakeApplication.injector.instanceOf[AgentController]
       val organisationId = 111
 
       val manageAgentUrl = s"$baseUrl/authorisation-search-api/owners/$organisationId/agents"
 
-      val expected = OwnerAgents(agents = Seq(OwnerAgent("Name1", 1), OwnerAgent("Name2", 2)))
-      when(mockWS.GET(mockEq(manageAgentUrl))(any(classOf[HttpReads[OwnerAgents]]), any(), any())).thenReturn(Future(expected))
+      val expected = Agents(agents = Seq(Agent("Name1", 1), Agent("Name2", 2)))
+      when(mockWS.GET(mockEq(manageAgentUrl))(any(classOf[HttpReads[Agents]]), any(), any())).thenReturn(Future(expected))
 
-      // test
       val res = testAgentController.manageAgents(organisationId)(FakeRequest())
 
-      // check
       status(res) shouldBe OK
-      val names = Json.parse(contentAsString(res)).as[OwnerAgents].agents
+      val names = Json.parse(contentAsString(res)).as[Agents].agents
 
-      names shouldBe Seq(OwnerAgent("Name1", 1), OwnerAgent("Name2", 2))
+      names shouldBe Seq(Agent("Name1", 1), Agent("Name2", 2))
     }
   }
 }

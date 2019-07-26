@@ -18,8 +18,7 @@ package models
 
 import play.api.libs.json.Json
 
-case class ClientProperty(ownerOrganisationId: Long,
-                          ownerOrganisationName: String,
+case class ClientProperty(ownerOrganisationName: String,
                           uarn: Long,
                           billingAuthorityReference: String,
                           authorisedPartyId: Long,
@@ -36,7 +35,6 @@ object ClientProperty {
 
   def build(prop: PropertiesView, userAccount: Option[GroupAccount]) = {
     ClientProperty(
-      prop.authorisationOwnerOrganisationId,
       userAccount.map(_.companyName).getOrElse("Name not found"),
       prop.uarn,
       prop.NDRListValuationHistoryItems.headOption.map(_.billingAuthorityReference).getOrElse("BARef not found"),

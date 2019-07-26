@@ -51,7 +51,6 @@ class AddressConnectorSpec extends ContentTypes with WireMockSpec with SimpleWsH
     }
   }
 
-  // Detailed Address
   lazy val getResponseValid = """{
       "addressDetails": [
         {

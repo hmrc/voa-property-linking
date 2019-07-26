@@ -20,7 +20,8 @@ import java.util.UUID
 
 import modules.tasks.AddTimestamps
 import org.scalatest.BeforeAndAfterEach
-import org.scalatest.mock.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
+//import org.scalatest.mock.MockitoSugar
 import play.api.Environment
 import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.indexes.Index

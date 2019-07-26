@@ -16,19 +16,20 @@
 
 package controllers
 
-import javax.inject.Inject
-
 import auditing.AuditingService
 import auth.Authenticated
-import connectors.PropertyRepresentationConnector
 import connectors.auth.DefaultAuthConnector
+import connectors.{GroupAccountConnector, PropertyLinkingConnector, PropertyRepresentationConnector}
+import javax.inject.Inject
 import models._
+import play.api.Logger
 import play.api.libs.json.Json
-import play.api.mvc.Action
 
 class PropertyRepresentationController @Inject() (
                                                    val authConnector: DefaultAuthConnector,
                                                    representations: PropertyRepresentationConnector,
+                                                   propertyLinksConnector: PropertyLinkingConnector,
+                                                   groupAccountsConnector: GroupAccountConnector,
                                                    auditingService: AuditingService
                                                  ) extends PropertyLinkingBaseController with Authenticated {
 
@@ -68,4 +69,30 @@ class PropertyRepresentationController @Inject() (
      }
    }
 
+  def appointableToAgent(ownerId: Long,
+                         agentCode: Long,
+                         checkPermission: Option[String],
+                         challengePermission: Option[String],
+                         paginationParams: PaginationParams,
+                         sortfield: Option[String],
+                         sortorder: Option[String],
+                         address: Option[String],
+                         agent: Option[String]) = authenticated { implicit request =>
+
+    groupAccountsConnector.withAgentCode(agentCode.toString) flatMap {
+      case Some(agentGroup) => propertyLinksConnector.appointableToAgent(
+        ownerId = ownerId,
+        agentId = agentGroup.id,
+        checkPermission = checkPermission,
+        challengePermission = challengePermission,
+        params = paginationParams,
+        sortfield = sortfield,
+        sortorder = sortorder,
+        address = address,
+        agent = agent).map(x => Ok(Json.toJson(x)))
+      case None =>
+        Logger.error(s"Agent details lookup failed for agentCode: $agentCode")
+        NotFound
+    }
+  }
 }

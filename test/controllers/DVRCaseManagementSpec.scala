@@ -22,11 +22,11 @@ import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import connectors.auth.DefaultAuthConnector
 import connectors.{CCACaseManagementApi, DVRCaseManagementConnector, ExternalValuationManagementApi}
-import models.dvr.documents.{Document, DocumentSummary, DvrDocumentFiles}
-import models.dvr.{DetailedValuationRequest, StreamedDocument}
+import models.voa.valuation.dvr.documents.{Document, DocumentSummary, DvrDocumentFiles}
+import models.voa.valuation.dvr.{DetailedValuationRequest, StreamedDocument}
 import org.mockito.ArgumentMatchers.{eq => matching, _}
 import org.mockito.Mockito._
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._

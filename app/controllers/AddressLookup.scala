@@ -24,7 +24,7 @@ import connectors.auth.DefaultAuthConnector
 import models.SimpleAddress
 import play.api.libs.json.Json
 import play.api.mvc.Action
-import util.PostcodeValidator
+import utils.PostcodeValidator
 
 import scala.concurrent.Future
 

@@ -16,8 +16,9 @@
 
 package models
 
-import java.time.{Instant, LocalDate}
+import java.time.{Clock, Instant, LocalDate, ZoneId}
 
+import models.modernised.{ValuationHistory, _}
 import play.api.libs.json._
 
 case class PropertiesViewResponse(resultCount: Option[Int], authorisations: Seq[PropertiesView]){
@@ -31,16 +32,13 @@ object PropertiesViewResponse {
 
 case class PropertiesView(authorisationId: Long,
                           uarn: Long,
-                          authorisationOwnerOrganisationId: Long,
-                          authorisationOwnerPersonId: Long,
                           authorisationStatus: String,
-                          authorisationMethod: String,
-                          authorisationOwnerCapacity: String,
-                          createDatetime: Instant,
                           startDate: LocalDate,
                           endDate: Option[LocalDate],
                           submissionId: String,
+                          address: String,
                           NDRListValuationHistoryItems: Seq[APIValuationHistory],
+                          agents: Seq[Party],
                           parties: Seq[APIParty]) {
 
   def upperCase = this.copy(NDRListValuationHistoryItems = NDRListValuationHistoryItems.map(_.capatalise))
@@ -53,4 +51,37 @@ case class PropertiesView(authorisationId: Long,
 object PropertiesView {
   implicit val instantReads: Reads[Instant] = Reads.instantReads("yyyy-MM-dd'T'HH:mm:ss.SSS[XXX][X]")
   implicit val format: Format[PropertiesView] = Json.format[PropertiesView]
+
+  def apply(propertyLink: PropertyLinkWithClient, history: Seq[ValuationHistory])
+  :PropertiesView =
+    PropertiesView(authorisationId = propertyLink.authorisationId,
+      uarn = propertyLink.uarn,
+      authorisationStatus = propertyLink.status.toString,
+      startDate = propertyLink.startDate,
+      endDate = propertyLink.endDate,
+      submissionId = propertyLink.submissionId,
+      address = propertyLink.address,
+      NDRListValuationHistoryItems = history.map(history => APIValuationHistory(history)).toList,
+      agents = Seq(),
+      parties = Seq())
+
+
+  def apply(propertyLink: PropertyLinkWithAgents, history: Seq[ValuationHistory])
+  :PropertiesView =
+    PropertiesView(authorisationId = propertyLink.authorisationId,
+      uarn = propertyLink.uarn,
+      authorisationStatus = propertyLink.status.toString,
+      startDate = propertyLink.startDate,
+      endDate = propertyLink.endDate,
+      submissionId = propertyLink.submissionId,
+      address = propertyLink.address,
+      NDRListValuationHistoryItems = history.map(history => APIValuationHistory(history)).toList,
+      agents = propertyLink.agents.map(agent => Party(agent)),
+      parties = propertyLink.agents.map(agent => APIParty(id = agent.authorisedPartyId,
+        authorisedPartyStatus = agent.status,
+        authorisedPartyOrganisationId = agent.organisationId,
+        permissions = Seq(Permissions(agent.authorisedPartyId, agent.checkPermission, agent.challengePermission, None)))))
+
+
+
 }
