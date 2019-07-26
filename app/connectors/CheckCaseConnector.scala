@@ -32,7 +32,7 @@ class CheckCaseConnector @Inject()(
                                     config: ServicesConfig
                                   ){
   lazy val baseUrl: String = config.baseUrl("external-business-rates-data-platform")
-  lazy val voaModernisedApiStubBaseUrl: String = config.baseUrl("voa-modernised-api-stub")
+  lazy val voaModernisedApiStubBaseUrl: String = config.baseUrl("voa-modernised-api")
 
 
   def getCheckCases(submissionId: String, party: String)(implicit request: ModernisedEnrichedRequest[_]): Future[Option[CheckCasesResponse]] = {
