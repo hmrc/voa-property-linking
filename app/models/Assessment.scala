@@ -18,7 +18,7 @@ package models
 
 import java.time.LocalDate
 
-import models.modernised.{PropertyLinkWithAgents, PropertyLinkWithClient, ValuationHistory}
+import models.modernised.{PropertyLinkStatus, PropertyLinkWithAgents, PropertyLinkWithClient, ValuationHistory}
 import play.api.libs.json.Json
 
 case class Assessment(
@@ -91,7 +91,7 @@ object Assessments {
     Assessments(propertyLink.submissionId,
       propertyLink.uarn,
       history.headOption.map(_.address).getOrElse("No address found"),
-      propertyLink.status != "APPROVED",
+      propertyLink.status != PropertyLinkStatus.APPROVED,
       capacity = capacity,
       assessments = history.map(x => Assessment.fromValuationHistory(x, propertyLink.authorisationId)),
       agents = propertyLink.agents.map(agent => Party(agent.authorisedPartyId,
@@ -107,7 +107,7 @@ object Assessments {
     Assessments(propertyLink.submissionId,
       propertyLink.uarn,
       history.headOption.map(_.address).getOrElse("No address found"),
-      propertyLink.status != "APPROVED",
+      propertyLink.status != PropertyLinkStatus.APPROVED,
       capacity = capacity,
       history.map(x => Assessment.fromValuationHistory(x, propertyLink.authorisationId)),
       Seq()
