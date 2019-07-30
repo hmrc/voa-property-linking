@@ -27,7 +27,7 @@ case class OwnerAuthorisation(
                                uarn: Long,
                                address: String,
                                localAuthorityRef: String,
-                               agents: Option[Seq[OwnerAuthAgent]]
+                               agents: Seq[OwnerAuthAgent]
                              ){
 
   def capatilise() = this.copy(address = address.toUpperCase)
@@ -36,30 +36,18 @@ case class OwnerAuthorisation(
 object OwnerAuthorisation {
   implicit val ownerAuthorisation = Json.format[OwnerAuthorisation]
 
-
-  def apply(propertyLink: PropertyLinkWithClient)
-  :OwnerAuthorisation =
-    OwnerAuthorisation(authorisationId = propertyLink.authorisationId,
+  def apply(propertyLink: PropertyLinkWithAgents):OwnerAuthorisation =
+    OwnerAuthorisation(
+      authorisationId = propertyLink.authorisationId,
       status = propertyLink.status.toString,
       submissionId = propertyLink.submissionId,
       uarn = propertyLink.uarn,
       address = propertyLink.address,
       localAuthorityRef = propertyLink.localAuthorityRef,
-      agents = None)
-
-
-  def apply(propertyLink: PropertyLinkWithAgents)
-  :OwnerAuthorisation =
-    OwnerAuthorisation(authorisationId = propertyLink.authorisationId,
-      status = propertyLink.status.toString,
-      submissionId = propertyLink.submissionId,
-      uarn = propertyLink.uarn,
-      address = propertyLink.address,
-      localAuthorityRef = propertyLink.localAuthorityRef,
-      agents = Some(propertyLink.agents.map(agent => OwnerAuthAgent(authorisedPartyId = agent.authorisedPartyId,
+      agents = propertyLink.agents.map(agent => OwnerAuthAgent(authorisedPartyId = agent.authorisedPartyId,
         organisationId = agent.organisationId,
         organisationName = agent.organisationName,
         status = Some(agent.status),
         checkPermission = AgentPermission.fromName(agent.checkPermission),
-        challengePermission = AgentPermission.fromName(agent.challengePermission))).toList))
+        challengePermission = AgentPermission.fromName(agent.challengePermission))).toList)
 }

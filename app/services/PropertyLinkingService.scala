@@ -23,7 +23,7 @@ import javax.inject.Inject
 import models._
 import models.mdtp.propertylinking.requests.APIPropertyLinkRequest
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, NotFoundException}
-import models.searchApi.OwnerAuthResult
+import models.searchApi.{AgentAuthResult, OwnerAuthResult}
 import models.voa.propertylinking.requests.CreatePropertyLink
 import utils.Cats
 
@@ -56,8 +56,8 @@ class PropertyLinkingService @Inject()(
   }
 
   def getClientsPropertyLinks( searchParams: GetPropertyLinksParameters, paginationParams: Option[PaginationParams])
-                             (implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]):OptionT[Future, OwnerAuthResult] = {
-    OptionT(propertyLinksConnector.getClientsPropertyLinks(searchParams, paginationParams)).map(OwnerAuthResult.apply)
+                             (implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]):OptionT[Future, AgentAuthResult] = {
+    OptionT(propertyLinksConnector.getClientsPropertyLinks(searchParams, paginationParams)).map(AgentAuthResult.apply)
   }
 
   def getMyOrganisationsPropertyLinks( searchParams: GetPropertyLinksParameters, paginationParams: Option[PaginationParams])

@@ -23,7 +23,7 @@ import connectors.{ExternalPropertyLinkConnector, ExternalValuationManagementApi
 import models._
 import models.mdtp.propertylinking.requests.APIPropertyLinkRequest
 import models.modernised.{PropertyLinksWithAgents, _}
-import models.searchApi.{OwnerAuthResult, OwnerAuthorisation}
+import models.searchApi.{AgentAuthResult, AgentAuthorisation, OwnerAuthResult, OwnerAuthorisation}
 import models.voa.propertylinking.requests.CreatePropertyLink
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import org.mockito.ArgumentMatchers._
@@ -134,7 +134,8 @@ class PropertyLinkingServiceSpec
   val ownerPropertyLink = OwnerPropertyLink(propertyLinkWithAgents)
 
 
-  val propertyLinkClient = PropertyLinkWithClient(authorisationId = 11111,
+  val propertyLinkClient = PropertyLinkWithClient(
+    authorisationId = 11111,
     authorisedPartyId = 11111,
     status = PropertyLinkStatus.APPROVED,
     startDate = date,
@@ -144,6 +145,9 @@ class PropertyLinkingServiceSpec
     address = "address",
     localAuthorityRef = "44444",
     client = ClientDetails(55555, "mock org"),
+    representationSubmissionId = "",
+    checkPermission = "",
+    challengePermission = "",
     representationStatus = "APPROVED")
 
   val clientPropertyLink = ClientPropertyLink(
@@ -171,8 +175,8 @@ class PropertyLinkingServiceSpec
     valuationDetailsAvailable = None,
     billingAuthorityCode = None)))
 
-  val ownerAuthorisationClient = OwnerAuthorisation(propertyLinkClient)
-  val ownerAuthResultClient = OwnerAuthResult(1, 1, 1, 1, Seq(ownerAuthorisationClient))
+  val agentAuthorisation = AgentAuthorisation(propertyLinkClient)
+  val ownerAuthResultClient = AgentAuthResult(1, 1, 1, 1, Seq(agentAuthorisation))
 
   val ownerAuthorisationAgent = OwnerAuthorisation(propertyLinkWithAgents)
   val ownerAuthResultAgent = OwnerAuthResult(1, 1, 1, 1, Seq(ownerAuthorisationAgent))
