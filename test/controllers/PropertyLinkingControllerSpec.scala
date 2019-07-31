@@ -97,7 +97,6 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
     startDate = date,
     endDate = Some(date),
     submissionId = "22222",
-    address = "address",
     NDRListValuationHistoryItems = Seq(APIValuationHistory(
       asstRef = 125689,
       listYear = "2017",
@@ -116,13 +115,7 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
         id = 24680,
         checkPermission = "APPROVED",
         challengePermission = "APPROVED",
-        endDate = None)))),
-    agents = Seq(Party(authorisedPartyId = 11111,
-      agentCode = 11111,
-      organisationName = "OrgName",
-      organisationId = 11111,
-      checkPermission = "START_AND_CONTINUE",
-      challengePermission = "NOT_PERMITTED")))
+        endDate = None)))))
 
 
   val ownerAuthorisation = OwnerAuthorisation(
