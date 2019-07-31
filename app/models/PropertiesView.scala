@@ -36,9 +36,7 @@ case class PropertiesView(authorisationId: Long,
                           startDate: LocalDate,
                           endDate: Option[LocalDate],
                           submissionId: String,
-                          address: String,
                           NDRListValuationHistoryItems: Seq[APIValuationHistory],
-                          agents: Seq[Party],
                           parties: Seq[APIParty]) {
 
   def upperCase = this.copy(NDRListValuationHistoryItems = NDRListValuationHistoryItems.map(_.capatalise))
@@ -60,9 +58,7 @@ object PropertiesView {
       startDate = propertyLink.startDate,
       endDate = propertyLink.endDate,
       submissionId = propertyLink.submissionId,
-      address = propertyLink.address,
       NDRListValuationHistoryItems = history.map(history => APIValuationHistory(history)).toList,
-      agents = Seq(),
       parties = Seq())
 
 
@@ -74,9 +70,7 @@ object PropertiesView {
       startDate = propertyLink.startDate,
       endDate = propertyLink.endDate,
       submissionId = propertyLink.submissionId,
-      address = propertyLink.address,
       NDRListValuationHistoryItems = history.map(history => APIValuationHistory(history)).toList,
-      agents = propertyLink.agents.map(agent => Party(agent)),
       parties = propertyLink.agents.map(agent => APIParty(id = agent.authorisedPartyId,
         authorisedPartyStatus = agent.status,
         authorisedPartyOrganisationId = agent.organisationId,

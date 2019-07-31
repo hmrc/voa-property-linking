@@ -62,7 +62,6 @@ class PropertyLinkingServiceSpec
     startDate = date,
     endDate = Some(date),
     submissionId = "22222",
-    address = "address",
     NDRListValuationHistoryItems = Seq(APIValuationHistory(
       asstRef = 125689,
       listYear = "2017",
@@ -81,13 +80,7 @@ class PropertyLinkingServiceSpec
                   id = 24680,
                   checkPermission = "START_AND_CONTINUE",
                   challengePermission = "NOT_PERMITTED",
-                  endDate = None)))),
-    agents = Seq(Party(authorisedPartyId = 24680,
-      agentCode = 1111,
-      organisationName = "org name",
-      organisationId = 123456,
-      checkPermission = "START_AND_CONTINUE",
-      challengePermission = "NOT_PERMITTED")))
+                  endDate = None)))))
 
   val clientValidPropertiesView = PropertiesView(
     authorisationId = 11111,
@@ -96,7 +89,6 @@ class PropertyLinkingServiceSpec
     startDate = date,
     endDate = Some(date),
     submissionId = "22222",
-    address = "address",
     NDRListValuationHistoryItems = Seq(APIValuationHistory(
       asstRef = 125689,
       listYear = "2017",
@@ -108,8 +100,7 @@ class PropertyLinkingServiceSpec
       currentFromDate = None,
       currentToDate = None
     )),
-    parties = Seq(),
-    agents = Seq()
+    parties = Seq()
     )
 
   val  propertyLinkWithAgents = PropertyLinkWithAgents(authorisationId = 11111,

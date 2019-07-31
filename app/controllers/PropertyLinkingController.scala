@@ -21,7 +21,8 @@ import auth.Authenticated
 import binders.GetPropertyLinksParameters
 import connectors.auth.DefaultAuthConnector
 import connectors.{GroupAccountConnector, PropertyRepresentationConnector}
-import javax.inject.Inject
+import javax.inject.{Inject, Named}
+
 import models._
 import models.mdtp.propertylinking.requests.{APIPropertyLinkRequest, PropertyLinkRequest}
 import play.api.Logger
@@ -123,15 +124,14 @@ class PropertyLinkingController @Inject()(
   def getMyOrganisationsAssessmentsWithCapacity(submissionId: String, authorisationId: Long) = authenticated { implicit request =>
     implicit val cache = Memoize[Long, Future[Option[GroupAccount]]]()
 
-    assessmentService.getMyOrganisationsAssessmentsWithCapacity(submissionId, authorisationId).fold(Ok(Json.toJson(submissionId))) {authorisation =>
-      Ok(Json.toJson(authorisation))}
+    assessmentService.getMyOrganisationsAssessmentsWithCapacity(submissionId, authorisationId).fold(Ok(Json.toJson(submissionId))) {assessment: Assessments =>
+      Ok(Json.toJson(assessment))}
   }
 
   def getClientsAssessmentsWithCapacity(submissionId: String, authorisationId: Long) = authenticated { implicit request =>
     implicit val cache = Memoize[Long, Future[Option[GroupAccount]]]()
-
-    assessmentService.getClientsAssessmentsWithCapacity(submissionId, authorisationId).fold(Ok(Json.toJson(submissionId))) {authorisation =>
-      Ok(Json.toJson(authorisation))}
+    assessmentService.getClientsAssessmentsWithCapacity(submissionId, authorisationId).fold(Ok(Json.toJson(submissionId))) {assessment =>
+      Ok(Json.toJson(assessment))}
   }
 
 }

@@ -18,34 +18,51 @@ package services
 
 import cats.data.OptionT
 import connectors.{ExternalPropertyLinkConnector, ExternalValuationManagementApi, PropertyLinkingConnector}
-import models.{Assessments, ModernisedEnrichedRequest, PropertiesView}
+import models._
 import uk.gov.hmrc.http.HeaderCarrier
-import javax.inject.Inject
+import javax.inject.{Inject, Named}
+
+import models.modernised.{ClientPropertyLink, OwnerPropertyLink, PropertyLinkStatus}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class AssessmentService @Inject()(
                                    val propertyLinksConnector: ExternalPropertyLinkConnector,
                                    val externalValuationManagementApi: ExternalValuationManagementApi,
-                                   val legacyPropertyLinksConnector: PropertyLinkingConnector
+                                   val legacyPropertyLinksConnector: PropertyLinkingConnector,
+                                   @Named("authedAssessmentEndpointEnabled") val authedAssessmentEndpointEnabled: Boolean
                                  )(implicit executionContext: ExecutionContext){
 
 
-  def getMyOrganisationsAssessments(submissionId: String)(implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_], ec: ExecutionContext, F: cats.Functor[scala.concurrent.Future], f: cats.Monad[scala.concurrent.Future]): OptionT[Future, Assessments] = {
+  def getMyOrganisationsAssessments(submissionId: String)(implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_], F: cats.Functor[scala.concurrent.Future], f: cats.Monad[scala.concurrent.Future]): OptionT[Future, Assessments] = {
     for {
       propertyLink <- OptionT(propertyLinksConnector.getMyOrganisationsPropertyLink(submissionId))
       history  <- OptionT(externalValuationManagementApi.getValuationHistory(propertyLink.authorisation.uarn, submissionId))
     } yield Assessments(propertyLink.authorisation, history.NDRListValuationHistoryItems, None)
   }
 
-  def getClientsAssessments(submissionId: String)(implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_], ec: ExecutionContext, F: cats.Functor[scala.concurrent.Future], f: cats.Monad[scala.concurrent.Future]): OptionT[Future, Assessments] = {
+  def getClientsAssessments(submissionId: String)(implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_], F: cats.Functor[scala.concurrent.Future], f: cats.Monad[scala.concurrent.Future]): OptionT[Future, Assessments] = {
     for {
       propertyLink <- OptionT(propertyLinksConnector.getClientsPropertyLink(submissionId))
-      history  <- OptionT(externalValuationManagementApi.getValuationHistory(propertyLink.authorisation.uarn, submissionId))
+      history <- OptionT(externalValuationManagementApi.getValuationHistory(propertyLink.authorisation.uarn, submissionId))
     } yield Assessments(propertyLink.authorisation, history.NDRListValuationHistoryItems, None)
   }
 
-  def getMyOrganisationsAssessmentsWithCapacity(submissionId: String, authorisationId: Long)(implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_], ec: ExecutionContext, F: cats.Functor[scala.concurrent.Future], f: cats.Monad[scala.concurrent.Future]): OptionT[Future, Assessments] = {
+  def getMyOrganisationsAssessmentsWithCapacity(submissionId: String, authorisationId: Long)(implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_], F: cats.Functor[scala.concurrent.Future], f: cats.Monad[scala.concurrent.Future]): OptionT[Future, Assessments] = {
+    authedAssessmentEndpointEnabled match {
+      case false => legacyGetAssessmentsAgent(submissionId, authorisationId)
+      case true => getNewMyOrganisationsAssessmentsWithCapacity(submissionId, authorisationId)
+    }
+  }
+
+  def getClientsAssessmentsWithCapacity(submissionId: String, authorisationId: Long)(implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_], F: cats.Functor[scala.concurrent.Future], f: cats.Monad[scala.concurrent.Future]): OptionT[Future, Assessments] = {
+    authedAssessmentEndpointEnabled match {
+      case false => legacyGetAssessmentsClient(submissionId, authorisationId)
+      case true => getNewClientsAssessmentsWithCapacity(submissionId, authorisationId)
+    }
+  }
+
+   private def getNewMyOrganisationsAssessmentsWithCapacity(submissionId: String, authorisationId: Long)(implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_], F: cats.Functor[scala.concurrent.Future], f: cats.Monad[scala.concurrent.Future]): OptionT[Future, Assessments] = {
     for {
       propertyLink <- OptionT(propertyLinksConnector.getMyOrganisationsPropertyLink(submissionId))
       capacity <- OptionT(legacyPropertyLinksConnector.getCapacity(authorisationId))
@@ -53,11 +70,43 @@ class AssessmentService @Inject()(
     } yield Assessments(propertyLink.authorisation, history.NDRListValuationHistoryItems, Some(capacity.authorisationOwnerCapacity))
   }
 
-  def getClientsAssessmentsWithCapacity(submissionId: String, authorisationId: Long)(implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_], ec: ExecutionContext, F: cats.Functor[scala.concurrent.Future], f: cats.Monad[scala.concurrent.Future]): OptionT[Future, Assessments] = {
+  private def getNewClientsAssessmentsWithCapacity(submissionId: String, authorisationId: Long)(implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_], F: cats.Functor[scala.concurrent.Future], f: cats.Monad[scala.concurrent.Future]): OptionT[Future, Assessments] = {
     for {
       propertyLink <- OptionT(propertyLinksConnector.getClientsPropertyLink(submissionId))
       capacity <- OptionT(legacyPropertyLinksConnector.getCapacity(authorisationId))
       history  <- OptionT(externalValuationManagementApi.getValuationHistory(propertyLink.authorisation.uarn, submissionId))
     } yield Assessments(propertyLink.authorisation, history.NDRListValuationHistoryItems, Some(capacity.authorisationOwnerCapacity))
+  }
+
+  private def legacyGetAssessmentsClient(submissionId: String, authorisationId: Long)(implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_], F: cats.Functor[scala.concurrent.Future], f: cats.Monad[scala.concurrent.Future]): OptionT[Future, Assessments] = {
+    for {
+      propertyLink: ClientPropertyLink <- OptionT(propertyLinksConnector.getClientsPropertyLink(submissionId))
+      capacity: Capacity <- OptionT(legacyPropertyLinksConnector.getCapacity(authorisationId))
+      propertiesView <- OptionT(legacyPropertyLinksConnector.getAssessment(authorisationId))
+    } yield Assessments(
+      propertyLink.authorisation.submissionId,
+      uarn = propertyLink.authorisation.uarn,
+      address = propertyLink.authorisation.address,
+      pending = propertyLink.authorisation.status != PropertyLinkStatus.APPROVED,
+      capacity = Some(capacity.authorisationOwnerCapacity),
+      assessments = propertiesView.NDRListValuationHistoryItems.map(x => Assessment.fromAPIValuationHistory(x, propertyLink.authorisation.authorisationId)),
+      agents = Seq.empty
+    )
+  }
+
+  private def legacyGetAssessmentsAgent(submissionId: String, authorisationId: Long)(implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_], F: cats.Functor[scala.concurrent.Future], f: cats.Monad[scala.concurrent.Future]): OptionT[Future, Assessments] = {
+    for {
+      propertyLink: OwnerPropertyLink <- OptionT(propertyLinksConnector.getMyOrganisationsPropertyLink(submissionId))
+      capacity: Capacity <- OptionT(legacyPropertyLinksConnector.getCapacity(authorisationId))
+      propertiesView <- OptionT(legacyPropertyLinksConnector.getAssessment(authorisationId))
+    } yield Assessments(
+      propertyLink.authorisation.submissionId,
+      uarn = propertyLink.authorisation.uarn,
+      address = propertyLink.authorisation.address,
+      pending = propertyLink.authorisation.status != PropertyLinkStatus.APPROVED,
+      capacity = Some(capacity.authorisationOwnerCapacity),
+      assessments = propertiesView.NDRListValuationHistoryItems.map(x => Assessment.fromAPIValuationHistory(x, propertyLink.authorisation.authorisationId)),
+      agents = propertyLink.authorisation.agents.map(Party(_))
+    )
   }
 }
