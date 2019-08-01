@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package models.modernised
+package models.modernised.externalpropertylink.myclients
 
 import java.time.LocalDate
 
-import play.api.libs.json.{Json, OFormat}
 import models.modernised.PropertyLinkStatus.PropertyLinkStatus
+import models.modernised.PropertyLink
+import play.api.libs.json.{Json, OFormat}
 
 
 case class PropertyLinkWithClient(
@@ -33,9 +34,6 @@ case class PropertyLinkWithClient(
                                    address: String,
                                    localAuthorityRef: String,
                                    client: ClientDetails,
-                                   representationSubmissionId: String,
-                                   checkPermission: String,
-                                   challengePermission: String,
                                    representationStatus: String) extends PropertyLink(authorisationId: Long,
                                                                                       status: PropertyLinkStatus,
                                                                                       startDate: LocalDate,

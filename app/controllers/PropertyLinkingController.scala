@@ -24,7 +24,7 @@ import connectors.{GroupAccountConnector, PropertyRepresentationConnector}
 import javax.inject.{Inject, Named}
 
 import models._
-import models.mdtp.propertylinking.requests.{APIPropertyLinkRequest, PropertyLinkRequest}
+import models.mdtp.propertylink.requests.{APIPropertyLinkRequest, PropertyLinkRequest}
 import play.api.Logger
 import play.api.libs.json.Json
 import services.{AssessmentService, PropertyLinkingService}

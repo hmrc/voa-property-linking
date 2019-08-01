@@ -19,6 +19,8 @@ package connectors
 import binders.GetPropertyLinksParameters
 import http.VoaHttpClient
 import models.modernised._
+import models.modernised.externalpropertylink.myclients.{ClientPropertyLink, PropertyLinksWithClient}
+import models.modernised.externalpropertylink.myorganisations.{PropertyLinkWithAgents, PropertyLinksWithAgents}
 import models.voa.propertylinking.requests.CreatePropertyLink
 import models.{ModernisedEnrichedRequest, PaginationParams}
 import org.scalatest.concurrent.ScalaFutures
@@ -31,7 +33,6 @@ import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import utils.Cats
 import org.mockito.ArgumentMatchers.{any, eq => mEq}
 import org.mockito.Mockito._
-
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -71,8 +72,7 @@ class ExternalPropertyLinkConnectorSpec extends UnitSpec with MockitoSugar with 
         myOrganisationsPropertyLinkUrl = ownerAuthorisationUrl,
         myClientsPropertyLinkUrl = clientAuthorisationUrl,
         myClientsPropertyLinksUrl = clientAuthorisationsUrl,
-        createPropertyLinkUrl = createPropertyLinkUrl,
-        conf = fakeApplication.injector.instanceOf[ServicesConfig]
+        createPropertyLinkUrl = createPropertyLinkUrl
       )
 
       val paginationParams = PaginationParams(1, 1, true)

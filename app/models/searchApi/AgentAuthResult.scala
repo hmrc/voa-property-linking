@@ -16,7 +16,6 @@
 
 package models.searchApi
 
-import models.modernised.PropertyLinksWithClient
 import play.api.libs.json.{Json, OFormat}
 
 case class AgentAuthResult(
@@ -30,13 +29,4 @@ case class AgentAuthResult(
 object AgentAuthResult {
 
   implicit val format: OFormat[AgentAuthResult] = Json.format
-
-  def apply(propertyLinks: PropertyLinksWithClient): AgentAuthResult = AgentAuthResult(
-    start = propertyLinks.start,
-    size = propertyLinks.size,
-    filterTotal = propertyLinks.filterTotal,
-    total = propertyLinks.total,
-    authorisations = propertyLinks.authorisations.map(auth => AgentAuthorisation(auth))
-  )
-
 }

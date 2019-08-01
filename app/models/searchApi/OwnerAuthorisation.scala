@@ -17,7 +17,8 @@
 package models.searchApi
 
 import models.AgentPermission
-import models.modernised.{PropertyLinkWithAgents, PropertyLinkWithClient, PropertyLinksWithClient}
+import models.modernised.externalpropertylink.myclients.PropertyLinksWithClient
+import models.modernised.externalpropertylink.myorganisations.PropertyLinkWithAgents
 import play.api.libs.json.Json
 
 case class OwnerAuthorisation(

@@ -21,10 +21,11 @@ import cats.data.OptionT
 import connectors.{ExternalPropertyLinkConnector, ExternalValuationManagementApi, PropertyLinkingConnector}
 import javax.inject.Inject
 import models._
-import models.mdtp.propertylinking.requests.APIPropertyLinkRequest
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, NotFoundException}
-import models.searchApi.{AgentAuthResult, OwnerAuthResult}
+import models.mdtp.propertylink.myclients.PropertyLinksWithClients
+import models.mdtp.propertylink.requests.APIPropertyLinkRequest
+import models.searchApi.OwnerAuthResult
 import models.voa.propertylinking.requests.CreatePropertyLink
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import utils.Cats
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -55,9 +56,11 @@ class PropertyLinkingService @Inject()(
     } yield PropertiesView(propertyLink.authorisation, history.NDRListValuationHistoryItems)
   }
 
-  def getClientsPropertyLinks( searchParams: GetPropertyLinksParameters, paginationParams: Option[PaginationParams])
-                             (implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]):OptionT[Future, AgentAuthResult] = {
-    OptionT(propertyLinksConnector.getClientsPropertyLinks(searchParams, paginationParams)).map(AgentAuthResult.apply)
+  def getClientsPropertyLinks(
+                               searchParams: GetPropertyLinksParameters,
+                               paginationParams: Option[PaginationParams]
+                             )(implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]):OptionT[Future, PropertyLinksWithClients] = {
+    OptionT(propertyLinksConnector.getClientsPropertyLinks(searchParams, paginationParams)).map(PropertyLinksWithClients.apply)
   }
 
   def getMyOrganisationsPropertyLinks( searchParams: GetPropertyLinksParameters, paginationParams: Option[PaginationParams])

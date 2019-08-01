@@ -18,6 +18,8 @@ package models
 
 import java.time.{Clock, Instant, LocalDate, ZoneId}
 
+import models.modernised.externalpropertylink.myclients.PropertyLinkWithClient
+import models.modernised.externalpropertylink.myorganisations.PropertyLinkWithAgents
 import models.modernised.{ValuationHistory, _}
 import play.api.libs.json._
 

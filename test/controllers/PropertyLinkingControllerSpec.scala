@@ -25,7 +25,8 @@ import cats.implicits._
 import connectors._
 import connectors.auth._
 import models._
-import models.mdtp.propertylinking.requests.{APIPropertyLinkRequest, PropertyLinkRequest}
+import models.mdtp.propertylink.myclients.PropertyLinksWithClients
+import models.mdtp.propertylink.requests.{APIPropertyLinkRequest, PropertyLinkRequest}
 import models.searchApi.{AgentAuthResult, OwnerAuthResult, OwnerAuthorisation}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
@@ -127,7 +128,7 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
     localAuthorityRef = "localAuthRef",
     agents = Nil)
 
-  val agentAuthResult = AgentAuthResult(1,1,1,1, Seq())
+  val propertyLinksWithClients = PropertyLinksWithClients(1,1,1,1, Seq())
   val ownerAuthResult = OwnerAuthResult(1,1,1,1, Seq())
 
   val assessments = Assessments(
@@ -216,7 +217,7 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
 
     "return client proprty links" in {
 
-      when(mockPropertyLinkService.getClientsPropertyLinks(any(), any())(any(), any())).thenReturn(OptionT.some[Future](agentAuthResult))
+      when(mockPropertyLinkService.getClientsPropertyLinks(any(), any())(any(), any())).thenReturn(OptionT.some[Future](propertyLinksWithClients))
       val res = testController.getClientsPropertyLinks(GetPropertyLinksParameters(), None)(FakeRequest())
 
       status(res) shouldBe OK

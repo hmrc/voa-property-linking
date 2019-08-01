@@ -21,8 +21,9 @@ import connectors.{ExternalPropertyLinkConnector, ExternalValuationManagementApi
 import models._
 import uk.gov.hmrc.http.HeaderCarrier
 import javax.inject.{Inject, Named}
-
-import models.modernised.{ClientPropertyLink, OwnerPropertyLink, PropertyLinkStatus}
+import models.modernised.externalpropertylink.myorganisations.OwnerPropertyLink
+import models.modernised.PropertyLinkStatus
+import models.modernised.externalpropertylink.myclients.ClientPropertyLink
 
 import scala.concurrent.{ExecutionContext, Future}
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package models.mdtp.propertylinking.requests
+package models.mdtp.propertylink.requests
 
 import java.time.Instant
 
