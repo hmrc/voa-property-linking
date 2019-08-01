@@ -38,4 +38,17 @@ object APIParty {
   implicit val format = Json.format[APIParty]
 }
 
+case class LegacyParty (
+                   authorisedPartyId: Long,
+                   agentCode: Long,
+                   organisationName: String,
+                   organisationId: Long,
+                   checkPermission: String,
+                   challengePermission: String
+                 )
+
+object LegacyParty {
+  implicit val format = Json.format[LegacyParty]
+}
+
 

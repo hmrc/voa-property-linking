@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package connectors
+package connectors.externalvaluation
 
 import http.VoaHttpClient
 import javax.inject.{Inject, Named}
 import models.ModernisedEnrichedRequest
+import models.modernised.ValuationHistoryResponse
 import models.voa.valuation.dvr.StreamedDocument
 import models.voa.valuation.dvr.documents.DvrDocumentFiles
-import models.modernised.ValuationHistoryResponse
-import play.api.http.HeaderNames.{CONTENT_LENGTH, CONTENT_TYPE}
+import play.api.http.HeaderNames.{CONTENT_LENGTH, CONTENT_TYPE, _}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.ws.{StreamedResponse, WSClient}
 import uk.gov.hmrc.http._
@@ -30,7 +30,6 @@ import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.ws.WSHttp
 
 import scala.concurrent.Future
-import play.api.http.HeaderNames._
 
 
 class ExternalValuationManagementApi @Inject()(

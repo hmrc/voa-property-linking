@@ -18,6 +18,8 @@ package models
 
 import java.time.{Clock, Instant, LocalDate, ZoneId}
 
+import models.modernised.externalpropertylink.myclients.PropertyLinkWithClient
+import models.modernised.externalpropertylink.myorganisations.PropertyLinkWithAgents
 import models.modernised.{ValuationHistory, _}
 import play.api.libs.json._
 
@@ -36,8 +38,10 @@ case class PropertiesView(authorisationId: Long,
                           startDate: LocalDate,
                           endDate: Option[LocalDate],
                           submissionId: String,
+                          address: Option[String],
                           NDRListValuationHistoryItems: Seq[APIValuationHistory],
-                          parties: Seq[APIParty]) {
+                          parties: Seq[APIParty],
+                          agents: Option[Seq[LegacyParty]]) {
 
   def upperCase = this.copy(NDRListValuationHistoryItems = NDRListValuationHistoryItems.map(_.capatalise))
 
@@ -54,18 +58,21 @@ object PropertiesView {
   :PropertiesView =
     PropertiesView(authorisationId = propertyLink.authorisationId,
       uarn = propertyLink.uarn,
+      address = Some(propertyLink.address),
       authorisationStatus = propertyLink.status.toString,
       startDate = propertyLink.startDate,
       endDate = propertyLink.endDate,
       submissionId = propertyLink.submissionId,
       NDRListValuationHistoryItems = history.map(history => APIValuationHistory(history)).toList,
-      parties = Seq())
+      parties = Seq(),
+      agents = Some(Seq()))
 
 
   def apply(propertyLink: PropertyLinkWithAgents, history: Seq[ValuationHistory])
   :PropertiesView =
     PropertiesView(authorisationId = propertyLink.authorisationId,
       uarn = propertyLink.uarn,
+      address = Some(propertyLink.address),
       authorisationStatus = propertyLink.status.toString,
       startDate = propertyLink.startDate,
       endDate = propertyLink.endDate,
@@ -74,8 +81,14 @@ object PropertiesView {
       parties = propertyLink.agents.map(agent => APIParty(id = agent.authorisedPartyId,
         authorisedPartyStatus = agent.status,
         authorisedPartyOrganisationId = agent.organisationId,
-        permissions = Seq(Permissions(agent.authorisedPartyId, agent.checkPermission, agent.challengePermission, None)))))
-
+        permissions = Seq(Permissions(agent.authorisedPartyId, agent.checkPermission, agent.challengePermission, None)))),
+      agents = Some(propertyLink.agents.map(agent => LegacyParty(
+        authorisedPartyId = agent.authorisedPartyId,
+        agentCode = agent.representativeCode,
+        organisationName = agent.organisationName,
+        organisationId = agent.organisationId,
+        checkPermission = agent.checkPermission,
+        challengePermission = agent.challengePermission))))
 
 
 }

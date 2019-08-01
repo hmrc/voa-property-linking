@@ -20,11 +20,12 @@ import auditing.AuditingService
 import auth.Authenticated
 import binders.GetPropertyLinksParameters
 import connectors.auth.DefaultAuthConnector
+import connectors.authorisationsearch.PropertyLinkingConnector
 import connectors.{GroupAccountConnector, PropertyRepresentationConnector}
 import javax.inject.{Inject, Named}
-
 import models._
-import models.mdtp.propertylinking.requests.{APIPropertyLinkRequest, PropertyLinkRequest}
+import models.mdtp.propertylink.requests.{APIPropertyLinkRequest, PropertyLinkRequest}
+import models.modernised.mdtpdashboard.LegacyPropertiesView
 import play.api.Logger
 import play.api.libs.json.Json
 import services.{AssessmentService, PropertyLinkingService}
@@ -42,6 +43,7 @@ case class Memoize[K, V]() {
 
 class PropertyLinkingController @Inject()(
                                            val authConnector: DefaultAuthConnector,
+                                           propertyLinkConnector: PropertyLinkingConnector,
                                            propertyLinkService: PropertyLinkingService,
                                            assessmentService: AssessmentService,
                                            groupAccountsConnector: GroupAccountConnector,
@@ -68,11 +70,11 @@ class PropertyLinkingController @Inject()(
   }
 
   def getMyOrganisationsPropertyLink(submissionId: String) = authenticated { implicit request =>
-    propertyLinkService.getMyOrganisationsPropertyLink(submissionId).fold(Ok(Json.toJson(submissionId))) {authorisation => Ok(Json.toJson(authorisation))}
+    propertyLinkService.getMyOrganisationsPropertyLink(submissionId).fold(NotFound("my organisation property link not found")) {authorisation => Ok(Json.toJson(authorisation))}
   }
 
   def getClientsPropertyLink(submissionId: String) = authenticated { implicit request =>
-      propertyLinkService.getClientsPropertyLink(submissionId).fold(Ok(Json.toJson(submissionId))) {authorisation => Ok(Json.toJson(authorisation))}
+      propertyLinkService.getClientsPropertyLink(submissionId).fold(NotFound("client property link not found")) {authorisation => Ok(Json.toJson(authorisation))}
   }
 
   def getMyOrganisationsPropertyLinks(searchParams: GetPropertyLinksParameters,
@@ -91,6 +93,23 @@ class PropertyLinkingController @Inject()(
       response => {
         Ok(Json.toJson(response))
       }
+    }
+  }
+
+  def clientProperty(authorisationId: Long, clientOrgId: Long, agentOrgId: Long) = authenticated { implicit request =>
+    propertyLinkConnector.get(authorisationId) flatMap {
+      case Some(authorisation) if authorisedFor(authorisation, clientOrgId, agentOrgId) => toClientProperty(authorisation) map { p => Ok(Json.toJson(p)) }
+      case _ => NotFound
+    }
+  }
+
+  private def authorisedFor(authorisation: LegacyPropertiesView, clientOrgId: Long, agentOrgId: Long) = {
+    authorisation.authorisationOwnerOrganisationId == clientOrgId && authorisation.parties.exists(_.authorisedPartyOrganisationId == agentOrgId)
+  }
+
+  private def toClientProperty(authorisation: LegacyPropertiesView)(implicit hc: HeaderCarrier): Future[ClientProperty] = {
+    groupAccountsConnector.get(authorisation.authorisationOwnerOrganisationId) map { acc =>
+      ClientProperty.build(authorisation, acc)
     }
   }
 

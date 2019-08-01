@@ -18,7 +18,9 @@ package models
 
 import java.time.LocalDate
 
-import models.modernised.{PropertyLinkStatus, PropertyLinkWithAgents, PropertyLinkWithClient, ValuationHistory}
+import models.modernised.externalpropertylink.myclients.PropertyLinkWithClient
+import models.modernised.externalpropertylink.myorganisations.PropertyLinkWithAgents
+import models.modernised.{PropertyLinkStatus, ValuationHistory}
 import play.api.libs.json.Json
 
 case class Assessment(

@@ -19,7 +19,7 @@ package models.searchApi
 import java.time.LocalDate
 
 import models.PropertyRepresentation
-import models.modernised.PropertyLinkWithClient
+import models.modernised.externalpropertylink.myclients.PropertyLinkWithClient
 import play.api.libs.json.Json
 
 case class AgentAuthorisation(
@@ -55,20 +55,4 @@ case class AgentAuthorisation(
 
 object AgentAuthorisation {
   implicit val agentAuthorisation = Json.format[AgentAuthorisation]
-
-  def apply(propertyLink: PropertyLinkWithClient): AgentAuthorisation =
-    AgentAuthorisation(
-      authorisationId = propertyLink.authorisationId,
-      authorisedPartyId = propertyLink.authorisedPartyId,
-      representationSubmissionId = propertyLink.representationSubmissionId,
-      representationStatus = propertyLink.representationStatus,
-      checkPermission = propertyLink.checkPermission,
-      challengePermission = propertyLink.challengePermission,
-      status = propertyLink.status.toString,
-      submissionId = propertyLink.submissionId,
-      uarn = propertyLink.uarn,
-      address = propertyLink.address,
-      localAuthorityRef = propertyLink.localAuthorityRef,
-      client = Client(propertyLink.client.organisationId, propertyLink.client.organisationName))
-
 }

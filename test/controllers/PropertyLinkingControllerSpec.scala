@@ -24,8 +24,10 @@ import cats.data._
 import cats.implicits._
 import connectors._
 import connectors.auth._
+import connectors.authorisationsearch.PropertyLinkingConnector
 import models._
-import models.mdtp.propertylinking.requests.{APIPropertyLinkRequest, PropertyLinkRequest}
+import models.mdtp.propertylink.myclients.PropertyLinksWithClients
+import models.mdtp.propertylink.requests.{APIPropertyLinkRequest, PropertyLinkRequest}
 import models.searchApi.{AgentAuthResult, OwnerAuthResult, OwnerAuthorisation}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
@@ -78,6 +80,8 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
 
   lazy val mockPropertyLinkService = mock[PropertyLinkingService]
 
+  lazy val mockPropertyLinkingConnector = mock[PropertyLinkingConnector]
+
   lazy val mockGroupAccountConnector = mock[GroupAccountConnector]
 
   lazy val mockPropertyRepresentationConnector = mock[PropertyRepresentationConnector]
@@ -86,13 +90,14 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
 
   lazy val mockBrAuth = mock[BusinessRatesAuthConnector]
 
-  lazy val testController = new PropertyLinkingController(mockAuthConnector, mockPropertyLinkService, mockAssessmentService, mockGroupAccountConnector, mock[AuditingService], mockPropertyRepresentationConnector)
+  lazy val testController = new PropertyLinkingController(mockAuthConnector, mockPropertyLinkingConnector,  mockPropertyLinkService, mockAssessmentService, mockGroupAccountConnector, mock[AuditingService], mockPropertyRepresentationConnector)
 
   val date = LocalDate.parse("2018-09-05")
 
   val validPropertiesView = PropertiesView(
     authorisationId = 11111,
     uarn = 33333,
+    address = Some("1 HIGH STREET, BRIGHTON"),
     authorisationStatus = "APPROVED",
     startDate = date,
     endDate = Some(date),
@@ -115,7 +120,8 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
         id = 24680,
         checkPermission = "APPROVED",
         challengePermission = "APPROVED",
-        endDate = None)))))
+        endDate = None)))),
+    agents = Some(Nil))
 
 
   val ownerAuthorisation = OwnerAuthorisation(
@@ -127,7 +133,7 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
     localAuthorityRef = "localAuthRef",
     agents = Nil)
 
-  val agentAuthResult = AgentAuthResult(1,1,1,1, Seq())
+  val propertyLinksWithClients = PropertyLinksWithClients(1,1,1,1, Seq())
   val ownerAuthResult = OwnerAuthResult(1,1,1,1, Seq())
 
   val assessments = Assessments(
@@ -216,7 +222,7 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
 
     "return client proprty links" in {
 
-      when(mockPropertyLinkService.getClientsPropertyLinks(any(), any())(any(), any())).thenReturn(OptionT.some[Future](agentAuthResult))
+      when(mockPropertyLinkService.getClientsPropertyLinks(any(), any())(any(), any())).thenReturn(OptionT.some[Future](propertyLinksWithClients))
       val res = testController.getClientsPropertyLinks(GetPropertyLinksParameters(), None)(FakeRequest())
 
       status(res) shouldBe OK

@@ -18,7 +18,7 @@ package models.voa.propertylinking.requests
 
 import java.time.{LocalDate, LocalDateTime}
 
-import models.mdtp.propertylinking.requests.APIPropertyLinkRequest
+import models.mdtp.propertylink.requests.APIPropertyLinkRequest
 import models.modernised.Capacity.Capacity
 import models.modernised.ProvidedEvidence.{ProvidedEvidence => Method}
 import models.modernised._

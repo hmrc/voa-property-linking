@@ -17,7 +17,7 @@ POST         /property-links                                                    
 GET          /owner/property-links/:submissionId/                                             @controllers.PropertyLinkingController.getMyOrganisationsPropertyLink(submissionId: String)
 GET          /agent/property-links/:submissionId/                                             @controllers.PropertyLinkingController.getClientsPropertyLink(submissionId: String)
 
-
+GET          /property-links/client-property/:authorisationId                                 @controllers.PropertyLinkingController.clientProperty(authorisationId: Long, clientOrganisationId: Long, agentOrganisationId: Long)
 
 GET          /dashboard/owner/assessments/:submissionId                                       @controllers.PropertyLinkingController.getMyOrganisationsAssessments(submissionId: String)
 GET          /dashboard/agent/assessments/:submissionId                                       @controllers.PropertyLinkingController.getClientsAssessments(submissionId: String)

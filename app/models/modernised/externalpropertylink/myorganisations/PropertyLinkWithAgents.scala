@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package models.modernised
+package models.modernised.externalpropertylink.myorganisations
 
 import java.time.LocalDate
+
 import models.modernised.PropertyLinkStatus.PropertyLinkStatus
+import models.modernised.PropertyLink
 import play.api.libs.json.{Json, OFormat}
 
 case class PropertyLinkWithAgents(

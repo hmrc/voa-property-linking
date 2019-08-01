@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package models.modernised
+package models.modernised.externalpropertylink.myclients
 
 import play.api.libs.json.{Json, OFormat}
 
-case class OwnerPropertyLink(authorisation: PropertyLinkWithAgents)
+case class ClientPropertyLink(authorisation: PropertyLinkWithClient)
 
-object OwnerPropertyLink {
-  implicit val format: OFormat[OwnerPropertyLink] = Json.format
+object ClientPropertyLink {
+  implicit val format: OFormat[ClientPropertyLink] = Json.format
 
 }

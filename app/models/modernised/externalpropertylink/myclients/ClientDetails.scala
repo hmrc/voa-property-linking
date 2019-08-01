@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package models.modernised
+package models.modernised.externalpropertylink.myclients
 
 import play.api.libs.json.Json
 

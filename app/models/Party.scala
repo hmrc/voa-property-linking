@@ -16,7 +16,7 @@
 
 package models
 
-import models.modernised.AgentDetails
+import models.modernised.externalpropertylink.myorganisations.AgentDetails
 import play.api.libs.json.Json
 
 case class Party (

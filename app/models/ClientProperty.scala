@@ -16,25 +16,29 @@
 
 package models
 
+import models.modernised.mdtpdashboard.LegacyPropertiesView
 import play.api.libs.json.Json
 
-case class ClientProperty(ownerOrganisationName: String,
-                          uarn: Long,
-                          billingAuthorityReference: String,
-                          authorisedPartyId: Long,
-                          authorisationId: Long,
-                          authorisationStatus: Boolean,
-                          authorisedPartyStatus: String,
-                          permissionId: Long,
-                          checkPermission: String,
-                          challengePermission: String,
-                          address: String)
+case class ClientProperty(
+                           ownerOrganisationId: Long,
+                           ownerOrganisationName: String,
+                           uarn: Long,
+                           billingAuthorityReference: String,
+                           authorisedPartyId: Long,
+                           authorisationId: Long,
+                           authorisationStatus: Boolean,
+                           authorisedPartyStatus: String,
+                           permissionId: Long,
+                           checkPermission: String,
+                           challengePermission: String,
+                           address: String)
 
 object ClientProperty {
   implicit val format = Json.format[ClientProperty]
 
-  def build(prop: PropertiesView, userAccount: Option[GroupAccount]) = {
+  def build(prop: LegacyPropertiesView, userAccount: Option[GroupAccount]) = {
     ClientProperty(
+      prop.authorisationOwnerOrganisationId,
       userAccount.map(_.companyName).getOrElse("Name not found"),
       prop.uarn,
       prop.NDRListValuationHistoryItems.headOption.map(_.billingAuthorityReference).getOrElse("BARef not found"),

@@ -21,8 +21,9 @@ import java.io.{BufferedInputStream, File}
 import akka.stream.Materializer
 import akka.stream.scaladsl.Sink
 import auth.Authenticated
-import connectors.{CCACaseManagementApi, DVRCaseManagementConnector, ExternalValuationManagementApi}
+import connectors.{CCACaseManagementApi, DVRCaseManagementConnector}
 import connectors.auth.DefaultAuthConnector
+import connectors.externalvaluation.ExternalValuationManagementApi
 import javax.inject.Inject
 import models.voa.valuation.dvr.DetailedValuationRequest
 import play.api.libs.json.{JsValue, Json}

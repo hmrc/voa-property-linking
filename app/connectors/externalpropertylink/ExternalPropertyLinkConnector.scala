@@ -14,32 +14,32 @@
  * limitations under the License.
  */
 
-package connectors
+package connectors.externalpropertylink
 
 import binders.GetPropertyLinksParameters
 import http.VoaHttpClient
 import javax.inject.{Inject, Named}
-import models.{ModernisedEnrichedRequest, PaginationParams}
-import models.modernised._
+import models.modernised.externalpropertylink.myclients.{ClientPropertyLink, PropertyLinksWithClient}
+import models.modernised.externalpropertylink.myorganisations.{OwnerPropertyLink, PropertyLinksWithAgents}
 import models.voa.propertylinking.requests.CreatePropertyLink
+import models.{ModernisedEnrichedRequest, PaginationParams}
+import play.api.Logger
 import uk.gov.hmrc.http._
-import uk.gov.hmrc.play.config.ServicesConfig
 
 import scala.concurrent.{ExecutionContext, Future}
 
 
-class ExternalPropertyLinkConnector @Inject()
-                                              (@Named("VoaAuthedBackendHttp") val http: VoaHttpClient,
-                                              @Named("voa.myOrganisationsPropertyLinks") myOrganisationsPropertyLinksUrl: String,
-                                              @Named("voa.myOrganisationsPropertyLink") myOrganisationsPropertyLinkUrl: String,
-                                              @Named("voa.myClientsPropertyLinks") myClientsPropertyLinksUrl: String,
-                                              @Named("voa.myClientsPropertyLink") myClientsPropertyLinkUrl: String,
-                                              @Named("voa.createPropertyLink") createPropertyLinkUrl: String,
-                                               conf: ServicesConfig) (implicit executionContext: ExecutionContext)
+class ExternalPropertyLinkConnector @Inject()(
+                                               @Named("VoaAuthedBackendHttp") val http: VoaHttpClient,
+                                               @Named("voa.myOrganisationsPropertyLinks") myOrganisationsPropertyLinksUrl: String,
+                                               @Named("voa.myOrganisationsPropertyLink") myOrganisationsPropertyLinkUrl: String,
+                                               @Named("voa.myClientsPropertyLinks") myClientsPropertyLinksUrl: String,
+                                               @Named("voa.myClientsPropertyLink") myClientsPropertyLinkUrl: String,
+                                               @Named("voa.createPropertyLink") createPropertyLinkUrl: String
+                                             )(implicit executionContext: ExecutionContext)
   extends JsonHttpReads with OptionHttpReads with RawReads {
 
-
-
+  private val logger = Logger(this.getClass.getName)
 
   def getMyOrganisationsPropertyLinks(searchParams: GetPropertyLinksParameters, params: Option[PaginationParams])
                                      (implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]): Future[Option[PropertyLinksWithAgents]] = {
@@ -54,7 +54,6 @@ class ExternalPropertyLinkConnector @Inject()
           searchParams.sortfield.map("sortfield" -> _),
           searchParams.sortorder.map("sortorder" -> _)).flatten)
   }
-
 
   def getMyOrganisationsPropertyLink(submissionId: String)
                                     (implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]): Future[Option[OwnerPropertyLink]] =
@@ -73,23 +72,23 @@ class ExternalPropertyLinkConnector @Inject()
           searchParams.sortfield.map("sortfield" -> _),
           searchParams.sortorder.map("sortorder" -> _)).flatten)
 
-
   def getClientsPropertyLink(submissionId: String)
                             (implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]): Future[Option[ClientPropertyLink]] =
     http.GET[Option[ClientPropertyLink]](myClientsPropertyLinkUrl.replace("{propertyLinkId}", submissionId))
-
 
   def createPropertyLink(propertyLink: CreatePropertyLink)(implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]): Future[HttpResponse] =
     http
       .POST[CreatePropertyLink, HttpResponse](createPropertyLinkUrl, propertyLink, Seq())
 
-
   private def modernisedPaginationParams(params: Option[PaginationParams]): Seq[(String, String)] =
-    params match {
-      case Some(i) => Seq("start" -> calculateStart(i),
-                          "size"  -> i.pageSize,
-                          "requestTotalRowCount" -> "true").map({ case (key, value) => (key, value.toString) })
-      case None => Seq()
+    params.fold(Seq.empty[(String, String)]){ p =>
+      Seq(
+        "start" -> calculateStart(p),
+        "size"  -> p.pageSize,
+        "requestTotalRowCount" -> "true"
+      ).map {
+        case (key, value) => (key, value.toString)
+      }
     }
 
   private def calculateStart(params: PaginationParams): Int = ((params.startPoint - 1) * params.pageSize) + 1

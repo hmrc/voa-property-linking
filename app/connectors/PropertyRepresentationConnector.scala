@@ -52,12 +52,9 @@ class PropertyRepresentationConnector @Inject()(
   }
 
   def forAgent(status: String, organisationId: Long, params: PaginationParams)(implicit hc: HeaderCarrier): Future[PropertyRepresentations] = {
-    val url = s"$baseUrl/authorisation-search-api/agents/$organisationId/authorisations" +
-      s"?start=${params.startPoint}" +
-      s"&size=${params.pageSize}" +
-      s"&representationStatus=PENDING"
+    val url = s"$baseUrl/authorisation-search-api/agents/$organisationId/authorisations"
     
-    http.GET[AgentAuthResultBE](url).map(x => {
+    http.GET[AgentAuthResultBE](url, Seq("start" -> params.startPoint.toString, "size" -> params.pageSize.toString, "representationStatus" -> "PENDING")).map(x => {
       PropertyRepresentations(x.filterTotal, x.authorisations.map(_.toPropertyRepresentation))
     })
   }

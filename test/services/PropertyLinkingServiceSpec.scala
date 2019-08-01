@@ -19,10 +19,15 @@ package services
 import java.time._
 
 import binders.GetPropertyLinksParameters
-import connectors.{ExternalPropertyLinkConnector, ExternalValuationManagementApi, PropertyLinkingConnector}
+import connectors.authorisationsearch.PropertyLinkingConnector
+import connectors.externalpropertylink.ExternalPropertyLinkConnector
+import connectors.externalvaluation.ExternalValuationManagementApi
 import models._
-import models.mdtp.propertylinking.requests.APIPropertyLinkRequest
-import models.modernised.{PropertyLinksWithAgents, _}
+import models.mdtp.propertylink.myclients.{PropertyLinkWithClient, PropertyLinksWithClients}
+import models.mdtp.propertylink.requests.APIPropertyLinkRequest
+import models.modernised.externalpropertylink.myorganisations.{AgentDetails, OwnerPropertyLink, PropertyLinkWithAgents, PropertyLinksWithAgents}
+import models.modernised._
+import models.modernised.externalpropertylink.myclients.{ClientDetails, ClientPropertyLink, PropertyLinksWithClient, PropertyLinkWithClient => ModernisedPropertyLinkWithClient}
 import models.searchApi.{AgentAuthResult, AgentAuthorisation, OwnerAuthResult, OwnerAuthorisation}
 import models.voa.propertylinking.requests.CreatePropertyLink
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
@@ -52,12 +57,15 @@ class PropertyLinkingServiceSpec
 
   val date = LocalDate.parse("2018-09-05")
   val instant = date.atStartOfDay().toInstant(ZoneOffset.UTC)
-  val service = new PropertyLinkingService(propertyLinksConnector = mockPropertyLinkingConnector, mockExternalValuationManagementApi,
+  val service = new PropertyLinkingService(
+    propertyLinksConnector = mockPropertyLinkingConnector,
+    mockExternalValuationManagementApi,
     mockLegacyPropertyLinkingConnector)
 
   val validPropertiesView = PropertiesView(
     authorisationId = 11111,
     uarn = 33333,
+    address = Some("1 HIGH STREET, BRIGHTON"),
     authorisationStatus = "APPROVED",
     startDate = date,
     endDate = Some(date),
@@ -80,11 +88,20 @@ class PropertyLinkingServiceSpec
                   id = 24680,
                   checkPermission = "START_AND_CONTINUE",
                   challengePermission = "NOT_PERMITTED",
-                  endDate = None)))))
+                  endDate = None)))),
+    agents = Some(Seq(LegacyParty(
+      authorisedPartyId = 24680,
+      agentCode = 1111,
+      organisationName = "org name",
+      organisationId = 123456,
+      checkPermission = "START_AND_CONTINUE",
+      challengePermission = "NOT_PERMITTED"
+    ))))
 
   val clientValidPropertiesView = PropertiesView(
     authorisationId = 11111,
     uarn = 33333,
+    address = Some("1 HIGH STREET, BRIGHTON"),
     authorisationStatus = "APPROVED",
     startDate = date,
     endDate = Some(date),
@@ -100,7 +117,8 @@ class PropertyLinkingServiceSpec
       currentFromDate = None,
       currentToDate = None
     )),
-    parties = Seq()
+    parties = Seq(),
+    agents = Some(Nil)
     )
 
   val  propertyLinkWithAgents = PropertyLinkWithAgents(authorisationId = 11111,
@@ -109,7 +127,7 @@ class PropertyLinkingServiceSpec
     endDate = Some(date),
     submissionId = "22222",
     uarn = 33333,
-    address = "address",
+    address = "1 HIGH STREET, BRIGHTON",
     localAuthorityRef = "44444",
     agents = Seq(
       AgentDetails(
@@ -124,8 +142,7 @@ class PropertyLinkingServiceSpec
   )
   val ownerPropertyLink = OwnerPropertyLink(propertyLinkWithAgents)
 
-
-  val propertyLinkClient = PropertyLinkWithClient(
+  val propertyLinkClient = ModernisedPropertyLinkWithClient(
     authorisationId = 11111,
     authorisedPartyId = 11111,
     status = PropertyLinkStatus.APPROVED,
@@ -133,12 +150,9 @@ class PropertyLinkingServiceSpec
     endDate = Some(date),
     submissionId = "22222",
     uarn = 33333,
-    address = "address",
+    address = "1 HIGH STREET, BRIGHTON",
     localAuthorityRef = "44444",
     client = ClientDetails(55555, "mock org"),
-    representationSubmissionId = "",
-    checkPermission = "",
-    challengePermission = "",
     representationStatus = "APPROVED")
 
   val clientPropertyLink = ClientPropertyLink(
@@ -166,8 +180,8 @@ class PropertyLinkingServiceSpec
     valuationDetailsAvailable = None,
     billingAuthorityCode = None)))
 
-  val agentAuthorisation = AgentAuthorisation(propertyLinkClient)
-  val ownerAuthResultClient = AgentAuthResult(1, 1, 1, 1, Seq(agentAuthorisation))
+  val agentAuthorisation = propertyLinkClient
+  val ownerAuthResultClient = PropertyLinksWithClients(1, 1, 1, 1, Seq(PropertyLinkWithClient.apply(agentAuthorisation)))
 
   val ownerAuthorisationAgent = OwnerAuthorisation(propertyLinkWithAgents)
   val ownerAuthResultAgent = OwnerAuthResult(1, 1, 1, 1, Seq(ownerAuthorisationAgent))
