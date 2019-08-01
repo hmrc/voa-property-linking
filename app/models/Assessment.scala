@@ -36,13 +36,15 @@ case class Assessment(
                      )
 
 
-case class Assessments(submissionId: String,
-                      uarn: Long,
-                      address: String,
-                      pending: Boolean,
-                      capacity: Option[String],
-                      assessments: Seq[Assessment],
-                      agents: Seq[Party])
+case class Assessments(
+                        authorisationId: Long,
+                        submissionId: String,
+                        uarn: Long,
+                        address: String,
+                        pending: Boolean,
+                        capacity: Option[String],
+                        assessments: Seq[Assessment],
+                        agents: Seq[Party])
 
 
 
@@ -88,7 +90,9 @@ object Assessments {
 
   def apply(propertyLink: PropertyLinkWithAgents, history: Seq[ValuationHistory], capacity: Option[String])
     :Assessments =
-    Assessments(propertyLink.submissionId,
+    Assessments(
+      propertyLink.authorisationId,
+      propertyLink.submissionId,
       propertyLink.uarn,
       history.headOption.map(_.address).getOrElse("No address found"),
       propertyLink.status != PropertyLinkStatus.APPROVED,
@@ -104,7 +108,9 @@ object Assessments {
 
   def apply(propertyLink: PropertyLinkWithClient, history: Seq[ValuationHistory], capacity: Option[String])
   :Assessments =
-    Assessments(propertyLink.submissionId,
+    Assessments(
+      propertyLink.authorisationId,
+      propertyLink.submissionId,
       propertyLink.uarn,
       history.headOption.map(_.address).getOrElse("No address found"),
       propertyLink.status != PropertyLinkStatus.APPROVED,

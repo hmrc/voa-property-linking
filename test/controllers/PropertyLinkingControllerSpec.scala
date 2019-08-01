@@ -130,12 +130,15 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
   val agentAuthResult = AgentAuthResult(1,1,1,1, Seq())
   val ownerAuthResult = OwnerAuthResult(1,1,1,1, Seq())
 
-  val assessments = Assessments("11111",
+  val assessments = Assessments(
+    1L,
+    "11111",
     111111,
     "address",
     false,
     Some("OWNER"),
     Seq(),
+
     Seq())
 
   "create" should {
