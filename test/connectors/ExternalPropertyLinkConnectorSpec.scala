@@ -17,6 +17,7 @@
 package connectors
 
 import binders.GetPropertyLinksParameters
+import connectors.externalpropertylink.ExternalPropertyLinkConnector
 import http.VoaHttpClient
 import models.modernised._
 import models.modernised.externalpropertylink.myclients.{ClientPropertyLink, PropertyLinksWithClient}

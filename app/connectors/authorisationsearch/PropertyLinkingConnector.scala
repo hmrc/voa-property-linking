@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package connectors
+package connectors.authorisationsearch
 
 import javax.inject.{Inject, Named}
 import models._
-import models.searchApi.{AgentAuthResultBE, OwnerAuthResult}
+import models.modernised.mdtpdashboard.LegacyPropertiesView
+import models.searchApi.OwnerAuthResult
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.ws.WSHttp
@@ -31,6 +32,19 @@ class PropertyLinkingConnector @Inject()(
                                         )(implicit ec: ExecutionContext) {
   lazy val baseUrl: String = conf.baseUrl("external-business-rates-data-platform")
   val listYear = 2017
+
+  //TODO remove this as it is not an authed endpoint
+  def get(authorisationId: Long)(implicit hc: HeaderCarrier): Future[Option[LegacyPropertiesView]] = {
+    val url = baseUrl +
+      s"/mdtp-dashboard-management-api/mdtp_dashboard/view_assessment" +
+      s"?listYear=$listYear" +
+      s"&authorisationId=$authorisationId"
+
+    http.GET[Option[LegacyPropertiesView]](url) map {
+      case Some(view) if view.hasValidStatus => Some(view.copy(parties = filterInvalidParties(view.parties)).upperCase)
+      case _ => None
+    }
+  }
 
   def appointableToAgent(
                           ownerId: Long,
@@ -66,6 +80,18 @@ class PropertyLinkingConnector @Inject()(
       case Some(paramValue) if paramValue != "" => s"&$name=$paramValue";
       case _ => ""
     }
+  }
+
+  private val withValidStatuses: PropertiesViewResponse => PropertiesViewResponse = { view =>
+    view.copy(authorisations = view.authorisations.filter(_.hasValidStatus))
+  }
+
+  private val withValidPermissions: APIParty => Boolean = { party =>
+    List("APPROVED", "PENDING").contains(party.authorisedPartyStatus) && party.permissions.exists(_.endDate.isEmpty)
+  }
+
+  private val filterInvalidParties: Seq[APIParty] => Seq[APIParty] = { parties =>
+    parties.withFilter(withValidPermissions).map(p => p.copy(permissions = p.permissions.filter(_.endDate.isEmpty)))
   }
 
   def getAssessment(authorisationId: Long)(implicit hc: HeaderCarrier): Future[Option[PropertiesView]] = {

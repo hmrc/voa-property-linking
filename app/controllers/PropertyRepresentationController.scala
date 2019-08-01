@@ -19,7 +19,8 @@ package controllers
 import auditing.AuditingService
 import auth.Authenticated
 import connectors.auth.DefaultAuthConnector
-import connectors.{GroupAccountConnector, PropertyLinkingConnector, PropertyRepresentationConnector}
+import connectors.authorisationsearch.PropertyLinkingConnector
+import connectors.{GroupAccountConnector, PropertyRepresentationConnector}
 import javax.inject.Inject
 import models._
 import play.api.Logger

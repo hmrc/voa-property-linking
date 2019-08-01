@@ -21,7 +21,8 @@ import java.time.LocalDateTime
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import connectors.auth.DefaultAuthConnector
-import connectors.{CCACaseManagementApi, DVRCaseManagementConnector, ExternalValuationManagementApi}
+import connectors.externalvaluation.ExternalValuationManagementApi
+import connectors.{CCACaseManagementApi, DVRCaseManagementConnector}
 import models.voa.valuation.dvr.documents.{Document, DocumentSummary, DvrDocumentFiles}
 import models.voa.valuation.dvr.{DetailedValuationRequest, StreamedDocument}
 import org.mockito.ArgumentMatchers.{eq => matching, _}

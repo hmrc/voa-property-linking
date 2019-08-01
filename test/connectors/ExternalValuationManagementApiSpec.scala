@@ -19,6 +19,7 @@ package connectors
 import java.time.LocalDateTime
 
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, stubFor, urlEqualTo, _}
+import connectors.externalvaluation.ExternalValuationManagementApi
 import helpers.SimpleWsHttpTestApplication
 import http.VoaHttpClient
 import models.ModernisedEnrichedRequest

@@ -18,7 +18,9 @@ package services
 
 import binders.GetPropertyLinksParameters
 import cats.data.OptionT
-import connectors.{ExternalPropertyLinkConnector, ExternalValuationManagementApi, PropertyLinkingConnector}
+import connectors.authorisationsearch.PropertyLinkingConnector
+import connectors.externalpropertylink.ExternalPropertyLinkConnector
+import connectors.externalvaluation.ExternalValuationManagementApi
 import javax.inject.Inject
 import models._
 import models.mdtp.propertylink.myclients.PropertyLinksWithClients

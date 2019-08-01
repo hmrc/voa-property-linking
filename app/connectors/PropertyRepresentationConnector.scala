@@ -57,7 +57,7 @@ class PropertyRepresentationConnector @Inject()(
     http.GET[AgentAuthResultBE](url, Seq("start" -> params.startPoint.toString, "size" -> params.pageSize.toString, "representationStatus" -> "PENDING")).map(x => {
       PropertyRepresentations(x.filterTotal, x.authorisations.map(_.toPropertyRepresentation))
     })
-  }git
+  }
 
   def create(reprRequest: APIRepresentationRequest)(implicit hc: HeaderCarrier): Future[Unit] = {
     val url = baseUrl + s"/authorisation-management-api/agent/submit_agent_representation"

@@ -24,6 +24,7 @@ import cats.data._
 import cats.implicits._
 import connectors._
 import connectors.auth._
+import connectors.authorisationsearch.PropertyLinkingConnector
 import models._
 import models.mdtp.propertylink.myclients.PropertyLinksWithClients
 import models.mdtp.propertylink.requests.{APIPropertyLinkRequest, PropertyLinkRequest}
@@ -79,6 +80,8 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
 
   lazy val mockPropertyLinkService = mock[PropertyLinkingService]
 
+  lazy val mockPropertyLinkingConnector = mock[PropertyLinkingConnector]
+
   lazy val mockGroupAccountConnector = mock[GroupAccountConnector]
 
   lazy val mockPropertyRepresentationConnector = mock[PropertyRepresentationConnector]
@@ -87,13 +90,14 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
 
   lazy val mockBrAuth = mock[BusinessRatesAuthConnector]
 
-  lazy val testController = new PropertyLinkingController(mockAuthConnector, mockPropertyLinkService, mockAssessmentService, mockGroupAccountConnector, mock[AuditingService], mockPropertyRepresentationConnector)
+  lazy val testController = new PropertyLinkingController(mockAuthConnector, mockPropertyLinkingConnector,  mockPropertyLinkService, mockAssessmentService, mockGroupAccountConnector, mock[AuditingService], mockPropertyRepresentationConnector)
 
   val date = LocalDate.parse("2018-09-05")
 
   val validPropertiesView = PropertiesView(
     authorisationId = 11111,
     uarn = 33333,
+    address = Some("1 HIGH STREET, BRIGHTON"),
     authorisationStatus = "APPROVED",
     startDate = date,
     endDate = Some(date),
@@ -116,7 +120,8 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
         id = 24680,
         checkPermission = "APPROVED",
         challengePermission = "APPROVED",
-        endDate = None)))))
+        endDate = None)))),
+    agents = Some(Nil))
 
 
   val ownerAuthorisation = OwnerAuthorisation(

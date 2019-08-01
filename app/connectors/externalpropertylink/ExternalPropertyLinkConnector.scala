@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package connectors
+package connectors.externalpropertylink
 
 import binders.GetPropertyLinksParameters
 import http.VoaHttpClient
