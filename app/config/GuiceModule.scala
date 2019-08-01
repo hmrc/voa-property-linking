@@ -65,7 +65,7 @@ class GuiceModule(environment: Environment,
 
     bindConstant().annotatedWith(Names.named("envelopeCollectionName")).to(configuration.getString("envelope.collection.name").get)
     bindConstant().annotatedWith(Names.named("dvrCollectionName")).to(configuration.getString("dvr.collection.name").get)
-    bindConstant().annotatedWith(Names.named("authedAssessmentEndpointEnabled")).to(configuration.getBoolean("featureFlags.authedAssessmentEndpointEnabled").get)
+    bindConstant().annotatedWith(Names.named("authedAssessmentEndpointEnabled")).to(configuration.getString("featureFlags.authedAssessmentEndpointEnabled").fold(false)(_.toBoolean))
 
     bind(classOf[uk.gov.hmrc.play.http.ws.WSHttp]).annotatedWith(Names.named("VoaBackendWsHttp")).to(classOf[VOABackendWSHttp])
     bind(classOf[Clock]).toInstance(Clock.systemUTC())
