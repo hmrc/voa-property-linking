@@ -84,6 +84,7 @@ class AssessmentService @Inject()(
       capacity: Capacity <- OptionT(legacyPropertyLinksConnector.getCapacity(authorisationId))
       propertiesView <- OptionT(legacyPropertyLinksConnector.getAssessment(authorisationId))
     } yield Assessments(
+      propertyLink.authorisation.authorisationId,
       propertyLink.authorisation.submissionId,
       uarn = propertyLink.authorisation.uarn,
       address = propertyLink.authorisation.address,
@@ -100,6 +101,7 @@ class AssessmentService @Inject()(
       capacity: Capacity <- OptionT(legacyPropertyLinksConnector.getCapacity(authorisationId))
       propertiesView <- OptionT(legacyPropertyLinksConnector.getAssessment(authorisationId))
     } yield Assessments(
+      propertyLink.authorisation.authorisationId,
       propertyLink.authorisation.submissionId,
       uarn = propertyLink.authorisation.uarn,
       address = propertyLink.authorisation.address,
