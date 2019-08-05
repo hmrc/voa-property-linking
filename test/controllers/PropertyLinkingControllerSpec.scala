@@ -19,7 +19,7 @@ package controllers
 import java.time.{Instant, LocalDate}
 
 import auditing.AuditingService
-import binders.GetPropertyLinksParameters
+import binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import cats.data._
 import cats.implicits._
 import connectors._
@@ -182,7 +182,7 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
   }
 
   "getMyPropertyLink" should {
-    "return a single my org proprty link" in {
+    "return a single my org property link" in {
 
       when(mockPropertyLinkService.getMyOrganisationsPropertyLink(any())(any(), any())).thenReturn(OptionT.some[Future](validPropertiesView))
       val res = testController.getMyOrganisationsPropertyLink("11111")(FakeRequest())
@@ -193,7 +193,7 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
 
     }
 
-    "return a single my client proprty link" in {
+    "return a single my client property link" in {
 
       when(mockPropertyLinkService.getClientsPropertyLink(any())(any(), any())).thenReturn(OptionT.some[Future](validPropertiesView))
       val res = testController.getClientsPropertyLink("11111")(FakeRequest())
@@ -207,11 +207,11 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
 
 
   "getMyPropertyLinks" should {
-    "return owner proprty links" in {
+    "return owner property links" in {
 
       when(mockPropertyLinkService.getMyOrganisationsPropertyLinks(any(), any())(any(), any())).thenReturn(OptionT.some[Future](ownerAuthResult))
 
-      val res = testController.getMyOrganisationsPropertyLinks(GetPropertyLinksParameters(), None)(FakeRequest())
+      val res = testController.getMyOrganisationsPropertyLinks(GetMyOrganisationPropertyLinksParameters(), None)(FakeRequest())
 
       status(res) shouldBe OK
 
@@ -220,10 +220,10 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
     }
 
 
-    "return client proprty links" in {
+    "return client property links" in {
 
       when(mockPropertyLinkService.getClientsPropertyLinks(any(), any())(any(), any())).thenReturn(OptionT.some[Future](propertyLinksWithClients))
-      val res = testController.getClientsPropertyLinks(GetPropertyLinksParameters(), None)(FakeRequest())
+      val res = testController.getClientsPropertyLinks(GetMyClientsPropertyLinkParameters(), None)(FakeRequest())
 
       status(res) shouldBe OK
 

@@ -34,6 +34,7 @@ class CheckCaseConnectorSpec extends ContentTypes
   val http = fakeApplication.injector.instanceOf[WSHttp]
   val connector = new CheckCaseConnector(http, fakeApplication.injector.instanceOf[ServicesConfig]) {
     override lazy val baseUrl: String = mockServerUrl
+    override lazy val voaModernisedApiStubBaseUrl: String = mockServerUrl
   }
 
   "CheckCaseConnector get check cases" should {

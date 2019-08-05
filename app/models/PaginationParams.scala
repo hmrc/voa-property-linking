@@ -18,7 +18,11 @@ package models
 
 import play.api.mvc.QueryStringBindable
 
-case class PaginationParams(startPoint: Int, pageSize: Int, requestTotalRowCount: Boolean) {
+case class PaginationParams(
+                             startPoint: Int,
+                             pageSize: Int,
+                             requestTotalRowCount: Boolean
+                           ) {
   override val toString = s"startPoint=$startPoint&pageSize=$pageSize&requestTotalRowCount=$requestTotalRowCount"
 }
 

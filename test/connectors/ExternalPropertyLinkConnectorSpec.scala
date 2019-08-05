@@ -16,7 +16,7 @@
 
 package connectors
 
-import binders.GetPropertyLinksParameters
+import binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import connectors.externalpropertylink.ExternalPropertyLinkConnector
 import http.VoaHttpClient
 import models.modernised._
@@ -53,10 +53,26 @@ class ExternalPropertyLinkConnectorSpec extends UnitSpec with MockitoSugar with 
       val status = "mock status"
       val sortField = "mock sort field"
       val sortOrder = "mock sort order"
-      val searchParams = GetPropertyLinksParameters(address = Some(address), baref = Some(baref), agent = Some(agent), status = Some(status),
-        Some(sortField), Some(sortOrder))
 
-      val emptySearchParams = GetPropertyLinksParameters()
+      val searchParams = GetMyOrganisationPropertyLinksParameters(
+        address = Some(address),
+        baref = Some(baref),
+        agent = Some(agent),
+        client = None,
+        status = Some(status),
+        Some(sortField),
+        Some(sortOrder))
+
+      val getMyClientsSearchParams = GetMyClientsPropertyLinkParameters(
+        address = Some(address),
+        baref = Some(baref),
+        agent = Some(agent),
+        status = Some(status),
+        Some(sortField),
+        Some(sortOrder),
+        representationStatus = None)
+
+      val emptySearchParams = GetMyOrganisationPropertyLinksParameters()
 
       val voaApiUrl = "http://voa-modernised-api/external-property-link-management-api"
 
@@ -127,7 +143,7 @@ class ExternalPropertyLinkConnectorSpec extends UnitSpec with MockitoSugar with 
         when(connector.http.GET[PropertyLinksWithClient](any(), any())(any(), any(), any(), any()))
           .thenReturn(Future.successful(mockReturnedPropertyLinks))
 
-        connector.getClientsPropertyLinks(searchParams, Some(paginationParams)).futureValue shouldBe mockReturnedPropertyLinks
+        connector.getClientsPropertyLinks(getMyClientsSearchParams, Some(paginationParams)).futureValue shouldBe mockReturnedPropertyLinks
 
         val clientQueryParams = queryParams :+ ("address" -> address) :+ ("baref" -> baref):+ ("agent" -> agent):+ ("status" -> status):+ ("sortfield" -> sortField):+ ("sortorder" -> sortOrder)
         verify(connector.http).GET(mEq(clientAuthorisationsUrl), mEq(clientQueryParams))(any(), any(), any(), any())

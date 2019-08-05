@@ -10,8 +10,8 @@ PUT          /property-representations/response                                 
 
 GET          /property-links-appointable                                                      @controllers.PropertyRepresentationController.appointableToAgent(ownerId: Long, agentCode: Long, checkPermission: Option[String], challengePermission: Option[String], params: models.PaginationParams, sortfield: Option[String], sortorder: Option[String], address: Option[String], agent: Option[String])
 
-GET          /owner/property-links                                                            @controllers.PropertyLinkingController.getMyOrganisationsPropertyLinks(searchParams: binders.GetPropertyLinksParameters, params: Option[models.PaginationParams])
-GET          /agent/property-links                                                            @controllers.PropertyLinkingController.getClientsPropertyLinks(searchParams: binders.GetPropertyLinksParameters, params: Option[models.PaginationParams])
+GET          /owner/property-links                                                            @controllers.PropertyLinkingController.getMyOrganisationsPropertyLinks(searchParams: GetMyOrganisationPropertyLinksParameters, params: Option[models.PaginationParams])
+GET          /agent/property-links                                                            @controllers.PropertyLinkingController.getClientsPropertyLinks(searchParams: GetMyClientsPropertyLinkParameters, params: Option[models.PaginationParams])
 
 POST         /property-links                                                                  @controllers.PropertyLinkingController.create()
 GET          /owner/property-links/:submissionId/                                             @controllers.PropertyLinkingController.getMyOrganisationsPropertyLink(submissionId: String)
