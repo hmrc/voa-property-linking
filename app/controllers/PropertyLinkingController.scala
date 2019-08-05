@@ -18,7 +18,7 @@ package controllers
 
 import auditing.AuditingService
 import auth.Authenticated
-import binders.GetPropertyLinksParameters
+import binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import connectors.auth.DefaultAuthConnector
 import connectors.authorisationsearch.PropertyLinkingConnector
 import connectors.{GroupAccountConnector, PropertyRepresentationConnector}
@@ -28,6 +28,7 @@ import models.mdtp.propertylink.requests.{APIPropertyLinkRequest, PropertyLinkRe
 import models.modernised.mdtpdashboard.LegacyPropertiesView
 import play.api.Logger
 import play.api.libs.json.Json
+import play.api.mvc.{Action, AnyContent}
 import services.{AssessmentService, PropertyLinkingService}
 import uk.gov.hmrc.http.{HeaderCarrier, Upstream5xxResponse}
 import utils.Cats
@@ -77,9 +78,9 @@ class PropertyLinkingController @Inject()(
       propertyLinkService.getClientsPropertyLink(submissionId).fold(NotFound("client property link not found")) {authorisation => Ok(Json.toJson(authorisation))}
   }
 
-  def getMyOrganisationsPropertyLinks(searchParams: GetPropertyLinksParameters,
-                                      paginationParams: Option[PaginationParams]) = authenticated { implicit request =>
-
+  def getMyOrganisationsPropertyLinks(
+                                       searchParams: GetMyOrganisationPropertyLinksParameters,
+                                       paginationParams: Option[PaginationParams]) = authenticated { implicit request =>
     propertyLinkService.getMyOrganisationsPropertyLinks(searchParams, paginationParams).value flatMap {
       response => {
         Ok(Json.toJson(response))
@@ -87,8 +88,9 @@ class PropertyLinkingController @Inject()(
     }
   }
 
-  def getClientsPropertyLinks(searchParams: GetPropertyLinksParameters,
-                         paginationParams: Option[PaginationParams]) = authenticated { implicit request =>
+  def getClientsPropertyLinks(
+                               searchParams: GetMyClientsPropertyLinkParameters,
+                               paginationParams: Option[PaginationParams]): Action[AnyContent] = authenticated { implicit request =>
     propertyLinkService.getClientsPropertyLinks(searchParams, paginationParams).value flatMap {
       response => {
         Ok(Json.toJson(response))

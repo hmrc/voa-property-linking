@@ -41,8 +41,8 @@ class CheckCaseConnector @Inject()(
       .withExtraHeaders("GG-GROUP-ID" -> request.groupId)
 
     party match {
-      case "agent"  =>  wSHttp.GET[Option[AgentCheckCasesResponse]](s"$baseUrl/external-case-management-api/my-organisation/clients/all/property-links/$submissionId/check-cases?start=1&size=100") recover { case _ => None }
-      case "client" =>  wSHttp.GET[Option[OwnerCheckCasesResponse]](s"$baseUrl/external-case-management-api/my-organisation/property-links/$submissionId/check-cases?start=1&size=100") recover { case _ => None }
+      case "agent"  =>  wSHttp.GET[Option[AgentCheckCasesResponse]](s"$voaModernisedApiStubBaseUrl/external-case-management-api/my-organisation/clients/all/property-links/$submissionId/check-cases?start=1&size=100") recover { case _ => None }
+      case "client" =>  wSHttp.GET[Option[OwnerCheckCasesResponse]](s"$voaModernisedApiStubBaseUrl/external-case-management-api/my-organisation/property-links/$submissionId/check-cases?start=1&size=100") recover { case _ => None }
       case _        =>  Future.successful(None)
 
     }

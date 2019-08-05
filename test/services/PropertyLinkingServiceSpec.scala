@@ -18,7 +18,7 @@ package services
 
 import java.time._
 
-import binders.GetPropertyLinksParameters
+import binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import connectors.authorisationsearch.PropertyLinkingConnector
 import connectors.externalpropertylink.ExternalPropertyLinkConnector
 import connectors.externalvaluation.ExternalValuationManagementApi
@@ -189,7 +189,8 @@ class PropertyLinkingServiceSpec
   val propertyLinksWithClient =  PropertyLinksWithClient(1, 1, 1, 1, Seq(propertyLinkClient))
   val propertyLinksWithAgents = PropertyLinksWithAgents(1, 1, 1, 1, Seq(propertyLinkWithAgents))
 
-  val searchParams = GetPropertyLinksParameters()
+  val getMyOrganisationSearchParams = GetMyOrganisationPropertyLinksParameters()
+  val getMyClientsSearchParams = GetMyClientsPropertyLinkParameters()
   val paginationParams = PaginationParams(1, 1, true)
 
 
@@ -271,24 +272,24 @@ class PropertyLinkingServiceSpec
   "getClientsPropertyLinks" should {
     "call connector and return a Owner Auth Result for a valid authorisation id" in {
 
-      when(mockPropertyLinkingConnector.getClientsPropertyLinks(searchParams, Some(paginationParams))).thenReturn(Future.successful(Some(propertyLinksWithClient)))
+      when(mockPropertyLinkingConnector.getClientsPropertyLinks(getMyClientsSearchParams, Some(paginationParams))).thenReturn(Future.successful(Some(propertyLinksWithClient)))
 
-      val result = service.getClientsPropertyLinks(searchParams, Some(paginationParams)).value
+      val result = service.getClientsPropertyLinks(getMyClientsSearchParams, Some(paginationParams)).value
 
       result.getOrElse("None returned") shouldBe ownerAuthResultClient
 
-      verify(mockPropertyLinkingConnector).getClientsPropertyLinks(searchParams, Some(paginationParams))
+      verify(mockPropertyLinkingConnector).getClientsPropertyLinks(getMyClientsSearchParams, Some(paginationParams))
     }
 
     "return none when nothing is returned from connector" in {
 
-      when(mockPropertyLinkingConnector.getClientsPropertyLinks(searchParams, Some(paginationParams))).thenReturn(Future.successful(None))
+      when(mockPropertyLinkingConnector.getClientsPropertyLinks(getMyClientsSearchParams, Some(paginationParams))).thenReturn(Future.successful(None))
 
-      val result = service.getClientsPropertyLinks(searchParams, Some(paginationParams)).value.futureValue
+      val result = service.getClientsPropertyLinks(getMyClientsSearchParams, Some(paginationParams)).value.futureValue
 
       result shouldBe None
 
-      verify(mockPropertyLinkingConnector).getClientsPropertyLinks(searchParams, Some(paginationParams))
+      verify(mockPropertyLinkingConnector).getClientsPropertyLinks(getMyClientsSearchParams, Some(paginationParams))
     }
   }
 
@@ -296,24 +297,24 @@ class PropertyLinkingServiceSpec
   "getMyOrganisationsPropertyLinks" should {
     "call connector and return a Owner Auth Result for a valid authorisation id" in {
 
-      when(mockPropertyLinkingConnector.getMyOrganisationsPropertyLinks(searchParams, Some(paginationParams))).thenReturn(Future.successful(Some(propertyLinksWithAgents)))
+      when(mockPropertyLinkingConnector.getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams))).thenReturn(Future.successful(Some(propertyLinksWithAgents)))
 
-      val result = service.getMyOrganisationsPropertyLinks(searchParams, Some(paginationParams)).value
+      val result = service.getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams)).value
 
       result.getOrElse("None returned") shouldBe ownerAuthResultAgent
 
-      verify(mockPropertyLinkingConnector).getMyOrganisationsPropertyLinks(searchParams, Some(paginationParams))
+      verify(mockPropertyLinkingConnector).getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams))
     }
 
     "return none when nothing is returned from connector" in {
 
-      when(mockPropertyLinkingConnector.getMyOrganisationsPropertyLinks(searchParams, Some(paginationParams))).thenReturn(Future.successful(None))
+      when(mockPropertyLinkingConnector.getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams))).thenReturn(Future.successful(None))
 
-      val result = service.getMyOrganisationsPropertyLinks(searchParams, Some(paginationParams)).value
+      val result = service.getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams)).value
 
       result.getOrElse("None returned") shouldBe "None returned"
 
-      verify(mockPropertyLinkingConnector).getMyOrganisationsPropertyLinks(searchParams, Some(paginationParams))
+      verify(mockPropertyLinkingConnector).getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams))
 
     }
   }

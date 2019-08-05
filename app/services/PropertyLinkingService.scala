@@ -16,7 +16,7 @@
 
 package services
 
-import binders.GetPropertyLinksParameters
+import binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import cats.data.OptionT
 import connectors.authorisationsearch.PropertyLinkingConnector
 import connectors.externalpropertylink.ExternalPropertyLinkConnector
@@ -59,13 +59,13 @@ class PropertyLinkingService @Inject()(
   }
 
   def getClientsPropertyLinks(
-                               searchParams: GetPropertyLinksParameters,
+                               searchParams: GetMyClientsPropertyLinkParameters,
                                paginationParams: Option[PaginationParams]
                              )(implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]):OptionT[Future, PropertyLinksWithClients] = {
     OptionT(propertyLinksConnector.getClientsPropertyLinks(searchParams, paginationParams)).map(PropertyLinksWithClients.apply)
   }
 
-  def getMyOrganisationsPropertyLinks( searchParams: GetPropertyLinksParameters, paginationParams: Option[PaginationParams])
+  def getMyOrganisationsPropertyLinks(searchParams: GetMyOrganisationPropertyLinksParameters, paginationParams: Option[PaginationParams])
                                      (implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]):OptionT[Future, OwnerAuthResult] = {
     OptionT(propertyLinksConnector.getMyOrganisationsPropertyLinks(searchParams, paginationParams)).map(OwnerAuthResult.apply)
   }

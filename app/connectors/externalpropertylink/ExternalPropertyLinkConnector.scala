@@ -16,7 +16,7 @@
 
 package connectors.externalpropertylink
 
-import binders.GetPropertyLinksParameters
+import binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import http.VoaHttpClient
 import javax.inject.{Inject, Named}
 import models.modernised.externalpropertylink.myclients.{ClientPropertyLink, PropertyLinksWithClient}
@@ -41,7 +41,7 @@ class ExternalPropertyLinkConnector @Inject()(
 
   private val logger = Logger(this.getClass.getName)
 
-  def getMyOrganisationsPropertyLinks(searchParams: GetPropertyLinksParameters, params: Option[PaginationParams])
+  def getMyOrganisationsPropertyLinks(searchParams: GetMyOrganisationPropertyLinksParameters, params: Option[PaginationParams])
                                      (implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]): Future[Option[PropertyLinksWithAgents]] = {
 
     http.GET[Option[PropertyLinksWithAgents]](
@@ -51,26 +51,29 @@ class ExternalPropertyLinkConnector @Inject()(
           searchParams.baref.map("baref" -> _),
           searchParams.agent.map("agent" -> _),
           searchParams.status.map("status" -> _),
-          searchParams.sortfield.map("sortfield" -> _),
-          searchParams.sortorder.map("sortorder" -> _)).flatten)
+          searchParams.sortField.map("sortfield" -> _),
+          searchParams.sortOrder.map("sortorder" -> _)).flatten)
   }
 
   def getMyOrganisationsPropertyLink(submissionId: String)
                                     (implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]): Future[Option[OwnerPropertyLink]] =
     http.GET[Option[OwnerPropertyLink]](myOrganisationsPropertyLinkUrl.replace("{propertyLinkId}", submissionId))
 
-  def getClientsPropertyLinks(searchParams: GetPropertyLinksParameters, params: Option[PaginationParams])
+  def getClientsPropertyLinks(searchParams: GetMyClientsPropertyLinkParameters, params: Option[PaginationParams])
                              (implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]): Future[Option[PropertyLinksWithClient]] =
     http
       .GET[Option[PropertyLinksWithClient]](
       myClientsPropertyLinksUrl,
       modernisedPaginationParams(params) ++
-        List(searchParams.address.map("address" -> _),
+        List(
+          searchParams.address.map("address" -> _),
           searchParams.baref.map("baref" -> _),
           searchParams.agent.map("agent" -> _),
           searchParams.status.map("status" -> _),
-          searchParams.sortfield.map("sortfield" -> _),
-          searchParams.sortorder.map("sortorder" -> _)).flatten)
+          searchParams.sortField.map("sortfield" -> _),
+          searchParams.sortOrder.map("sortorder" -> _),
+          searchParams.representationStatus.map("representationStatus" -> _)
+        ).flatten)
 
   def getClientsPropertyLink(submissionId: String)
                             (implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]): Future[Option[ClientPropertyLink]] =
