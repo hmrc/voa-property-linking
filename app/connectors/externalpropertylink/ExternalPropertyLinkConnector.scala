@@ -86,14 +86,12 @@ class ExternalPropertyLinkConnector @Inject()(
   private def modernisedPaginationParams(params: Option[PaginationParams]): Seq[(String, String)] =
     params.fold(Seq.empty[(String, String)]){ p =>
       Seq(
-        "start" -> calculateStart(p),
+        "start" -> p.startPoint,
         "size"  -> p.pageSize,
         "requestTotalRowCount" -> "true"
       ).map {
         case (key, value) => (key, value.toString)
       }
     }
-
-  private def calculateStart(params: PaginationParams): Int = ((params.startPoint - 1) * params.pageSize) + 1
 
 }
