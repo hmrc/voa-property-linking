@@ -161,7 +161,7 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
 
       await(res)
 
-      status(res) shouldBe CREATED
+      status(res) shouldBe ACCEPTED
 
     }
 

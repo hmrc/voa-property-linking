@@ -25,6 +25,7 @@ trait MicroService {
   lazy val playSettings: Seq[Setting[_]] = Seq(
     RoutesKeys.routesImport ++= Seq(
       "binders.propertylinks._",
+      "binders.propertylinks.temp._",
       "scala.language.reflectiveCalls",
       "models._"
     )

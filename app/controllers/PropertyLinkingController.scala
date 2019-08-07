@@ -18,6 +18,7 @@ package controllers
 
 import auditing.AuditingService
 import auth.Authenticated
+import binders.propertylinks.temp.GetMyOrganisationsPropertyLinksParametersWithAgentFiltering
 import binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import connectors.auth.DefaultAuthConnector
 import connectors.authorisationsearch.PropertyLinkingConnector
@@ -27,7 +28,7 @@ import models._
 import models.mdtp.propertylink.requests.{APIPropertyLinkRequest, PropertyLinkRequest}
 import models.modernised.mdtpdashboard.LegacyPropertiesView
 import play.api.Logger
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent}
 import services.{AssessmentService, PropertyLinkingService}
 import uk.gov.hmrc.http.{HeaderCarrier, Upstream5xxResponse}
@@ -54,33 +55,33 @@ class PropertyLinkingController @Inject()(
 
   type GroupCache = Memoize[Long, Future[Option[GroupAccount]]]
 
-  def create() = authenticated(parse.json) { implicit request =>
-    withJsonBody[PropertyLinkRequest] { linkRequest =>
-      propertyLinkService.create(APIPropertyLinkRequest.fromPropertyLinkRequest(linkRequest))
+  def create(): Action[JsValue] = authenticated(parse.json) { implicit request =>
+    withJsonBody[PropertyLinkRequest] { propertyLinkRequest =>
+      propertyLinkService
+        .create(APIPropertyLinkRequest.fromPropertyLinkRequest(propertyLinkRequest))
         .map { _ =>
-          Logger.info(s"create property link: submissionId ${linkRequest.submissionId}")
-          auditingService.sendEvent("create property link", linkRequest)
-          Created
-        }
-        .recover { case _: Upstream5xxResponse =>
-          Logger.info(s"create property link failure: submissionId ${linkRequest.submissionId}")
-          auditingService.sendEvent("create property link failure", linkRequest)
+          Logger.info(s"create property link: submissionId ${propertyLinkRequest.submissionId}")
+          auditingService.sendEvent("create property link", propertyLinkRequest)
+          Accepted
+        }.recover {
+        case _: Upstream5xxResponse =>
+          Logger.info(s"create property link failure: submissionId ${propertyLinkRequest.submissionId}")
+          auditingService.sendEvent("create property link failure", propertyLinkRequest)
           InternalServerError
         }
     }
   }
 
-  def getMyOrganisationsPropertyLink(submissionId: String) = authenticated { implicit request =>
-    propertyLinkService.getMyOrganisationsPropertyLink(submissionId).fold(NotFound("my organisation property link not found")) {authorisation => Ok(Json.toJson(authorisation))}
-  }
-
-  def getClientsPropertyLink(submissionId: String) = authenticated { implicit request =>
-      propertyLinkService.getClientsPropertyLink(submissionId).fold(NotFound("client property link not found")) {authorisation => Ok(Json.toJson(authorisation))}
+  def getMyOrganisationsPropertyLink(submissionId: String): Action[AnyContent] = authenticated { implicit request =>
+    propertyLinkService
+      .getMyOrganisationsPropertyLink(submissionId)
+      .fold(NotFound("my organisation property link not found")) {authorisation => Ok(Json.toJson(authorisation))}
   }
 
   def getMyOrganisationsPropertyLinks(
                                        searchParams: GetMyOrganisationPropertyLinksParameters,
-                                       paginationParams: Option[PaginationParams]) = authenticated { implicit request =>
+                                       paginationParams: Option[PaginationParams]
+                                     ): Action[AnyContent] = authenticated { implicit request =>
     propertyLinkService.getMyOrganisationsPropertyLinks(searchParams, paginationParams).value flatMap {
       response => {
         Ok(Json.toJson(response))
@@ -95,6 +96,52 @@ class PropertyLinkingController @Inject()(
       response => {
         Ok(Json.toJson(response))
       }
+    }
+  }
+
+  def getClientsPropertyLink(submissionId: String): Action[AnyContent] = authenticated { implicit request =>
+    propertyLinkService
+      .getClientsPropertyLink(submissionId)
+      .fold(NotFound("client property link not found")){authorisation => Ok(Json.toJson(authorisation))}
+  }
+
+  /*
+  To Remove this method once external endpoints have catched up.
+   */
+  def getMyOrganisationPropertyLinksWithAppointable(
+                                                     searchParams: GetMyOrganisationsPropertyLinksParametersWithAgentFiltering,
+                                                     paginationParams: Option[PaginationParams]
+                                                   ): Action[AnyContent] = authenticated { implicit request =>
+
+    searchParams.agentAppointed.getOrElse("BOTH") match {
+      case "NO" =>
+        propertyLinkConnector.searchAndSort(
+          searchParams.organisationId,
+          paginationParams.getOrElse(DefaultPaginationParams),
+          searchParams.sortField,
+          searchParams.sortOrder,
+          searchParams.status,
+          searchParams.address,
+          searchParams.baref,
+          searchParams.agent,
+          searchParams.agentAppointed
+        ).map { response =>
+          Ok(Json.toJson(response))
+        }
+      case _    =>
+        propertyLinkConnector.appointableToAgent(
+          searchParams.organisationId,
+          searchParams.agentCode,
+          searchParams.checkPermission,
+          searchParams.challengePermission,
+          paginationParams.getOrElse(DefaultPaginationParams),
+          searchParams.sortField,
+          searchParams.sortOrder,
+          searchParams.address,
+          searchParams.agent
+        ).map { response =>
+          Ok(Json.toJson(response))
+        }
     }
   }
 
