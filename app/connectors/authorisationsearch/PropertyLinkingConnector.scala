@@ -46,6 +46,30 @@ class PropertyLinkingConnector @Inject()(
     }
   }
 
+  def searchAndSort(organisationId: Long,
+                    params: PaginationParams,
+                    sortfield: Option[String] = None,
+                    sortorder: Option[String] = None,
+                    status: Option[String] = None,
+                    address: Option[String] = None,
+                    baref: Option[String] = None,
+                    agent: Option[String] = None,
+                    agentAppointed: Option[String] = Some("BOTH"))(implicit hc: HeaderCarrier): Future[OwnerAuthResult] = {
+    val url = baseUrl +
+      s"/authorisation-search-api/owners/$organisationId/authorisations" +
+      s"?start=${params.startPoint}" +
+      s"&size=${params.pageSize}" +
+      buildQueryParams("sortfield", sortfield) +
+      buildQueryParams("sortorder", sortorder) +
+      buildQueryParams("status", status) +
+      buildQueryParams("address", address) +
+      buildQueryParams("baref", baref) +
+      buildQueryParams("agent", agent) +
+      s"&agentAppointed=${agentAppointed.getOrElse("BOTH")}"
+
+    http.GET[OwnerAuthResult](url).map(_.uppercase)
+  }
+
   def appointableToAgent(
                           ownerId: Long,
                           agentId: Long,

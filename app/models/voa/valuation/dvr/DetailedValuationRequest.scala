@@ -25,7 +25,8 @@ case class DetailedValuationRequest(
                                      submissionId: String,
                                      assessmentRef: Long,
                                      agents: Option[List[Long]],
-                                     billingAuthorityReferenceNumber: String)
+                                     billingAuthorityReferenceNumber: String
+                                   )
 
 object DetailedValuationRequest {
   implicit val format: Format[DetailedValuationRequest] = Json.format[DetailedValuationRequest]

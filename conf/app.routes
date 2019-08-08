@@ -10,20 +10,7 @@ PUT          /property-representations/response                                 
 
 GET          /property-links-appointable                                                      @controllers.PropertyRepresentationController.appointableToAgent(ownerId: Long, agentCode: Long, checkPermission: Option[String], challengePermission: Option[String], params: models.PaginationParams, sortfield: Option[String], sortorder: Option[String], address: Option[String], agent: Option[String])
 
-GET          /owner/property-links                                                            @controllers.PropertyLinkingController.getMyOrganisationsPropertyLinks(searchParams: GetMyOrganisationPropertyLinksParameters, params: Option[models.PaginationParams])
-GET          /agent/property-links                                                            @controllers.PropertyLinkingController.getClientsPropertyLinks(searchParams: GetMyClientsPropertyLinkParameters, params: Option[models.PaginationParams])
-
-POST         /property-links                                                                  @controllers.PropertyLinkingController.create()
-GET          /owner/property-links/:submissionId/                                             @controllers.PropertyLinkingController.getMyOrganisationsPropertyLink(submissionId: String)
-GET          /agent/property-links/:submissionId/                                             @controllers.PropertyLinkingController.getClientsPropertyLink(submissionId: String)
-
 GET          /property-links/client-property/:authorisationId                                 @controllers.PropertyLinkingController.clientProperty(authorisationId: Long, clientOrganisationId: Long, agentOrganisationId: Long)
-
-GET          /dashboard/owner/assessments/:submissionId                                       @controllers.PropertyLinkingController.getMyOrganisationsAssessments(submissionId: String)
-GET          /dashboard/agent/assessments/:submissionId                                       @controllers.PropertyLinkingController.getClientsAssessments(submissionId: String)
-GET          /dashboard/owner/assessments/:submissionId/:authorisationId                      @controllers.PropertyLinkingController.getMyOrganisationsAssessmentsWithCapacity(submissionId: String, authorisationId: Long)
-GET          /dashboard/agent/assessments/:submissionId/:authorisationId                      @controllers.PropertyLinkingController.getClientsAssessmentsWithCapacity(submissionId: String, authorisationId: Long)
-
 
 
 # Manage Agents
@@ -63,3 +50,22 @@ GET          /dvr-exists                                                        
 GET          /check-cases/:submissionId/:party                                                @controllers.CheckCaseController.getCheckCases(submissionId: String, party: String)
 
 GET          /property-links/:plSubmissionId/check-cases/:checkCaseRef/canChallenge           @controllers.ChallengeController.canChallenge(plSubmissionId: String, checkCaseRef: String, valuationId: Long, party: String)
+
+
+#My Property Links
+POST         /property-links                                                                  @controllers.PropertyLinkingController.create()
+
+GET          /owner/property-links                                                            @controllers.PropertyLinkingController.getMyOrganisationsPropertyLinks(searchParams: GetMyOrganisationPropertyLinksParameters, params: Option[models.PaginationParams])
+GET          /owner/property-links/:submissionId/                                             @controllers.PropertyLinkingController.getMyOrganisationsPropertyLink(submissionId: String)
+GET          /dashboard/owner/assessments/:submissionId                                       @controllers.PropertyLinkingController.getMyOrganisationsAssessments(submissionId: String)
+GET          /dashboard/owner/assessments/:submissionId/:authorisationId                      @controllers.PropertyLinkingController.getMyOrganisationsAssessmentsWithCapacity(submissionId: String, authorisationId: Long)
+
+#My Clients Property Links
+GET          /agent/property-links                                                            @controllers.PropertyLinkingController.getClientsPropertyLinks(searchParams: GetMyClientsPropertyLinkParameters, params: Option[models.PaginationParams])
+GET          /agent/property-links/:submissionId/                                             @controllers.PropertyLinkingController.getClientsPropertyLink(submissionId: String)
+GET          /dashboard/agent/assessments/:submissionId                                       @controllers.PropertyLinkingController.getClientsAssessments(submissionId: String)
+GET          /dashboard/agent/assessments/:submissionId/:authorisationId                      @controllers.PropertyLinkingController.getClientsAssessmentsWithCapacity(submissionId: String, authorisationId: Long)
+
+#TODO Remove this once external endpoint is created
+GET          /owner/property-links/appointable                                                @controllers.PropertyLinkingController.getMyOrganisationPropertyLinksWithAppointable(searchParams: GetMyOrganisationsPropertyLinksParametersWithAgentFiltering, params: Option[models.PaginationParams])
+
