@@ -49,8 +49,8 @@ object GetMyOrganisationPropertyLinksParameters extends ValidationUtils {
         validateString("agent", params),
         validateString("client", params),
         validateString("status", params),
-        validateString("sortfield", params),
-        validateString("sortorder", params))
+        validateString("sortField", params),
+        validateString("sortOrder", params))
         .mapN(GetMyOrganisationPropertyLinksParameters.apply)
 
     def validateString(implicit key: String, params: Params): ValidationResult[Option[String]] =
