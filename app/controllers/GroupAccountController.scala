@@ -16,21 +16,21 @@
 
 package controllers
 
-import javax.inject.Inject
-
+import auditing.AuditingService
 import auth.Authenticated
 import connectors.auth.DefaultAuthConnector
-import auditing.AuditingService
 import connectors.{BusinessRatesAuthConnector, GroupAccountConnector}
+import javax.inject.Inject
 import models.{GroupAccountSubmission, GroupId, UpdatedOrganisationAccount}
 import play.api.libs.json.Json
-import play.api.mvc.{Action, AnyContent}
+
+import scala.concurrent.ExecutionContext
 
 class GroupAccountController @Inject() (
                                          val authConnector: DefaultAuthConnector,
                                          auditingService: AuditingService,
-                                         groups: GroupAccountConnector, brAuth: BusinessRatesAuthConnector)
-  extends PropertyLinkingBaseController with Authenticated {
+                                         groups: GroupAccountConnector, brAuth: BusinessRatesAuthConnector
+                                       )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController with Authenticated {
 
   case class GroupAccount(groupId: GroupId, submission: GroupAccountSubmission)
 

@@ -17,16 +17,17 @@
 package controllers
 
 import javax.inject.Inject
-
 import auth.Authenticated
 import connectors.CheckCaseConnector
 import connectors.auth.DefaultAuthConnector
 import play.api.libs.json.Json
 
-class ChallengeController @Inject()(val authConnector: DefaultAuthConnector,
-                                    checkCaseConnector: CheckCaseConnector)
-  extends PropertyLinkingBaseController with Authenticated {
+import scala.concurrent.ExecutionContext
 
+class ChallengeController @Inject()(
+                                     val authConnector: DefaultAuthConnector,
+                                     checkCaseConnector: CheckCaseConnector
+                                   )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController with Authenticated {
 
   def canChallenge(propertyLinkSubmissionId: String,
                           checkCaseRef: String,

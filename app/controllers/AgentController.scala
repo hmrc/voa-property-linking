@@ -17,15 +17,17 @@
 package controllers
 
 import javax.inject.Inject
-
 import auth.Authenticated
 import connectors.AgentConnector
 import connectors.auth.DefaultAuthConnector
 import play.api.libs.json.Json
 
-class AgentController @Inject()(val authConnector: DefaultAuthConnector,
-                                agentConnector: AgentConnector)
-                                  extends PropertyLinkingBaseController with Authenticated  {
+import scala.concurrent.ExecutionContext
+
+class AgentController @Inject()(
+                                 val authConnector: DefaultAuthConnector,
+                                 agentConnector: AgentConnector
+                               )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController with Authenticated  {
 
   def manageAgents(organisationId: Long) = authenticated { implicit request =>
     agentConnector.manageAgents(organisationId) map { agents => Ok(Json.toJson(agents)) }

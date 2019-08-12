@@ -17,17 +17,20 @@
 package controllers
 
 import javax.inject.Inject
-
 import auth.Authenticated
 import connectors.CheckCaseConnector
 import connectors.auth.DefaultAuthConnector
 import play.api.libs.json.Json
+import play.api.mvc.{Action, AnyContent}
 
-class CheckCaseController @Inject() (val authConnector: DefaultAuthConnector,
-                                     checkCaseConnector: CheckCaseConnector)
-  extends PropertyLinkingBaseController with Authenticated {
+import scala.concurrent.ExecutionContext
 
-  def getCheckCases(submissionId: String, party: String) = authenticated { implicit request =>
+class CheckCaseController @Inject()(
+                                      val authConnector: DefaultAuthConnector,
+                                      checkCaseConnector: CheckCaseConnector
+                                   )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController with Authenticated {
+
+  def getCheckCases(submissionId: String, party: String): Action[AnyContent] = authenticated { implicit request =>
 
     checkCaseConnector.getCheckCases(submissionId, party) map {
       case Some(checkCasesResponse) => Ok(Json.toJson(checkCasesResponse))

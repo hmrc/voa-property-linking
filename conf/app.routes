@@ -55,7 +55,7 @@ GET          /property-links/:plSubmissionId/check-cases/:checkCaseRef/canChalle
 #My Property Links
 POST         /property-links                                                                  @controllers.PropertyLinkingController.create()
 
-GET          /owner/property-links                                                            @controllers.PropertyLinkingController.getMyOrganisationsPropertyLinks(searchParams: GetMyOrganisationPropertyLinksParameters, params: Option[models.PaginationParams])
+GET          /owner/property-links                                                            @controllers.PropertyLinkingController.getMyOrganisationsPropertyLinks(searchParams: GetMyOrganisationPropertyLinksParameters, params: Option[models.PaginationParams], organisationId: Option[Long] ?= None)
 GET          /owner/property-links/:submissionId/                                             @controllers.PropertyLinkingController.getMyOrganisationsPropertyLink(submissionId: String)
 GET          /dashboard/owner/assessments/:submissionId                                       @controllers.PropertyLinkingController.getMyOrganisationsAssessments(submissionId: String)
 GET          /dashboard/owner/assessments/:submissionId/:authorisationId                      @controllers.PropertyLinkingController.getMyOrganisationsAssessmentsWithCapacity(submissionId: String, authorisationId: Long)
