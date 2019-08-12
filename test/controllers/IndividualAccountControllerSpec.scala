@@ -33,6 +33,7 @@ import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.test.WithFakeApplication
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class IndividualAccountControllerSpec extends ControllerSpec with MockitoSugar with WithFakeApplication {
 
