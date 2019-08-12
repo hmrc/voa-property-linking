@@ -17,27 +17,28 @@
 package controllers
 
 import javax.inject.Inject
-
 import auth.Authenticated
 import connectors.auth.DefaultAuthConnector
 import connectors.fileUpload.{EnvelopeMetadata, FileUploadConnector}
 import models.Closed
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
+import play.api.mvc.{Action, AnyContent}
 import repositories.EnvelopeIdRepo
 import uk.gov.hmrc.circuitbreaker.UnhealthyServiceException
 import uk.gov.hmrc.play.config.ServicesConfig
+
+import scala.concurrent.ExecutionContext
 
 class EnvelopeController @Inject()(
                                     val authConnector: DefaultAuthConnector,
                                     val repo: EnvelopeIdRepo,
                                     fileUploadConnector: FileUploadConnector,
                                     config: ServicesConfig
-                                  )
-  extends PropertyLinkingBaseController with Authenticated {
+                                  )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController with Authenticated {
 
   lazy val mdtpPlatformSsl = config.getBoolean("mdtp.platformSsl")
 
-  def create = authenticated(parse.json) { implicit request =>
+  def create: Action[JsValue] = authenticated(parse.json) { implicit request =>
     withJsonBody[EnvelopeMetadata] { metadata =>
       fileUploadConnector.createEnvelope(metadata, routes.FileTransferController.handleCallback().absoluteURL(mdtpPlatformSsl)) flatMap {
         case Some(id) => repo.create(id) map { _ => Ok(Json.obj("envelopeId" -> id))}
@@ -48,11 +49,11 @@ class EnvelopeController @Inject()(
     }
   }
 
-  def record(envelopeId: String) = authenticated { implicit request =>
+  def record(envelopeId: String): Action[AnyContent] = authenticated { implicit request =>
     repo.create(envelopeId).map(_=> Ok(envelopeId))
   }
 
-  def close(envelopeId: String) = authenticated { implicit request =>
+  def close(envelopeId: String): Action[AnyContent] = authenticated { implicit request =>
     repo.update(envelopeId, Closed).map(_=> Ok(envelopeId))
   }
 }

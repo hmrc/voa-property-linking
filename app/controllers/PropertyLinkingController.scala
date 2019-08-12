@@ -35,7 +35,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, Upstream5xxResponse}
 import utils.Cats
 
 import scala.collection.mutable
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 case class Memoize[K, V]() {
   private val cache = mutable.Map.empty[K, V]
@@ -50,8 +50,9 @@ class PropertyLinkingController @Inject()(
                                            assessmentService: AssessmentService,
                                            groupAccountsConnector: GroupAccountConnector,
                                            auditingService: AuditingService,
-                                           representationsConnector: PropertyRepresentationConnector)
-  extends PropertyLinkingBaseController with Authenticated with Cats {
+                                           representationsConnector: PropertyRepresentationConnector,
+                                           @Named("agentQueryParameterEnabledExteranl") agentQueryParameterEnabledExteranl: Boolean
+                                         )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController with Authenticated with Cats {
 
   type GroupCache = Memoize[Long, Future[Option[GroupAccount]]]
 
@@ -80,11 +81,30 @@ class PropertyLinkingController @Inject()(
 
   def getMyOrganisationsPropertyLinks(
                                        searchParams: GetMyOrganisationPropertyLinksParameters,
-                                       paginationParams: Option[PaginationParams]
+                                       paginationParams: Option[PaginationParams],
+                                       organisationId: Option[Long]
                                      ): Action[AnyContent] = authenticated { implicit request =>
-    propertyLinkService.getMyOrganisationsPropertyLinks(searchParams, paginationParams).value flatMap {
-      response => {
-        Ok(Json.toJson(response))
+    //TODO remove once modernised external has caught up.
+    if (searchParams.sortField.map(_ == "AGENT").getOrElse(false) && agentQueryParameterEnabledExteranl) {
+
+      organisationId.fold(Future.successful(BadRequest("organisationId is required for this query.")))(
+        id =>
+          propertyLinkConnector.searchAndSort(
+            id,
+            paginationParams.getOrElse(DefaultPaginationParams),
+            searchParams.sortField,
+            searchParams.sortOrder,
+            searchParams.status,
+            searchParams.address,
+            searchParams.baref,
+            searchParams.agent
+          )
+            .map( response => Ok(Json.toJson(response))))
+    } else {
+      propertyLinkService.getMyOrganisationsPropertyLinks(searchParams, paginationParams).value flatMap {
+        response => {
+          Ok(Json.toJson(response))
+        }
       }
     }
   }

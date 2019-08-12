@@ -22,8 +22,11 @@ import play.api.Logger
 import play.api.mvc.Action
 import services.FileTransferService
 
-class FileTransferController @Inject()(val fileTransferService: FileTransferService)
-  extends PropertyLinkingBaseController {
+import scala.concurrent.ExecutionContext
+
+class FileTransferController @Inject()(
+                                        val fileTransferService: FileTransferService
+                                      )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController {
 
   def handleCallback() = Action.async(parse.json) { implicit request =>
     Logger.info(request.body.validate[Callback].toString)

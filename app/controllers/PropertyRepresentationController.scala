@@ -26,13 +26,15 @@ import models._
 import play.api.Logger
 import play.api.libs.json.Json
 
+import scala.concurrent.ExecutionContext
+
 class PropertyRepresentationController @Inject() (
                                                    val authConnector: DefaultAuthConnector,
                                                    representations: PropertyRepresentationConnector,
                                                    propertyLinksConnector: PropertyLinkingConnector,
                                                    groupAccountsConnector: GroupAccountConnector,
                                                    auditingService: AuditingService
-                                                 ) extends PropertyLinkingBaseController with Authenticated {
+                                                 )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController with Authenticated {
 
   def validateAgentCode(agentCode:Long, authorisationId: Long) = authenticated { implicit request =>
     representations.validateAgentCode(agentCode, authorisationId).map(

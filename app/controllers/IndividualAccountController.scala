@@ -17,23 +17,24 @@
 package controllers
 
 import javax.inject.Inject
-
 import auth.Authenticated
 import connectors.auth.DefaultAuthConnector
 import auditing.AuditingService
 import connectors.{BusinessRatesAuthConnector, IndividualAccountConnector}
 import models.{IndividualAccountId, IndividualAccountSubmission}
 import play.api.Logger
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Action
 import play.api.mvc.Results.EmptyContent
 
+import scala.concurrent.ExecutionContext
+
 class IndividualAccountController @Inject()(
                                              val authConnector: DefaultAuthConnector,
-                                            individuals: IndividualAccountConnector,
+                                             individuals: IndividualAccountConnector,
                                              auditingService: AuditingService,
-                                            brAuth: BusinessRatesAuthConnector
-                                           ) extends PropertyLinkingBaseController with Authenticated {
+                                             brAuth: BusinessRatesAuthConnector
+                                           )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController with Authenticated {
 
   case class IndividualAccount(id: IndividualAccountId, submission: IndividualAccountSubmission)
 
@@ -41,7 +42,7 @@ class IndividualAccountController @Inject()(
     implicit val format = Json.format[IndividualAccount]
   }
 
-  def create() = authenticated(parse.json) { implicit request =>
+  def create(): Action[JsValue] = authenticated(parse.json) { implicit request =>
     withJsonBody[IndividualAccountSubmission] { acc =>
       individuals.create(acc) map { x =>
         auditingService.sendEvent("Created", IndividualAccount(x, acc))
@@ -50,7 +51,7 @@ class IndividualAccountController @Inject()(
     }
   }
 
-  def update(personId: Long) = authenticated(parse.json) { implicit request =>
+  def update(personId: Long): Action[JsValue] = authenticated(parse.json) { implicit request =>
     withJsonBody[IndividualAccountSubmission] { account =>
       for {
         _ <- individuals.update(personId, account)

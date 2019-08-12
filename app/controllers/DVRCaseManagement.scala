@@ -32,12 +32,15 @@ import repositories.DVRRecordRepository
 import play.api.Logger
 import play.api.http.HttpEntity.Streamed
 
-class DVRCaseManagement @Inject()(val authConnector: DefaultAuthConnector,
-                                  dvrCaseManagement: DVRCaseManagementConnector,
-                                  dvrCaseManagementV2: CCACaseManagementApi,
-                                  externalValuationManagementApi: ExternalValuationManagementApi,
-                                  dvrRecordRepository: DVRRecordRepository)
-  extends PropertyLinkingBaseController with Authenticated {
+import scala.concurrent.ExecutionContext
+
+class DVRCaseManagement @Inject()(
+                                   val authConnector: DefaultAuthConnector,
+                                   dvrCaseManagement: DVRCaseManagementConnector,
+                                   dvrCaseManagementV2: CCACaseManagementApi,
+                                   externalValuationManagementApi: ExternalValuationManagementApi,
+                                   dvrRecordRepository: DVRRecordRepository
+                                 )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController with Authenticated {
 
   def requestDetailedValuation: Action[JsValue] = authenticated(parse.json) { implicit request =>
     withJsonBody[DetailedValuationRequest] { dvr => {
@@ -83,10 +86,10 @@ class DVRCaseManagement @Inject()(val authConnector: DefaultAuthConnector,
       )
   }
 
-  def dvrExists(organisationId: Long, assessmentRef: Long) = Action.async { implicit request =>
+  def dvrExists(organisationId: Long, assessmentRef: Long): Action[AnyContent] = Action.async { implicit request =>
     dvrRecordRepository.exists(organisationId, assessmentRef).map {
-      case true => Ok(Json.toJson(true))
-      case false => Ok(Json.toJson(false))
+      case true   => Ok(Json.toJson(true))
+      case false  => Ok(Json.toJson(false))
     }
   }
 

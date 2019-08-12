@@ -17,15 +17,17 @@
 package controllers
 
 import javax.inject.Inject
-
 import auth.Authenticated
 import connectors.auth.DefaultAuthConnector
 import play.api.libs.json.Json
 import repositories.SequenceGeneratorMongoRepository
 
-class SubmissionIdController @Inject()(val authConnector: DefaultAuthConnector,
-                                       val sequenceGenerator: SequenceGeneratorMongoRepository)
-  extends PropertyLinkingBaseController with Authenticated {
+import scala.concurrent.ExecutionContext
+
+class SubmissionIdController @Inject()(
+                                        val authConnector: DefaultAuthConnector,
+                                        val sequenceGenerator: SequenceGeneratorMongoRepository
+                                      )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController with Authenticated {
 
   def get(prefix: String) = authenticated { implicit  request =>
     for {

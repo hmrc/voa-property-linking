@@ -16,21 +16,20 @@
 
 package controllers
 
-import javax.inject.Inject
-
 import auth.Authenticated
 import connectors.AddressConnector
 import connectors.auth.DefaultAuthConnector
+import javax.inject.Inject
 import models.SimpleAddress
 import play.api.libs.json.Json
-import play.api.mvc.Action
 import utils.PostcodeValidator
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class AddressLookup @Inject() (val authConnector: DefaultAuthConnector,
-                               addresses: AddressConnector)
-  extends PropertyLinkingBaseController with Authenticated {
+class AddressLookup @Inject()(
+                               val authConnector: DefaultAuthConnector,
+                               addresses: AddressConnector
+                             )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController with Authenticated {
 
   def find(postcode: String) = authenticated { implicit request =>
     PostcodeValidator.validateAndFormat(postcode) match {

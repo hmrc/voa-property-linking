@@ -21,13 +21,15 @@ import connectors.auth.DefaultAuthConnector
 import connectors.test.TestConnector
 import controllers.PropertyLinkingBaseController
 import javax.inject.Inject
-
 import repositories.DVRRecordRepository
 
-class TestController @Inject()(val authConnector: DefaultAuthConnector,
-                               testConnector: TestConnector,
-                               dvrRecordRepository: DVRRecordRepository)
-  extends PropertyLinkingBaseController with Authenticated {
+import scala.concurrent.ExecutionContext
+
+class TestController @Inject()(
+                                val authConnector: DefaultAuthConnector,
+                                testConnector: TestConnector,
+                                dvrRecordRepository: DVRRecordRepository
+                              )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController with Authenticated {
 
   def deleteOrganisation(organisationId: Long) = authenticated { implicit request =>
     testConnector.deleteOrganisation(organisationId).map(_ => Ok)
