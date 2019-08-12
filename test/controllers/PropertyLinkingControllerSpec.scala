@@ -90,7 +90,7 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
 
   lazy val mockBrAuth = mock[BusinessRatesAuthConnector]
 
-  lazy val testController = new PropertyLinkingController(mockAuthConnector, mockPropertyLinkingConnector,  mockPropertyLinkService, mockAssessmentService, mockGroupAccountConnector, mock[AuditingService], mockPropertyRepresentationConnector)
+  lazy val testController = new PropertyLinkingController(mockAuthConnector, mockPropertyLinkingConnector,  mockPropertyLinkService, mockAssessmentService, mockGroupAccountConnector, mock[AuditingService], mockPropertyRepresentationConnector, true)
 
   val date = LocalDate.parse("2018-09-05")
 
@@ -211,7 +211,7 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
 
       when(mockPropertyLinkService.getMyOrganisationsPropertyLinks(any(), any())(any(), any())).thenReturn(OptionT.some[Future](ownerAuthResult))
 
-      val res = testController.getMyOrganisationsPropertyLinks(GetMyOrganisationPropertyLinksParameters(), None)(FakeRequest())
+      val res = testController.getMyOrganisationsPropertyLinks(GetMyOrganisationPropertyLinksParameters(), None, None)(FakeRequest())
 
       status(res) shouldBe OK
 

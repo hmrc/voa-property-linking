@@ -35,6 +35,8 @@ import repositories.DVRRecordRepository
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.http.HeaderCarrier
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
 import scala.concurrent.{ExecutionContext, Future}
 
 class DVRCaseManagementSpec extends ControllerSpec with MockitoSugar {
