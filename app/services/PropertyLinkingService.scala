@@ -47,15 +47,13 @@ class PropertyLinkingService @Inject()(
   def getClientsPropertyLink(submissionId: String)(implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]): OptionT[Future, PropertiesView] = {
     for {
       propertyLink <- OptionT(propertyLinksConnector.getClientsPropertyLink(submissionId))
-      history  <- OptionT(externalValuationManagementApi.getValuationHistory(propertyLink.authorisation.uarn, submissionId))
-    } yield PropertiesView(propertyLink.authorisation, history.NDRListValuationHistoryItems)
+    } yield PropertiesView(propertyLink.authorisation, Nil)
   }
 
   def getMyOrganisationsPropertyLink(submissionId: String)(implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]): OptionT[Future, PropertiesView] = {
     for {
       propertyLink <- OptionT(propertyLinksConnector.getMyOrganisationsPropertyLink(submissionId))
-      history  <- OptionT(externalValuationManagementApi.getValuationHistory(propertyLink.authorisation.uarn, submissionId))
-    } yield PropertiesView(propertyLink.authorisation, history.NDRListValuationHistoryItems)
+    } yield PropertiesView(propertyLink.authorisation, Nil)
   }
 
   def getClientsPropertyLinks(
