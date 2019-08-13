@@ -23,7 +23,8 @@ import connectors.externalpropertylink.ExternalPropertyLinkConnector
 import connectors.externalvaluation.ExternalValuationManagementApi
 import javax.inject.Inject
 import models._
-import models.mdtp.propertylink.myclients.PropertyLinksWithClients
+import models.mdtp.propertylink.myclients.{PropertyLinksWithClients, PropertyLinkWithClient => MdtpPropertyLinkWithClient}
+import models.mdtp.propertylink.myorganisation.{PropertyLinkWithAgents => MdtpPropertyLinkWithAgent}
 import models.mdtp.propertylink.requests.APIPropertyLinkRequest
 import models.searchApi.OwnerAuthResult
 import models.voa.propertylinking.requests.CreatePropertyLink
@@ -44,18 +45,16 @@ class PropertyLinkingService @Inject()(
       propertyLinksConnector.createPropertyLink(createPropertyLink)
   }
 
-  def getClientsPropertyLink(submissionId: String)(implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]): OptionT[Future, PropertiesView] = {
+  def getClientsPropertyLink(submissionId: String)(implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]): OptionT[Future, MdtpPropertyLinkWithClient] = {
     for {
       propertyLink <- OptionT(propertyLinksConnector.getClientsPropertyLink(submissionId))
-      history  <- OptionT(externalValuationManagementApi.getValuationHistory(propertyLink.authorisation.uarn, submissionId))
-    } yield PropertiesView(propertyLink.authorisation, history.NDRListValuationHistoryItems)
+    } yield MdtpPropertyLinkWithClient(propertyLink.authorisation)
   }
 
-  def getMyOrganisationsPropertyLink(submissionId: String)(implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]): OptionT[Future, PropertiesView] = {
+  def getMyOrganisationsPropertyLink(submissionId: String)(implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]): OptionT[Future, MdtpPropertyLinkWithAgent] = {
     for {
       propertyLink <- OptionT(propertyLinksConnector.getMyOrganisationsPropertyLink(submissionId))
-      history  <- OptionT(externalValuationManagementApi.getValuationHistory(propertyLink.authorisation.uarn, submissionId))
-    } yield PropertiesView(propertyLink.authorisation, history.NDRListValuationHistoryItems)
+    } yield MdtpPropertyLinkWithAgent(propertyLink.authorisation)
   }
 
   def getClientsPropertyLinks(
