@@ -26,8 +26,10 @@ import connectors._
 import connectors.auth._
 import connectors.authorisationsearch.PropertyLinkingConnector
 import models._
-import models.mdtp.propertylink.myclients.PropertyLinksWithClients
+import models.mdtp.propertylink.myclients.{PropertyLinkWithClient, PropertyLinksWithClients}
+import models.mdtp.propertylink.myorganisation.{PropertyLinkWithAgents, PropertyLinksWithAgents}
 import models.mdtp.propertylink.requests.{APIPropertyLinkRequest, PropertyLinkRequest}
+import models.modernised.PropertyLinkStatus
 import models.searchApi.{AgentAuthResult, OwnerAuthResult, OwnerAuthorisation}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
@@ -184,23 +186,46 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
   "getMyPropertyLink" should {
     "return a single my org property link" in {
 
-      when(mockPropertyLinkService.getMyOrganisationsPropertyLink(any())(any(), any())).thenReturn(OptionT.some[Future](validPropertiesView))
+      val propertyLink = PropertyLinkWithAgents(
+        1L,
+        PropertyLinkStatus.APPROVED,
+        LocalDate.now(),
+        None,
+        "11111",
+        1L,
+        "some address",
+        "123",
+        Nil
+      )
+
+      when(mockPropertyLinkService.getMyOrganisationsPropertyLink(any())(any(), any())).thenReturn(OptionT.some[Future](propertyLink))
       val res = testController.getMyOrganisationsPropertyLink("11111")(FakeRequest())
 
       status(res) shouldBe OK
 
-      contentAsJson(res) shouldBe Json.toJson(validPropertiesView)
+      contentAsJson(res) shouldBe Json.toJson(propertyLink)
 
     }
 
     "return a single my client property link" in {
+      val propertyLink = new PropertyLinkWithClient(
+        1L,
+        1L,
+        PropertyLinkStatus.APPROVED.toString,
+        "PL1",
+        1L,
+        "some address",
+        "123",
+        models.searchApi.Client(1L, "some org"),
+        "APPROVED"
+      )
 
-      when(mockPropertyLinkService.getClientsPropertyLink(any())(any(), any())).thenReturn(OptionT.some[Future](validPropertiesView))
+      when(mockPropertyLinkService.getClientsPropertyLink(any())(any(), any())).thenReturn(OptionT.some[Future](propertyLink))
       val res = testController.getClientsPropertyLink("11111")(FakeRequest())
 
       status(res) shouldBe OK
 
-      contentAsJson(res) shouldBe Json.toJson(validPropertiesView)
+      contentAsJson(res) shouldBe Json.toJson(propertyLink)
 
     }
   }

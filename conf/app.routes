@@ -56,13 +56,13 @@ GET          /property-links/:plSubmissionId/check-cases/:checkCaseRef/canChalle
 POST         /property-links                                                                  @controllers.PropertyLinkingController.create()
 
 GET          /owner/property-links                                                            @controllers.PropertyLinkingController.getMyOrganisationsPropertyLinks(searchParams: GetMyOrganisationPropertyLinksParameters, params: Option[models.PaginationParams], organisationId: Option[Long] ?= None)
-GET          /owner/property-links/:submissionId/                                             @controllers.PropertyLinkingController.getMyOrganisationsPropertyLink(submissionId: String)
+GET          /owner/property-links/:submissionId                                              @controllers.PropertyLinkingController.getMyOrganisationsPropertyLink(submissionId: String)
 GET          /dashboard/owner/assessments/:submissionId                                       @controllers.PropertyLinkingController.getMyOrganisationsAssessments(submissionId: String)
 GET          /dashboard/owner/assessments/:submissionId/:authorisationId                      @controllers.PropertyLinkingController.getMyOrganisationsAssessmentsWithCapacity(submissionId: String, authorisationId: Long)
 
 #My Clients Property Links
 GET          /agent/property-links                                                            @controllers.PropertyLinkingController.getClientsPropertyLinks(searchParams: GetMyClientsPropertyLinkParameters, params: Option[models.PaginationParams])
-GET          /agent/property-links/:submissionId/                                             @controllers.PropertyLinkingController.getClientsPropertyLink(submissionId: String)
+GET          /agent/property-links/:submissionId                                              @controllers.PropertyLinkingController.getClientsPropertyLink(submissionId: String)
 GET          /dashboard/agent/assessments/:submissionId                                       @controllers.PropertyLinkingController.getClientsAssessments(submissionId: String)
 GET          /dashboard/agent/assessments/:submissionId/:authorisationId                      @controllers.PropertyLinkingController.getClientsAssessmentsWithCapacity(submissionId: String, authorisationId: Long)
 
