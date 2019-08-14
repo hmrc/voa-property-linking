@@ -66,7 +66,7 @@ class ExternalPropertyLinkConnectorSpec extends UnitSpec with MockitoSugar with 
       val getMyClientsSearchParams = GetMyClientsPropertyLinkParameters(
         address = Some(address),
         baref = Some(baref),
-        agent = Some(agent),
+        client = Some(agent),
         status = Some(status),
         Some(sortField),
         Some(sortOrder),
@@ -145,7 +145,7 @@ class ExternalPropertyLinkConnectorSpec extends UnitSpec with MockitoSugar with 
 
         connector.getClientsPropertyLinks(getMyClientsSearchParams, Some(paginationParams)).futureValue shouldBe mockReturnedPropertyLinks
 
-        val clientQueryParams = queryParams :+ ("address" -> address) :+ ("baref" -> baref):+ ("agent" -> agent):+ ("status" -> status):+ ("sortfield" -> sortField):+ ("sortorder" -> sortOrder)
+        val clientQueryParams = queryParams :+ ("address" -> address) :+ ("baref" -> baref):+ ("client" -> agent):+ ("status" -> status):+ ("sortfield" -> sortField):+ ("sortorder" -> sortOrder)
         verify(connector.http).GET(mEq(clientAuthorisationsUrl), mEq(clientQueryParams))(any(), any(), any(), any())
       }
 

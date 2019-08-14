@@ -22,13 +22,14 @@ import utils.JsonUtils.enumFormat
 object EvidenceType extends Enumeration {
   type EvidenceType = Value
 
-  val RATES_BILL = Value("ratesBill")
   val LEASE = Value("lease")
   val LICENSE = Value("license")
   val SERVICE_CHARGE = Value("serviceCharge")
   val STAMP_DUTY_LAND_TAX_FORM = Value("stampDutyLandTaxForm")
   val WATER_RATE_DEMAND = Value("waterRateDemand")
   val OTHER_UTILITY_BILL = Value("otherUtilityBill")
+  val RATES_BILL = Value("ratesBill")
+  val LAND_REGISTRY_TITLE = Value("landRegistryTitle")
 
   implicit val format: Format[EvidenceType] = enumFormat(EvidenceType)
 
