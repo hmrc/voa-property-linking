@@ -48,8 +48,8 @@ object GetMyClientsPropertyLinkParameters extends ValidationUtils {
         validateString("baref", params),
         validateString("client", params),
         validateString("status", params),
-        validateString("sortfield", params),
-        validateString("sortorder", params),
+        validateString("sortField", params),
+        validateString("sortOrder", params),
         validateString("representationStatus", params)
       ).mapN(GetMyClientsPropertyLinkParameters.apply)
 
