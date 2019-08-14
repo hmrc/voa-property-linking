@@ -56,7 +56,8 @@ GET          /property-links/:plSubmissionId/check-cases/:checkCaseRef/canChalle
 POST         /property-links                                                                  @controllers.PropertyLinkingController.create()
 
 GET          /owner/property-links                                                            @controllers.PropertyLinkingController.getMyOrganisationsPropertyLinks(searchParams: GetMyOrganisationPropertyLinksParameters, params: Option[models.PaginationParams], organisationId: Option[Long] ?= None)
-GET          /owner/property-links/:submissionId                                             @controllers.PropertyLinkingController.getMyOrganisationsPropertyLink(submissionId: String)
+GET          /owner/property-links/appointable                                                @controllers.PropertyLinkingController.getMyOrganisationPropertyLinksWithAppointable(searchParams: GetMyOrganisationsPropertyLinksParametersWithAgentFiltering, params: Option[models.PaginationParams])
+GET          /owner/property-links/:submissionId                                              @controllers.PropertyLinkingController.getMyOrganisationsPropertyLink(submissionId: String)
 GET          /dashboard/owner/assessments/:submissionId                                       @controllers.PropertyLinkingController.getMyOrganisationsAssessments(submissionId: String)
 GET          /dashboard/owner/assessments/:submissionId/:authorisationId                      @controllers.PropertyLinkingController.getMyOrganisationsAssessmentsWithCapacity(submissionId: String, authorisationId: Long)
 
@@ -67,5 +68,4 @@ GET          /dashboard/agent/assessments/:submissionId                         
 GET          /dashboard/agent/assessments/:submissionId/:authorisationId                      @controllers.PropertyLinkingController.getClientsAssessmentsWithCapacity(submissionId: String, authorisationId: Long)
 
 #TODO Remove this once external endpoint is created
-GET          /owner/property-links/appointable                                                @controllers.PropertyLinkingController.getMyOrganisationPropertyLinksWithAppointable(searchParams: GetMyOrganisationsPropertyLinksParametersWithAgentFiltering, params: Option[models.PaginationParams])
 
