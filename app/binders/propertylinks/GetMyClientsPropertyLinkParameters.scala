@@ -25,7 +25,7 @@ import utils.QueryParamUtils.toQueryString
 case class GetMyClientsPropertyLinkParameters(
                                                      address: Option[String] = None,
                                                      baref: Option[String] = None,
-                                                     agent: Option[String] = None,
+                                                     client: Option[String] = None,
                                                      status: Option[String] = None,
                                                      sortField: Option[String] = None,
                                                      sortOrder: Option[String] = None,
@@ -46,7 +46,7 @@ object GetMyClientsPropertyLinkParameters extends ValidationUtils {
       (
         validateString("address", params),
         validateString("baref", params),
-        validateString("agent", params),
+        validateString("client", params),
         validateString("status", params),
         validateString("sortfield", params),
         validateString("sortorder", params),

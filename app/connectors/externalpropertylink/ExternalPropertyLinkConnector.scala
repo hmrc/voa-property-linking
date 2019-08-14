@@ -68,7 +68,7 @@ class ExternalPropertyLinkConnector @Inject()(
         List(
           searchParams.address.map("address" -> _),
           searchParams.baref.map("baref" -> _),
-          searchParams.agent.map("agent" -> _),
+          searchParams.client.map("client" -> _),
           searchParams.status.map("status" -> _),
           searchParams.sortField.map("sortfield" -> _),
           searchParams.sortOrder.map("sortorder" -> _),
