@@ -23,18 +23,18 @@ import utils.Cats
 import utils.QueryParamUtils.toQueryString
 
 case class GetMyOrganisationsPropertyLinksParametersWithAgentFiltering(
-                                                                   address: Option[String] = None,
-                                                                   baref: Option[String] = None,
-                                                                   agent: Option[String] = None,
-                                                                   client: Option[String] = None,
-                                                                   status: Option[String] = None,
-                                                                   sortField: Option[String] = None,
-                                                                   sortOrder: Option[String] = None,
-                                                                   agentAppointed: Option[String] = None,
-                                                                   organisationId: Long,
-                                                                   agentCode: Long,
-                                                                   checkPermission: Option[String],
-                                                                   challengePermission: Option[String]
+                                                                        address: Option[String] = None,
+                                                                        baref: Option[String] = None,
+                                                                        agent: Option[String] = None,
+                                                                        client: Option[String] = None,
+                                                                        status: Option[String] = None,
+                                                                        sortField: Option[String] = None,
+                                                                        sortOrder: Option[String] = None,
+                                                                        agentAppointed: Option[String] = None,
+                                                                        organisationId: Long,
+                                                                        agentOrganisationId: Long,
+                                                                        checkPermission: Option[String],
+                                                                        challengePermission: Option[String]
                                                                  )
 
 object GetMyOrganisationsPropertyLinksParametersWithAgentFiltering extends ValidationUtils {
@@ -55,7 +55,7 @@ object GetMyOrganisationsPropertyLinksParametersWithAgentFiltering extends Valid
         validateOptString("sortorder", params),
         validateOptString("agentAppointed", params),
         validateOrganisationId("organisationId", params),
-        validateAgentCode("organisationId", params),
+        validateAgentCode("agentOrganisationId", params),
         validateOptString("checkPermission", params),
         validateOptString("challengePermission", params)
       ).mapN(GetMyOrganisationsPropertyLinksParametersWithAgentFiltering.apply)

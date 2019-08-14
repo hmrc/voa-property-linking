@@ -151,7 +151,7 @@ class PropertyLinkingController @Inject()(
       case _    =>
         propertyLinkConnector.appointableToAgent(
           searchParams.organisationId,
-          searchParams.agentCode,
+          searchParams.agentOrganisationId,
           searchParams.checkPermission,
           searchParams.challengePermission,
           paginationParams.getOrElse(DefaultPaginationParams),
