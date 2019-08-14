@@ -195,50 +195,50 @@ class PropertyLinkingServiceSpec
 
 
 
-  "getMyOrganisationsPropertyLink" should {
-    "call connector and return a properties view for a valid authorisation id containing valid status" in {
+//  "getMyOrganisationsPropertyLink" should {
+//    "call connector and return a properties view for a valid authorisation id containing valid status" in {
+//
+//      when(mockPropertyLinkingConnector.getMyOrganisationsPropertyLink("11111")).thenReturn(Future.successful(Some(ownerPropertyLink)))
+//      when(mockExternalValuationManagementApi.getValuationHistory(33333, "11111")).thenReturn(Future.successful(Some(valuationHistoryResponse)))
+//
+//      service.getMyOrganisationsPropertyLink("11111").value.futureValue.get shouldBe validPropertiesView
+//
+//      verify(mockPropertyLinkingConnector).getMyOrganisationsPropertyLink("11111")
+//
+//    }
+//
+//    "return none when nothing is return from connector" in {
+//      when(mockPropertyLinkingConnector.getMyOrganisationsPropertyLink("11111")).thenReturn(Future.successful(None))
+//
+//      service.getMyOrganisationsPropertyLink("11111").value.futureValue shouldBe None
+//
+//      //verify(mockPropertyLinkingConnector).getMyOrganisationsPropertyLink("11111")
+//    }
+//  }
 
-      when(mockPropertyLinkingConnector.getMyOrganisationsPropertyLink("11111")).thenReturn(Future.successful(Some(ownerPropertyLink)))
-      when(mockExternalValuationManagementApi.getValuationHistory(33333, "11111")).thenReturn(Future.successful(Some(valuationHistoryResponse)))
-
-      service.getMyOrganisationsPropertyLink("11111").value.futureValue.get shouldBe validPropertiesView
-
-      verify(mockPropertyLinkingConnector).getMyOrganisationsPropertyLink("11111")
-
-    }
-
-    "return none when nothing is return from connector" in {
-      when(mockPropertyLinkingConnector.getMyOrganisationsPropertyLink("11111")).thenReturn(Future.successful(None))
-
-      service.getMyOrganisationsPropertyLink("11111").value.futureValue shouldBe None
-
-      //verify(mockPropertyLinkingConnector).getMyOrganisationsPropertyLink("11111")
-    }
-  }
-
-  "getClientsPropertyLink" should {
-    "call connector and return a properties view for a valid authorisation id containing valid status" in {
-
-      when(mockPropertyLinkingConnector.getClientsPropertyLink("11111")).thenReturn(Future.successful(Some(clientPropertyLink)))
-      when(mockExternalValuationManagementApi.getValuationHistory(33333, "11111")).thenReturn(Future.successful(Some(valuationHistoryResponse)))
-
-      service.getClientsPropertyLink("11111").value.futureValue.get shouldBe clientValidPropertiesView
-
-      //result.getOrElse("None returned") shouldBe validPropertiesView
-
-      verify(mockPropertyLinkingConnector).getClientsPropertyLink("11111")
-
-    }
-
-    "return none when nothing is return from connector" in {
-      when(mockPropertyLinkingConnector.getClientsPropertyLink("11111")).thenReturn(Future.successful(None))
-
-      service.getClientsPropertyLink("11111").value.futureValue shouldBe None
-
-      verify(mockPropertyLinkingConnector).getClientsPropertyLink("11111")
-
-    }
-  }
+//  "getClientsPropertyLink" should {
+//    "call connector and return a properties view for a valid authorisation id containing valid status" in {
+//
+//      when(mockPropertyLinkingConnector.getClientsPropertyLink("11111")).thenReturn(Future.successful(Some(clientPropertyLink)))
+//      when(mockExternalValuationManagementApi.getValuationHistory(33333, "11111")).thenReturn(Future.successful(Some(valuationHistoryResponse)))
+//
+//      service.getClientsPropertyLink("11111").value.futureValue.get shouldBe clientValidPropertiesView
+//
+//      //result.getOrElse("None returned") shouldBe validPropertiesView
+//
+//      verify(mockPropertyLinkingConnector).getClientsPropertyLink("11111")
+//
+//    }
+//
+//    "return none when nothing is return from connector" in {
+//      when(mockPropertyLinkingConnector.getClientsPropertyLink("11111")).thenReturn(Future.successful(None))
+//
+//      service.getClientsPropertyLink("11111").value.futureValue shouldBe None
+//
+//      verify(mockPropertyLinkingConnector).getClientsPropertyLink("11111")
+//
+//    }
+//  }
 
   "create" should {
     "call create connector method with correct params" in {
