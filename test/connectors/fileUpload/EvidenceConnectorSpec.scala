@@ -20,10 +20,11 @@ import java.io.ByteArrayInputStream
 
 import akka.stream.scaladsl.{Source, StreamConverters}
 import akka.util.ByteString
+import basespecs.WireMockSpec
 import com.codahale.metrics.{Meter, MetricRegistry}
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.kenshoo.play.metrics.Metrics
-import connectors.{EvidenceConnector, WireMockSpec}
+import connectors.EvidenceConnector
 import helpers.{AnswerSugar, SimpleWsHttpTestApplication}
 import infrastructure.SimpleWSHttp
 import org.mockito.ArgumentMatchers.{any => mockitoAny}

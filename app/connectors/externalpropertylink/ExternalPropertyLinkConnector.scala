@@ -22,9 +22,10 @@ import javax.inject.{Inject, Named}
 import models.modernised.externalpropertylink.myclients.{ClientPropertyLink, PropertyLinksWithClient}
 import models.modernised.externalpropertylink.myorganisations.{OwnerPropertyLink, PropertyLinksWithAgents}
 import models.voa.propertylinking.requests.CreatePropertyLink
-import models.{ModernisedEnrichedRequest, PaginationParams}
+import models.PaginationParams
 import play.api.Logger
 import uk.gov.hmrc.http._
+import uk.gov.voa.voapropertylinking.auth.RequestWithPrincipal
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -42,7 +43,7 @@ class ExternalPropertyLinkConnector @Inject()(
   private val logger = Logger(this.getClass.getName)
 
   def getMyOrganisationsPropertyLinks(searchParams: GetMyOrganisationPropertyLinksParameters, params: Option[PaginationParams])
-                                     (implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]): Future[Option[PropertyLinksWithAgents]] = {
+                                     (implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[Option[PropertyLinksWithAgents]] = {
 
     http.GET[Option[PropertyLinksWithAgents]](
       myOrganisationsPropertyLinksUrl,
@@ -56,11 +57,11 @@ class ExternalPropertyLinkConnector @Inject()(
   }
 
   def getMyOrganisationsPropertyLink(submissionId: String)
-                                    (implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]): Future[Option[OwnerPropertyLink]] =
+                                    (implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[Option[OwnerPropertyLink]] =
     http.GET[Option[OwnerPropertyLink]](myOrganisationsPropertyLinkUrl.replace("{propertyLinkId}", submissionId))
 
   def getClientsPropertyLinks(searchParams: GetMyClientsPropertyLinkParameters, params: Option[PaginationParams])
-                             (implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]): Future[Option[PropertyLinksWithClient]] =
+                             (implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[Option[PropertyLinksWithClient]] =
     http
       .GET[Option[PropertyLinksWithClient]](
       myClientsPropertyLinksUrl,
@@ -76,10 +77,10 @@ class ExternalPropertyLinkConnector @Inject()(
         ).flatten)
 
   def getClientsPropertyLink(submissionId: String)
-                            (implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]): Future[Option[ClientPropertyLink]] =
+                            (implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[Option[ClientPropertyLink]] =
     http.GET[Option[ClientPropertyLink]](myClientsPropertyLinkUrl.replace("{propertyLinkId}", submissionId))
 
-  def createPropertyLink(propertyLink: CreatePropertyLink)(implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]): Future[HttpResponse] =
+  def createPropertyLink(propertyLink: CreatePropertyLink)(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[HttpResponse] =
     http
       .POST[CreatePropertyLink, HttpResponse](createPropertyLinkUrl, propertyLink, Seq())
 

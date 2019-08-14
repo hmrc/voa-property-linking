@@ -16,20 +16,19 @@
 
 package connectors
 
+import basespecs.WireMockSpec
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, get, stubFor, urlEqualTo}
 import config.WSHttp
 import helpers.SimpleWsHttpTestApplication
-import models.ModernisedEnrichedRequest
 import play.api.http.ContentTypes
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.voa.voapropertylinking.auth.{Principal, RequestWithPrincipal}
 
-class CheckCaseConnectorSpec extends ContentTypes
-  with WireMockSpec with SimpleWsHttpTestApplication {
+class CheckCaseConnectorSpec extends WireMockSpec with ContentTypes with SimpleWsHttpTestApplication {
 
   implicit val hc = HeaderCarrier()
-  implicit val modernisedEnrichedRequest = ModernisedEnrichedRequest(FakeRequest(), "XXXXX", "YYYYY")
 
   val http = fakeApplication.injector.instanceOf[WSHttp]
   val connector = new CheckCaseConnector(http, fakeApplication.injector.instanceOf[ServicesConfig]) {
@@ -51,7 +50,7 @@ class CheckCaseConnectorSpec extends ContentTypes
         )
       )
 
-      await(connector.getCheckCases(submissionId, "agent")(modernisedEnrichedRequest)).get.filterTotal shouldBe 4
+      await(connector.getCheckCases(submissionId, "agent")(requestWithPrincipal)).get.filterTotal shouldBe 4
     }
     "handle 403 from get agents check cases" in {
 
@@ -72,7 +71,7 @@ class CheckCaseConnectorSpec extends ContentTypes
         )
       )
 
-      await(connector.getCheckCases(submissionId, "agent")(modernisedEnrichedRequest)) shouldBe None
+      await(connector.getCheckCases(submissionId, "agent")(requestWithPrincipal)) shouldBe None
     }
 
     "handle 404 get agent check cases" in {
@@ -88,7 +87,7 @@ class CheckCaseConnectorSpec extends ContentTypes
         )
       )
 
-      await(connector.getCheckCases(submissionId, "agent")(modernisedEnrichedRequest)) shouldBe None
+      await(connector.getCheckCases(submissionId, "agent")(requestWithPrincipal)) shouldBe None
     }
 
     "get client check cases" in {
@@ -104,7 +103,7 @@ class CheckCaseConnectorSpec extends ContentTypes
         )
       )
 
-      await(connector.getCheckCases(submissionId, "client")(modernisedEnrichedRequest)).get.filterTotal shouldBe 4
+      await(connector.getCheckCases(submissionId, "client")(requestWithPrincipal)).get.filterTotal shouldBe 4
     }
 
     "handle 403 from get client check cases" in {
@@ -126,7 +125,7 @@ class CheckCaseConnectorSpec extends ContentTypes
         )
       )
 
-      await(connector.getCheckCases(submissionId, "client")(modernisedEnrichedRequest)) shouldBe None
+      await(connector.getCheckCases(submissionId, "client")(requestWithPrincipal)) shouldBe None
     }
 
     "handle 404 get client check cases" in {
@@ -142,7 +141,7 @@ class CheckCaseConnectorSpec extends ContentTypes
         )
       )
 
-      await(connector.getCheckCases(submissionId, "client")(modernisedEnrichedRequest)) shouldBe None
+      await(connector.getCheckCases(submissionId, "client")(requestWithPrincipal)) shouldBe None
     }
   }
 

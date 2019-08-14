@@ -14,18 +14,13 @@
  * limitations under the License.
  */
 
-package connectors.auth
+package uk.gov.voa.voapropertylinking.auth
 
-import config.WSHttp
-import javax.inject.Inject
-import uk.gov.hmrc.auth.core.PlayAuthConnector
-import uk.gov.hmrc.http.HttpPost
-import uk.gov.hmrc.play.config.ServicesConfig
+import play.api.libs.json.{Json, OFormat}
 
-class DefaultAuthConnector @Inject()(
-                                    wSHttp: WSHttp,
-                                    config: ServicesConfig
-                                    ) extends PlayAuthConnector {
-  override val http: HttpPost = wSHttp
-  override val serviceUrl: String = config.baseUrl("auth")
+case class Principal(externalId: String, groupId: String)
+
+object Principal {
+  implicit val format: OFormat[Principal] = Json.format
 }
+

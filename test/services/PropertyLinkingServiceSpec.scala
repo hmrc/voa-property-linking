@@ -18,6 +18,7 @@ package services
 
 import java.time._
 
+import basespecs.BaseUnitSpec
 import binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import connectors.authorisationsearch.PropertyLinkingConnector
 import connectors.externalpropertylink.ExternalPropertyLinkConnector
@@ -40,11 +41,11 @@ import org.scalatestplus.mockito.MockitoSugar
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import utils.Cats
 import org.scalatest.concurrent.{Futures, ScalaFutures}
+import uk.gov.voa.voapropertylinking.auth.RequestWithPrincipal
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class PropertyLinkingServiceSpec
-  extends UnitSpec with BeforeAndAfterEach with MockitoSugar with WithFakeApplication with Cats with ScalaFutures {
+class PropertyLinkingServiceSpec extends BaseUnitSpec {
 
   val mockPropertyLinkingConnector = mock[ExternalPropertyLinkConnector]
   val mockExternalValuationManagementApi = mock[ExternalValuationManagementApi]
@@ -52,7 +53,6 @@ class PropertyLinkingServiceSpec
   val mockHttpResponse: HttpResponse = mock[HttpResponse]
   val httpResponse = HttpResponse(200)
   implicit val fakeHc = HeaderCarrier()
-  implicit val modernisedEnrichedRequest = ModernisedEnrichedRequest(FakeRequest(), "XXXXX", "YYYYY")
   implicit val ec: ExecutionContext = play.api.libs.concurrent.Execution.Implicits.defaultContext
 
   val date = LocalDate.parse("2018-09-05")

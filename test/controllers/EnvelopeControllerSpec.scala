@@ -18,26 +18,23 @@ package controllers
 
 import java.util.UUID
 
-import connectors.auth._
+import basespecs.BaseControllerSpec
 import connectors.fileUpload.{EnvelopeMetadata, FileUploadConnector}
 import models.EnvelopeStatus
 import org.mockito.ArgumentMatchers.{eq => matching, _}
 import org.mockito.Mockito._
-import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.EnvelopeIdRepo
-import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.circuitbreaker.UnhealthyServiceException
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.config.ServicesConfig
+
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
-
-import scala.concurrent.{ExecutionContext, Future}
-
-class EnvelopeControllerSpec extends ControllerSpec with MockitoSugar {
+class EnvelopeControllerSpec extends BaseControllerSpec {
 
   "EnvelopeController.create" should {
     "create a new envelope in FUaaS" in {
@@ -100,7 +97,7 @@ class EnvelopeControllerSpec extends ControllerSpec with MockitoSugar {
   lazy val callbackUrl = routes.FileTransferController.handleCallback().absoluteURL()(FakeRequest().withHeaders(HOST -> "localhost:9524"))
 
   lazy val testController = new EnvelopeController(
-    mockAuthConnector,
+    preAuthenticatedActionBuilders(),
     mockRepo,
     mockFileUpload,
     mockServicesConfig
@@ -126,15 +123,6 @@ class EnvelopeControllerSpec extends ControllerSpec with MockitoSugar {
   }
 
   lazy val once = times(1)
-
-
-
-  lazy val mockAuthConnector = {
-    val m = mock[DefaultAuthConnector]
-    when(m.authorise[~[Option[String], Option[String]]](any(), any())(any[HeaderCarrier], any[ExecutionContext])) thenReturn Future.successful(
-      new ~(Some("externalId"), Some("groupIdentifier")))
-    m
-  }
 
 }
 

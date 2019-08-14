@@ -17,18 +17,19 @@
 package http
 
 import javax.inject.{Inject, Named, Singleton}
-import models.ModernisedEnrichedRequest
 import play.api.libs.json.Writes
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads}
 import uk.gov.hmrc.play.http.ws.WSHttp
+import uk.gov.voa.voapropertylinking.auth.{Principal, RequestWithPrincipal}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class VoaHttpClient @Inject()(
-                               @Named("VoaBackendWsHttp") httpClient: WSHttp) {
+                               @Named("VoaBackendWsHttp") httpClient: WSHttp //Should Use DefaultHttpClient.
+                             ) {
 
-  def buildHeaderCarrier(hc: HeaderCarrier, principal: ModernisedEnrichedRequest[_]): HeaderCarrier =
+  def buildHeaderCarrier(hc: HeaderCarrier, principal: Principal): HeaderCarrier =
     hc.copy()
       .withExtraHeaders(
         "GG-EXTERNAL-ID" -> principal.externalId,
@@ -40,46 +41,46 @@ class VoaHttpClient @Inject()(
         implicit rds: HttpReads[A],
         hc: HeaderCarrier,
         ec: ExecutionContext,
-        principal: ModernisedEnrichedRequest[_]): Future[A] =
-    httpClient.GET[A](url)(implicitly, hc = buildHeaderCarrier(hc, principal), implicitly)
+        requestWithPrincipal: RequestWithPrincipal[_]): Future[A] =
+    httpClient.GET[A](url)(implicitly, hc = buildHeaderCarrier(hc, requestWithPrincipal.principal), implicitly)
 
   def GET[A](url: String, queryParams: Seq[(String, String)])(
         implicit rds: HttpReads[A],
         hc: HeaderCarrier,
         ec: ExecutionContext,
-        principal: ModernisedEnrichedRequest[_]): Future[A] =
-    httpClient.GET[A](url, queryParams)(implicitly, hc = buildHeaderCarrier(hc, principal), implicitly)
+        requestWithPrincipal: RequestWithPrincipal[_]): Future[A] =
+    httpClient.GET[A](url, queryParams)(implicitly, hc = buildHeaderCarrier(hc, requestWithPrincipal.principal), implicitly)
 
   def DELETE[O](url: String)(
         implicit rds: HttpReads[O],
         hc: HeaderCarrier,
         ec: ExecutionContext,
-        principal: ModernisedEnrichedRequest[_]): Future[O] =
-    httpClient.DELETE[O](url)(implicitly, hc = buildHeaderCarrier(hc, principal), implicitly)
+        requestWithPrincipal: RequestWithPrincipal[_]): Future[O] =
+    httpClient.DELETE[O](url)(implicitly, hc = buildHeaderCarrier(hc, requestWithPrincipal.principal), implicitly)
 
   def PUT[I, O](url: String, body: I)(
         implicit wts: Writes[I],
         rds: HttpReads[O],
         hc: HeaderCarrier,
         ec: ExecutionContext,
-        principal: ModernisedEnrichedRequest[_]): Future[O] =
-    httpClient.PUT[I, O](url, body)(implicitly, implicitly, hc = buildHeaderCarrier(hc, principal), implicitly)
+        requestWithPrincipal: RequestWithPrincipal[_]): Future[O] =
+    httpClient.PUT[I, O](url, body)(implicitly, implicitly, hc = buildHeaderCarrier(hc, requestWithPrincipal.principal), implicitly)
 
   def POST[I, O](url: String, body: I, headers: Seq[(String, String)])(
         implicit wts: Writes[I],
         rds: HttpReads[O],
         hc: HeaderCarrier,
         ec: ExecutionContext,
-        principal: ModernisedEnrichedRequest[_]): Future[O] =
+        requestWithPrincipal: RequestWithPrincipal[_]): Future[O] =
     httpClient
-      .POST[I, O](url, body, headers)(implicitly, implicitly, hc = buildHeaderCarrier(hc, principal), implicitly)
+      .POST[I, O](url, body, headers)(implicitly, implicitly, hc = buildHeaderCarrier(hc, requestWithPrincipal.principal), implicitly)
 
   def PATCH[I, O](url: String, body: I)(
         implicit wts: Writes[I],
         rds: HttpReads[O],
         hc: HeaderCarrier,
         ec: ExecutionContext,
-        principal: ModernisedEnrichedRequest[_]): Future[O] =
+        requestWithPrincipal: RequestWithPrincipal[_]): Future[O] =
     httpClient
-      .PATCH[I, O](url, body)(implicitly, implicitly, hc = buildHeaderCarrier(hc, principal), implicitly)
+      .PATCH[I, O](url, body)(implicitly, implicitly, hc = buildHeaderCarrier(hc, requestWithPrincipal.principal), implicitly)
 }

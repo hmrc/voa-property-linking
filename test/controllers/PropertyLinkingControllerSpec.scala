@@ -19,62 +19,30 @@ package controllers
 import java.time.{Instant, LocalDate}
 
 import auditing.AuditingService
+import basespecs.BaseControllerSpec
 import binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import cats.data._
 import cats.implicits._
 import connectors._
-import connectors.auth._
 import connectors.authorisationsearch.PropertyLinkingConnector
 import models._
 import models.mdtp.propertylink.myclients.PropertyLinksWithClients
 import models.mdtp.propertylink.requests.{APIPropertyLinkRequest, PropertyLinkRequest}
-import models.searchApi.{AgentAuthResult, OwnerAuthResult, OwnerAuthorisation}
+import models.searchApi.{OwnerAuthResult, OwnerAuthorisation}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
-import org.scalatestplus.mockito.MockitoSugar
-import services.AssessmentService
-import play.api.inject.bind
-import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import services.PropertyLinkingService
-import uk.gov.hmrc.auth.core.retrieve.~
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, Upstream5xxResponse}
-import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http.ws.WSHttp
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import services.{AssessmentService, PropertyLinkingService}
+import uk.gov.hmrc.http.{HttpResponse, Upstream5xxResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
-class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
+class PropertyLinkingControllerSpec extends BaseControllerSpec {
 
-  implicit val request = FakeRequest()
-  implicit val modernisedEnrichedRequest = ModernisedEnrichedRequest(FakeRequest(), "XXXXX", "YYYYY")
-  implicit val ec: ExecutionContext = play.api.libs.concurrent.Execution.Implicits.defaultContext
-  implicit val fakeHc = HeaderCarrier()
-
-
-  val mockWS = mock[WSHttp]
-  val mockConf = mock[ServicesConfig]
   val mockAddressConnector = mock[AddressConnector]
-  val baseUrl = "http://localhost:9999"
-
-  lazy val mockAuthConnector = {
-    val m = mock[DefaultAuthConnector]
-    when(m.authorise[~[Option[String], Option[String]]](any(), any())(any[HeaderCarrier], any[ExecutionContext])) thenReturn Future.successful(
-      new ~(Some("externalId"), Some("groupIdentifier")))
-    m
-  }
-
-  override lazy val fakeApplication = new GuiceApplicationBuilder()
-    .configure("run.mode" -> "Test")
-    .overrides(bind[WSHttp].qualifiedWith("VoaBackendWsHttp").toInstance(mockWS))
-    .overrides(bind[ServicesConfig].toInstance(mockConf))
-    .overrides(bind[DefaultAuthConnector].toInstance(mockAuthConnector))
-    .build()
-
 
   lazy val mockPropertyLinkConnector = mock[PropertyLinkingConnector]
 
@@ -90,7 +58,7 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
 
   lazy val mockBrAuth = mock[BusinessRatesAuthConnector]
 
-  lazy val testController = new PropertyLinkingController(mockAuthConnector, mockPropertyLinkingConnector,  mockPropertyLinkService, mockAssessmentService, mockGroupAccountConnector, mock[AuditingService], mockPropertyRepresentationConnector, true)
+  lazy val testController = new PropertyLinkingController(preAuthenticatedActionBuilders(), mockPropertyLinkingConnector,  mockPropertyLinkService, mockAssessmentService, mockGroupAccountConnector, mock[AuditingService], mockPropertyRepresentationConnector, true)
 
   val date = LocalDate.parse("2018-09-05")
 
@@ -161,7 +129,7 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
 
       await(res)
 
-      status(res) shouldBe ACCEPTED
+      status(res) mustBe ACCEPTED
 
     }
 
@@ -177,7 +145,7 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
       val res = testController.create()(FakeRequest().withBody(plSubmissionJson))
       await(res)
 
-      status(res) shouldBe INTERNAL_SERVER_ERROR
+      status(res) mustBe INTERNAL_SERVER_ERROR
     }
   }
 
@@ -187,9 +155,9 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
       when(mockPropertyLinkService.getMyOrganisationsPropertyLink(any())(any(), any())).thenReturn(OptionT.some[Future](validPropertiesView))
       val res = testController.getMyOrganisationsPropertyLink("11111")(FakeRequest())
 
-      status(res) shouldBe OK
+      status(res) mustBe OK
 
-      contentAsJson(res) shouldBe Json.toJson(validPropertiesView)
+      contentAsJson(res) mustBe Json.toJson(validPropertiesView)
 
     }
 
@@ -198,9 +166,9 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
       when(mockPropertyLinkService.getClientsPropertyLink(any())(any(), any())).thenReturn(OptionT.some[Future](validPropertiesView))
       val res = testController.getClientsPropertyLink("11111")(FakeRequest())
 
-      status(res) shouldBe OK
+      status(res) mustBe OK
 
-      contentAsJson(res) shouldBe Json.toJson(validPropertiesView)
+      contentAsJson(res) mustBe Json.toJson(validPropertiesView)
 
     }
   }
@@ -213,9 +181,9 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
 
       val res = testController.getMyOrganisationsPropertyLinks(GetMyOrganisationPropertyLinksParameters(), None, None)(FakeRequest())
 
-      status(res) shouldBe OK
+      status(res) mustBe OK
 
-      contentAsJson(res) shouldBe Json.toJson(ownerAuthResult)
+      contentAsJson(res) mustBe Json.toJson(ownerAuthResult)
 
     }
 
@@ -225,9 +193,9 @@ class PropertyLinkingControllerSpec extends UnitSpec with MockitoSugar with With
       when(mockPropertyLinkService.getClientsPropertyLinks(any(), any())(any(), any())).thenReturn(OptionT.some[Future](propertyLinksWithClients))
       val res = testController.getClientsPropertyLinks(GetMyClientsPropertyLinkParameters(), None)(FakeRequest())
 
-      status(res) shouldBe OK
+      status(res) mustBe OK
 
-      contentAsJson(res) shouldBe Json.toJson(ownerAuthResult)
+      contentAsJson(res) mustBe Json.toJson(ownerAuthResult)
 
     }
   }

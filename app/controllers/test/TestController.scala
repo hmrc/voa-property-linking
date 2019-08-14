@@ -16,31 +16,40 @@
 
 package controllers.test
 
-import auth.Authenticated
-import connectors.auth.DefaultAuthConnector
 import connectors.test.TestConnector
 import controllers.PropertyLinkingBaseController
 import javax.inject.Inject
+import play.api.mvc.{Action, AnyContent}
 import repositories.DVRRecordRepository
+import uk.gov.voa.voapropertylinking.actions.AuthenticatedActionBuilder
 
 import scala.concurrent.ExecutionContext
 
 class TestController @Inject()(
-                                val authConnector: DefaultAuthConnector,
+                                authenticated: AuthenticatedActionBuilder,
                                 testConnector: TestConnector,
                                 dvrRecordRepository: DVRRecordRepository
-                              )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController with Authenticated {
+                              )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController {
 
-  def deleteOrganisation(organisationId: Long) = authenticated { implicit request =>
-    testConnector.deleteOrganisation(organisationId).map(_ => Ok)
+  /*
+  Move tests away from this method.
+   */
+  def deleteOrganisation(organisationId: Long): Action[AnyContent] = authenticated.async { implicit request =>
+    testConnector
+      .deleteOrganisation(organisationId)
+      .map(_ => Ok)
   }
 
-  def clearDvrRecords(organisationId: Long) = authenticated { implicit request =>
-    dvrRecordRepository.clear(organisationId).map(_ => Ok)
+  def clearDvrRecords(organisationId: Long): Action[AnyContent] = authenticated.async { implicit request =>
+    dvrRecordRepository
+      .clear(organisationId)
+      .map(_ => Ok)
   }
 
-  def deleteCheckCases(propertyLinkingSubmissionId: String) = authenticated { implicit request =>
-    testConnector.deleteCheckCases(propertyLinkingSubmissionId).map(_ => Ok)
+  def deleteCheckCases(propertyLinkingSubmissionId: String): Action[AnyContent] = authenticated.async { implicit request =>
+    testConnector
+      .deleteCheckCases(propertyLinkingSubmissionId)
+      .map(_ => Ok)
   }
 
 }

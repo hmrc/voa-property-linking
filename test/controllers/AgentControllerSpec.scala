@@ -16,69 +16,46 @@
 
 package controllers
 
-import connectors.auth.DefaultAuthConnector
+import basespecs.BaseControllerSpec
+import connectors.AgentConnector
 import models.searchApi.{Agent, Agents}
-import org.mockito.ArgumentMatchers.{any, eq => mockEq}
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{reset, when}
-import org.scalatestplus.mockito.MockitoSugar
-import play.api.inject.bind
-import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, _}
-import uk.gov.hmrc.auth.core.retrieve.~
-import uk.gov.hmrc.http.{HeaderCarrier, HttpReads}
-import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http.ws.WSHttp
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
-class AgentControllerSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
+class AgentControllerSpec extends BaseControllerSpec {
 
-  implicit val request = FakeRequest()
+  trait Setup {
+    val mockAgentConnector = mock[AgentConnector]
 
-  val mockWS = mock[WSHttp]
-  val mockConf = mock[ServicesConfig]
-  val mockAgentConnector = mock[AgentController]
-  val baseUrl = "http://localhost:9999"
-
-  lazy val mockAuthConnector = {
-    val m = mock[DefaultAuthConnector]
-    when(m.authorise[~[Option[String], Option[String]]](any(), any())(any[HeaderCarrier], any[ExecutionContext])) thenReturn Future.successful(
-      new ~(Some("externalId"), Some("groupIdentifier")))
-    m
+    val agentController = new AgentController(preAuthenticatedActionBuilders(), mockAgentConnector)
   }
-
-  override lazy val fakeApplication = new GuiceApplicationBuilder()
-    .configure("run.mode" -> "Test")
-    .overrides(bind[WSHttp].qualifiedWith("VoaBackendWsHttp").toInstance(mockWS))
-    .overrides(bind[ServicesConfig].toInstance(mockConf))
-    .overrides(bind[DefaultAuthConnector].toInstance(mockAuthConnector))
-    .build()
 
   "given authorised access, manage agents" should {
 
     when(mockConf.baseUrl(any())).thenReturn(baseUrl)
 
-    "return owner agents" in {
+    "return owner agents" in new Setup {
       reset(mockWS)
 
-      val testAgentController = fakeApplication.injector.instanceOf[AgentController]
       val organisationId = 111
 
       val manageAgentUrl = s"$baseUrl/authorisation-search-api/owners/$organisationId/agents"
 
       val expected = Agents(agents = Seq(Agent("Name1", 1), Agent("Name2", 2)))
-      when(mockWS.GET(mockEq(manageAgentUrl))(any(classOf[HttpReads[Agents]]), any(), any())).thenReturn(Future(expected))
+      when(mockAgentConnector.manageAgents(any())(any())).thenReturn(Future(expected))
 
-      val res = testAgentController.manageAgents(organisationId)(FakeRequest())
+      val res = agentController.manageAgents(organisationId)(FakeRequest())
 
-      status(res) shouldBe OK
+      status(res) mustBe OK
       val names = Json.parse(contentAsString(res)).as[Agents].agents
 
-      names shouldBe Seq(Agent("Name1", 1), Agent("Name2", 2))
+      names mustBe Seq(Agent("Name1", 1), Agent("Name2", 2))
     }
   }
 }

@@ -16,25 +16,25 @@
 
 package controllers
 
-import javax.inject.Inject
-import auth.Authenticated
 import connectors.CheckCaseConnector
-import connectors.auth.DefaultAuthConnector
+import javax.inject.Inject
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent}
+import uk.gov.voa.voapropertylinking.actions.AuthenticatedActionBuilder
 
 import scala.concurrent.ExecutionContext
 
 class CheckCaseController @Inject()(
-                                      val authConnector: DefaultAuthConnector,
-                                      checkCaseConnector: CheckCaseConnector
-                                   )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController with Authenticated {
+                                     authenticated: AuthenticatedActionBuilder,
+                                     checkCaseConnector: CheckCaseConnector
+                                   )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController {
 
-  def getCheckCases(submissionId: String, party: String): Action[AnyContent] = authenticated { implicit request =>
-
-    checkCaseConnector.getCheckCases(submissionId, party) map {
-      case Some(checkCasesResponse) => Ok(Json.toJson(checkCasesResponse))
-      case _ => NotFound
+  def getCheckCases(submissionId: String, party: String): Action[AnyContent] = authenticated.async { implicit request =>
+    checkCaseConnector
+      .getCheckCases(submissionId, party)
+      .map {
+        case Some(checkCasesResponse) => Ok(Json.toJson(checkCasesResponse))
+        case _                        => NotFound
     }
   }
 }

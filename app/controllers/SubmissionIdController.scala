@@ -17,19 +17,19 @@
 package controllers
 
 import javax.inject.Inject
-import auth.Authenticated
-import connectors.auth.DefaultAuthConnector
 import play.api.libs.json.Json
+import play.api.mvc.{Action, AnyContent}
 import repositories.SequenceGeneratorMongoRepository
+import uk.gov.voa.voapropertylinking.actions.AuthenticatedActionBuilder
 
 import scala.concurrent.ExecutionContext
 
 class SubmissionIdController @Inject()(
-                                        val authConnector: DefaultAuthConnector,
+                                        authenticated: AuthenticatedActionBuilder,
                                         val sequenceGenerator: SequenceGeneratorMongoRepository
-                                      )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController with Authenticated {
+                                      )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController {
 
-  def get(prefix: String) = authenticated { implicit  request =>
+  def get(prefix: String): Action[AnyContent] = authenticated.async { implicit request =>
     for {
       id <- sequenceGenerator.getNextSequenceId(prefix)
       strId = formatId(id)

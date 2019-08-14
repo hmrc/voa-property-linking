@@ -18,6 +18,7 @@ package connectors
 
 import java.time.{LocalDate, ZoneOffset}
 
+import basespecs.WireMockSpec
 import com.github.tomakehurst.wiremock.client.WireMock._
 import helpers.SimpleWsHttpTestApplication
 import models._
@@ -28,8 +29,7 @@ import uk.gov.hmrc.play.http.ws.WSHttp
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class PropertyRepresentationConnectorSpec extends ContentTypes
-    with WireMockSpec with SimpleWsHttpTestApplication {
+class PropertyRepresentationConnectorSpec extends WireMockSpec with ContentTypes with SimpleWsHttpTestApplication {
 
   implicit val hc = HeaderCarrier()
   val http = fakeApplication.injector.instanceOf[WSHttp]

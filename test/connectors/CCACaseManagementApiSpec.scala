@@ -16,6 +16,7 @@
 
 package connectors
 
+import basespecs.WireMockSpec
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, post, stubFor, urlEqualTo}
 import helpers.SimpleWsHttpTestApplication
 import http.VoaHttpClient
@@ -26,8 +27,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.ws.WSHttp
 
-class CCACaseManagementApiSpec extends ContentTypes
-  with WireMockSpec with SimpleWsHttpTestApplication {
+class CCACaseManagementApiSpec extends WireMockSpec with ContentTypes with SimpleWsHttpTestApplication {
 
   implicit val mat = fakeApplication.materializer
 

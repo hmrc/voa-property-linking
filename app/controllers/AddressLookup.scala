@@ -16,38 +16,42 @@
 
 package controllers
 
-import auth.Authenticated
 import connectors.AddressConnector
-import connectors.auth.DefaultAuthConnector
 import javax.inject.Inject
 import models.SimpleAddress
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
+import play.api.mvc.{Action, AnyContent}
+import uk.gov.voa.voapropertylinking.actions.AuthenticatedActionBuilder
 import utils.PostcodeValidator
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class AddressLookup @Inject()(
-                               val authConnector: DefaultAuthConnector,
+                               authenticated: AuthenticatedActionBuilder,
                                addresses: AddressConnector
-                             )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController with Authenticated {
+                             )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController {
 
-  def find(postcode: String) = authenticated { implicit request =>
+  def find(postcode: String): Action[AnyContent] = authenticated.async { implicit request =>
     PostcodeValidator.validateAndFormat(postcode) match {
-      case Some(s) => addresses.find(s).map(r => Ok(Json.toJson(r)))
-      case None => Future.successful(BadRequest)
+      case Some(s)  => addresses.find(s).map(r => Ok(Json.toJson(r)))
+      case None     => Future.successful(BadRequest)
     }
   }
 
-  def get(addressUnitId: Long) = authenticated { implicit request =>
+  def get(addressUnitId: Long): Action[AnyContent] = authenticated.async { implicit request =>
     addresses.get(addressUnitId) map {
-      case Some(a) => Ok(Json.toJson(a))
-      case None => NotFound
+      case Some(a)  => Ok(Json.toJson(a))
+      case None     => NotFound
     }
   }
 
-  def create = authenticated(parse.json) { implicit request =>
+  def create: Action[JsValue] = authenticated.async(parse.json) { implicit request =>
     withJsonBody[SimpleAddress] { address =>
-      addresses.create(address) map { x => Created(Json.obj("id" -> x)) }
+      addresses
+        .create(address)
+        .map { id =>
+          Created(Json.obj("id" -> id))
+        }
     }
   }
 }
