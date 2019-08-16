@@ -24,6 +24,7 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.voa.voapropertylinking.auth.RequestWithPrincipal
 
 import scala.concurrent.Future
 
@@ -35,10 +36,10 @@ class CheckCaseConnector @Inject()(
   lazy val voaModernisedApiStubBaseUrl: String = config.baseUrl("voa-modernised-api")
 
 
-  def getCheckCases(submissionId: String, party: String)(implicit request: ModernisedEnrichedRequest[_]): Future[Option[CheckCasesResponse]] = {
+  def getCheckCases(submissionId: String, party: String)(implicit request: RequestWithPrincipal[_]): Future[Option[CheckCasesResponse]] = {
      implicit val hc = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
-      .withExtraHeaders("GG-EXTERNAL-ID" -> request.externalId)
-      .withExtraHeaders("GG-GROUP-ID" -> request.groupId)
+      .withExtraHeaders("GG-EXTERNAL-ID" -> request.principal.externalId)
+      .withExtraHeaders("GG-GROUP-ID" -> request.principal.groupId)
 
     party match {
       case "agent"  =>  wSHttp.GET[Option[AgentCheckCasesResponse]](s"$voaModernisedApiStubBaseUrl/external-case-management-api/my-organisation/clients/all/property-links/$submissionId/check-cases?start=1&size=100") recover { case _ => None }
@@ -52,10 +53,10 @@ class CheckCaseConnector @Inject()(
   def canChallenge(propertyLinkSubmissionId: String,
                    checkCaseRef: String,
                    valuationId: Long,
-                   party: String)(implicit request: ModernisedEnrichedRequest[_]): Future[Option[CanChallengeResponse]] = {
+                   party: String)(implicit request: RequestWithPrincipal[_]): Future[Option[CanChallengeResponse]] = {
     implicit val hc = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
-      .withExtraHeaders("GG-EXTERNAL-ID" -> request.externalId)
-      .withExtraHeaders("GG-GROUP-ID" -> request.groupId)
+      .withExtraHeaders("GG-EXTERNAL-ID" -> request.principal.externalId)
+      .withExtraHeaders("GG-GROUP-ID" -> request.principal.groupId)
 
     party match {
       case "client"   =>  wSHttp.GET[HttpResponse](s"$voaModernisedApiStubBaseUrl/external-case-management-api/my-organisation/property-links/$propertyLinkSubmissionId/check-cases/$checkCaseRef/canChallenge?valuationId=$valuationId").map{ resp =>

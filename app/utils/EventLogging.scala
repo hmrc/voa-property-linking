@@ -16,7 +16,7 @@
 
 package utils
 
-import connectors.auth.Principal
+import uk.gov.voa.voapropertylinking.auth.Principal
 import play.api.Logger
 
 import scala.collection.SortedMap

@@ -16,36 +16,25 @@
 
 package connectors
 
+import basespecs.BaseUnitSpec
 import binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import connectors.externalpropertylink.ExternalPropertyLinkConnector
 import http.VoaHttpClient
-import models.modernised._
+import models.PaginationParams
 import models.modernised.externalpropertylink.myclients.{ClientPropertyLink, PropertyLinksWithClient}
 import models.modernised.externalpropertylink.myorganisations.{PropertyLinkWithAgents, PropertyLinksWithAgents}
 import models.voa.propertylinking.requests.CreatePropertyLink
-import models.{ModernisedEnrichedRequest, PaginationParams}
-import org.scalatest.concurrent.ScalaFutures
-import org.scalatest._
-import org.scalatestplus.mockito.MockitoSugar
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.config.ServicesConfig
-import play.api.test.FakeRequest
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
-import utils.Cats
 import org.mockito.ArgumentMatchers.{any, eq => mEq}
 import org.mockito.Mockito._
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class ExternalPropertyLinkConnectorSpec extends UnitSpec with MockitoSugar with WithFakeApplication with BeforeAndAfterEach with BeforeAndAfterAll with Matchers with Inspectors with Inside
-  with EitherValues with LoneElement with ScalaFutures with OptionValues with Cats {
-
+class ExternalPropertyLinkConnectorSpec extends BaseUnitSpec {
 
     trait Setup {
-      implicit val modernisedEnrichedRequest = ModernisedEnrichedRequest(FakeRequest(), "XXXXX", "YYYYY")
       implicit val ec: ExecutionContext = play.api.libs.concurrent.Execution.Implicits.defaultContext
       implicit val fakeHc = HeaderCarrier()
-
 
       val address = "mock address"
       val baref = "mock baref"

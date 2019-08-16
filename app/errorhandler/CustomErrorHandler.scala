@@ -16,7 +16,7 @@
 
 package errorhandler
 
-import connectors.auth.Principal
+import uk.gov.voa.voapropertylinking.auth.Principal
 import connectors.errorhandler.VoaClientException
 import javax.inject.Inject
 import play.api._

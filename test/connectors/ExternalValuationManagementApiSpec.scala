@@ -18,14 +18,13 @@ package connectors
 
 import java.time.LocalDateTime
 
+import basespecs.WireMockSpec
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, stubFor, urlEqualTo, _}
 import connectors.externalvaluation.ExternalValuationManagementApi
 import helpers.SimpleWsHttpTestApplication
 import http.VoaHttpClient
-import models.ModernisedEnrichedRequest
 import models.voa.valuation.dvr.StreamedDocument
 import models.voa.valuation.dvr.documents.{Document, DocumentSummary, DvrDocumentFiles}
-import org.scalatest.Outcome
 import play.api.http.ContentTypes
 import play.api.libs.ws.WSClient
 import play.api.test.FakeRequest
@@ -35,8 +34,7 @@ import uk.gov.hmrc.play.http.ws.WSHttp
 import uk.gov.hmrc.play.test.WithFakeApplication
 
 
-class ExternalValuationManagementApiSpec extends ContentTypes
-  with WireMockSpec with SimpleWsHttpTestApplication with WithFakeApplication{
+class ExternalValuationManagementApiSpec extends WireMockSpec with ContentTypes with SimpleWsHttpTestApplication with WithFakeApplication {
 
   implicit val mat = fakeApplication.materializer
 
@@ -57,7 +55,6 @@ class ExternalValuationManagementApiSpec extends ContentTypes
 
     "get dvr documents" should {
       "return the documents and transfer them into an optional" in {
-        implicit val request = ModernisedEnrichedRequest(FakeRequest(), "EXT-1234567", "GG-123456")
         val valuationId = 1L
         val uarn = 2L
         val propertyLinkId = "PL-123456789"
@@ -100,7 +97,6 @@ class ExternalValuationManagementApiSpec extends ContentTypes
       }
 
       "return a None upon a 404 from modernised" in {
-        implicit val request = ModernisedEnrichedRequest(FakeRequest(), "EXT-1234567", "GG-123456")
         val valuationId = 1L
         val uarn = 2L
         val propertyLinkId = "PL-123456789"
@@ -119,7 +115,6 @@ class ExternalValuationManagementApiSpec extends ContentTypes
 
     "get dvr document" should {
       "stream through the file" in {
-        implicit val request = ModernisedEnrichedRequest(FakeRequest(), "EXT-1234567", "GG-123456")
         val valuationId = 1L
         val uarn = 2L
         val propertyLinkId = "PL-123456789"

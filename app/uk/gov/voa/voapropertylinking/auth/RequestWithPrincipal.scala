@@ -14,21 +14,16 @@
  * limitations under the License.
  */
 
-package connectors.auth
+package uk.gov.voa.voapropertylinking.auth
 
-import auth.RequestWithPrincipal
-import play.api.mvc.WrappedRequest
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.HeaderCarrierConverter
+import play.api.mvc.{Request, WrappedRequest}
 
-case class AuthenticatedApiRequest[A](requestWithPrincipal: RequestWithPrincipal[A])
-  extends WrappedRequest[A](requestWithPrincipal) {
+class RequestWithPrincipal[A](
+                               request: Request[A],
+                               val principal: Principal
+                             ) extends WrappedRequest[A](request)
 
-  implicit val headerCarrier: HeaderCarrier =
-    HeaderCarrierConverter.fromHeadersAndSession(requestWithPrincipal.headers)
-
-  val principal = requestWithPrincipal.principal
-  val externalId = principal.externalId
-  val groupId = principal.groupId
-
+object RequestWithPrincipal {
+  def apply[A](request: Request[A], principal: Principal): RequestWithPrincipal[A] =
+    new RequestWithPrincipal(request, principal)
 }

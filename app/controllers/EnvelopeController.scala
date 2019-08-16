@@ -16,44 +16,58 @@
 
 package controllers
 
-import javax.inject.Inject
-import auth.Authenticated
-import connectors.auth.DefaultAuthConnector
 import connectors.fileUpload.{EnvelopeMetadata, FileUploadConnector}
+import javax.inject.Inject
 import models.Closed
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent}
 import repositories.EnvelopeIdRepo
 import uk.gov.hmrc.circuitbreaker.UnhealthyServiceException
 import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.voa.voapropertylinking.actions.AuthenticatedActionBuilder
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class EnvelopeController @Inject()(
-                                    val authConnector: DefaultAuthConnector,
+                                    authenticated: AuthenticatedActionBuilder,
                                     val repo: EnvelopeIdRepo,
                                     fileUploadConnector: FileUploadConnector,
                                     config: ServicesConfig
-                                  )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController with Authenticated {
+                                  )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController {
 
   lazy val mdtpPlatformSsl = config.getBoolean("mdtp.platformSsl")
 
-  def create: Action[JsValue] = authenticated(parse.json) { implicit request =>
+  def create: Action[JsValue] = authenticated.async(parse.json) { implicit request =>
     withJsonBody[EnvelopeMetadata] { metadata =>
-      fileUploadConnector.createEnvelope(metadata, routes.FileTransferController.handleCallback().absoluteURL(mdtpPlatformSsl)) flatMap {
-        case Some(id) => repo.create(id) map { _ => Ok(Json.obj("envelopeId" -> id))}
-        case None => InternalServerError(Json.obj("error" -> "envelope creation failed"))
-      } recover {
+      fileUploadConnector
+        .createEnvelope(metadata, routes.FileTransferController.handleCallback().absoluteURL(mdtpPlatformSsl))
+        .flatMap {
+          case Some(id) =>
+            repo
+              .create(id)
+              .map { _ =>
+                Ok(Json.obj("envelopeId" -> id))
+              }
+          case None     => Future.successful(InternalServerError(Json.obj("error" -> "envelope creation failed")))
+        } recover {
         case _: UnhealthyServiceException => ServiceUnavailable(Json.obj("error" -> "file upload service not available"))
       }
     }
   }
 
-  def record(envelopeId: String): Action[AnyContent] = authenticated { implicit request =>
-    repo.create(envelopeId).map(_=> Ok(envelopeId))
+  def record(envelopeId: String): Action[AnyContent] = authenticated.async { implicit request =>
+    repo
+      .create(envelopeId)
+      .map { _ =>
+        Ok(envelopeId)
+      }
   }
 
-  def close(envelopeId: String): Action[AnyContent] = authenticated { implicit request =>
-    repo.update(envelopeId, Closed).map(_=> Ok(envelopeId))
+  def close(envelopeId: String): Action[AnyContent] = authenticated.async { implicit request =>
+    repo
+      .update(envelopeId, Closed)
+      .map{ _=>
+        Ok(envelopeId)
+      }
   }
 }

@@ -18,7 +18,6 @@ package connectors.externalvaluation
 
 import http.VoaHttpClient
 import javax.inject.{Inject, Named}
-import models.ModernisedEnrichedRequest
 import models.modernised.ValuationHistoryResponse
 import models.voa.valuation.dvr.StreamedDocument
 import models.voa.valuation.dvr.documents.DvrDocumentFiles
@@ -28,6 +27,7 @@ import play.api.libs.ws.{StreamedResponse, WSClient}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.ws.WSHttp
+import uk.gov.voa.voapropertylinking.auth.RequestWithPrincipal
 
 import scala.concurrent.Future
 
@@ -45,7 +45,7 @@ class ExternalValuationManagementApi @Inject()(
   lazy val baseURL = config.baseUrl("external-business-rates-data-platform")
   lazy val url = baseURL + "/external-valuation-management-api"
 
-  def getDvrDocuments(valuationId: Long, uarn: Long, propertyLinkId: String)(implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]): Future[Option[DvrDocumentFiles]] =
+  def getDvrDocuments(valuationId: Long, uarn: Long, propertyLinkId: String)(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[Option[DvrDocumentFiles]] =
     http.GET[DvrDocumentFiles](s"$url/properties/$uarn/valuations/$valuationId/files", Seq("propertyLinkId" -> propertyLinkId))
       .map(Option.apply)
       .recover {
@@ -59,14 +59,14 @@ class ExternalValuationManagementApi @Inject()(
                       valuationId: Long,
                       uarn: Long,
                       propertyLinkId: String,
-                      fileRef: String)(implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]): Future[StreamedDocument] =
+                      fileRef: String)(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[StreamedDocument] =
     wsClient
       .url(s"$url/properties/$uarn/valuations/$valuationId/files/$fileRef?propertyLinkId=$propertyLinkId")
       .withMethod("GET")
       .withHeaders(List(
-        "GG-EXTERNAL-ID" -> request.externalId,
+        "GG-EXTERNAL-ID" -> request.principal.externalId,
         USER_AGENT -> appName,
-        "GG-GROUP-ID"    -> request.groupId): _*)
+        "GG-GROUP-ID"    -> request.principal.groupId): _*)
       .stream().flatMap {
       case StreamedResponse(hs, body) =>
 
@@ -80,7 +80,7 @@ class ExternalValuationManagementApi @Inject()(
         }
     }
 
-  def getValuationHistory(uarn: Long, propertyLinkSubmissionId: String)(implicit hc: HeaderCarrier, request: ModernisedEnrichedRequest[_]): Future[Option[ValuationHistoryResponse]] = {
+  def getValuationHistory(uarn: Long, propertyLinkSubmissionId: String)(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[Option[ValuationHistoryResponse]] = {
     http
       .GET[Option[ValuationHistoryResponse]](
       valuationHistoryUrl.replace("{uarn}", uarn.toString),

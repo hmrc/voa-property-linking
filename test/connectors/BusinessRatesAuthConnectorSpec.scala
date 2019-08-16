@@ -16,6 +16,7 @@
 
 package connectors
 
+import basespecs.WireMockSpec
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, delete, stubFor, urlEqualTo}
 import helpers.SimpleWsHttpTestApplication
 import infrastructure.SimpleWSHttp
@@ -24,8 +25,7 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.config.ServicesConfig
 
-class BusinessRatesAuthConnectorSpec extends ContentTypes
-  with WireMockSpec with SimpleWsHttpTestApplication {
+class BusinessRatesAuthConnectorSpec extends WireMockSpec with ContentTypes with SimpleWsHttpTestApplication {
 
   implicit val hc = HeaderCarrier()
 

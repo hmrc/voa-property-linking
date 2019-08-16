@@ -17,56 +17,66 @@
 package controllers
 
 import auditing.AuditingService
-import auth.Authenticated
-import connectors.auth.DefaultAuthConnector
 import connectors.{BusinessRatesAuthConnector, GroupAccountConnector}
 import javax.inject.Inject
 import models.{GroupAccountSubmission, GroupId, UpdatedOrganisationAccount}
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
+import play.api.mvc.{Action, AnyContent}
+import uk.gov.voa.voapropertylinking.actions.AuthenticatedActionBuilder
 
 import scala.concurrent.ExecutionContext
 
 class GroupAccountController @Inject() (
-                                         val authConnector: DefaultAuthConnector,
+                                         authenticated: AuthenticatedActionBuilder,
                                          auditingService: AuditingService,
                                          groups: GroupAccountConnector, brAuth: BusinessRatesAuthConnector
-                                       )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController with Authenticated {
+                                       )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController {
 
   case class GroupAccount(groupId: GroupId, submission: GroupAccountSubmission)
 
   object GroupAccount {
     implicit val format = Json.format[GroupAccount]
   }
-  def get(organisationId: Long) = authenticated { implicit request =>
-    groups.get(organisationId) map {
-      case Some(x) => Ok(Json.toJson(x))
-      case None => NotFound
+
+  def get(organisationId: Long): Action[AnyContent] = authenticated.async { implicit request =>
+    groups
+      .get(organisationId)
+      .map {
+        case Some(x)  => Ok(Json.toJson(x))
+        case None     => NotFound
     }
   }
 
-  def withGroupId(groupId: String) = authenticated { implicit request =>
-    groups.findByGGID(groupId) map {
-      case Some(x) => Ok(Json.toJson(x))
-      case None => NotFound
-    }
+  def withGroupId(groupId: String): Action[AnyContent] = authenticated.async { implicit request =>
+    groups
+      .findByGGID(groupId)
+      .map {
+        case Some(x)  => Ok(Json.toJson(x))
+        case None     => NotFound
+      }
   }
 
-  def withAgentCode(agentCode: String) = authenticated { implicit request =>
-    groups.withAgentCode(agentCode) map {
-      case Some(a) => Ok(Json.toJson(a))
-      case None => NotFound
-    }
+  def withAgentCode(agentCode: String): Action[AnyContent] = authenticated.async { implicit request =>
+    groups
+      .withAgentCode(agentCode)
+      .map {
+        case Some(a)  => Ok(Json.toJson(a))
+        case None     => NotFound
+      }
   }
 
-  def create() = authenticated(parse.json) { implicit request =>
+  def create(): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
     withJsonBody[GroupAccountSubmission] { acc =>
-      groups.create(acc) map { x =>
-        auditingService.sendEvent("Created", GroupAccount(x, acc))
-        Created(Json.toJson(x)) }
+      groups
+        .create(acc)
+        .map { groupId =>
+          auditingService.sendEvent("Created", GroupAccount(groupId, acc))
+          Created(Json.toJson(groupId))
+        }
     }
   }
 
-  def update(orgId: Long) = authenticated(parse.json) { implicit request =>
+  def update(orgId: Long): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
     withJsonBody[UpdatedOrganisationAccount] { acc =>
       for {
         _ <- groups.update(orgId, acc)

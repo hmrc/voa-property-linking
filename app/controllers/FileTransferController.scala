@@ -19,24 +19,32 @@ package controllers
 import javax.inject.Inject
 import models.mdtp.fileupload.{Available, Callback}
 import play.api.Logger
-import play.api.mvc.Action
+import play.api.libs.json.JsValue
+import play.api.mvc.{Action, AnyContent}
 import services.FileTransferService
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class FileTransferController @Inject()(
                                         val fileTransferService: FileTransferService
                                       )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController {
 
-  def handleCallback() = Action.async(parse.json) { implicit request =>
+  def handleCallback(): Action[JsValue] = Action.async(parse.json) { implicit request =>
     Logger.info(request.body.validate[Callback].toString)
     withJsonBody[Callback] {
-      case Callback(envelopeId, _, Available, _) => fileTransferService.transferManually(envelopeId) map { _ => Ok }
-      case Callback(envelopeId, _, status, _) => Logger.info(s"Received callback for $envelopeId; File status: $status"); Ok
+      case Callback(envelopeId, _, Available, _)  =>
+        fileTransferService
+          .transferManually(envelopeId)
+          .map { _ =>
+            Ok
+          }
+      case Callback(envelopeId, _, status, _)     =>
+        Logger.info(s"Received callback for $envelopeId; File status: $status")
+        Future.successful(Ok)
     }
   }
 
-  def run() = Action.async { implicit request =>
+  def run(): Action[AnyContent] = Action.async { implicit request =>
     fileTransferService.justDoIt().map(_ => Ok("File transfer was started manually"))
   }
 }

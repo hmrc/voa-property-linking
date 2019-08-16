@@ -18,6 +18,7 @@ package connectors
 
 import java.time._
 
+import basespecs.WireMockSpec
 import com.github.tomakehurst.wiremock.client.WireMock._
 import helpers.SimpleWsHttpTestApplication
 import models._
@@ -27,7 +28,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.ws.WSHttp
 
-class GroupAccountConnectorSpec extends ContentTypes with WireMockSpec with SimpleWsHttpTestApplication {
+class GroupAccountConnectorSpec extends WireMockSpec with ContentTypes  with SimpleWsHttpTestApplication {
 
   implicit val hc = HeaderCarrier()
   val http = fakeApplication.injector.instanceOf[WSHttp]

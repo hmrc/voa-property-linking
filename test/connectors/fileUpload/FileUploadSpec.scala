@@ -34,11 +34,11 @@ package connectors.fileUpload
 
 import java.util.UUID
 
+import basespecs.WireMockSpec
 import com.codahale.metrics.{Meter, MetricRegistry}
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.kenshoo.play.metrics.Metrics
-import connectors.WireMockSpec
 import helpers.SimpleWsHttpTestApplication
 import infrastructure.SimpleWSHttp
 import org.mockito.ArgumentMatchers.{any => mockitoAny, _}

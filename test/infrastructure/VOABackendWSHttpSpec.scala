@@ -16,10 +16,10 @@
 
 package infrastructure
 
+import basespecs.WireMockSpec
 import com.codahale.metrics.{Counter, Meter, MetricRegistry, Timer}
 import com.kenshoo.play.metrics.Metrics
 import com.typesafe.config.Config
-import connectors.WireMockSpec
 import helpers.SimpleWsHttpTestApplication
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito.when
@@ -29,7 +29,7 @@ import play.api.Configuration
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
 
-class VOABackendWSHttpSpec extends UnitSpec with WireMockSpec with SimpleWsHttpTestApplication with MockitoSugar {
+class VOABackendWSHttpSpec extends WireMockSpec with SimpleWsHttpTestApplication with MockitoSugar {
 
   val metricsMock = mock[Metrics]
   val metricRegistry = mock[MetricRegistry]

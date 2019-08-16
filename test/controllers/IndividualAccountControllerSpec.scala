@@ -17,25 +17,20 @@
 package controllers
 
 import auditing.AuditingService
-import connectors.auth.DefaultAuthConnector
+import basespecs.BaseControllerSpec
 import connectors.{BusinessRatesAuthConnector, IndividualAccountConnector}
 import models.{IndividualAccount, IndividualAccountId, IndividualAccountSubmission, IndividualDetails}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
-import org.scalatestplus.mockito.MockitoSugar
-import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.AnyContent
+import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.auth.core.retrieve.{OptionalRetrieval, ~}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.test.WithFakeApplication
 
-import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
-class IndividualAccountControllerSpec extends ControllerSpec with MockitoSugar with WithFakeApplication {
+class IndividualAccountControllerSpec extends BaseControllerSpec {
 
   "create" should {
     "create a new individual user in modernised" in {
@@ -133,14 +128,7 @@ class IndividualAccountControllerSpec extends ControllerSpec with MockitoSugar w
 
   lazy val mockBrAuth = mock[BusinessRatesAuthConnector]
 
-  lazy val mockAuthConnector = {
-    val m = mock[DefaultAuthConnector]
-    when(m.authorise[~[Option[String], Option[String]]](any(), any())(any[HeaderCarrier], any[ExecutionContext])) thenReturn Future.successful(
-      new ~(Some("externalId"), Some("groupIdentifier")))
-    m
-  }
-
-  lazy val testController = new IndividualAccountController(mockAuthConnector, mockIndividualAccountConnector, mock[AuditingService], mockBrAuth)
+  lazy val testController = new IndividualAccountController(preAuthenticatedActionBuilders(), mockIndividualAccountConnector, mock[AuditingService], mockBrAuth)
 
 }
 

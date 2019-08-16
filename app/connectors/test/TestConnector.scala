@@ -17,11 +17,11 @@
 package connectors.test
 
 import javax.inject.{Inject, Named}
-import models.ModernisedEnrichedRequest
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.ws.WSHttp
+import uk.gov.voa.voapropertylinking.auth.RequestWithPrincipal
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -37,10 +37,10 @@ class TestConnector @Inject()(
     http.DELETE[HttpResponse](s"$url?organisationId=$orgId")
   }
 
-  def deleteCheckCases(propertyLinkingSubmissionId: String)(implicit request: ModernisedEnrichedRequest[_]): Future[HttpResponse] = {
+  def deleteCheckCases(propertyLinkingSubmissionId: String)(implicit request: RequestWithPrincipal[_]): Future[HttpResponse] = {
     implicit val hc = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
-      .withExtraHeaders("GG-EXTERNAL-ID" -> request.externalId)
-      .withExtraHeaders("GG-GROUP-ID" -> request.groupId)
+      .withExtraHeaders("GG-EXTERNAL-ID" -> request.principal.externalId)
+      .withExtraHeaders("GG-GROUP-ID" -> request.principal.groupId)
 
     http.DELETE[HttpResponse](s"$baseUrl/external-case-management-api/check-cases/$propertyLinkingSubmissionId")
   }

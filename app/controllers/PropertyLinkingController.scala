@@ -17,10 +17,8 @@
 package controllers
 
 import auditing.AuditingService
-import auth.Authenticated
 import binders.propertylinks.temp.GetMyOrganisationsPropertyLinksParametersWithAgentFiltering
 import binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
-import connectors.auth.DefaultAuthConnector
 import connectors.authorisationsearch.PropertyLinkingConnector
 import connectors.{GroupAccountConnector, PropertyRepresentationConnector}
 import javax.inject.{Inject, Named}
@@ -32,6 +30,7 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent}
 import services.{AssessmentService, PropertyLinkingService}
 import uk.gov.hmrc.http.{HeaderCarrier, Upstream5xxResponse}
+import uk.gov.voa.voapropertylinking.actions.AuthenticatedActionBuilder
 import utils.Cats
 
 import scala.collection.mutable
@@ -44,7 +43,7 @@ case class Memoize[K, V]() {
 }
 
 class PropertyLinkingController @Inject()(
-                                           val authConnector: DefaultAuthConnector,
+                                           authenticated: AuthenticatedActionBuilder,
                                            propertyLinkConnector: PropertyLinkingConnector,
                                            propertyLinkService: PropertyLinkingService,
                                            assessmentService: AssessmentService,
@@ -52,11 +51,11 @@ class PropertyLinkingController @Inject()(
                                            auditingService: AuditingService,
                                            representationsConnector: PropertyRepresentationConnector,
                                            @Named("agentQueryParameterEnabledExteranl") agentQueryParameterEnabledExteranl: Boolean
-                                         )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController with Authenticated with Cats {
+                                         )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController with Cats {
 
   type GroupCache = Memoize[Long, Future[Option[GroupAccount]]]
 
-  def create(): Action[JsValue] = authenticated(parse.json) { implicit request =>
+  def create(): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
     withJsonBody[PropertyLinkRequest] { propertyLinkRequest =>
       propertyLinkService
         .create(APIPropertyLinkRequest.fromPropertyLinkRequest(propertyLinkRequest))
@@ -73,7 +72,7 @@ class PropertyLinkingController @Inject()(
     }
   }
 
-  def getMyOrganisationsPropertyLink(submissionId: String): Action[AnyContent] = authenticated { implicit request =>
+  def getMyOrganisationsPropertyLink(submissionId: String): Action[AnyContent] = authenticated.async { implicit request =>
     propertyLinkService
       .getMyOrganisationsPropertyLink(submissionId)
       .fold(NotFound("my organisation property link not found")) {authorisation => Ok(Json.toJson(authorisation))}
@@ -83,7 +82,7 @@ class PropertyLinkingController @Inject()(
                                        searchParams: GetMyOrganisationPropertyLinksParameters,
                                        paginationParams: Option[PaginationParams],
                                        organisationId: Option[Long]
-                                     ): Action[AnyContent] = authenticated { implicit request =>
+                                     ): Action[AnyContent] = authenticated.async { implicit request =>
     //TODO remove once modernised external has caught up.
     if (searchParams.sortField.map(_ == "AGENT").getOrElse(false) && agentQueryParameterEnabledExteranl) {
 
@@ -101,25 +100,21 @@ class PropertyLinkingController @Inject()(
           )
             .map( response => Ok(Json.toJson(response))))
     } else {
-      propertyLinkService.getMyOrganisationsPropertyLinks(searchParams, paginationParams).value flatMap {
-        response => {
-          Ok(Json.toJson(response))
-        }
-      }
+      propertyLinkService
+        .getMyOrganisationsPropertyLinks(searchParams, paginationParams)
+        .fold(NotFound("my organisation property links not found"))(propertyLinks => Ok(Json.toJson(propertyLinks)))
     }
   }
 
   def getClientsPropertyLinks(
                                searchParams: GetMyClientsPropertyLinkParameters,
-                               paginationParams: Option[PaginationParams]): Action[AnyContent] = authenticated { implicit request =>
-    propertyLinkService.getClientsPropertyLinks(searchParams, paginationParams).value flatMap {
-      response => {
-        Ok(Json.toJson(response))
-      }
-    }
+                               paginationParams: Option[PaginationParams]): Action[AnyContent] = authenticated.async { implicit request =>
+    propertyLinkService
+      .getClientsPropertyLinks(searchParams, paginationParams)
+      .fold(NotFound("clients property links not found"))(propertyLinks => Ok(Json.toJson(propertyLinks)))
   }
 
-  def getClientsPropertyLink(submissionId: String): Action[AnyContent] = authenticated { implicit request =>
+  def getClientsPropertyLink(submissionId: String): Action[AnyContent] = authenticated.async { implicit request =>
     propertyLinkService
       .getClientsPropertyLink(submissionId)
       .fold(NotFound("client property link not found")){authorisation => Ok(Json.toJson(authorisation))}
@@ -131,7 +126,7 @@ class PropertyLinkingController @Inject()(
   def getMyOrganisationPropertyLinksWithAppointable(
                                                      searchParams: GetMyOrganisationsPropertyLinksParametersWithAgentFiltering,
                                                      paginationParams: Option[PaginationParams]
-                                                   ): Action[AnyContent] = authenticated { implicit request =>
+                                                   ): Action[AnyContent] = authenticated.async { implicit request =>
 
     searchParams.agentAppointed.getOrElse("BOTH") match {
       case "NO" =>
@@ -165,10 +160,36 @@ class PropertyLinkingController @Inject()(
     }
   }
 
-  def clientProperty(authorisationId: Long, clientOrgId: Long, agentOrgId: Long) = authenticated { implicit request =>
-    propertyLinkConnector.get(authorisationId) flatMap {
-      case Some(authorisation) if authorisedFor(authorisation, clientOrgId, agentOrgId) => toClientProperty(authorisation) map { p => Ok(Json.toJson(p)) }
-      case _ => NotFound
+  def getMyOrganisationsAssessments(submissionId: String): Action[AnyContent] = authenticated.async { implicit request =>
+    assessmentService
+      .getMyOrganisationsAssessments(submissionId)
+      .fold(Ok(Json.toJson(submissionId)))(propertyLinkWithAssessments => Ok(Json.toJson(propertyLinkWithAssessments)))
+  }
+
+  def getClientsAssessments(submissionId: String): Action[AnyContent] = authenticated.async { implicit request =>
+    assessmentService
+      .getClientsAssessments(submissionId)
+      .fold(Ok(Json.toJson(submissionId)))(propertyLinkWithAssessments => Ok(Json.toJson(propertyLinkWithAssessments)))
+  }
+
+  def getMyOrganisationsAssessmentsWithCapacity(submissionId: String, authorisationId: Long): Action[AnyContent] = authenticated.async { implicit request =>
+    assessmentService
+      .getMyOrganisationsAssessmentsWithCapacity(submissionId, authorisationId)
+      .fold(Ok(Json.toJson(submissionId)))(propertyLinkWithAssessmentsAndCapacity => Ok(Json.toJson(propertyLinkWithAssessmentsAndCapacity)))
+  }
+
+  def getClientsAssessmentsWithCapacity(submissionId: String, authorisationId: Long): Action[AnyContent] = authenticated.async { implicit request =>
+    assessmentService
+      .getClientsAssessmentsWithCapacity(submissionId, authorisationId)
+      .fold(Ok(Json.toJson(submissionId)))(propertyLinkWithAssessmentsAndCapacity => Ok(Json.toJson(propertyLinkWithAssessmentsAndCapacity)))
+  }
+
+  def clientProperty(authorisationId: Long, clientOrgId: Long, agentOrgId: Long): Action[AnyContent] = authenticated.async { implicit request =>
+    propertyLinkConnector
+      .get(authorisationId)
+      .flatMap {
+        case Some(authorisation) if authorisedFor(authorisation, clientOrgId, agentOrgId) => toClientProperty(authorisation) map { p => Ok(Json.toJson(p)) }
+        case _ => Future.successful(NotFound)
     }
   }
 
@@ -181,46 +202,5 @@ class PropertyLinkingController @Inject()(
       ClientProperty.build(authorisation, acc)
     }
   }
-
-  private def detailed(authorisation: PropertiesView)(implicit hc: HeaderCarrier, cache: GroupCache): Future[PropertyLink] = {
-    for {
-      apiPartiesWithGroupAccounts <- withGroupAccounts(authorisation)
-      parties = apiPartiesWithGroupAccounts.flatMap { case (p: APIParty, g: GroupAccount) => Party.fromAPIParty(p, g) }
-    } yield PropertyLink.fromAPIAuthorisation(authorisation, parties)
-  }
-
-  private def withGroupAccounts(authorisation: PropertiesView)(implicit hc: HeaderCarrier, cache: GroupCache): Future[Seq[(APIParty, GroupAccount)]] = {
-    Future.traverse(authorisation.parties) { party =>
-      cache(groupAccountsConnector.get)(party.authorisedPartyOrganisationId).map(_.map(groupAccount => (party, groupAccount)))
-    }.map(_.flatten)
-  }
-
-  def getMyOrganisationsAssessments(submissionId: String) = authenticated { implicit request =>
-    implicit val cache = Memoize[Long, Future[Option[GroupAccount]]]()
-
-    assessmentService.getMyOrganisationsAssessments(submissionId).fold(Ok(Json.toJson(submissionId))) {authorisation =>
-      Ok(Json.toJson(authorisation))}
-  }
-
-  def getClientsAssessments(submissionId: String) = authenticated { implicit request =>
-    implicit val cache = Memoize[Long, Future[Option[GroupAccount]]]()
-
-    assessmentService.getClientsAssessments(submissionId).fold(Ok(Json.toJson(submissionId))) {authorisation =>
-      Ok(Json.toJson(authorisation))}
-  }
-
-  def getMyOrganisationsAssessmentsWithCapacity(submissionId: String, authorisationId: Long) = authenticated { implicit request =>
-    implicit val cache = Memoize[Long, Future[Option[GroupAccount]]]()
-
-    assessmentService.getMyOrganisationsAssessmentsWithCapacity(submissionId, authorisationId).fold(Ok(Json.toJson(submissionId))) {assessment: Assessments =>
-      Ok(Json.toJson(assessment))}
-  }
-
-  def getClientsAssessmentsWithCapacity(submissionId: String, authorisationId: Long) = authenticated { implicit request =>
-    implicit val cache = Memoize[Long, Future[Option[GroupAccount]]]()
-    assessmentService.getClientsAssessmentsWithCapacity(submissionId, authorisationId).fold(Ok(Json.toJson(submissionId))) {assessment =>
-      Ok(Json.toJson(assessment))}
-  }
-
 }
 

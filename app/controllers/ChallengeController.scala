@@ -16,28 +16,28 @@
 
 package controllers
 
-import javax.inject.Inject
-import auth.Authenticated
 import connectors.CheckCaseConnector
-import connectors.auth.DefaultAuthConnector
+import javax.inject.Inject
 import play.api.libs.json.Json
+import play.api.mvc.{Action, AnyContent}
+import uk.gov.voa.voapropertylinking.actions.AuthenticatedActionBuilder
 
 import scala.concurrent.ExecutionContext
 
 class ChallengeController @Inject()(
-                                     val authConnector: DefaultAuthConnector,
+                                     authenticated: AuthenticatedActionBuilder,
                                      checkCaseConnector: CheckCaseConnector
-                                   )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController with Authenticated {
+                                   )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController {
 
   def canChallenge(propertyLinkSubmissionId: String,
                           checkCaseRef: String,
                           valuationId: Long,
-                          party: String) = authenticated { implicit request =>
-    checkCaseConnector.canChallenge(propertyLinkSubmissionId, checkCaseRef, valuationId, party) map {
-      case Some(resp) => {
-        Ok(Json.toJson(resp))
-      }
-      case _ => Forbidden
+                          party: String): Action[AnyContent] = authenticated.async { implicit request =>
+    checkCaseConnector
+      .canChallenge(propertyLinkSubmissionId, checkCaseRef, valuationId, party)
+      .map {
+        case Some(resp) => Ok(Json.toJson(resp))
+        case _          => Forbidden
     }
   }
 }

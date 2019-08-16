@@ -14,28 +14,29 @@
  * limitations under the License.
  */
 
-package auditing
+package basespecs
 
-import basespecs.WireMockSpec
-import helpers.SimpleWsHttpTestApplication
-import play.api.http.ContentTypes
+import org.scalatest._
+import org.scalatest.concurrent.ScalaFutures
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.test.FakeRequest
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.test.UnitSpec
+import uk.gov.voa.voapropertylinking.auth.{Principal, RequestWithPrincipal}
+import utils.Cats
 
-import scala.concurrent.ExecutionContext.Implicits.global
+abstract class BaseUnitSpec extends UnitSpec
+  with MockitoSugar
+  with BeforeAndAfterEach
+  with BeforeAndAfterAll
+  with Matchers
+  with Inspectors
+  with Inside
+  with EitherValues
+  with LoneElement
+  with ScalaFutures
+  with OptionValues
+  with Cats {
 
-class AuditingServiceSpec
-  extends WireMockSpec
-    with ContentTypes
-    with SimpleWsHttpTestApplication {
-
-  implicit val hc = HeaderCarrier()
-  implicit val request = FakeRequest()
-
-  "AuditingService.sendEvent" should {
-    "audit the extended event" in {
-      fakeApplication.injector.instanceOf[AuditingService].sendEvent[Int]("test", 999) shouldBe ()
-    }
-  }
+  implicit val requestWithPrincipal = RequestWithPrincipal(FakeRequest(), Principal("external-id", "group-id"))
 
 }

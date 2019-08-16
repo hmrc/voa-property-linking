@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-package connectors
+package basespecs
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
-import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import uk.gov.hmrc.play.it.Port
-import uk.gov.hmrc.play.test.UnitSpec
 
-trait WireMockSpec extends UnitSpec with BeforeAndAfterAll with BeforeAndAfterEach {
+/*
+  TODO remove this once we get proper unit tests no need for a wiremock server
+ */
+abstract class WireMockSpec extends BaseUnitSpec {
 
   private lazy val wireMockServer = new WireMockServer(Port.randomAvailable)
 

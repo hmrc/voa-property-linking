@@ -16,25 +16,23 @@
 
 package controllers
 
-import javax.inject.Inject
-import auth.Authenticated
-import connectors.auth.DefaultAuthConnector
 import auditing.AuditingService
 import connectors.{BusinessRatesAuthConnector, IndividualAccountConnector}
+import javax.inject.Inject
 import models.{IndividualAccountId, IndividualAccountSubmission}
-import play.api.Logger
 import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.Action
 import play.api.mvc.Results.EmptyContent
+import play.api.mvc.{Action, AnyContent}
+import uk.gov.voa.voapropertylinking.actions.AuthenticatedActionBuilder
 
 import scala.concurrent.ExecutionContext
 
 class IndividualAccountController @Inject()(
-                                             val authConnector: DefaultAuthConnector,
+                                             authenticated: AuthenticatedActionBuilder,
                                              individuals: IndividualAccountConnector,
                                              auditingService: AuditingService,
                                              brAuth: BusinessRatesAuthConnector
-                                           )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController with Authenticated {
+                                           )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController {
 
   case class IndividualAccount(id: IndividualAccountId, submission: IndividualAccountSubmission)
 
@@ -42,16 +40,18 @@ class IndividualAccountController @Inject()(
     implicit val format = Json.format[IndividualAccount]
   }
 
-  def create(): Action[JsValue] = authenticated(parse.json) { implicit request =>
+  def create(): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
     withJsonBody[IndividualAccountSubmission] { acc =>
-      individuals.create(acc) map { x =>
-        auditingService.sendEvent("Created", IndividualAccount(x, acc))
-        Created(Json.toJson(x))
-      }
+      individuals
+        .create(acc)
+        .map { personId =>
+          auditingService.sendEvent("Created", IndividualAccount(personId, acc))
+          Created(Json.toJson(personId))
+        }
     }
   }
 
-  def update(personId: Long): Action[JsValue] = authenticated(parse.json) { implicit request =>
+  def update(personId: Long): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
     withJsonBody[IndividualAccountSubmission] { account =>
       for {
         _ <- individuals.update(personId, account)
@@ -62,18 +62,22 @@ class IndividualAccountController @Inject()(
     }
   }
 
-  def get(personId: Long) = authenticated { implicit request =>
-    individuals.get(personId) map {
-      case Some(x) => Ok(Json.toJson(x))
-      case None => NotFound
-    }
+  def get(personId: Long): Action[AnyContent] = authenticated.async { implicit request =>
+    individuals
+      .get(personId)
+      .map {
+        case Some(x)  => Ok(Json.toJson(x))
+        case None     => NotFound
+      }
   }
 
-  def withExternalId(externalId: String) = authenticated { implicit request =>
-    individuals.findByGGID(externalId) map {
-      case Some(x) => Ok(Json.toJson(x))
-      case None => NotFound
-    }
+  def withExternalId(externalId: String): Action[AnyContent] = authenticated.async { implicit request =>
+    individuals
+      .findByGGID(externalId)
+      .map {
+        case Some(x)  => Ok(Json.toJson(x))
+        case None     => NotFound
+      }
   }
 
 }

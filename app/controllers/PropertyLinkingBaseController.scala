@@ -27,8 +27,6 @@ trait PropertyLinkingBaseController extends Controller {
 
   implicit def hc(implicit request: Request[_]): HeaderCarrier =  HeaderCarrierConverter.fromHeadersAndSession(request.headers)
 
-  implicit def future[A](a: A): Future[A] = Future.successful(a)
-
   def withJsonBody[T](f: T => Future[Result])(implicit request: Request[JsValue], m: Manifest[T], reads: Reads[T]) = {
     request.body.validate[T] match {
       case JsSuccess(v, _) => f(v)

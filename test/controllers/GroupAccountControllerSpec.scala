@@ -19,24 +19,21 @@ package controllers
 import java.time.Instant
 
 import auditing.AuditingService
-import connectors.auth.DefaultAuthConnector
+import basespecs.BaseControllerSpec
 import connectors.{BusinessRatesAuthConnector, GroupAccountConnector}
 import models._
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
-import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.test.WithFakeApplication
 
-import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 
-class GroupAccountControllerSpec extends ControllerSpec with MockitoSugar with WithFakeApplication {
+class GroupAccountControllerSpec extends BaseControllerSpec {
 
   "create" should {
     "create a new individual user in modernised" in {
@@ -152,15 +149,7 @@ class GroupAccountControllerSpec extends ControllerSpec with MockitoSugar with W
   lazy val mockBrAuth = mock[BusinessRatesAuthConnector]
 
 
-  lazy val mockAuthConnector = {
-    val m = mock[DefaultAuthConnector]
-    when(m.authorise[~[Option[String], Option[String]]](any(), any())(any[HeaderCarrier], any[ExecutionContext])) thenReturn Future.successful(
-      new ~(Some("externalId"), Some("groupIdentifier")))
-    m
-  }
-
-
-  lazy val testController = new GroupAccountController(mockAuthConnector, mock[AuditingService], mockGroupAccountConnector, mockBrAuth)
+  lazy val testController = new GroupAccountController(preAuthenticatedActionBuilders(), mock[AuditingService], mockGroupAccountConnector, mockBrAuth)
 
 }
 

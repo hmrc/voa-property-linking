@@ -20,26 +20,23 @@ import java.time.LocalDateTime
 
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
-import connectors.auth.DefaultAuthConnector
+import basespecs.BaseControllerSpec
 import connectors.externalvaluation.ExternalValuationManagementApi
 import connectors.{CCACaseManagementApi, DVRCaseManagementConnector}
 import models.voa.valuation.dvr.documents.{Document, DocumentSummary, DvrDocumentFiles}
 import models.voa.valuation.dvr.{DetailedValuationRequest, StreamedDocument}
 import org.mockito.ArgumentMatchers.{eq => matching, _}
 import org.mockito.Mockito._
-import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.DVRRecordRepository
-import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
-import scala.concurrent.{ExecutionContext, Future}
-
-class DVRCaseManagementSpec extends ControllerSpec with MockitoSugar {
+class DVRCaseManagementSpec extends BaseControllerSpec {
 
   val testDvr = DetailedValuationRequest(
     authorisationId = 123l,
@@ -154,7 +151,7 @@ class DVRCaseManagementSpec extends ControllerSpec with MockitoSugar {
   }
 
   lazy val testController = new DVRCaseManagement(
-    mockAuthConnector,
+    preAuthenticatedActionBuilders(),
     mockDvrConnector,
     mockCcaCaseManagementConnector,
     mockExternalValuationManagementapi,
@@ -177,13 +174,6 @@ class DVRCaseManagementSpec extends ControllerSpec with MockitoSugar {
   lazy val mockDvrConnector = {
     val m = mock[DVRCaseManagementConnector]
     when(m.requestDetailedValuation(any[DetailedValuationRequest])(any[HeaderCarrier])) thenReturn Future.successful()
-    m
-  }
-
-  lazy val mockAuthConnector = {
-    val m = mock[DefaultAuthConnector]
-    when(m.authorise[~[Option[String], Option[String]]](any(), any())(any[HeaderCarrier], any[ExecutionContext])) thenReturn Future.successful(
-      new ~(Some("externalId"), Some("groupIdentifier")))
     m
   }
 
