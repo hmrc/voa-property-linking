@@ -16,12 +16,12 @@
 
 package controllers.test
 
-import connectors.test.TestConnector
 import controllers.PropertyLinkingBaseController
 import javax.inject.Inject
 import play.api.mvc.{Action, AnyContent}
 import repositories.DVRRecordRepository
-import uk.gov.voa.voapropertylinking.actions.AuthenticatedActionBuilder
+import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
+import uk.gov.hmrc.voapropertylinking.connectors.test.TestConnector
 
 import scala.concurrent.ExecutionContext
 

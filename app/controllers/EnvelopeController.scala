@@ -16,7 +16,6 @@
 
 package controllers
 
-import connectors.fileUpload.{EnvelopeMetadata, FileUploadConnector}
 import javax.inject.Inject
 import models.Closed
 import play.api.libs.json.{JsValue, Json}
@@ -24,7 +23,8 @@ import play.api.mvc.{Action, AnyContent}
 import repositories.EnvelopeIdRepo
 import uk.gov.hmrc.circuitbreaker.UnhealthyServiceException
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.voa.voapropertylinking.actions.AuthenticatedActionBuilder
+import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
+import uk.gov.hmrc.voapropertylinking.connectors.mdtp.{EnvelopeMetadata, FileUploadConnector}
 
 import scala.concurrent.{ExecutionContext, Future}
 

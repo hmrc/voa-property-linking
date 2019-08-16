@@ -30,7 +30,6 @@ trait SimpleWsHttpTestApplication extends WithFakeApplication {
 
   override lazy val fakeApplication: Application = new GuiceApplicationBuilder()
     .bindings(bindModules: _*)
-    .overrides(bind[WSHttp].to[SimpleWSHttp])
     .configure("metrics.enabled" -> "true")
     .configure("fileTransfer.enabled" -> "false")
     .build()

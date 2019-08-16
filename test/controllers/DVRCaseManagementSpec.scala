@@ -21,8 +21,6 @@ import java.time.LocalDateTime
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import basespecs.BaseControllerSpec
-import connectors.externalvaluation.ExternalValuationManagementApi
-import connectors.{CCACaseManagementApi, DVRCaseManagementConnector}
 import models.voa.valuation.dvr.documents.{Document, DocumentSummary, DvrDocumentFiles}
 import models.voa.valuation.dvr.{DetailedValuationRequest, StreamedDocument}
 import org.mockito.ArgumentMatchers.{eq => matching, _}
@@ -32,6 +30,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import repositories.DVRRecordRepository
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.voapropertylinking.connectors.modernised.{CCACaseManagementApi, ExternalValuationManagementApi}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -48,25 +47,13 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
     billingAuthorityReferenceNumber = "BAREF"
   )
 
-  "request detailed valuation" should {
-    "create a record of the DVR in mongo and POST the DVR to modernised" in {
-      val dvrJson = Json.toJson(testDvr)
-      val res = testController.requestDetailedValuation()(FakeRequest().withBody(dvrJson))
-
-      await(res)
-      verify(mockRepo, times(1)).create(matching(testDvr))
-      verify(mockDvrConnector, times(1)).requestDetailedValuation(matching(testDvr))(any[HeaderCarrier])
-      status(res) mustBe OK
-    }
-  }
-
   "request detailed valuation v2 " should {
     "create a record of the DVR in mongo and POST the DVR to modernised" in {
       val dvrJson = Json.toJson(testDvr)
       val res = testController.requestDetailedValuationV2()(FakeRequest().withBody(dvrJson))
 
       await(res)
-      verify(mockRepo, times(2)).create(matching(testDvr))
+      verify(mockRepo, times(1)).create(matching(testDvr))
       verify(mockCcaCaseManagementConnector, times(1)).requestDetailedValuation(matching(testDvr))(any[HeaderCarrier])
       status(res) mustBe OK
     }
@@ -96,6 +83,7 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
     }
   }
 
+  //TODO flaky test due to now and 0's being removed from result. e.g 10/10/2010T10.10.10.81 vs 10/10/2010T10.10.10.810
   "get dvr documents" should {
     "return 200 OK with the dvr document information" in {
       val now = LocalDateTime.now()
@@ -152,7 +140,6 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
 
   lazy val testController = new DVRCaseManagement(
     preAuthenticatedActionBuilders(),
-    mockDvrConnector,
     mockCcaCaseManagementConnector,
     mockExternalValuationManagementapi,
     mockRepo)
@@ -167,12 +154,6 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
 
   lazy val mockCcaCaseManagementConnector = {
     val m = mock[CCACaseManagementApi]
-    when(m.requestDetailedValuation(any[DetailedValuationRequest])(any[HeaderCarrier])) thenReturn Future.successful()
-    m
-  }
-
-  lazy val mockDvrConnector = {
-    val m = mock[DVRCaseManagementConnector]
     when(m.requestDetailedValuation(any[DetailedValuationRequest])(any[HeaderCarrier])) thenReturn Future.successful()
     m
   }

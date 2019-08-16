@@ -16,20 +16,21 @@
 
 package controllers
 
-import auditing.AuditingService
-import connectors.{BusinessRatesAuthConnector, IndividualAccountConnector}
+import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import javax.inject.Inject
 import models.{IndividualAccountId, IndividualAccountSubmission}
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Results.EmptyContent
 import play.api.mvc.{Action, AnyContent}
-import uk.gov.voa.voapropertylinking.actions.AuthenticatedActionBuilder
+import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
+import uk.gov.hmrc.voapropertylinking.connectors.mdtp.BusinessRatesAuthConnector
+import uk.gov.hmrc.voapropertylinking.connectors.modernised.CustomerManagementApi
 
 import scala.concurrent.ExecutionContext
 
 class IndividualAccountController @Inject()(
                                              authenticated: AuthenticatedActionBuilder,
-                                             individuals: IndividualAccountConnector,
+                                             customerManagementApi: CustomerManagementApi,
                                              auditingService: AuditingService,
                                              brAuth: BusinessRatesAuthConnector
                                            )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController {
@@ -42,8 +43,8 @@ class IndividualAccountController @Inject()(
 
   def create(): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
     withJsonBody[IndividualAccountSubmission] { acc =>
-      individuals
-        .create(acc)
+      customerManagementApi
+        .createIndividualAccount(acc)
         .map { personId =>
           auditingService.sendEvent("Created", IndividualAccount(personId, acc))
           Created(Json.toJson(personId))
@@ -54,7 +55,7 @@ class IndividualAccountController @Inject()(
   def update(personId: Long): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
     withJsonBody[IndividualAccountSubmission] { account =>
       for {
-        _ <- individuals.update(personId, account)
+        _ <- customerManagementApi.updateIndividualAccount(personId, account)
         _ <- brAuth.clearCache()
       } yield {
         Ok(EmptyContent())
@@ -63,8 +64,8 @@ class IndividualAccountController @Inject()(
   }
 
   def get(personId: Long): Action[AnyContent] = authenticated.async { implicit request =>
-    individuals
-      .get(personId)
+    customerManagementApi
+      .getDetailedIndividual(personId)
       .map {
         case Some(x)  => Ok(Json.toJson(x))
         case None     => NotFound
@@ -72,8 +73,8 @@ class IndividualAccountController @Inject()(
   }
 
   def withExternalId(externalId: String): Action[AnyContent] = authenticated.async { implicit request =>
-    individuals
-      .findByGGID(externalId)
+    customerManagementApi
+      .findDetailedIndividualAccountByGGID(externalId)
       .map {
         case Some(x)  => Ok(Json.toJson(x))
         case None     => NotFound

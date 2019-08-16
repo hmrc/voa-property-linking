@@ -24,6 +24,7 @@ import uk.gov.hmrc.lock.ExclusiveTimePeriodLock
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 
+//TODO remove with file upload compoenents
 abstract class LockedJobScheduler[Event <: AnyRef](lock: ExclusiveTimePeriodLock, actorSystem: ActorSystem) {
   implicit val t: Timeout = 1 hour
 

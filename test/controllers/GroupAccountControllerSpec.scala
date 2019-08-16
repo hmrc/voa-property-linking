@@ -18,9 +18,8 @@ package controllers
 
 import java.time.Instant
 
-import auditing.AuditingService
+import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import basespecs.BaseControllerSpec
-import connectors.{BusinessRatesAuthConnector, GroupAccountConnector}
 import models._
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
@@ -28,6 +27,8 @@ import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.voapropertylinking.connectors.mdtp.BusinessRatesAuthConnector
+import uk.gov.hmrc.voapropertylinking.connectors.modernised.CustomerManagementApi
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -43,7 +44,7 @@ class GroupAccountControllerSpec extends BaseControllerSpec {
 
       val groupJson = Json.toJson(testGroupAccountSubmission)
 
-      when(mockGroupAccountConnector.create(any())(any[HeaderCarrier])).thenReturn(Future.successful(GroupId(1, "test", 23)))
+      when(mockGroupAccountConnector.createGroupAccount(any())(any[HeaderCarrier])).thenReturn(Future.successful(GroupId(1, "test", 23)))
 
       val res = testController.create()(FakeRequest().withBody(groupJson))
       await(res)
@@ -59,7 +60,7 @@ class GroupAccountControllerSpec extends BaseControllerSpec {
 
       val groupJson = Json.toJson(testGroupAccount)
 
-      when(mockGroupAccountConnector.get(any())(any[HeaderCarrier])).thenReturn(Future.successful(Some(testGroupAccount)))
+      when(mockGroupAccountConnector.getDetailedGroupAccount(any())(any[HeaderCarrier])).thenReturn(Future.successful(Some(testGroupAccount)))
 
       val res = testController.get(1)(FakeRequest())
       await(res)
@@ -69,7 +70,7 @@ class GroupAccountControllerSpec extends BaseControllerSpec {
     }
 
     "return NotFound if the account does not exist in modernised" in {
-      when(mockGroupAccountConnector.get(any())(any[HeaderCarrier])).thenReturn(Future.successful(None))
+      when(mockGroupAccountConnector.getDetailedGroupAccount(any())(any[HeaderCarrier])).thenReturn(Future.successful(None))
 
       val res = testController.get(1)(FakeRequest())
       await(res)
@@ -84,7 +85,7 @@ class GroupAccountControllerSpec extends BaseControllerSpec {
 
       val groupJson = Json.toJson(testGroupAccount)
 
-      when(mockGroupAccountConnector.findByGGID(any())(any[HeaderCarrier])).thenReturn(Future.successful(Some(testGroupAccount)))
+      when(mockGroupAccountConnector.findDetailedGroupAccountByGGID(any())(any[HeaderCarrier])).thenReturn(Future.successful(Some(testGroupAccount)))
 
       val res = testController.withGroupId("test-group-id")(FakeRequest())
       await(res)
@@ -94,7 +95,7 @@ class GroupAccountControllerSpec extends BaseControllerSpec {
     }
 
     "return NotFound if the account does not exist in modernised" in {
-      when(mockGroupAccountConnector.findByGGID(any())(any[HeaderCarrier])).thenReturn(Future.successful(None))
+      when(mockGroupAccountConnector.findDetailedGroupAccountByGGID(any())(any[HeaderCarrier])).thenReturn(Future.successful(None))
 
       val res = testController.withGroupId("test-group-id")(FakeRequest())
       await(res)
@@ -134,8 +135,8 @@ class GroupAccountControllerSpec extends BaseControllerSpec {
 
       val testUpdatedOrgAccountJson = Json.toJson(testUpdatedOrgAccount)
 
-      when(mockGroupAccountConnector.update(any(), any())(any[HeaderCarrier])).thenReturn(Future.successful(()))
-      when(mockBrAuth.clearCache()(any[HeaderCarrier], any())).thenReturn(Future.successful(()))
+      when(mockGroupAccountConnector.updateGroupAccount(any(), any())(any[HeaderCarrier])).thenReturn(Future.successful(()))
+      when(mockBrAuth.clearCache()(any[HeaderCarrier])).thenReturn(Future.successful(()))
 
       val res = testController.update(1)(FakeRequest().withBody(testUpdatedOrgAccountJson))
       await(res)
@@ -144,7 +145,7 @@ class GroupAccountControllerSpec extends BaseControllerSpec {
     }
   }
 
-  lazy val mockGroupAccountConnector = mock[GroupAccountConnector]
+  lazy val mockGroupAccountConnector = mock[CustomerManagementApi]
 
   lazy val mockBrAuth = mock[BusinessRatesAuthConnector]
 

@@ -17,23 +17,22 @@
 package services
 
 import cats.data.OptionT
-import connectors.authorisationsearch.PropertyLinkingConnector
-import connectors.externalpropertylink.ExternalPropertyLinkConnector
-import connectors.externalvaluation.ExternalValuationManagementApi
-import models._
-import uk.gov.hmrc.http.HeaderCarrier
 import javax.inject.{Inject, Named}
-import models.modernised.externalpropertylink.myorganisations.OwnerPropertyLink
+import models._
 import models.modernised.PropertyLinkStatus
 import models.modernised.externalpropertylink.myclients.ClientPropertyLink
-import uk.gov.voa.voapropertylinking.auth.RequestWithPrincipal
+import models.modernised.externalpropertylink.myorganisations.OwnerPropertyLink
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
+import uk.gov.hmrc.voapropertylinking.connectors.modernised.{AuthorisationManagementApi, ExternalPropertyLinkApi, ExternalValuationManagementApi, MdtpDashboardManagementApi}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class AssessmentService @Inject()(
-                                   val propertyLinksConnector: ExternalPropertyLinkConnector,
+                                   val propertyLinksConnector: ExternalPropertyLinkApi,
                                    val externalValuationManagementApi: ExternalValuationManagementApi,
-                                   val legacyPropertyLinksConnector: PropertyLinkingConnector,
+                                   val authorisationManagementApi: AuthorisationManagementApi,
+                                   val mdtpDashboardManagementApi: MdtpDashboardManagementApi,
                                    @Named("authedAssessmentEndpointEnabled") val authedAssessmentEndpointEnabled: Boolean
                                  )(implicit executionContext: ExecutionContext){
 
@@ -69,7 +68,7 @@ class AssessmentService @Inject()(
    private def getNewMyOrganisationsAssessmentsWithCapacity(submissionId: String, authorisationId: Long)(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_], F: cats.Functor[scala.concurrent.Future], f: cats.Monad[scala.concurrent.Future]): OptionT[Future, Assessments] = {
     for {
       propertyLink <- OptionT(propertyLinksConnector.getMyOrganisationsPropertyLink(submissionId))
-      capacity <- OptionT(legacyPropertyLinksConnector.getCapacity(authorisationId))
+      capacity <- OptionT(authorisationManagementApi.getCapacity(authorisationId))
       history  <- OptionT(externalValuationManagementApi.getValuationHistory(propertyLink.authorisation.uarn, submissionId))
     } yield Assessments(propertyLink.authorisation, history.NDRListValuationHistoryItems, Some(capacity.authorisationOwnerCapacity))
   }
@@ -77,7 +76,7 @@ class AssessmentService @Inject()(
   private def getNewClientsAssessmentsWithCapacity(submissionId: String, authorisationId: Long)(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_], F: cats.Functor[scala.concurrent.Future], f: cats.Monad[scala.concurrent.Future]): OptionT[Future, Assessments] = {
     for {
       propertyLink <- OptionT(propertyLinksConnector.getClientsPropertyLink(submissionId))
-      capacity <- OptionT(legacyPropertyLinksConnector.getCapacity(authorisationId))
+      capacity <- OptionT(authorisationManagementApi.getCapacity(authorisationId))
       history  <- OptionT(externalValuationManagementApi.getValuationHistory(propertyLink.authorisation.uarn, submissionId))
     } yield Assessments(propertyLink.authorisation, history.NDRListValuationHistoryItems, Some(capacity.authorisationOwnerCapacity))
   }
@@ -85,8 +84,8 @@ class AssessmentService @Inject()(
   private def legacyGetAssessmentsClient(submissionId: String, authorisationId: Long)(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_], F: cats.Functor[scala.concurrent.Future], f: cats.Monad[scala.concurrent.Future]): OptionT[Future, Assessments] = {
     for {
       propertyLink: ClientPropertyLink <- OptionT(propertyLinksConnector.getClientsPropertyLink(submissionId))
-      capacity: Capacity <- OptionT(legacyPropertyLinksConnector.getCapacity(authorisationId))
-      propertiesView <- OptionT(legacyPropertyLinksConnector.getAssessment(authorisationId))
+      capacity: Capacity <- OptionT(authorisationManagementApi.getCapacity(authorisationId))
+      propertiesView <- OptionT(mdtpDashboardManagementApi.getAssessment(authorisationId))
     } yield Assessments(
       propertyLink.authorisation.authorisationId,
       propertyLink.authorisation.submissionId,
@@ -102,8 +101,8 @@ class AssessmentService @Inject()(
   private def legacyGetAssessmentsAgent(submissionId: String, authorisationId: Long)(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_], F: cats.Functor[scala.concurrent.Future], f: cats.Monad[scala.concurrent.Future]): OptionT[Future, Assessments] = {
     for {
       propertyLink: OwnerPropertyLink <- OptionT(propertyLinksConnector.getMyOrganisationsPropertyLink(submissionId))
-      capacity: Capacity <- OptionT(legacyPropertyLinksConnector.getCapacity(authorisationId))
-      propertiesView <- OptionT(legacyPropertyLinksConnector.getAssessment(authorisationId))
+      capacity: Capacity <- OptionT(authorisationManagementApi.getCapacity(authorisationId))
+      propertiesView <- OptionT(mdtpDashboardManagementApi.getAssessment(authorisationId))
     } yield Assessments(
       propertyLink.authorisation.authorisationId,
       propertyLink.authorisation.submissionId,

@@ -27,6 +27,7 @@ import uk.gov.hmrc.http.hooks.HttpHook
 import uk.gov.hmrc.http.hooks.HttpHooks
 import uk.gov.hmrc.play.http.ws._
 
+//TODO remove with file upload components.
 class SimpleWSHttp @Inject()(
                               val appNameConfiguration: Configuration
                             ) extends HttpGet with WSGet with HttpPut with WSPut with HttpPost with WSPost with HttpDelete with WSDelete with HttpPatch with WSPatch with WSHttp with AppName with HttpHooks{

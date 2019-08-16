@@ -36,22 +36,21 @@ import java.util.concurrent.atomic.AtomicInteger
 
 import com.codahale.metrics.MetricRegistry
 import com.kenshoo.play.metrics.Metrics
-import connectors.EvidenceConnector
-import connectors.fileUpload.{EnvelopeInfo, EnvelopeMetadata, FileInfo, FileUploadConnector}
 import helpers.AnswerSugar
 import models.Closed
 import org.mockito.ArgumentMatchers
-import org.scalatest.concurrent.Eventually._
 import org.mockito.ArgumentMatchers.{eq => mEq, _}
 import org.mockito.Mockito._
 import org.mockito.invocation.InvocationOnMock
 import org.scalatest.BeforeAndAfterEach
+import org.scalatest.concurrent.Eventually._
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.ws.{StreamedResponse, WSResponseHeaders}
 import reactivemongo.bson.BSONDateTime
 import repositories.{EnvelopeId, EnvelopeIdRepo}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
+import uk.gov.hmrc.voapropertylinking.connectors.mdtp._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

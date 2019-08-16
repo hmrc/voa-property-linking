@@ -18,13 +18,11 @@ package controllers
 
 import java.time.{Instant, LocalDate}
 
-import auditing.AuditingService
+import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import basespecs.BaseControllerSpec
 import binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import cats.data._
 import cats.implicits._
-import connectors._
-import connectors.authorisationsearch.PropertyLinkingConnector
 import models._
 import models.mdtp.propertylink.myclients.PropertyLinksWithClients
 import models.mdtp.propertylink.requests.{APIPropertyLinkRequest, PropertyLinkRequest}
@@ -36,29 +34,34 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services.{AssessmentService, PropertyLinkingService}
 import uk.gov.hmrc.http.{HttpResponse, Upstream5xxResponse}
+import uk.gov.hmrc.voapropertylinking.connectors.mdtp.BusinessRatesAuthConnector
+import uk.gov.hmrc.voapropertylinking.connectors.modernised.{AuthorisationManagementApi, CustomerManagementApi}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class PropertyLinkingControllerSpec extends BaseControllerSpec {
 
-  val mockAddressConnector = mock[AddressConnector]
-
-  lazy val mockPropertyLinkConnector = mock[PropertyLinkingConnector]
-
   lazy val mockPropertyLinkService = mock[PropertyLinkingService]
 
-  lazy val mockPropertyLinkingConnector = mock[PropertyLinkingConnector]
+  lazy val mockGroupAccountConnector = mock[CustomerManagementApi]
 
-  lazy val mockGroupAccountConnector = mock[GroupAccountConnector]
-
-  lazy val mockPropertyRepresentationConnector = mock[PropertyRepresentationConnector]
+  lazy val mockPropertyRepresentationConnector = mock[AuthorisationManagementApi]
 
   lazy val mockAssessmentService = mock[AssessmentService]
 
   lazy val mockBrAuth = mock[BusinessRatesAuthConnector]
 
-  lazy val testController = new PropertyLinkingController(preAuthenticatedActionBuilders(), mockPropertyLinkingConnector,  mockPropertyLinkService, mockAssessmentService, mockGroupAccountConnector, mock[AuditingService], mockPropertyRepresentationConnector, true)
+  lazy val testController = new PropertyLinkingController(
+    authenticated = preAuthenticatedActionBuilders(),
+    authorisationSearchApi = mockAuthorisationSearchApi,
+    mdtpDashboardManagementApi = mockMdtpDashboardManagementApi,
+    propertyLinkService = mockPropertyLinkService,
+    assessmentService = mockAssessmentService,
+    customerManagementApi = mockGroupAccountConnector,
+    auditingService = mock[AuditingService],
+    authorisationManagementApi = mockPropertyRepresentationConnector,
+    agentQueryParameterEnabledExteranl = true)
 
   val date = LocalDate.parse("2018-09-05")
 

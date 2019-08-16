@@ -16,29 +16,28 @@
 
 package controllers
 
-import auditing.AuditingService
-import connectors.authorisationsearch.PropertyLinkingConnector
-import connectors.{GroupAccountConnector, PropertyRepresentationConnector}
+import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import javax.inject.Inject
 import models._
 import play.api.Logger
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent}
-import uk.gov.voa.voapropertylinking.actions.AuthenticatedActionBuilder
+import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
+import uk.gov.hmrc.voapropertylinking.connectors.modernised.{AuthorisationManagementApi, AuthorisationSearchApi, CustomerManagementApi}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class PropertyRepresentationController @Inject() (
                                                    authenticated: AuthenticatedActionBuilder,
-                                                   representations: PropertyRepresentationConnector,
-                                                   propertyLinksConnector: PropertyLinkingConnector,
-                                                   groupAccountsConnector: GroupAccountConnector,
+                                                   authorisationManagementApi: AuthorisationManagementApi,
+                                                   authorisationSearchApi: AuthorisationSearchApi,
+                                                   customerManagementApi: CustomerManagementApi,
                                                    auditingService: AuditingService
                                                  )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController {
 
   def create(): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
     withJsonBody[RepresentationRequest] { reprRequest =>
-      representations
+      authorisationManagementApi
         .create(APIRepresentationRequest.fromRepresentationRequest(reprRequest))
         .map{ _ =>
           Ok("")
@@ -50,7 +49,7 @@ class PropertyRepresentationController @Inject() (
                          agentCode:Long,
                          authorisationId: Long
                        ): Action[AnyContent] = authenticated.async { implicit request =>
-    representations
+    authorisationManagementApi
       .validateAgentCode(agentCode, authorisationId)
       .map { errorOrOrganisationId =>
         errorOrOrganisationId.fold(orgId => Ok(Json.obj("organisationId" -> orgId)), errorString => Ok(Json.obj("failureCode" -> errorString)))
@@ -62,7 +61,7 @@ class PropertyRepresentationController @Inject() (
                 organisationId: Long,
                 pagination: PaginationParams
               ): Action[AnyContent] = authenticated.async { implicit request =>
-    representations
+    authorisationSearchApi
       .forAgent(status, organisationId, pagination)
       .map { propertyRepresentation =>
         Ok(Json.toJson(propertyRepresentation))
@@ -71,7 +70,7 @@ class PropertyRepresentationController @Inject() (
 
   def response(): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
     withJsonBody[APIRepresentationResponse] { representationResponse =>
-      representations
+      authorisationManagementApi
         .response(representationResponse)
         .map { _ =>
           auditingService.sendEvent("agent representation response", representationResponse)
@@ -81,7 +80,7 @@ class PropertyRepresentationController @Inject() (
   }
 
    def revoke(authorisedPartyId: Long): Action[JsValue] =  authenticated.async(parse.json) { implicit request =>
-     representations
+     authorisationManagementApi
        .revoke(authorisedPartyId)
        .map { _ =>
          Ok("")
@@ -99,11 +98,11 @@ class PropertyRepresentationController @Inject() (
                           address: Option[String],
                           agent: Option[String]
                         ): Action[AnyContent] = authenticated.async { implicit request =>
-    groupAccountsConnector
+    customerManagementApi
       .withAgentCode(agentCode.toString)
       .flatMap {
         case Some(agentGroup) =>
-          propertyLinksConnector.appointableToAgent(
+          authorisationSearchApi.appointableToAgent(
             ownerId = ownerId,
             agentId = agentGroup.id,
             checkPermission = checkPermission,

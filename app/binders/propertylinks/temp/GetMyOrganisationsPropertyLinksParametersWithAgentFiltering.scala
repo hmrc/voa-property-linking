@@ -19,8 +19,8 @@ package binders.propertylinks.temp
 import binders.validation.ValidationUtils
 import binders.{Params, ValidationResult}
 import play.api.mvc.QueryStringBindable
-import utils.Cats
-import utils.QueryParamUtils.toQueryString
+import uk.gov.hmrc.voapropertylinking.utils.Cats
+import uk.gov.hmrc.voapropertylinking.utils.QueryParamUtils.toQueryString
 
 case class GetMyOrganisationsPropertyLinksParametersWithAgentFiltering(
                                                                         address: Option[String] = None,

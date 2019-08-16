@@ -16,8 +16,6 @@
 
 package controllers
 
-import connectors.externalvaluation.ExternalValuationManagementApi
-import connectors.{CCACaseManagementApi, DVRCaseManagementConnector}
 import javax.inject.Inject
 import models.voa.valuation.dvr.DetailedValuationRequest
 import play.api.Logger
@@ -25,27 +23,17 @@ import play.api.http.HttpEntity.Streamed
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ResponseHeader, Result}
 import repositories.DVRRecordRepository
-import uk.gov.voa.voapropertylinking.actions.AuthenticatedActionBuilder
+import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
+import uk.gov.hmrc.voapropertylinking.connectors.modernised.{CCACaseManagementApi, ExternalValuationManagementApi}
 
 import scala.concurrent.ExecutionContext
 
 class DVRCaseManagement @Inject()(
                                    authenticated: AuthenticatedActionBuilder,
-                                   dvrCaseManagement: DVRCaseManagementConnector,
                                    dvrCaseManagementV2: CCACaseManagementApi,
                                    externalValuationManagementApi: ExternalValuationManagementApi,
                                    dvrRecordRepository: DVRRecordRepository
                                  )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController {
-
-  def requestDetailedValuation: Action[JsValue] = authenticated.async(parse.json) { implicit request =>
-    withJsonBody[DetailedValuationRequest] { dvrRequest =>
-      Logger.info(s"detailed valuation request submitted: ${dvrRequest.submissionId}")
-      for {
-        _ <- dvrRecordRepository.create(dvrRequest)
-        _ <- dvrCaseManagement.requestDetailedValuation(dvrRequest)
-      } yield Ok
-    }
-  }
 
   def requestDetailedValuationV2: Action[JsValue] = authenticated.async(parse.json) { implicit request =>
     withJsonBody[DetailedValuationRequest] { dvrRequest =>

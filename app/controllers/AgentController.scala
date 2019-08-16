@@ -16,21 +16,21 @@
 
 package controllers
 
-import connectors.AgentConnector
 import javax.inject.Inject
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent}
-import uk.gov.voa.voapropertylinking.actions.AuthenticatedActionBuilder
+import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
+import uk.gov.hmrc.voapropertylinking.connectors.modernised.AuthorisationSearchApi
 
 import scala.concurrent.ExecutionContext
 
 class AgentController @Inject()(
                                  authenticated: AuthenticatedActionBuilder,
-                                 agentConnector: AgentConnector
+                                 authorisationSearchApi: AuthorisationSearchApi
                                )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController  {
 
   def manageAgents(organisationId: Long): Action[AnyContent] = authenticated.async { implicit request =>
-    agentConnector
+    authorisationSearchApi
       .manageAgents(organisationId)
       .map { agents =>
         Ok(Json.toJson(agents))

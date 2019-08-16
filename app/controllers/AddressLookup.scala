@@ -16,19 +16,19 @@
 
 package controllers
 
-import connectors.AddressConnector
 import javax.inject.Inject
 import models.SimpleAddress
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent}
-import uk.gov.voa.voapropertylinking.actions.AuthenticatedActionBuilder
-import utils.PostcodeValidator
+import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
+import uk.gov.hmrc.voapropertylinking.connectors.modernised.AddressManagementApi
+import uk.gov.hmrc.voapropertylinking.utils.PostcodeValidator
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class AddressLookup @Inject()(
                                authenticated: AuthenticatedActionBuilder,
-                               addresses: AddressConnector
+                               addresses: AddressManagementApi
                              )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController {
 
   def find(postcode: String): Action[AnyContent] = authenticated.async { implicit request =>

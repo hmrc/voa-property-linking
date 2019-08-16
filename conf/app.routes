@@ -40,7 +40,6 @@ POST         /address                                                           
 
 GET          /submissionId/:prefix                                                            @controllers.SubmissionIdController.get(prefix: String)
 
-POST         /request-detailed-valuation                                                      @controllers.DVRCaseManagement.requestDetailedValuation
 POST         /detailed-valuation                                                              @controllers.DVRCaseManagement.requestDetailedValuationV2
 GET          /properties/:uarn/valuation/:valuationId/files                                   @controllers.DVRCaseManagement.getDvrDocuments(valuationId: Long, uarn: Long, propertyLinkId: String)
 GET          /properties/:uarn/valuation/:valuationId/files/:ref                              @controllers.DVRCaseManagement.getDvrDocument(valuationId: Long, uarn: Long, propertyLinkId: String, ref: String)

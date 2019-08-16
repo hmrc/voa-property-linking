@@ -17,7 +17,6 @@
 package controllers
 
 import basespecs.BaseControllerSpec
-import connectors.AgentConnector
 import models.searchApi.{Agent, Agents}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{reset, when}
@@ -25,13 +24,14 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, _}
+import uk.gov.hmrc.voapropertylinking.connectors.modernised.AuthorisationSearchApi
 
 import scala.concurrent.Future
 
 class AgentControllerSpec extends BaseControllerSpec {
 
   trait Setup {
-    val mockAgentConnector = mock[AgentConnector]
+    val mockAgentConnector = mock[AuthorisationSearchApi]
 
     val agentController = new AgentController(preAuthenticatedActionBuilders(), mockAgentConnector)
   }

@@ -17,7 +17,7 @@
 package models.modernised
 
 import play.api.libs.json.Format
-import utils.JsonUtils.enumFormat
+import uk.gov.hmrc.voapropertylinking.utils.JsonUtils.enumFormat
 
 object Capacity extends Enumeration {
   type Capacity = Value
