@@ -18,9 +18,6 @@ package services
 
 import binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import cats.data.OptionT
-import connectors.authorisationsearch.PropertyLinkingConnector
-import connectors.externalpropertylink.ExternalPropertyLinkConnector
-import connectors.externalvaluation.ExternalValuationManagementApi
 import javax.inject.Inject
 import models._
 import models.mdtp.propertylink.myclients.PropertyLinksWithClients
@@ -28,15 +25,15 @@ import models.mdtp.propertylink.requests.APIPropertyLinkRequest
 import models.searchApi.OwnerAuthResult
 import models.voa.propertylinking.requests.CreatePropertyLink
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.voa.voapropertylinking.auth.RequestWithPrincipal
-import utils.Cats
+import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
+import uk.gov.hmrc.voapropertylinking.connectors.modernised.{ExternalPropertyLinkApi, ExternalValuationManagementApi}
+import uk.gov.hmrc.voapropertylinking.utils.Cats
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class PropertyLinkingService @Inject()(
-                                        val propertyLinksConnector: ExternalPropertyLinkConnector,
-                                        val externalValuationManagementApi: ExternalValuationManagementApi,
-                                        val legacyPropertyLinksConnector: PropertyLinkingConnector
+                                        val propertyLinksConnector: ExternalPropertyLinkApi,
+                                        val externalValuationManagementApi: ExternalValuationManagementApi
                                       ) (implicit executionContext: ExecutionContext) extends Cats {
 
 

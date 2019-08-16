@@ -16,11 +16,9 @@
 
 package controllers
 
-import auditing.AuditingService
+import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import binders.propertylinks.temp.GetMyOrganisationsPropertyLinksParametersWithAgentFiltering
 import binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
-import connectors.authorisationsearch.PropertyLinkingConnector
-import connectors.{GroupAccountConnector, PropertyRepresentationConnector}
 import javax.inject.{Inject, Named}
 import models._
 import models.mdtp.propertylink.requests.{APIPropertyLinkRequest, PropertyLinkRequest}
@@ -30,8 +28,9 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent}
 import services.{AssessmentService, PropertyLinkingService}
 import uk.gov.hmrc.http.{HeaderCarrier, Upstream5xxResponse}
-import uk.gov.voa.voapropertylinking.actions.AuthenticatedActionBuilder
-import utils.Cats
+import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
+import uk.gov.hmrc.voapropertylinking.connectors.modernised.{AuthorisationManagementApi, AuthorisationSearchApi, CustomerManagementApi, MdtpDashboardManagementApi}
+import uk.gov.hmrc.voapropertylinking.utils.Cats
 
 import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future}
@@ -44,12 +43,13 @@ case class Memoize[K, V]() {
 
 class PropertyLinkingController @Inject()(
                                            authenticated: AuthenticatedActionBuilder,
-                                           propertyLinkConnector: PropertyLinkingConnector,
+                                           authorisationSearchApi: AuthorisationSearchApi,
+                                           mdtpDashboardManagementApi: MdtpDashboardManagementApi,
                                            propertyLinkService: PropertyLinkingService,
                                            assessmentService: AssessmentService,
-                                           groupAccountsConnector: GroupAccountConnector,
+                                           customerManagementApi: CustomerManagementApi,
                                            auditingService: AuditingService,
-                                           representationsConnector: PropertyRepresentationConnector,
+                                           authorisationManagementApi: AuthorisationManagementApi,
                                            @Named("agentQueryParameterEnabledExteranl") agentQueryParameterEnabledExteranl: Boolean
                                          )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController with Cats {
 
@@ -88,7 +88,7 @@ class PropertyLinkingController @Inject()(
 
       organisationId.fold(Future.successful(BadRequest("organisationId is required for this query.")))(
         id =>
-          propertyLinkConnector.searchAndSort(
+          authorisationSearchApi.searchAndSort(
             id,
             paginationParams.getOrElse(DefaultPaginationParams),
             searchParams.sortField,
@@ -130,7 +130,7 @@ class PropertyLinkingController @Inject()(
 
     searchParams.agentAppointed.getOrElse("BOTH") match {
       case "NO" =>
-        propertyLinkConnector.searchAndSort(
+        authorisationSearchApi.searchAndSort(
           searchParams.organisationId,
           paginationParams.getOrElse(DefaultPaginationParams),
           searchParams.sortField,
@@ -144,7 +144,7 @@ class PropertyLinkingController @Inject()(
           Ok(Json.toJson(response))
         }
       case _    =>
-        propertyLinkConnector.appointableToAgent(
+        authorisationSearchApi.appointableToAgent(
           searchParams.organisationId,
           searchParams.agentOrganisationId,
           searchParams.checkPermission,
@@ -185,7 +185,7 @@ class PropertyLinkingController @Inject()(
   }
 
   def clientProperty(authorisationId: Long, clientOrgId: Long, agentOrgId: Long): Action[AnyContent] = authenticated.async { implicit request =>
-    propertyLinkConnector
+    mdtpDashboardManagementApi
       .get(authorisationId)
       .flatMap {
         case Some(authorisation) if authorisedFor(authorisation, clientOrgId, agentOrgId) => toClientProperty(authorisation) map { p => Ok(Json.toJson(p)) }
@@ -198,7 +198,7 @@ class PropertyLinkingController @Inject()(
   }
 
   private def toClientProperty(authorisation: LegacyPropertiesView)(implicit hc: HeaderCarrier): Future[ClientProperty] = {
-    groupAccountsConnector.get(authorisation.authorisationOwnerOrganisationId) map { acc =>
+    customerManagementApi.getDetailedGroupAccount(authorisation.authorisationOwnerOrganisationId) map { acc =>
       ClientProperty.build(authorisation, acc)
     }
   }

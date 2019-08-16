@@ -18,16 +18,19 @@ package basespecs
 
 import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatestplus.mockito.MockitoSugar
 import play.api.test.FakeRequest
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
-import uk.gov.voa.voapropertylinking.auth.{Principal, RequestWithPrincipal}
-import utils.Cats
+import uk.gov.hmrc.voapropertylinking.auth.{Principal, RequestWithPrincipal}
+import uk.gov.hmrc.test.AllMocks
+import uk.gov.hmrc.voapropertylinking.utils.Cats
+
+import scala.concurrent.ExecutionContext
 
 abstract class BaseUnitSpec extends UnitSpec
-  with MockitoSugar
   with BeforeAndAfterEach
   with BeforeAndAfterAll
+  with AllMocks
   with Matchers
   with Inspectors
   with Inside
@@ -37,6 +40,8 @@ abstract class BaseUnitSpec extends UnitSpec
   with OptionValues
   with Cats {
 
+  implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
+  implicit val hc: HeaderCarrier = HeaderCarrier()
   implicit val requestWithPrincipal = RequestWithPrincipal(FakeRequest(), Principal("external-id", "group-id"))
 
 }

@@ -16,7 +16,7 @@
 
 package models.modernised
 
-import utils.JsonUtils.enumFormat
+import uk.gov.hmrc.voapropertylinking.utils.JsonUtils.enumFormat
 
 object PropertyLinkStatus extends Enumeration {
   type PropertyLinkStatus = Value

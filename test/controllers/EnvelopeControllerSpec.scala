@@ -19,7 +19,6 @@ package controllers
 import java.util.UUID
 
 import basespecs.BaseControllerSpec
-import connectors.fileUpload.{EnvelopeMetadata, FileUploadConnector}
 import models.EnvelopeStatus
 import org.mockito.ArgumentMatchers.{eq => matching, _}
 import org.mockito.Mockito._
@@ -30,6 +29,7 @@ import repositories.EnvelopeIdRepo
 import uk.gov.hmrc.circuitbreaker.UnhealthyServiceException
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.voapropertylinking.connectors.mdtp.{EnvelopeMetadata, FileUploadConnector}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

@@ -16,19 +16,17 @@
 
 package services
 
-import javax.inject.Inject
-
 import akka.stream.scaladsl.Source
 import com.google.inject.Singleton
 import com.kenshoo.play.metrics.Metrics
-import connectors.EvidenceConnector
-import connectors.fileUpload.{EnvelopeInfo, EnvelopeMetadata, FileInfo, FileUploadConnector}
+import javax.inject.Inject
 import metrics.MetricsLogger
 import models.{Closed, Open}
 import play.api.Logger
 import repositories.EnvelopeIdRepo
 import uk.gov.hmrc.circuitbreaker.UnhealthyServiceException
 import uk.gov.hmrc.http.{HeaderCarrier, Upstream4xxResponse}
+import uk.gov.hmrc.voapropertylinking.connectors.mdtp._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}

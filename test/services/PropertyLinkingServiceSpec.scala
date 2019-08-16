@@ -20,47 +20,36 @@ import java.time._
 
 import basespecs.BaseUnitSpec
 import binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
-import connectors.authorisationsearch.PropertyLinkingConnector
-import connectors.externalpropertylink.ExternalPropertyLinkConnector
-import connectors.externalvaluation.ExternalValuationManagementApi
 import models._
 import models.mdtp.propertylink.myclients.{PropertyLinkWithClient, PropertyLinksWithClients}
 import models.mdtp.propertylink.requests.APIPropertyLinkRequest
-import models.modernised.externalpropertylink.myorganisations.{AgentDetails, OwnerPropertyLink, PropertyLinkWithAgents, PropertyLinksWithAgents}
 import models.modernised._
 import models.modernised.externalpropertylink.myclients.{ClientDetails, ClientPropertyLink, PropertyLinksWithClient, PropertyLinkWithClient => ModernisedPropertyLinkWithClient}
-import models.searchApi.{AgentAuthResult, AgentAuthorisation, OwnerAuthResult, OwnerAuthorisation}
+import models.modernised.externalpropertylink.myorganisations.{AgentDetails, OwnerPropertyLink, PropertyLinkWithAgents, PropertyLinksWithAgents}
+import models.searchApi.{OwnerAuthResult, OwnerAuthorisation}
 import models.voa.propertylinking.requests.CreatePropertyLink
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito
 import org.mockito.Mockito._
-import org.scalatest.BeforeAndAfterEach
-import play.api.test.FakeRequest
-import org.scalatestplus.mockito.MockitoSugar
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import utils.Cats
-import org.scalatest.concurrent.{Futures, ScalaFutures}
-import uk.gov.voa.voapropertylinking.auth.RequestWithPrincipal
+import uk.gov.hmrc.voapropertylinking.connectors.modernised.{ExternalPropertyLinkApi, ExternalValuationManagementApi}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 class PropertyLinkingServiceSpec extends BaseUnitSpec {
 
-  val mockPropertyLinkingConnector = mock[ExternalPropertyLinkConnector]
+  val mockPropertyLinkingConnector = mock[ExternalPropertyLinkApi]
   val mockExternalValuationManagementApi = mock[ExternalValuationManagementApi]
-  val mockLegacyPropertyLinkingConnector = mock[PropertyLinkingConnector]
   val mockHttpResponse: HttpResponse = mock[HttpResponse]
   val httpResponse = HttpResponse(200)
   implicit val fakeHc = HeaderCarrier()
-  implicit val ec: ExecutionContext = play.api.libs.concurrent.Execution.Implicits.defaultContext
 
   val date = LocalDate.parse("2018-09-05")
   val instant = date.atStartOfDay().toInstant(ZoneOffset.UTC)
   val service = new PropertyLinkingService(
     propertyLinksConnector = mockPropertyLinkingConnector,
-    mockExternalValuationManagementApi,
-    mockLegacyPropertyLinkingConnector)
+    mockExternalValuationManagementApi
+  )
 
   val validPropertiesView = PropertiesView(
     authorisationId = 11111,

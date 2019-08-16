@@ -16,24 +16,24 @@
 
 package controllers
 
-import connectors.CheckCaseConnector
 import javax.inject.Inject
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent}
-import uk.gov.voa.voapropertylinking.actions.AuthenticatedActionBuilder
+import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
+import uk.gov.hmrc.voapropertylinking.connectors.modernised.ExternalCaseManagementApi
 
 import scala.concurrent.ExecutionContext
 
 class ChallengeController @Inject()(
                                      authenticated: AuthenticatedActionBuilder,
-                                     checkCaseConnector: CheckCaseConnector
+                                     externalCaseManagementApi: ExternalCaseManagementApi
                                    )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController {
 
   def canChallenge(propertyLinkSubmissionId: String,
                           checkCaseRef: String,
                           valuationId: Long,
                           party: String): Action[AnyContent] = authenticated.async { implicit request =>
-    checkCaseConnector
+    externalCaseManagementApi
       .canChallenge(propertyLinkSubmissionId, checkCaseRef, valuationId, party)
       .map {
         case Some(resp) => Ok(Json.toJson(resp))

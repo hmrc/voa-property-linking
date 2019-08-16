@@ -21,19 +21,18 @@ import java.util.UUID.randomUUID
 
 import com.codahale.metrics.MetricRegistry
 import com.kenshoo.play.metrics.Metrics
-import connectors.{AddressConnector, GroupAccountConnector, IndividualAccountConnector}
-import infrastructure.VOABackendWSHttp
 import org.mockito.ArgumentMatchers.{eq => matches}
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.{FlatSpec, MustMatchers}
 import org.scalatestplus.mockito.MockitoSugar
-//import org.scalatest.mockito.MockitoSugar
-import org.scalatest.{FlatSpec, MustMatchers, Outcome}
 import play.api.Configuration
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.test.WithFakeApplication
+import uk.gov.hmrc.voapropertylinking.connectors.modernised.{AddressManagementApi, CustomerManagementApi}
 
 import scala.concurrent.Await
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -77,12 +76,11 @@ object TestCreateAccountService extends MockitoSugar {
 
   val configuration = mock[Configuration]
 
-  val http = new VOABackendWSHttp(new DisabledMetrics(), configuration)
+  val http = mock[DefaultHttpClient]
   val config = mock[ServicesConfig]
   when(config.baseUrl(matches("external-business-rates-data-platform"))).thenReturn(dpStubUrl)
-  val addresses = new AddressConnector(http, config)
-  val individuals = new IndividualAccountConnector(addresses, http, config)
-  val groups = new GroupAccountConnector(http, config)
+  val addresses = new AddressManagementApi(http, config)
+  val groups = new CustomerManagementApi(http, config)
 
   def createUser(
     username:String, password:String, groupId:String, credential:String,

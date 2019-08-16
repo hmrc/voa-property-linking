@@ -24,13 +24,14 @@ import play.api.test.{DefaultAwaitTimeout, FakeRequest, FutureAwaits}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.ws.WSHttp
-import uk.gov.voa.voapropertylinking.actions.AuthenticatedActionBuilder
-import uk.gov.voa.voapropertylinking.auth.{Principal, RequestWithPrincipal}
+import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
+import uk.gov.hmrc.voapropertylinking.auth.{Principal, RequestWithPrincipal}
+import uk.gov.hmrc.test.AllMocks
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-abstract class BaseControllerSpec extends WordSpec with FutureAwaits with DefaultAwaitTimeout with BeforeAndAfterEach with MustMatchers with MockitoSugar {
+abstract class BaseControllerSpec extends WordSpec with FutureAwaits with DefaultAwaitTimeout with BeforeAndAfterEach with MustMatchers with MockitoSugar with AllMocks {
 
   implicit val request = FakeRequest()
 

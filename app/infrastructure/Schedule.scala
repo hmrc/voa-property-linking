@@ -23,6 +23,7 @@ import play.api.Configuration
 
 import scala.concurrent.duration.FiniteDuration
 
+//TODO remove with file upload components
 trait Schedule {
   def timeUntilNextRun(): FiniteDuration
 }

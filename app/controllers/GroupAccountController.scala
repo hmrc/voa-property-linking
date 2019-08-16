@@ -16,20 +16,22 @@
 
 package controllers
 
-import auditing.AuditingService
-import connectors.{BusinessRatesAuthConnector, GroupAccountConnector}
+import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import javax.inject.Inject
 import models.{GroupAccountSubmission, GroupId, UpdatedOrganisationAccount}
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent}
-import uk.gov.voa.voapropertylinking.actions.AuthenticatedActionBuilder
+import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
+import uk.gov.hmrc.voapropertylinking.connectors.mdtp.BusinessRatesAuthConnector
+import uk.gov.hmrc.voapropertylinking.connectors.modernised.CustomerManagementApi
 
 import scala.concurrent.ExecutionContext
 
 class GroupAccountController @Inject() (
                                          authenticated: AuthenticatedActionBuilder,
                                          auditingService: AuditingService,
-                                         groups: GroupAccountConnector, brAuth: BusinessRatesAuthConnector
+                                         customerManagementApi: CustomerManagementApi,
+                                         brAuth: BusinessRatesAuthConnector
                                        )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController {
 
   case class GroupAccount(groupId: GroupId, submission: GroupAccountSubmission)
@@ -39,8 +41,8 @@ class GroupAccountController @Inject() (
   }
 
   def get(organisationId: Long): Action[AnyContent] = authenticated.async { implicit request =>
-    groups
-      .get(organisationId)
+    customerManagementApi
+      .getDetailedGroupAccount(organisationId)
       .map {
         case Some(x)  => Ok(Json.toJson(x))
         case None     => NotFound
@@ -48,8 +50,8 @@ class GroupAccountController @Inject() (
   }
 
   def withGroupId(groupId: String): Action[AnyContent] = authenticated.async { implicit request =>
-    groups
-      .findByGGID(groupId)
+    customerManagementApi
+      .findDetailedGroupAccountByGGID(groupId)
       .map {
         case Some(x)  => Ok(Json.toJson(x))
         case None     => NotFound
@@ -57,7 +59,7 @@ class GroupAccountController @Inject() (
   }
 
   def withAgentCode(agentCode: String): Action[AnyContent] = authenticated.async { implicit request =>
-    groups
+    customerManagementApi
       .withAgentCode(agentCode)
       .map {
         case Some(a)  => Ok(Json.toJson(a))
@@ -67,8 +69,8 @@ class GroupAccountController @Inject() (
 
   def create(): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
     withJsonBody[GroupAccountSubmission] { acc =>
-      groups
-        .create(acc)
+      customerManagementApi
+        .createGroupAccount(acc)
         .map { groupId =>
           auditingService.sendEvent("Created", GroupAccount(groupId, acc))
           Created(Json.toJson(groupId))
@@ -79,7 +81,7 @@ class GroupAccountController @Inject() (
   def update(orgId: Long): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
     withJsonBody[UpdatedOrganisationAccount] { acc =>
       for {
-        _ <- groups.update(orgId, acc)
+        _ <- customerManagementApi.updateGroupAccount(orgId, acc)
         _ <- brAuth.clearCache()
       } yield Ok
     }

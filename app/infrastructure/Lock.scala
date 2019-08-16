@@ -23,6 +23,7 @@ import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.DB
 import uk.gov.hmrc.lock.{ExclusiveTimePeriodLock, LockMongoRepository, LockRepository}
 
+//TODO remove with file upload components
 @Singleton
 class Lock @Inject()(
                       @Named("lockName") val name: String,

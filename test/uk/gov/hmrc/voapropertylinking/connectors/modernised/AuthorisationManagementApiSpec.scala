@@ -1,0 +1,153 @@
+/*
+ * Copyright 2019 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package uk.gov.hmrc.voapropertylinking.connectors.modernised
+
+import java.time.{LocalDate, ZoneOffset}
+
+import basespecs.BaseUnitSpec
+import models._
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.when
+import play.api.libs.json.{JsValue, Json}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
+import uk.gov.hmrc.play.config.ServicesConfig
+
+import scala.concurrent.Future
+
+class AuthorisationManagementApiSpec extends BaseUnitSpec {
+
+  val http: DefaultHttpClient = mock[DefaultHttpClient]
+  val connector: AuthorisationManagementApi = new AuthorisationManagementApi(http, mock[ServicesConfig]) {
+    override lazy val baseUrl: String = "http://some-url"
+  }
+
+  "AuthorisationManagementApi.validateAgentCode" should {
+    "return the organisation id for a valid agentCode" in {
+      val agentCode = 123
+      val authId = 987
+
+      when(http.GET[JsValue](any())(any(), any(), any())).thenReturn(Future.successful(Json.parse(validAgentCodeResponse)))
+
+      inside(await(connector.validateAgentCode(agentCode, authId)(hc))) {
+        case Left(v) => v shouldBe 1234567
+      }
+    }
+  }
+
+  "AuthorisationManagementApi.validateAgentCode" should {
+    "return the invalid code for a valid agentCode" in {
+
+      val agentCode = 123
+      val authId = 987
+
+      when(http.GET[JsValue](any())(any(), any(), any())).thenReturn(Future.successful(Json.parse(noAgentFlagResponse)))
+
+      inside(await(connector.validateAgentCode(agentCode, authId)(hc))) {
+        case Right(v) => v shouldBe "INVALID_CODE"
+      }
+    }
+  }
+
+  "AuthorisationManagementApi.validateAgentCode" should {
+    "return the invalid code which is not a no Agent Flag code" in {
+
+      val agentCode = 123
+      val authId = 987
+
+      when(http.GET[JsValue](any())(any(), any(), any())).thenReturn(Future.successful(Json.parse(invalidAgentCodeResponse)))
+
+      inside(await(connector.validateAgentCode(agentCode, authId)(hc))){
+        case Right(v) => v shouldBe "OTHER_ERROR"
+      }
+    }
+  }
+
+  "AuthorisationManagementApi.create" should {
+    "return a created property representation" in {
+
+      val createRequest = APIRepresentationRequest(
+        authorisationId = 123456,
+        submissionId = "abc123",
+        authorisationOwnerPersonId = 98765,
+        authorisedPartyOrganisationId = 24680,
+        checkPermission = "ok",
+        challengePermission = "notOk",
+        createDatetime = instant
+      )
+
+      when(http.POST[APIRepresentationRequest, HttpResponse](any(), any(), any())(any(), any(), any(), any()))
+        .thenReturn(Future.successful(HttpResponse(200)))
+
+      val result: Unit = await(connector.create(createRequest)(hc))
+      result shouldBe ()
+    }
+  }
+
+  "AuthorisationManagementApi.response" should {
+    "return a unit after putting a property representation response" in {
+      val response = APIRepresentationResponse(
+        submissionId = "abc123",
+        authorisedPartyPersonId = 24680,
+        outcome = "ok"
+      )
+
+      when(http.PUT[APIRepresentationResponse, HttpResponse](any(), any())(any(), any(), any(), any()))
+        .thenReturn(Future.successful(HttpResponse(200)))
+
+      val result: Unit = await(connector.response(response)(hc))
+      result shouldBe ()
+    }
+  }
+
+  "AuthorisationManagementApi.revoke" should {
+    "return a unit after revoking property representation response" in {
+
+      val authorisedPartyId =  34567890
+
+      when(http.PATCH[JsValue, HttpResponse](any(), any())(any(), any(), any(), any()))
+        .thenReturn(Future.successful(HttpResponse(200)))
+
+      val result: Unit = await(connector.revoke(authorisedPartyId)(hc))
+      result shouldBe ()
+    }
+  }
+
+  private lazy val validAgentCodeResponse =
+    """{
+      |  "isValid": true,
+      |  "organisationId": 1234567,
+      |  "failureCode": "NO_AGENT_FLAG"
+      |}""".stripMargin
+
+  private lazy val noAgentFlagResponse =
+    """{
+      |  "isValid": false,
+      |  "organisationId": 1234567,
+      |  "failureCode": "NO_AGENT_FLAG"
+      |}""".stripMargin
+
+  private lazy val invalidAgentCodeResponse =
+    """{
+      |  "isValid": false,
+      |  "organisationId": 1234567,
+      |  "failureCode": "OTHER_ERROR"
+      |}""".stripMargin
+
+    private val date = LocalDate.parse("2018-09-04")
+    private val instant = date.atStartOfDay().toInstant(ZoneOffset.UTC)
+}

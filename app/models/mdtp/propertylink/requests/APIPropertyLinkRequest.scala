@@ -20,7 +20,6 @@ import java.time.{Instant, LocalDate}
 
 import models.FileInfo
 import play.api.libs.json.{Json, OFormat, Reads}
-import utils.Formatters._
 
 case class APIPropertyLinkRequest(
                                    uarn: Long,
