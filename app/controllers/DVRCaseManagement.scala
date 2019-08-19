@@ -35,6 +35,8 @@ class DVRCaseManagement @Inject()(
                                    dvrRecordRepository: DVRRecordRepository
                                  )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController {
 
+  val logger = Logger(this.getClass.getName)
+
   def requestDetailedValuationV2: Action[JsValue] = authenticated.async(parse.json) { implicit request =>
     withJsonBody[DetailedValuationRequest] { dvrRequest =>
       Logger.info(s"detailed valuation request submitted: ${dvrRequest.submissionId}")
@@ -53,7 +55,9 @@ class DVRCaseManagement @Inject()(
     externalValuationManagementApi
       .getDvrDocuments(valuationId, uarn, propertyLinkId)
       .map{
-        case Some(response) => Ok(Json.toJson(response))
+        case Some(response) =>
+          logger.debug(s"dvr documents response: ${Json.prettyPrint(Json.toJson(response))}")
+          Ok(Json.toJson(response))
         case None           => NotFound
       }
   }
