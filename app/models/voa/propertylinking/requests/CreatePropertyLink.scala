@@ -51,6 +51,6 @@ object CreatePropertyLink {
       method = ProvidedEvidence.withName(request.authorisationMethod),
       PLsubmissionId = request.submissionId,
       createDatetime = LocalDateTime.now(),
-      uploadedFiles = request.uploadedFiles.map(e => Evidence(formatFileName(request.submissionId, e.name), EvidenceType.withName(e.evidenceType))),
+      uploadedFiles = request.uploadedFiles.map(e => Evidence(e.name, EvidenceType.withName(e.evidenceType))),
       submissionSource = "DFE_UI")
 }

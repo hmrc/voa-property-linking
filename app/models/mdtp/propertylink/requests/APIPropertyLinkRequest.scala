@@ -38,15 +38,13 @@ object APIPropertyLinkRequest {
   implicit val format: OFormat[APIPropertyLinkRequest] = Json.format[APIPropertyLinkRequest]
 
   def fromPropertyLinkRequest(propertyLinkRequest: PropertyLinkRequest) = {
-    val cleanFileInfo: Seq[FileInfo] = propertyLinkRequest.fileInfo.map(file => FileInfo(file.name, file.evidenceType))
-
     APIPropertyLinkRequest(
       uarn = propertyLinkRequest.uarn,
       authorisationOwnerOrganisationId = propertyLinkRequest.organisationId,
       authorisationOwnerPersonId = propertyLinkRequest.individualId,
       createDatetime = propertyLinkRequest.linkedDate,
       authorisationMethod = propertyLinkRequest.linkBasis,
-      uploadedFiles = cleanFileInfo,
+      uploadedFiles = propertyLinkRequest.fileInfo,
       submissionId = propertyLinkRequest.submissionId,
       authorisationOwnerCapacity = propertyLinkRequest.capacityDeclaration.capacity,
       startDate = propertyLinkRequest.capacityDeclaration.fromDate,
