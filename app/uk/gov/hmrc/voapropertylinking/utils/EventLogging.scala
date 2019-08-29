@@ -28,7 +28,7 @@ sealed abstract class LogEvent(val code: String, val description: String) {
 
 trait EventLogging {
 
-  private lazy val logger: Logger = Logger("eventLoggerBRA")
+  private lazy val logger: Logger = Logger("eventLoggerVPL")
 
   protected def logResponse(logEvent: LogEvent, data: (String, Any)*)(implicit principal: Principal): Unit =
     Try {
