@@ -16,15 +16,31 @@
 
 package models.voa.propertylinking.requests
 
+import models.FileInfo
+import models.modernised.{Capacity, Evidence, EvidenceType, ProvidedEvidence}
 import org.scalatest.{FlatSpec, MustMatchers}
 import utils.FakeObjects
 
 class CreatePropertyLinkSpec extends FlatSpec with MustMatchers with FakeObjects{
   "CreatePropertyLink" must "create from ApiPropertyLinkRequest " in {
 
-    val expectedRequest: CreatePropertyLink = testCreatePropertyLink
-    val targetRequest: CreatePropertyLink = testCreatePropertyLinkFromApiPropertyLinkRequest
+    val fileInfo = FileInfo(FILE_NAME, "serviceCharge")
+    val evidence = Evidence(FILE_NAME, EvidenceType.SERVICE_CHARGE)
 
-    targetRequest  must be  (expectedRequest)
+    val apiRequest = apiPropertyLinkRequest.copy(
+      uploadedFiles = Seq(fileInfo),
+      authorisationMethod = "NO_EVIDENCE",
+      authorisationOwnerCapacity = "OCCUPIER"
+    )
+    val expectedRequest: CreatePropertyLink = testCreatePropertyLink.copy(
+      uploadedFiles = Seq(evidence),
+      method = ProvidedEvidence.withName("NO_EVIDENCE"),
+      capacity = Capacity.withName("OCCUPIER"))
+
+    val targetRequest: CreatePropertyLink = CreatePropertyLink(apiRequest)
+
+    targetRequest.uploadedFiles  must be  (expectedRequest.uploadedFiles)
+    targetRequest.method  must be  (expectedRequest.method)
+    targetRequest.capacity  must be  (expectedRequest.capacity)
   }
 }

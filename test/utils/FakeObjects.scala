@@ -45,8 +45,6 @@ trait FakeObjects {
     startDate = date,
     endDate = Some(date))
 
-  val testCreatePropertyLinkFromApiPropertyLinkRequest: CreatePropertyLink = CreatePropertyLink(apiPropertyLinkRequest)
-
   val testCreatePropertyLink: CreatePropertyLink = CreatePropertyLink(
     uarn = 11111,
     capacity = Capacity.withName("OWNER"),
@@ -54,7 +52,7 @@ trait FakeObjects {
     endDate =  Some(date),
     method = ProvidedEvidence.withName("RATES_BILL"),
     PLsubmissionId = "44444",
-    createDatetime = testCreatePropertyLinkFromApiPropertyLinkRequest.createDatetime,
+    createDatetime = LocalDateTime.now(),
     uploadedFiles =  Seq(evidence),
     submissionSource = "DFE_UI")
 }
