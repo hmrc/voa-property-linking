@@ -30,6 +30,7 @@ case class PropertyLinkWithClient(
                                    startDate: LocalDate,
                                    endDate: Option[LocalDate],
                                    submissionId: String,
+                                   capacity: String,
                                    uarn: Long,
                                    address: String,
                                    localAuthorityRef: String,
@@ -39,6 +40,7 @@ case class PropertyLinkWithClient(
                                                                                       startDate: LocalDate,
                                                                                       endDate: Option[LocalDate],
                                                                                       submissionId: String,
+                                                                                      capacity,
                                                                                       uarn: Long,
                                                                                       address: String,
                                                                                       localAuthorityRef: String)

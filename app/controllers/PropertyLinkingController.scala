@@ -174,13 +174,13 @@ class PropertyLinkingController @Inject()(
 
   def getMyOrganisationsAssessmentsWithCapacity(submissionId: String, authorisationId: Long): Action[AnyContent] = authenticated.async { implicit request =>
     assessmentService
-      .getMyOrganisationsAssessmentsWithCapacity(submissionId, authorisationId)
+      .getMyOrganisationsAssessments(submissionId)
       .fold(Ok(Json.toJson(submissionId)))(propertyLinkWithAssessmentsAndCapacity => Ok(Json.toJson(propertyLinkWithAssessmentsAndCapacity)))
   }
 
   def getClientsAssessmentsWithCapacity(submissionId: String, authorisationId: Long): Action[AnyContent] = authenticated.async { implicit request =>
     assessmentService
-      .getClientsAssessmentsWithCapacity(submissionId, authorisationId)
+      .getClientsAssessments(submissionId)
       .fold(Ok(Json.toJson(submissionId)))(propertyLinkWithAssessmentsAndCapacity => Ok(Json.toJson(propertyLinkWithAssessmentsAndCapacity)))
   }
 
