@@ -17,8 +17,7 @@
 package models.searchApi
 
 import models.AgentPermission
-import models.modernised.externalpropertylink.myclients.PropertyLinksWithClient
-import models.modernised.externalpropertylink.myorganisations.PropertyLinkWithAgents
+import models.modernised.externalpropertylink.myorganisations.SummaryPropertyLinkWithAgents
 import play.api.libs.json.Json
 
 case class OwnerAuthorisation(
@@ -37,7 +36,7 @@ case class OwnerAuthorisation(
 object OwnerAuthorisation {
   implicit val ownerAuthorisation = Json.format[OwnerAuthorisation]
 
-  def apply(propertyLink: PropertyLinkWithAgents):OwnerAuthorisation =
+  def apply(propertyLink: SummaryPropertyLinkWithAgents):OwnerAuthorisation =
     OwnerAuthorisation(
       authorisationId = propertyLink.authorisationId,
       status = propertyLink.status.toString,

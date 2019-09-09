@@ -66,5 +66,3 @@ GET          /agent/property-links/:submissionId                                
 GET          /dashboard/agent/assessments/:submissionId                                       @controllers.PropertyLinkingController.getClientsAssessments(submissionId: String)
 GET          /dashboard/agent/assessments/:submissionId/:authorisationId                      @controllers.PropertyLinkingController.getClientsAssessmentsWithCapacity(submissionId: String, authorisationId: Long)
 
-#TODO Remove this once external endpoint is created
-

@@ -16,7 +16,7 @@
 
 package models.mdtp.propertylink.myclients
 
-import models.modernised.externalpropertylink.myclients.{ PropertyLinkWithClient => ModernisedPropertyLinkWithClient}
+import models.modernised.externalpropertylink.myclients.{ SummaryPropertyLinkWithClient => ModernisedSummaryPropertyLinkWithClient}
 import models.searchApi.Client
 import play.api.libs.json.{Json, OFormat}
 
@@ -35,7 +35,7 @@ case class PropertyLinkWithClient(
 object PropertyLinkWithClient {
   implicit val format: OFormat[PropertyLinkWithClient] = Json.format
 
-  def apply(propertyLink: ModernisedPropertyLinkWithClient): PropertyLinkWithClient =
+  def apply(propertyLink: ModernisedSummaryPropertyLinkWithClient): PropertyLinkWithClient =
     PropertyLinkWithClient(
       authorisationId = propertyLink.authorisationId,
       authorisedPartyId = propertyLink.authorisedPartyId,
