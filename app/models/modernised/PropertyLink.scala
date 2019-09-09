@@ -26,6 +26,7 @@ abstract class PropertyLink(
                              startDate: LocalDate,
                              endDate: Option[LocalDate],
                              submissionId: String,
+                             capacity: String,
                              uarn: Long,
                              address: String,
                              localAuthorityRef: String)

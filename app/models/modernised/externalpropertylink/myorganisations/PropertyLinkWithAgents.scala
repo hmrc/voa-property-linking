@@ -28,6 +28,7 @@ case class PropertyLinkWithAgents(
                                    startDate: LocalDate,
                                    endDate: Option[LocalDate],
                                    submissionId: String,
+                                   capacity: String,
                                    uarn: Long,
                                    address: String,
                                    localAuthorityRef: String,
@@ -36,6 +37,7 @@ case class PropertyLinkWithAgents(
                                                                                   startDate: LocalDate,
                                                                                   endDate: Option[LocalDate],
                                                                                   submissionId: String,
+                                                                                  capacity,
                                                                                   uarn: Long,
                                                                                   address: String,
                                                                                   localAuthorityRef: String)
