@@ -24,8 +24,9 @@ import models._
 import models.mdtp.propertylink.myclients.{PropertyLinkWithClient, PropertyLinksWithClients}
 import models.mdtp.propertylink.requests.APIPropertyLinkRequest
 import models.modernised._
-import models.modernised.externalpropertylink.myclients.{ClientDetails, ClientPropertyLink, PropertyLinksWithClient, PropertyLinkWithClient => ModernisedPropertyLinkWithClient}
-import models.modernised.externalpropertylink.myorganisations.{AgentDetails, OwnerPropertyLink, PropertyLinkWithAgents, PropertyLinksWithAgents}
+import models.modernised.externalpropertylink.myclients
+import models.modernised.externalpropertylink.myclients.{ClientDetails, ClientPropertyLink, PropertyLinksWithClient, SummaryPropertyLinkWithClient, PropertyLinkWithClient => ModernisedPropertyLinkWithClient}
+import models.modernised.externalpropertylink.myorganisations._
 import models.searchApi.{OwnerAuthResult, OwnerAuthorisation}
 import models.voa.propertylinking.requests.CreatePropertyLink
 import org.mockito.ArgumentMatchers._
@@ -110,12 +111,33 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
     agents = Some(Nil)
     )
 
-  val  propertyLinkWithAgents = PropertyLinkWithAgents(authorisationId = 11111,
+  val  propertyLinkWithAgents: PropertyLinkWithAgents = PropertyLinkWithAgents(authorisationId = 11111,
     status = PropertyLinkStatus.APPROVED,
     startDate = date,
     endDate = Some(date),
     submissionId = "22222",
     capacity = "OWNER",
+    uarn = 33333,
+    address = "1 HIGH STREET, BRIGHTON",
+    localAuthorityRef = "44444",
+    agents = Seq(
+      AgentDetails(
+        authorisedPartyId = 24680,
+        organisationId = 123456,
+        organisationName = "org name",
+        status = "APPROVED",
+        representationSubmissionId = "",
+        representativeCode =  1111,
+        checkPermission = "START_AND_CONTINUE",
+        challengePermission = "NOT_PERMITTED"))
+  )
+
+  val  summaryPropertyLinkWithAgents: SummaryPropertyLinkWithAgents = SummaryPropertyLinkWithAgents(
+    authorisationId = 11111,
+    status = PropertyLinkStatus.APPROVED,
+    startDate = date,
+    endDate = Some(date),
+    submissionId = "22222",
     uarn = 33333,
     address = "1 HIGH STREET, BRIGHTON",
     localAuthorityRef = "44444",
@@ -140,6 +162,19 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
     endDate = Some(date),
     submissionId = "22222",
     capacity = "OWNER",
+    uarn = 33333,
+    address = "1 HIGH STREET, BRIGHTON",
+    localAuthorityRef = "44444",
+    client = ClientDetails(55555, "mock org"),
+    representationStatus = "APPROVED")
+
+  val summaryPropertyLinkClient = SummaryPropertyLinkWithClient(
+    authorisationId = 11111,
+    authorisedPartyId = 11111,
+    status = PropertyLinkStatus.APPROVED,
+    startDate = date,
+    endDate = Some(date),
+    submissionId = "22222",
     uarn = 33333,
     address = "1 HIGH STREET, BRIGHTON",
     localAuthorityRef = "44444",
@@ -172,13 +207,14 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
     billingAuthorityCode = None)))
 
   val agentAuthorisation = propertyLinkClient
-  val ownerAuthResultClient = PropertyLinksWithClients(1, 1, 1, 1, Seq(PropertyLinkWithClient.apply(agentAuthorisation)))
+  val agentSummaryAuthorisation = propertyLinkClient
+  val ownerAuthResultClient = PropertyLinksWithClients(1, 1, 1, 1, Seq(PropertyLinkWithClient.apply(summaryPropertyLinkClient)))
 
-  val ownerAuthorisationAgent = OwnerAuthorisation(propertyLinkWithAgents)
+  val ownerAuthorisationAgent = OwnerAuthorisation(summaryPropertyLinkWithAgents)
   val ownerAuthResultAgent = OwnerAuthResult(1, 1, 1, 1, Seq(ownerAuthorisationAgent))
 
-  val propertyLinksWithClient =  PropertyLinksWithClient(1, 1, 1, 1, Seq(propertyLinkClient))
-  val propertyLinksWithAgents = PropertyLinksWithAgents(1, 1, 1, 1, Seq(propertyLinkWithAgents))
+  val propertyLinksWithClient =  PropertyLinksWithClient(1, 1, 1, 1, Seq(summaryPropertyLinkClient))
+  val propertyLinksWithAgents = PropertyLinksWithAgents(1, 1, 1, 1, Seq(summaryPropertyLinkWithAgents))
 
   val getMyOrganisationSearchParams = GetMyOrganisationPropertyLinksParameters()
   val getMyClientsSearchParams = GetMyClientsPropertyLinkParameters()
@@ -283,6 +319,7 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
       verify(mockPropertyLinkingConnector).getClientsPropertyLinks(getMyClientsSearchParams, Some(paginationParams))
     }
   }
+
 
 
   "getMyOrganisationsPropertyLinks" should {

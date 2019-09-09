@@ -23,7 +23,7 @@ case class PropertyLinksWithAgents(
                                     size: Int,
                                     filterTotal: Int,
                                     total: Int,
-                                    authorisations: Seq[PropertyLinkWithAgents])
+                                    authorisations: Seq[SummaryPropertyLinkWithAgents])
 
 object PropertyLinksWithAgents {
   implicit val format: OFormat[PropertyLinksWithAgents] = Json.format
