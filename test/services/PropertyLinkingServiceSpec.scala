@@ -45,8 +45,6 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
   val httpResponse = HttpResponse(200)
   implicit val fakeHc = HeaderCarrier()
 
-  val date = LocalDate.parse("2018-09-05")
-  val instant = date.atStartOfDay().toInstant(ZoneOffset.UTC)
   val service = new PropertyLinkingService(
     propertyLinksConnector = mockPropertyLinkingConnector,
     mockExternalValuationManagementApi
@@ -293,7 +291,7 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
 
       when(mockPropertyLinkingConnector.getClientsPropertyLinks(getMyClientsSearchParams, Some(paginationParams))).thenReturn(Future.successful(Some(propertyLinksWithClient)))
 
-      val result = service.getClientsPropertyLinks(getMyClientsSearchParams, Some(paginationParams)).value
+      val result = service.getClientsPropertyLinks(getMyClientsSearchParams, Some(paginationParams)).value.futureValue
 
       result.getOrElse("None returned") shouldBe ownerAuthResultClient
 
@@ -319,7 +317,7 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
 
       when(mockPropertyLinkingConnector.getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams))).thenReturn(Future.successful(Some(propertyLinksWithAgents)))
 
-      val result = service.getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams)).value
+      val result = service.getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams)).value.futureValue
 
       result.getOrElse("None returned") shouldBe ownerAuthResultAgent
 
@@ -330,7 +328,7 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
 
       when(mockPropertyLinkingConnector.getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams))).thenReturn(Future.successful(None))
 
-      val result = service.getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams)).value
+      val result = service.getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams)).value.futureValue
 
       result.getOrElse("None returned") shouldBe "None returned"
 

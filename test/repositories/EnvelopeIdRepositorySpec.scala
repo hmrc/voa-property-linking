@@ -16,22 +16,19 @@
 
 package repositories
 
-import models.{Closed, Open}
-import org.scalatest.BeforeAndAfterEach
+import basespecs.BaseUnitSpec
+import models.{Closed, EnvelopeStatus, Open}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.indexes.Index
 import reactivemongo.bson.BSONDateTime
 import uk.gov.hmrc.mongo.MongoSpecSupport
-import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class EnvelopeIdRepositorySpec
-  extends UnitSpec
-    with BeforeAndAfterEach
-    with MongoSpecSupport
-{
+  extends BaseUnitSpec
+    with MongoSpecSupport {
 
   val app = appBuilder.build()
 
@@ -46,8 +43,8 @@ class EnvelopeIdRepositorySpec
 
   override def beforeEach(): Unit = {
     super.beforeEach()
-    await(repository.drop)
-    await(repository.ensureIndexes)
+    repository.drop.futureValue
+    repository.ensureIndexes.futureValue
   }
 
   private val envelopeId = "envId1234"
@@ -55,67 +52,73 @@ class EnvelopeIdRepositorySpec
 
   "repository" should {
     "have an empty index initially" in {
-      await(repository.indexes shouldBe Seq.empty)
+      repository.indexes shouldBe Seq.empty
     }
   }
 
   "repository" should {
     "insert an envelopeId in the repository with the provided status" in {
-      await(repository.create(envelopeId, status)) shouldBe ()
+      repository.create(envelopeId, status).futureValue shouldBe (())
     }
   }
 
   "repository" should {
     "get an empty list of envelopeIds from the repository" in {
-      await(repository.get()) shouldBe Seq.empty
+      repository.get().futureValue shouldBe Seq.empty
     }
   }
 
   "repository" should {
     "get all the envelopeIds from the repository" in {
-      val result = Seq(EnvelopeId(envelopeId, envelopeId, Some(status), Some(BSONDateTime(System.currentTimeMillis))))
-      await(repository.create(envelopeId, status))
-      await(repository.get()) shouldBe result
+      val result = Seq(EnvelopeId(
+        envelopeId = envelopeId,
+        _id = envelopeId,
+        status = Some(status),
+        createdAt = Some(BSONDateTime(System.currentTimeMillis))))
+      repository.create(envelopeId, status).futureValue
+      val pickImportantBits: EnvelopeId => (String, Option[EnvelopeStatus]) =
+        eid => eid.envelopeId -> eid.status
+      repository.get().futureValue.map(pickImportantBits) shouldBe result.map(pickImportantBits)
     }
   }
 
   "repository" should {
     "get return the status open for the provided envelopeId" in {
-      await(repository.create(envelopeId, status))
-      await(repository.getStatus(envelopeId)) shouldBe Some(Open)
+      repository.create(envelopeId, status).futureValue
+      repository.getStatus(envelopeId).futureValue shouldBe Some(Open)
     }
   }
 
   "repository" should {
     "get return None for an envelopeId that doesn't exist" in {
-      await(repository.getStatus(envelopeId)) shouldBe None
+      repository.getStatus(envelopeId).futureValue shouldBe None
     }
   }
 
   "repository" should {
     "update the envelopeId with the status Closed " in {
-      await(repository.create(envelopeId, status))
-      await(repository.update(envelopeId, Closed)) shouldBe ()
-      await(repository.getStatus(envelopeId)) shouldBe Some(Closed)
+      repository.create(envelopeId, status).futureValue
+      repository.update(envelopeId, Closed).futureValue shouldBe (())
+      repository.getStatus(envelopeId).futureValue shouldBe Some(Closed)
     }
   }
 
   "repository" should {
     "not update the status for an envelopeId that does not exist" in {
-      await(repository.update(envelopeId, Closed)) shouldBe ()
+      repository.update(envelopeId, Closed).futureValue shouldBe (())
     }
   }
 
   "repository" should {
     "delete the envelope for and id that exists" in {
-      await(repository.create(envelopeId, status))
-      await(repository.delete(envelopeId)) shouldBe ()
+      repository.create(envelopeId, status).futureValue
+      repository.delete(envelopeId).futureValue shouldBe (())
     }
   }
 
   "repository" should {
     "handle delete for an envelope id that does not exist" in {
-      await(repository.delete(envelopeId)) shouldBe ()
+      repository.delete(envelopeId).futureValue shouldBe (())
     }
   }
 

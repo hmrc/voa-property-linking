@@ -16,7 +16,6 @@
 
 package controllers
 
-import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import binders.propertylinks.temp.GetMyOrganisationsPropertyLinksParametersWithAgentFiltering
 import binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import javax.inject.{Inject, Named}
@@ -29,17 +28,11 @@ import play.api.mvc.{Action, AnyContent}
 import services.{AssessmentService, PropertyLinkingService}
 import uk.gov.hmrc.http.{HeaderCarrier, Upstream5xxResponse}
 import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
-import uk.gov.hmrc.voapropertylinking.connectors.modernised.{AuthorisationManagementApi, AuthorisationSearchApi, CustomerManagementApi, MdtpDashboardManagementApi}
+import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
+import uk.gov.hmrc.voapropertylinking.connectors.modernised._
 import uk.gov.hmrc.voapropertylinking.utils.Cats
 
-import scala.collection.mutable
 import scala.concurrent.{ExecutionContext, Future}
-
-case class Memoize[K, V]() {
-  private val cache = mutable.Map.empty[K, V]
-
-  def apply(f: K => V): K => V = in => cache.getOrElseUpdate(in, f(in))
-}
 
 class PropertyLinkingController @Inject()(
                                            authenticated: AuthenticatedActionBuilder,
@@ -52,8 +45,6 @@ class PropertyLinkingController @Inject()(
                                            authorisationManagementApi: AuthorisationManagementApi,
                                            @Named("agentQueryParameterEnabledExteranl") agentQueryParameterEnabledExteranl: Boolean
                                          )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController with Cats {
-
-  type GroupCache = Memoize[Long, Future[Option[GroupAccount]]]
 
   def create(): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
     withJsonBody[PropertyLinkRequest] { propertyLinkRequest =>
@@ -68,14 +59,14 @@ class PropertyLinkingController @Inject()(
           Logger.info(s"create property link failure: submissionId ${propertyLinkRequest.submissionId}")
           auditingService.sendEvent("create property link failure", propertyLinkRequest)
           InternalServerError
-        }
+      }
     }
   }
 
   def getMyOrganisationsPropertyLink(submissionId: String): Action[AnyContent] = authenticated.async { implicit request =>
     propertyLinkService
       .getMyOrganisationsPropertyLink(submissionId)
-      .fold(NotFound("my organisation property link not found")) {authorisation => Ok(Json.toJson(authorisation))}
+      .fold(NotFound("my organisation property link not found")) { authorisation => Ok(Json.toJson(authorisation)) }
   }
 
   def getMyOrganisationsPropertyLinks(
@@ -84,7 +75,7 @@ class PropertyLinkingController @Inject()(
                                        organisationId: Option[Long]
                                      ): Action[AnyContent] = authenticated.async { implicit request =>
     //TODO remove once modernised external has caught up.
-    if (searchParams.sortField.map(_ == "AGENT").getOrElse(false) && agentQueryParameterEnabledExteranl) {
+    if (searchParams.sortField.contains("AGENT") && agentQueryParameterEnabledExteranl) {
 
       organisationId.fold(Future.successful(BadRequest("organisationId is required for this query.")))(
         id =>
@@ -98,7 +89,7 @@ class PropertyLinkingController @Inject()(
             searchParams.baref,
             searchParams.agent
           )
-            .map( response => Ok(Json.toJson(response))))
+            .map(response => Ok(Json.toJson(response))))
     } else {
       propertyLinkService
         .getMyOrganisationsPropertyLinks(searchParams, paginationParams)
@@ -117,7 +108,7 @@ class PropertyLinkingController @Inject()(
   def getClientsPropertyLink(submissionId: String): Action[AnyContent] = authenticated.async { implicit request =>
     propertyLinkService
       .getClientsPropertyLink(submissionId)
-      .fold(NotFound("client property link not found")){authorisation => Ok(Json.toJson(authorisation))}
+      .fold(NotFound("client property link not found")) { authorisation => Ok(Json.toJson(authorisation)) }
   }
 
   /*
@@ -143,7 +134,7 @@ class PropertyLinkingController @Inject()(
         ).map { response =>
           Ok(Json.toJson(response))
         }
-      case _    =>
+      case _ =>
         authorisationSearchApi.appointableToAgent(
           searchParams.organisationId,
           searchParams.agentOrganisationId,
@@ -190,7 +181,7 @@ class PropertyLinkingController @Inject()(
       .flatMap {
         case Some(authorisation) if authorisedFor(authorisation, clientOrgId, agentOrgId) => toClientProperty(authorisation) map { p => Ok(Json.toJson(p)) }
         case _ => Future.successful(NotFound)
-    }
+      }
   }
 
   private def authorisedFor(authorisation: LegacyPropertiesView, clientOrgId: Long, agentOrgId: Long) = {

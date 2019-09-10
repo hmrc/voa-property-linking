@@ -101,7 +101,7 @@ class ExternalCaseManagementApiSpec extends BaseUnitSpec {
         )
       )))))
 
-      await(connector.getCheckCases(submissionId, "agent")(hc, requestWithPrincipal)).get.filterTotal shouldBe 4
+      connector.getCheckCases(submissionId, "agent")(hc, requestWithPrincipal).futureValue.get.filterTotal shouldBe 4
     }
 
     "handle 403 from get agents check cases" in {
@@ -111,7 +111,7 @@ class ExternalCaseManagementApiSpec extends BaseUnitSpec {
       when(http.GET[Option[AgentCheckCasesResponse]](any())(any(), any(), any(), any()))
         .thenReturn(Future.failed(new UnauthorizedException("unauthorised")))
 
-      await(connector.getCheckCases(submissionId, "agent")(hc, requestWithPrincipal)) shouldBe None
+      connector.getCheckCases(submissionId, "agent")(hc, requestWithPrincipal).futureValue shouldBe None
     }
 
     "handle 404 get agent check cases" in {
@@ -121,7 +121,7 @@ class ExternalCaseManagementApiSpec extends BaseUnitSpec {
       when(http.GET[Option[AgentCheckCasesResponse]](any())(any(), any(), any(), any()))
         .thenReturn(Future.failed(new NotFoundException("unauthorised")))
 
-      await(connector.getCheckCases(submissionId, "agent")(hc, requestWithPrincipal)) shouldBe None
+      connector.getCheckCases(submissionId, "agent")(hc, requestWithPrincipal).futureValue shouldBe None
     }
 
     "get client check cases" in {
@@ -179,7 +179,7 @@ class ExternalCaseManagementApiSpec extends BaseUnitSpec {
       )))))
 
 
-      await(connector.getCheckCases(submissionId, "client")(hc, requestWithPrincipal)).get.filterTotal shouldBe 4
+      connector.getCheckCases(submissionId, "client")(hc, requestWithPrincipal).futureValue.get.filterTotal shouldBe 4
     }
 
     "handle 403 from get client check cases" in {
@@ -189,7 +189,7 @@ class ExternalCaseManagementApiSpec extends BaseUnitSpec {
       when(http.GET[Option[AgentCheckCasesResponse]](any())(any(), any(), any(), any()))
         .thenReturn(Future.failed(new UnauthorizedException("unauthorised")))
 
-      await(connector.getCheckCases(submissionId, "client")(hc, requestWithPrincipal)) shouldBe None
+      connector.getCheckCases(submissionId, "client")(hc, requestWithPrincipal).futureValue shouldBe None
     }
 
     "handle 404 get client check cases" in {
@@ -199,7 +199,7 @@ class ExternalCaseManagementApiSpec extends BaseUnitSpec {
       when(http.GET[Option[AgentCheckCasesResponse]](any())(any(), any(), any(), any()))
         .thenReturn(Future.failed(new NotFoundException("unauthorised")))
 
-      await(connector.getCheckCases(submissionId, "client")(hc, requestWithPrincipal)) shouldBe None
+      connector.getCheckCases(submissionId, "client")(hc, requestWithPrincipal).futureValue shouldBe None
     }
   }
 }

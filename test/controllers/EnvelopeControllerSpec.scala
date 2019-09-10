@@ -43,11 +43,9 @@ class EnvelopeControllerSpec extends BaseControllerSpec {
       val metadataJson = Json.obj("submissionId" -> submissionId, "personId" -> 1)
 
       val res = testController.create()(FakeRequest().withBody(metadataJson).withHeaders(HOST -> "localhost:9524"))
-      await(res)
+      status(res) shouldBe OK
 
       verify(mockFileUpload, once).createEnvelope(matching(EnvelopeMetadata(submissionId, 1)), matching(callbackUrl))(any[HeaderCarrier])
-
-      status(res) mustBe OK
     }
 
     "record the envelope ID in mongo" in {
@@ -59,11 +57,9 @@ class EnvelopeControllerSpec extends BaseControllerSpec {
       when(mockFileUpload.createEnvelope(matching(metadata), matching(callbackUrl))(any[HeaderCarrier])).thenReturn(Future.successful(Some(envelopeId)))
 
       val res = testController.create()(FakeRequest().withBody(metadataJson).withHeaders(HOST -> "localhost:9524"))
-      await(res)
+      status(res) shouldBe OK
 
       verify(mockRepo, once).create(matching(envelopeId), any())
-
-      status(res) mustBe OK
     }
 
     "return the envelope ID as json" in {
@@ -75,21 +71,21 @@ class EnvelopeControllerSpec extends BaseControllerSpec {
       when(mockFileUpload.createEnvelope(matching(metadata), matching(callbackUrl))(any[HeaderCarrier])) thenReturn Future.successful(Some(envelopeId))
 
       val res = testController.create()(FakeRequest().withBody(metadataJson).withHeaders(HOST -> "localhost:9524"))
-      await(res)
 
-      status(res) mustBe OK
-
-      contentAsJson(res) mustBe Json.obj("envelopeId" -> envelopeId)
+      status(res) shouldBe OK
+      contentAsJson(res) shouldBe Json.obj("envelopeId" -> envelopeId)
     }
 
     "return a 503 Service Unavailable when file upload is not available" in {
       val metadataJson = Json.obj("submissionId" -> UUID.randomUUID().toString, "personId" -> 1)
-      when(mockFileUpload.createEnvelope(any[EnvelopeMetadata], any[String])(any[HeaderCarrier])) thenReturn Future.failed { new UnhealthyServiceException("file upload isn't feeling well") }
+      when(mockFileUpload.createEnvelope(any[EnvelopeMetadata], any[String])(any[HeaderCarrier])) thenReturn Future.failed {
+        new UnhealthyServiceException("file upload isn't feeling well")
+      }
 
       val res = testController.create()(FakeRequest().withBody(metadataJson))
 
-      status(res) mustBe SERVICE_UNAVAILABLE
-      contentAsJson(res) mustBe Json.obj("error" -> "file upload service not available")
+      status(res) shouldBe SERVICE_UNAVAILABLE
+      contentAsJson(res) shouldBe Json.obj("error" -> "file upload service not available")
     }
 
   }

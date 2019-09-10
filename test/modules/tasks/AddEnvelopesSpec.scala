@@ -19,10 +19,8 @@ package modules.tasks
 import java.util.UUID
 
 import models.Closed
-import modules.tasks.AddEnvelopes
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
-//import org.scalatest.mock.MockitoSugar
 import play.api.Environment
 import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.indexes.Index
@@ -52,7 +50,7 @@ class AddEnvelopesSpec extends UnitSpec
   "execute" should {
     "insert the line into the repo" in {
       val function1 = unitUnderTest.execute
-      function1(envId) onSuccess {case r => r} shouldBe ()
+      function1(envId) onSuccess {case r => r} shouldBe (())
     }
   }
 
@@ -60,7 +58,7 @@ class AddEnvelopesSpec extends UnitSpec
     "return the envelopeId for the provided valid uuid" in {
       val function1: String => Option[EnvelopeId] = unitUnderTest.verify
       val result = function1(uuid).map(e => (e._id, e.envelopeId, e.status))
-      result.get shouldBe (envId._id, envId.envelopeId, envId.status)
+      result.get shouldBe Tuple3(envId._id, envId.envelopeId, envId.status)
     }
   }
 

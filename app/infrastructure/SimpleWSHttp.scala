@@ -29,11 +29,13 @@ import uk.gov.hmrc.play.http.ws._
 
 //TODO remove with file upload components.
 class SimpleWSHttp @Inject()(
-                              val appNameConfiguration: Configuration
-                            ) extends HttpGet with WSGet with HttpPut with WSPut with HttpPost with WSPost with HttpDelete with WSDelete with HttpPatch with WSPatch with WSHttp with AppName with HttpHooks{
+                              val appNameConfiguration: Configuration,
+                              override val actorSystem: ActorSystem
+                            ) extends HttpGet with WSGet with HttpPut with WSPut with HttpPost with WSPost with HttpDelete with WSDelete with HttpPatch with WSPatch with WSHttp with AppName with HttpHooks {
+
   override val hooks: Seq[HttpHook] = NoneRequired
 
   override protected def configuration: Option[Config] = Some(appNameConfiguration.underlying)
-  override protected def actorSystem: ActorSystem = Play.current.actorSystem
+
 }
 

@@ -52,10 +52,10 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
       val dvrJson = Json.toJson(testDvr)
       val res = testController.requestDetailedValuationV2()(FakeRequest().withBody(dvrJson))
 
-      await(res)
+      status(res) shouldBe OK
+
       verify(mockRepo, times(1)).create(matching(testDvr))
       verify(mockCcaCaseManagementConnector, times(1)).requestDetailedValuation(matching(testDvr))(any[HeaderCarrier])
-      status(res) mustBe OK
     }
   }
 
@@ -64,10 +64,10 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
       when(mockRepo.exists(anyLong(), anyLong())) thenReturn Future.successful((true))
       val res = testController.dvrExists(1l, 3l)(FakeRequest())
 
-      await(res)
+      status(res) shouldBe OK
+      contentAsJson(res) shouldBe Json.toJson(true)
+
       verify(mockRepo, times(1)).exists(matching(1l), matching(3l))
-      status(res) mustBe OK
-      contentAsJson(res) mustBe Json.toJson(true)
       reset(mockRepo)
     }
 
@@ -75,10 +75,10 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
       when(mockRepo.exists(anyLong(), anyLong())) thenReturn Future.successful((false))
       val res = testController.dvrExists(1l, 3l)(FakeRequest())
 
-      await(res)
+      status(res) shouldBe OK
+      contentAsJson(res) shouldBe Json.toJson(false)
+
       verify(mockRepo, times(1)).exists(matching(1l), matching(3l))
-      status(res) mustBe OK
-      contentAsJson(res) mustBe Json.toJson(false)
       reset(mockRepo)
     }
   }
@@ -96,24 +96,25 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
 
       val result = testController.getDvrDocuments(1L, 3L, "PL-12345")(FakeRequest())
 
-      status(result) mustBe OK
-      contentAsJson(result) mustBe Json.parse( s"""
-                                                   |{
-                                                   | "checkForm": {
-                                                   |   "documentSummary": {
-                                                   |     "documentId": "1L",
-                                                   |     "documentName": "Check Document",
-                                                   |     "createDatetime": "$now"
-                                                   |     }
-                                                   | },
-                                                   | "detailedValuation": {
-                                                   |    "documentSummary": {
-                                                   |       "documentId": "2L",
-                                                   |       "documentName": "Detailed Valuation Document",
-                                                   |       "createDatetime": "$now"
-                                                   |    }
-                                                   | }
-                                                   |}
+      status(result) shouldBe OK
+      contentAsJson(result) shouldBe Json.parse(
+        s"""
+           |{
+           | "checkForm": {
+           |   "documentSummary": {
+           |     "documentId": "1L",
+           |     "documentName": "Check Document",
+           |     "createDatetime": "$now"
+           |     }
+           | },
+           | "detailedValuation": {
+           |    "documentSummary": {
+           |       "documentId": "2L",
+           |       "documentName": "Detailed Valuation Document",
+           |       "createDatetime": "$now"
+           |    }
+           | }
+           |}
             """.stripMargin)
     }
 
@@ -123,7 +124,7 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
 
       val result = testController.getDvrDocuments(1L, 3L, "PL-12345")(FakeRequest())
 
-      status(result) mustBe NOT_FOUND
+      status(result) shouldBe NOT_FOUND
     }
   }
 
@@ -134,7 +135,7 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
 
       val result = testController.getDvrDocument(1L, 3L, "PL-12345", "1L")(FakeRequest())
 
-      status(result) mustBe OK
+      status(result) shouldBe OK
     }
   }
 
@@ -154,7 +155,7 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
 
   lazy val mockCcaCaseManagementConnector = {
     val m = mock[CCACaseManagementApi]
-    when(m.requestDetailedValuation(any[DetailedValuationRequest])(any[HeaderCarrier])) thenReturn Future.successful()
+    when(m.requestDetailedValuation(any[DetailedValuationRequest])(any[HeaderCarrier])) thenReturn Future.successful(())
     m
   }
 

@@ -17,22 +17,19 @@
 package repositories
 
 
+import basespecs.BaseUnitSpec
 import models.voa.valuation.dvr.DetailedValuationRequest
-import org.scalatest.BeforeAndAfterEach
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.indexes.Index
 import uk.gov.hmrc.mongo.MongoSpecSupport
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class DVRRepositorySpec
-  extends UnitSpec
-    with BeforeAndAfterEach
-    with MongoSpecSupport
-{
+  extends BaseUnitSpec
+    with MongoSpecSupport {
   val app = appBuilder.build()
 
   val repository = new DVRRepository(app.injector.instanceOf[ReactiveMongoComponent], "test", app.injector.instanceOf[ServicesConfig]) {
@@ -46,8 +43,8 @@ class DVRRepositorySpec
 
   override def beforeEach(): Unit = {
     super.beforeEach()
-    await(repository.drop)
-    await(repository.ensureIndexes)
+    repository.drop.futureValue
+    repository.ensureIndexes.futureValue
   }
 
   private val organisationId = 1234
@@ -55,13 +52,13 @@ class DVRRepositorySpec
 
   "repository" should {
     "have an empty index initially" in {
-      await(repository.indexes shouldBe Seq.empty)
+      repository.indexes shouldBe Seq.empty
     }
   }
 
   "repository" should {
     "create a DVRRecord in the repository with the provided organisationId and assessmentRef" in {
-      await(repository.create(DetailedValuationRequest(
+      repository.create(DetailedValuationRequest(
         1L,
         1L,
         1L,
@@ -69,13 +66,13 @@ class DVRRepositorySpec
         1L,
         None,
         ""
-      ))) shouldBe ()
+      )).futureValue shouldBe (())
     }
   }
 
   "repository" should {
     "return true if a record with the organisationId and assessmentRef exists" in {
-      await(repository.create(DetailedValuationRequest(
+      repository.create(DetailedValuationRequest(
         1L,
         organisationId,
         1L,
@@ -83,21 +80,21 @@ class DVRRepositorySpec
         assessmentRef,
         None,
         ""
-      )))
+      )).futureValue
 
-      await(repository.exists(organisationId, assessmentRef)) shouldBe true
+      repository.exists(organisationId, assessmentRef).futureValue shouldBe true
     }
   }
 
   "repository" should {
     "return false if a record with the organisationId and assessmentRef does not exist" in {
-      await(repository.exists(organisationId, assessmentRef)) shouldBe false
+      repository.exists(organisationId, assessmentRef).futureValue shouldBe false
     }
   }
 
   "repository" should {
     "clear the DVRRecord in the repository with the provided organisationId" in {
-      await(repository.clear(organisationId)) shouldBe ()
+      repository.clear(organisationId).futureValue shouldBe (())
     }
   }
 

@@ -43,10 +43,9 @@ class IndividualAccountControllerSpec extends BaseControllerSpec {
       when(mockIndividualAccountConnector.createIndividualAccount(any())(any[HeaderCarrier])).thenReturn(Future.successful(IndividualAccountId(1)))
 
       val res = testController.create()(FakeRequest().withBody(individualJson))
-      await(res)
 
-      status(res) mustBe CREATED
-      contentAsJson(res) mustBe Json.toJson(IndividualAccountId(1))
+      status(res) shouldBe CREATED
+      contentAsJson(res) shouldBe Json.toJson(IndividualAccountId(1))
     }
   }
 
@@ -67,9 +66,8 @@ class IndividualAccountControllerSpec extends BaseControllerSpec {
       when(mockBrAuth.clearCache()(any[HeaderCarrier])).thenReturn(Future.successful(()))
 
       val res = testController.update(1)(FakeRequest().withBody(individualJson))
-      await(res)
 
-      status(res) mustBe OK
+      status(res) shouldBe OK
     }
   }
 
@@ -83,19 +81,17 @@ class IndividualAccountControllerSpec extends BaseControllerSpec {
       when(mockIndividualAccountConnector.getDetailedIndividual(any())(any[HeaderCarrier])).thenReturn(Future.successful(Some(testIndividualAccount)))
 
       val res = testController.get(1)(FakeRequest())
-      await(res)
 
-      status(res) mustBe OK
-      contentAsJson(res) mustBe individualJson
+      status(res) shouldBe OK
+      contentAsJson(res) shouldBe individualJson
     }
 
     "return NotFound for if the individual does not exist in modernised" in {
       when(mockIndividualAccountConnector.getDetailedIndividual(any())(any[HeaderCarrier])).thenReturn(Future.successful(None))
 
       val res = testController.get(1)(FakeRequest())
-      await(res)
 
-      status(res) mustBe NOT_FOUND
+      status(res) shouldBe NOT_FOUND
     }
   }
 
@@ -109,19 +105,17 @@ class IndividualAccountControllerSpec extends BaseControllerSpec {
       when(mockIndividualAccountConnector.findDetailedIndividualAccountByGGID(any())(any[HeaderCarrier])).thenReturn(Future.successful(Some(testIndividualAccount)))
 
       val res = testController.withExternalId("test-external-id")(FakeRequest())
-      await(res)
 
-      status(res) mustBe OK
-      contentAsJson(res) mustBe individualJson
+      status(res) shouldBe OK
+      contentAsJson(res) shouldBe individualJson
     }
 
     "return NotFound for if the individual does not exist in modernised using the GG external ID" in {
       when(mockIndividualAccountConnector.findDetailedIndividualAccountByGGID(any())(any[HeaderCarrier])).thenReturn(Future.successful(None))
 
       val res = testController.withExternalId("test-external-id")(FakeRequest())
-      await(res)
 
-      status(res) mustBe NOT_FOUND
+      status(res) shouldBe NOT_FOUND
     }
   }
 

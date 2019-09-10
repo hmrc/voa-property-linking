@@ -18,27 +18,30 @@ package basespecs
 
 import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.test.UnitSpec
-import uk.gov.hmrc.voapropertylinking.auth.{Principal, RequestWithPrincipal}
 import uk.gov.hmrc.test.AllMocks
+import uk.gov.hmrc.voapropertylinking.auth.{Principal, RequestWithPrincipal}
 import uk.gov.hmrc.voapropertylinking.utils.Cats
+import utils.FakeObjects
 
 import scala.concurrent.ExecutionContext
 
-abstract class BaseUnitSpec extends UnitSpec
-  with BeforeAndAfterEach
-  with BeforeAndAfterAll
-  with AllMocks
-  with Matchers
-  with Inspectors
-  with Inside
-  with EitherValues
-  with LoneElement
-  with ScalaFutures
-  with OptionValues
-  with Cats {
+abstract class BaseUnitSpec
+  extends WordSpec
+    with Matchers
+    with BeforeAndAfterEach
+    with BeforeAndAfterAll
+    with AllMocks
+    with Inspectors
+    with Inside
+    with EitherValues
+    with LoneElement
+    with ScalaFutures
+    with FakeObjects
+    with MockitoSugar
+    with Cats {
 
   implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
   implicit val hc: HeaderCarrier = HeaderCarrier()

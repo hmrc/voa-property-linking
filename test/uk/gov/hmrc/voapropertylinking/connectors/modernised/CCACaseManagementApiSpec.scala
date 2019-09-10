@@ -49,7 +49,7 @@ class CCACaseManagementApiSpec extends BaseUnitSpec {
         billingAuthorityReferenceNumber = "barn1"
       )
 
-      await(connector.requestDetailedValuation(dvr)) shouldBe ()
+      connector.requestDetailedValuation(dvr).futureValue shouldBe (())
     }
   }
 }

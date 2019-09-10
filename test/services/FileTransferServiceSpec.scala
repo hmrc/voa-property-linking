@@ -34,6 +34,7 @@ package services
 
 import java.util.concurrent.atomic.AtomicInteger
 
+import basespecs.BaseUnitSpec
 import com.codahale.metrics.MetricRegistry
 import com.kenshoo.play.metrics.Metrics
 import helpers.AnswerSugar
@@ -42,14 +43,11 @@ import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.{eq => mEq, _}
 import org.mockito.Mockito._
 import org.mockito.invocation.InvocationOnMock
-import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.Eventually._
-import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.ws.{StreamedResponse, WSResponseHeaders}
 import reactivemongo.bson.BSONDateTime
 import repositories.{EnvelopeId, EnvelopeIdRepo}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.voapropertylinking.connectors.mdtp._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -62,7 +60,9 @@ object Result {
   case object Fail extends Result
 }
 
-class FileTransferServiceSpec extends UnitSpec with MockitoSugar with AnswerSugar with BeforeAndAfterEach {
+class FileTransferServiceSpec extends BaseUnitSpec with AnswerSugar {
+
+  implicit val fakeHc = HeaderCarrier()
 
   override protected def beforeEach(): Unit = {
     reset(evidenceConnector, fileUploadConnector)
@@ -84,17 +84,15 @@ class FileTransferServiceSpec extends UnitSpec with MockitoSugar with AnswerSuga
 
     val fts = new FileTransferService(fileUploadConnector, evidenceConnector, repo, metrics)
 
-    implicit val fakeHc = HeaderCarrier()
-
     "Throw an exception if the file upload service returned status >= 400" in {
       when(fileUploadConnector.downloadFile("uniqueHref")).thenReturn(Future.successful(mockStreamedResponse))
       when(mockStreamedResponse.headers).thenReturn(mockHeaders)
       when(mockHeaders.status).thenReturn(500)
 
-      await(fts.transferFile(fileInfo, metaData) map { _ => Result.Fail } recover { case _ => Result.Ok } map {
+      (fts.transferFile(fileInfo, metaData) map { _ => Result.Fail } recover { case _ => Result.Ok } map {
         case Result.Ok => ()
         case Result.Fail => fail("Expected failed future with exception but got a Success")
-      })
+      }).futureValue
     }
 
     "Not throw an exception if the file upload service returned status = 200" in {
@@ -103,10 +101,10 @@ class FileTransferServiceSpec extends UnitSpec with MockitoSugar with AnswerSuga
       when(mockHeaders.status).thenReturn(200)
       when(evidenceConnector.uploadFile(any(), any(), any())(any())).thenReturn(Future.successful(()))
 
-      await(fts.transferFile(fileInfo, metaData) map { _ => Result.Ok } recover { case _ => Result.Fail } map {
+      (fts.transferFile(fileInfo, metaData) map { _ => Result.Ok } recover { case _ => Result.Fail } map {
         case Result.Ok => ()
         case Result.Fail => fail("Expected successful future")
-      })
+      }).futureValue
     }
 
     "Fail fast on the first failure with uploads" in {
@@ -148,12 +146,12 @@ class FileTransferServiceSpec extends UnitSpec with MockitoSugar with AnswerSuga
           Future.successful(())
       }
 
-      await(fts.justDoIt() map { _ => Result.Fail } recover { case _ => Result.Ok } map {
+      (fts.justDoIt() map { _ => Result.Fail } recover { case _ => Result.Ok } map {
         case Result.Ok =>
           verify(evidenceConnector, times(6)).uploadFile(any(), any(), any())(any())
           verify(fileUploadConnector, times(5)).deleteEnvelope(any())(any())
         case Result.Fail => fail("Expected failed future")
-      })
+      }).futureValue
     }
 
     "Not fail, but skip errors originating in file upload" in {
@@ -200,12 +198,12 @@ class FileTransferServiceSpec extends UnitSpec with MockitoSugar with AnswerSuga
       when(fileUploadConnector.deleteEnvelope(any())(any())).thenReturn(Future.successful(()))
       when(evidenceConnector.uploadFile(any(), any(), any())(any())).thenReturn(Future.successful(()))
 
-      await(fts.justDoIt() map { _ => Result.Ok } recover { case _ => Result.Fail } map {
+      (fts.justDoIt() map { _ => Result.Ok } recover { case _ => Result.Fail } map {
         case Result.Ok =>
           verify(evidenceConnector, times(9)).uploadFile(any(), any(), any())(any())
           verify(fileUploadConnector, times(9)).deleteEnvelope(any())(any())
         case Result.Fail => fail("Expected future success")
-      })
+      }).futureValue
     }
 
     "delete envelope IDs that don't exist in FUaaS" in {
@@ -218,7 +216,7 @@ class FileTransferServiceSpec extends UnitSpec with MockitoSugar with AnswerSuga
 
       when(repo.delete(anyString)).thenReturn(Future.successful(()))
 
-      await(fts.justDoIt())
+      fts.justDoIt().futureValue
 
       verify(repo, times(1)).delete(envelopeId)
       verify(repo, never).create(envelopeId, Closed)
@@ -235,7 +233,7 @@ class FileTransferServiceSpec extends UnitSpec with MockitoSugar with AnswerSuga
       when(repo.delete(anyString)).thenReturn(Future.successful(()))
       when(repo.create(envelopeId, Closed)).thenReturn(Future.successful(()))
 
-      Try { await(fts.justDoIt()) }
+      Try { fts.justDoIt().futureValue }
 
       verify(repo, times(1)).delete(envelopeId)
       verify(repo, times(1)).create(envelopeId, Closed)
@@ -253,7 +251,7 @@ class FileTransferServiceSpec extends UnitSpec with MockitoSugar with AnswerSuga
       when(metrics.defaultRegistry).thenReturn(registry)
       when(envelopeIdRepo.get()).thenReturn(Future(Nil))
 
-      await(service.justDoIt()(HeaderCarrier()))
+      service.justDoIt()(HeaderCarrier()).futureValue
 
       eventually(verify(registry, times(1)).meter(ArgumentMatchers.eq("mongo.envelope.queue-size.open")))
       eventually(verify(registry, times(1)).meter(ArgumentMatchers.eq("mongo.envelope.queue-size.closed")))

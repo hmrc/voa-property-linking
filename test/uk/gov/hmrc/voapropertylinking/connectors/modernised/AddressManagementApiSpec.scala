@@ -52,7 +52,7 @@ class AddressManagementApiSpec extends BaseUnitSpec {
         )
       )))
 
-      await(testConnector.get(addressUnitId)(hc)) shouldBe Some(SimpleAddress(
+      testConnector.get(addressUnitId)(hc).futureValue shouldBe Some(SimpleAddress(
         addressUnitId = Some(123456789),
         line1 = "Liverpool FC, First team",
         line2 = "Anfield Stadium",

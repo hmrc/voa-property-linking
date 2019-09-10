@@ -46,7 +46,7 @@ class AuthorisationSearchApiSpec extends BaseUnitSpec {
         )
       ))
 
-      await(connector.manageAgents(organisationId)(hc)).agents.size shouldBe 2
+      connector.manageAgents(organisationId)(hc).futureValue.agents.size shouldBe 2
     }
   }
 
@@ -94,7 +94,7 @@ class AuthorisationSearchApiSpec extends BaseUnitSpec {
         propertyRepresentations = Seq(validPropertyRepresentation)
       )
 
-      val result: PropertyRepresentations = await(connector.forAgent(status = "APPROVED", organisationId, pageParams)(hc))
+      val result: PropertyRepresentations = connector.forAgent(status = "APPROVED", organisationId, pageParams)(hc).futureValue
       result shouldBe validPropertyRepresentations
     }
   }

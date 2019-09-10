@@ -67,6 +67,7 @@ class FileUploadSpec extends WireMockSpec with SimpleWsHttpTestApplication with 
   val headers = mock[WSResponseHeaders]
 
   implicit lazy val mat = fakeApplication.materializer
+
   override def beforeEach(): Unit = {
     super.beforeEach()
     Mockito.reset(http, response, metrics, registry, strResponse, headers)
@@ -99,7 +100,7 @@ class FileUploadSpec extends WireMockSpec with SimpleWsHttpTestApplication with 
         )
       )
 
-      await(await(connector.downloadFile(fileUrl)).body.runFold("")(_ + _.decodeString("UTF-8"))) should be(new String(fileBytes))
+      connector.downloadFile(fileUrl).futureValue.body.runFold("")(_ + _.decodeString("UTF-8")).futureValue should be(new String(fileBytes))
     }
 
     "handle 404 responses when retrieving envelope details from FUaaS" in {
@@ -117,7 +118,7 @@ class FileUploadSpec extends WireMockSpec with SimpleWsHttpTestApplication with 
 
       stubFor(get(urlEqualTo(s"/file-upload/envelopes/$envelopeId")).willReturn(aResponse().withStatus(404)))
 
-      await(connector.getEnvelopeDetails(envelopeId)(HeaderCarrier())) shouldBe EnvelopeInfo(envelopeId, "NOT_EXISTING", Nil, EnvelopeMetadata("nosubmissionid", 0))
+      connector.getEnvelopeDetails(envelopeId)(HeaderCarrier()).futureValue shouldBe EnvelopeInfo(envelopeId, "NOT_EXISTING", Nil, EnvelopeMetadata("nosubmissionid", 0))
     }
 
     "convert envelope metadata into a valid payload" in {
@@ -152,7 +153,7 @@ class FileUploadSpec extends WireMockSpec with SimpleWsHttpTestApplication with 
       ))
 
 
-      await(connector.createEnvelope(metadata, "/some-callback")(HeaderCarrier()))
+      connector.createEnvelope(metadata, "/some-callback")(HeaderCarrier()).futureValue
 
       WireMock.verify(postRequestedFor(urlEqualTo("/file-upload/envelopes")).withRequestBody(equalToJson(expectedJson)))
     }
@@ -174,7 +175,7 @@ class FileUploadSpec extends WireMockSpec with SimpleWsHttpTestApplication with 
           .withStatus(200)
           .withHeader("location", s"/file-upload/envelopes/$fileId")))
 
-      val res = await(connector.createEnvelope(metadata, "/some-callback")(HeaderCarrier()))
+      val res = connector.createEnvelope(metadata, "/some-callback")(HeaderCarrier()).futureValue
 
       res shouldBe Some(fileId)
     }
@@ -191,7 +192,7 @@ class FileUploadSpec extends WireMockSpec with SimpleWsHttpTestApplication with 
 
       stubFor(delete(urlEqualTo(s"/file-upload/envelopes/$envelopeId")).willReturn(aResponse().withStatus(404)))
 
-      noException shouldBe thrownBy(await(connector.deleteEnvelope(envelopeId)(HeaderCarrier())))
+      noException shouldBe thrownBy(connector.deleteEnvelope(envelopeId)(HeaderCarrier()).futureValue)
     }
 
     "send the correct classification of metric" when {
@@ -199,9 +200,9 @@ class FileUploadSpec extends WireMockSpec with SimpleWsHttpTestApplication with 
         "map success to file-upload.envelope.create.201" in {
           when(response.header(ArgumentMatchers.eq("location"))).thenReturn(Some("MATCH"))
           when(response.status).thenReturn(201)
-            when(http.POST[CreateEnvelopePayload, HttpResponse](anyString(), mockitoAny(), mockitoAny())(mockitoAny(), mockitoAny(), mockitoAny(), mockitoAny())).thenReturn(Future.successful(response))
+          when(http.POST[CreateEnvelopePayload, HttpResponse](anyString(), mockitoAny(), mockitoAny())(mockitoAny(), mockitoAny(), mockitoAny(), mockitoAny())).thenReturn(Future.successful(response))
 
-          await(mockFileUploadConnector.createEnvelope(EnvelopeMetadata("subId", 1L), "")(HeaderCarrier()))
+          mockFileUploadConnector.createEnvelope(EnvelopeMetadata("subId", 1L), "")(HeaderCarrier()).futureValue
           eventually(Mockito.verify(registry, times(1)).meter(ArgumentMatchers.eq("file-upload.envelope.create.201")))
         }
 
@@ -210,7 +211,7 @@ class FileUploadSpec extends WireMockSpec with SimpleWsHttpTestApplication with 
           when(failResponse.status).thenReturn(400)
           when(http.POST[CreateEnvelopePayload, HttpResponse](anyString(), mockitoAny(), mockitoAny())(mockitoAny(), mockitoAny(), mockitoAny(), mockitoAny())).thenReturn(Future.successful(failResponse))
 
-          await(mockFileUploadConnector.createEnvelope(EnvelopeMetadata("subId", 1L), "")(HeaderCarrier()))
+          mockFileUploadConnector.createEnvelope(EnvelopeMetadata("subId", 1L), "")(HeaderCarrier()).futureValue
           eventually(Mockito.verify(registry, times(1)).meter(ArgumentMatchers.eq("file-upload.envelope.create.400")))
         }
 
@@ -219,14 +220,14 @@ class FileUploadSpec extends WireMockSpec with SimpleWsHttpTestApplication with 
           when(failResponse.status).thenReturn(502)
           when(http.POST[CreateEnvelopePayload, HttpResponse](anyString(), mockitoAny(), mockitoAny())(mockitoAny(), mockitoAny(), mockitoAny(), mockitoAny())).thenReturn(Future.successful(failResponse))
 
-          await(mockFileUploadConnector.createEnvelope(EnvelopeMetadata("subId", 1L), "")(HeaderCarrier()))
+          mockFileUploadConnector.createEnvelope(EnvelopeMetadata("subId", 1L), "")(HeaderCarrier()).futureValue
           eventually(Mockito.verify(registry, times(1)).meter(ArgumentMatchers.eq("file-upload.envelope.create.502")))
         }
 
         "map Upstream5xx exceptions to file-upload.envelope.create.5xx" in {
           when(http.POST[CreateEnvelopePayload, HttpResponse](anyString(), mockitoAny(), mockitoAny())(mockitoAny(), mockitoAny(), mockitoAny(), mockitoAny())).thenReturn(Future.failed(Upstream5xxResponse("", 502, 502)))
 
-          await(mockFileUploadConnector.createEnvelope(EnvelopeMetadata("subId", 1L), "")(HeaderCarrier()))
+          mockFileUploadConnector.createEnvelope(EnvelopeMetadata("subId", 1L), "")(HeaderCarrier()).futureValue
 
           eventually(Mockito.verify(registry, times(1)).meter(ArgumentMatchers.eq("file-upload.envelope.create.502")))
         }
@@ -234,7 +235,7 @@ class FileUploadSpec extends WireMockSpec with SimpleWsHttpTestApplication with 
         "map Upstream4xx exceptions to file-upload.envelope.create.4xx" in {
           when(http.POST[CreateEnvelopePayload, HttpResponse](anyString(), mockitoAny(), mockitoAny())(mockitoAny(), mockitoAny(), mockitoAny(), mockitoAny())).thenReturn(Future.failed(Upstream4xxResponse("", 400, 400)))
 
-          await(mockFileUploadConnector.createEnvelope(EnvelopeMetadata("subId", 1L), "")(HeaderCarrier()))
+          mockFileUploadConnector.createEnvelope(EnvelopeMetadata("subId", 1L), "")(HeaderCarrier()).futureValue
 
           eventually(Mockito.verify(registry, times(1)).meter(ArgumentMatchers.eq("file-upload.envelope.create.400")))
         }
@@ -242,7 +243,7 @@ class FileUploadSpec extends WireMockSpec with SimpleWsHttpTestApplication with 
         "map Other exceptions to file-upload.envelope.create.[NAME]" in {
           when(http.POST[CreateEnvelopePayload, HttpResponse](anyString(), mockitoAny(), mockitoAny())(mockitoAny(), mockitoAny(), mockitoAny(), mockitoAny())).thenReturn(Future.failed(new NullPointerException()))
 
-          await(mockFileUploadConnector.createEnvelope(EnvelopeMetadata("subId", 1L), "")(HeaderCarrier()))
+          mockFileUploadConnector.createEnvelope(EnvelopeMetadata("subId", 1L), "")(HeaderCarrier()).futureValue
 
           eventually(Mockito.verify(registry, times(1)).meter(ArgumentMatchers.eq("file-upload.envelope.create.NullPointerException")))
         }
@@ -253,7 +254,7 @@ class FileUploadSpec extends WireMockSpec with SimpleWsHttpTestApplication with 
           when(http.DELETE[HttpResponse](anyString())(mockitoAny(), mockitoAny(), mockitoAny())).thenReturn(Future.successful(response))
           when(response.status).thenReturn(200)
 
-          await(mockFileUploadConnector.deleteEnvelope("1")(HeaderCarrier()))
+          mockFileUploadConnector.deleteEnvelope("1")(HeaderCarrier()).futureValue
           eventually(Mockito.verify(registry, times(1)).meter(ArgumentMatchers.eq("file-upload.envelope.delete.200")))
         }
 
@@ -262,7 +263,7 @@ class FileUploadSpec extends WireMockSpec with SimpleWsHttpTestApplication with 
           when(failResponse.status).thenReturn(400)
           when(http.DELETE[HttpResponse](anyString())(mockitoAny(), mockitoAny(), mockitoAny())).thenReturn(Future.successful(failResponse))
 
-          await(mockFileUploadConnector.deleteEnvelope("1")(HeaderCarrier()))
+          mockFileUploadConnector.deleteEnvelope("1")(HeaderCarrier()).futureValue
           eventually(Mockito.verify(registry, times(1)).meter(ArgumentMatchers.eq("file-upload.envelope.delete.400")))
         }
 
@@ -271,28 +272,28 @@ class FileUploadSpec extends WireMockSpec with SimpleWsHttpTestApplication with 
           when(failResponse.status).thenReturn(502)
           when(http.DELETE[HttpResponse](anyString())(mockitoAny(), mockitoAny(), mockitoAny())).thenReturn(Future.successful(failResponse))
 
-          await(mockFileUploadConnector.deleteEnvelope("1")(HeaderCarrier()))
+          mockFileUploadConnector.deleteEnvelope("1")(HeaderCarrier()).futureValue
           eventually(Mockito.verify(registry, times(1)).meter(ArgumentMatchers.eq("file-upload.envelope.delete.502")))
         }
 
         "map Upstream5xx exceptions to file-upload.envelope.delete.5xx" in {
           when(http.DELETE[HttpResponse](anyString())(mockitoAny(), mockitoAny(), mockitoAny())).thenReturn(Future.failed(Upstream5xxResponse("", 502, 502)))
 
-          await(mockFileUploadConnector.deleteEnvelope("1")(HeaderCarrier()))
+          mockFileUploadConnector.deleteEnvelope("1")(HeaderCarrier()).futureValue
           eventually(Mockito.verify(registry, times(1)).meter(ArgumentMatchers.eq("file-upload.envelope.delete.502")))
         }
 
         "map Upstream4xx exceptions to file-upload.envelope.create.4xx" in {
           when(http.DELETE[HttpResponse](anyString())(mockitoAny(), mockitoAny(), mockitoAny())).thenReturn(Future.failed(Upstream4xxResponse("", 400, 400)))
 
-          await(mockFileUploadConnector.deleteEnvelope("1")(HeaderCarrier()))
+          mockFileUploadConnector.deleteEnvelope("1")(HeaderCarrier()).futureValue
           eventually(Mockito.verify(registry, times(1)).meter(ArgumentMatchers.eq("file-upload.envelope.delete.400")))
         }
 
         "map Other exceptions to file-upload.envelope.delete.[NAME]" in {
           when(http.DELETE[HttpResponse](anyString())(mockitoAny(), mockitoAny(), mockitoAny())).thenReturn(Future.failed(new NullPointerException()))
 
-          await(mockFileUploadConnector.deleteEnvelope("1")(HeaderCarrier()))
+          mockFileUploadConnector.deleteEnvelope("1")(HeaderCarrier()).futureValue
           eventually(Mockito.verify(registry, times(1)).meter(ArgumentMatchers.eq("file-upload.envelope.delete.NullPointerException")))
         }
       }
@@ -301,30 +302,30 @@ class FileUploadSpec extends WireMockSpec with SimpleWsHttpTestApplication with 
         "map success status to file-upload.download.200" in {
           when(headers.status).thenReturn(200)
 
-          await(mockFileUploadConnector.downloadFile("1")(HeaderCarrier()))
+          mockFileUploadConnector.downloadFile("1")(HeaderCarrier()).futureValue
           eventually(Mockito.verify(registry, times(1)).meter(ArgumentMatchers.eq("file-upload.download.200")))
         }
 
         "map 4xx failure to file-upload.download.4xx" in {
           when(headers.status).thenReturn(400)
 
-          await(mockFileUploadConnector.downloadFile("1")(HeaderCarrier()))
+          mockFileUploadConnector.downloadFile("1")(HeaderCarrier()).futureValue
           eventually(Mockito.verify(registry, times(1)).meter(ArgumentMatchers.eq("file-upload.download.400")))
         }
 
         "map 5xx failure to file-upload.download.5xx" in {
           when(headers.status).thenReturn(500)
 
-          await(mockFileUploadConnector.downloadFile("1")(HeaderCarrier()))
+          mockFileUploadConnector.downloadFile("1")(HeaderCarrier()).futureValue
           eventually(Mockito.verify(registry, times(1)).meter(ArgumentMatchers.eq("file-upload.download.500")))
         }
 
         "map Upstream5xx exceptions to file-upload.download.5xx" in {
           when(request.stream()).thenReturn(Future.failed(Upstream5xxResponse("", 502, 502)))
 
-          intercept[Upstream5xxResponse] {
-            await(mockFileUploadConnector.downloadFile("1")(HeaderCarrier()))
-          }
+          whenReady(
+            mockFileUploadConnector.downloadFile("1")(HeaderCarrier()).failed
+          )(_ shouldBe an[Upstream5xxResponse])
 
           eventually(Mockito.verify(registry, times(1)).meter(ArgumentMatchers.eq("file-upload.download.502")))
         }
@@ -332,9 +333,9 @@ class FileUploadSpec extends WireMockSpec with SimpleWsHttpTestApplication with 
         "map Upstream4xx exceptions to file-upload.download.4xx" in {
           when(request.stream()).thenReturn(Future.failed(Upstream4xxResponse("", 400, 400)))
 
-          intercept[Upstream4xxResponse] {
-            await(mockFileUploadConnector.downloadFile("1")(HeaderCarrier()))
-          }
+          whenReady(
+            mockFileUploadConnector.downloadFile("1")(HeaderCarrier()).failed
+          )(_ shouldBe an[Upstream4xxResponse])
 
           eventually(Mockito.verify(registry, times(1)).meter(ArgumentMatchers.eq("file-upload.download.400")))
         }
@@ -342,9 +343,9 @@ class FileUploadSpec extends WireMockSpec with SimpleWsHttpTestApplication with 
         "map Other exceptions to file-upload.download.[NAME]" in {
           when(request.stream()).thenReturn(Future.failed(new NullPointerException()))
 
-          intercept[NullPointerException] {
-            await(mockFileUploadConnector.downloadFile("1")(HeaderCarrier()))
-          }
+          whenReady(
+            mockFileUploadConnector.downloadFile("1")(HeaderCarrier()).failed
+          )(_ shouldBe a[NullPointerException])
 
           eventually(Mockito.verify(registry, times(1)).meter(ArgumentMatchers.eq("file-upload.download.NullPointerException")))
         }
@@ -360,4 +361,5 @@ class FileUploadSpec extends WireMockSpec with SimpleWsHttpTestApplication with 
   ) {
     override lazy val url = ""
   }
+
 }

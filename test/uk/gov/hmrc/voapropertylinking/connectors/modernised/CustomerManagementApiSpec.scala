@@ -69,7 +69,7 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
           )
         )))
 
-      await(testConnector.getDetailedIndividual(id)(hc)) shouldBe expectedGetValidResponse
+      testConnector.getDetailedIndividual(id)(hc).futureValue shouldBe expectedGetValidResponse
     }
 
     "return an empty response if the provided id cannot be found" in {
@@ -78,7 +78,7 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
       when(defaultHttpClient.GET[Option[APIDetailedIndividualAccount]](any())(any(), any(), any()))
         .thenReturn(Future.successful(None))
 
-      await(testConnector.getDetailedIndividual(id)(hc)) shouldBe expectedGetEmptyResponse
+      testConnector.getDetailedIndividual(id)(hc).futureValue shouldBe expectedGetEmptyResponse
     }
   }
 
@@ -111,7 +111,7 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
           )
         )))
 
-      await(testConnector.findDetailedIndividualAccountByGGID(ggId)(hc)) shouldBe expectedGetValidResponse
+      testConnector.findDetailedIndividualAccountByGGID(ggId)(hc).futureValue shouldBe expectedGetValidResponse
     }
 
     "return an empty response if the provided GGID cannot be found" in {
@@ -120,7 +120,7 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
       when(defaultHttpClient.GET[Option[APIDetailedIndividualAccount]](any())(any(), any(), any()))
         .thenReturn(Future.successful(None))
 
-      await(testConnector.findDetailedIndividualAccountByGGID(ggId)(hc)) shouldBe expectedGetEmptyResponse
+      testConnector.findDetailedIndividualAccountByGGID(ggId)(hc).futureValue shouldBe expectedGetEmptyResponse
     }
   }
 
@@ -129,7 +129,7 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
       when(defaultHttpClient.POST[APIIndividualAccount, IndividualAccountId](any(), any(), any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(IndividualAccountId(12345)))
 
-      await(testConnector.createIndividualAccount(individualAccountSubmission)(hc)) shouldBe expectedCreateResponseValid
+      testConnector.createIndividualAccount(individualAccountSubmission)(hc).futureValue shouldBe expectedCreateResponseValid
     }
   }
 
@@ -163,7 +163,7 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
           )
         )))
 
-      await(testConnector.updateIndividualAccount(personId, individualAccountSubmission)(hc)) shouldBe expectedUpdateValidResponse
+      testConnector.updateIndividualAccount(personId, individualAccountSubmission)(hc).futureValue shouldBe expectedUpdateValidResponse
     }
   }
 
@@ -188,7 +188,7 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
           )
         )))
 
-      await(testConnector.getDetailedGroupAccount(groupId)(hc)) shouldBe expectedGetValidResponse1
+      testConnector.getDetailedGroupAccount(groupId)(hc).futureValue shouldBe expectedGetValidResponse1
     }
 
     "return an empty response if the provided id cannot be found" in {
@@ -197,7 +197,7 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
       when(defaultHttpClient.GET[Option[APIDetailedGroupAccount]](any())(any(), any(), any()))
         .thenReturn(Future.successful(None))
 
-      await(testConnector.getDetailedGroupAccount(groupId)(hc)) shouldBe expectedGetEmptyResponse
+      testConnector.getDetailedGroupAccount(groupId)(hc).futureValue shouldBe expectedGetEmptyResponse
     }
   }
 
@@ -223,7 +223,7 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
         )))
 
 
-     await(testConnector.findDetailedGroupAccountByGGID(ggId)(hc)) shouldBe expectedGetValidResponse1
+     testConnector.findDetailedGroupAccountByGGID(ggId)(hc).futureValue shouldBe expectedGetValidResponse1
     }
 
     "return an empty response if the provided GGID cannot be found" in {
@@ -232,7 +232,7 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
       when(defaultHttpClient.GET[Option[APIDetailedGroupAccount]](any())(any(), any(), any()))
         .thenReturn(Future.successful(None))
 
-      await(testConnector.findDetailedGroupAccountByGGID(ggId)(hc)) shouldBe expectedGetEmptyResponse
+      testConnector.findDetailedGroupAccountByGGID(ggId)(hc).futureValue shouldBe expectedGetEmptyResponse
     }
   }
 
@@ -257,7 +257,7 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
           )
         )))
 
-      await(testConnector.withAgentCode(agentCode)(hc)) shouldBe expectedGetValidResponse1
+      testConnector.withAgentCode(agentCode)(hc).futureValue shouldBe expectedGetValidResponse1
     }
 
     "return an empty response if the provided agent code cannot be found" in {
@@ -267,7 +267,7 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
         .thenReturn(Future.successful(None))
 
 
-      await(testConnector.withAgentCode(agentCode)(hc)) shouldBe expectedGetEmptyResponse
+      testConnector.withAgentCode(agentCode)(hc).futureValue shouldBe expectedGetEmptyResponse
     }
   }
 
@@ -277,7 +277,7 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
       when(defaultHttpClient.POST[APIGroupAccountSubmission, GroupId](any(), any(), any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(models.GroupId(654321, "valid group id", 45678)))
 
-      await(testConnector.createGroupAccount(createValidRequest)(hc)) shouldBe expectedCreateValidResponse
+      testConnector.createGroupAccount(createValidRequest)(hc).futureValue shouldBe expectedCreateValidResponse
     }
   }
 
@@ -300,8 +300,8 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
       when(defaultHttpClient.PUT[UpdatedOrganisationAccount, HttpResponse](any(), any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(HttpResponse(200)))
 
-      val result: Unit = await(testConnector.updateGroupAccount(orgId = orgId, updatedOrgAccount))
-      result should be ()
+      val result: Unit = testConnector.updateGroupAccount(orgId = orgId, updatedOrgAccount).futureValue
+      result should be (())
     }
   }
 
@@ -401,6 +401,4 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
     agentCode = 234)
   )
 
-  private val date = LocalDate.parse("2018-09-05")
-  private val instant = date.atStartOfDay().toInstant(ZoneOffset.UTC)
 }

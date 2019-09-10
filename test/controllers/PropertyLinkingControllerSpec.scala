@@ -18,14 +18,12 @@ package controllers
 
 import java.time.{Instant, LocalDate}
 
-import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import basespecs.BaseControllerSpec
 import binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import cats.data._
-import cats.implicits._
 import models._
 import models.mdtp.propertylink.myclients.PropertyLinksWithClients
-import models.mdtp.propertylink.requests.{APIPropertyLinkRequest, PropertyLinkRequest}
+import models.mdtp.propertylink.requests.PropertyLinkRequest
 import models.searchApi.{OwnerAuthResult, OwnerAuthorisation}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
@@ -34,6 +32,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services.{AssessmentService, PropertyLinkingService}
 import uk.gov.hmrc.http.{HttpResponse, Upstream5xxResponse}
+import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import uk.gov.hmrc.voapropertylinking.connectors.mdtp.BusinessRatesAuthConnector
 import uk.gov.hmrc.voapropertylinking.connectors.modernised.{AuthorisationManagementApi, CustomerManagementApi}
 
@@ -62,8 +61,6 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec {
     auditingService = mock[AuditingService],
     authorisationManagementApi = mockPropertyRepresentationConnector,
     agentQueryParameterEnabledExteranl = true)
-
-  val date = LocalDate.parse("2018-09-05")
 
   val validPropertiesView = PropertiesView(
     authorisationId = 11111,
@@ -122,33 +119,25 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec {
     "create a new property link submission in modernised" in {
       val testCapacityDeclaration = CapacityDeclaration("TEST_CAPACITY", LocalDate.now(), None)
       val testPropertyLinkSubmission = PropertyLinkRequest(1, 1, 1, testCapacityDeclaration, Instant.now(), "TEST_BASIS", Seq(FileInfo("filename", "evidenceType")), "PL12345")
-      val testAPIPropertyLinkRequest = APIPropertyLinkRequest.fromPropertyLinkRequest(testPropertyLinkSubmission)
 
       val plSubmissionJson = Json.toJson(testPropertyLinkSubmission)
 
       when(mockPropertyLinkService.create(any())(any(), any())).thenReturn(Future.successful(HttpResponse(200)))
 
       val res = testController.create()(FakeRequest().withBody(plSubmissionJson))
-
-      await(res)
-
-      status(res) mustBe ACCEPTED
-
+      status(res) shouldBe ACCEPTED
     }
 
     "return InternalServerError if property link submission fails" in {
       val testCapacityDeclaration = CapacityDeclaration("TEST_CAPACITY", LocalDate.now(), None)
       val testPropertyLinkSubmission = PropertyLinkRequest(1, 1, 1, testCapacityDeclaration, Instant.now(), "TEST_BASIS", Seq(FileInfo("filename", "evidenceType")), "PL12345")
-      val testAPIPropertyLinkRequest = APIPropertyLinkRequest.fromPropertyLinkRequest(testPropertyLinkSubmission)
 
       val plSubmissionJson = Json.toJson(testPropertyLinkSubmission)
 
       when(mockPropertyLinkService.create(any())(any(), any())).thenReturn(Future.failed(new Upstream5xxResponse("Failed to create PL", 501, 501)))
 
       val res = testController.create()(FakeRequest().withBody(plSubmissionJson))
-      await(res)
-
-      status(res) mustBe INTERNAL_SERVER_ERROR
+      status(res) shouldBe INTERNAL_SERVER_ERROR
     }
   }
 
@@ -158,9 +147,9 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec {
       when(mockPropertyLinkService.getMyOrganisationsPropertyLink(any())(any(), any())).thenReturn(OptionT.some[Future](validPropertiesView))
       val res = testController.getMyOrganisationsPropertyLink("11111")(FakeRequest())
 
-      status(res) mustBe OK
+      status(res) shouldBe OK
 
-      contentAsJson(res) mustBe Json.toJson(validPropertiesView)
+      contentAsJson(res) shouldBe Json.toJson(validPropertiesView)
 
     }
 
@@ -169,13 +158,12 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec {
       when(mockPropertyLinkService.getClientsPropertyLink(any())(any(), any())).thenReturn(OptionT.some[Future](validPropertiesView))
       val res = testController.getClientsPropertyLink("11111")(FakeRequest())
 
-      status(res) mustBe OK
+      status(res) shouldBe OK
 
-      contentAsJson(res) mustBe Json.toJson(validPropertiesView)
+      contentAsJson(res) shouldBe Json.toJson(validPropertiesView)
 
     }
   }
-
 
   "getMyPropertyLinks" should {
     "return owner property links" in {
@@ -184,9 +172,9 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec {
 
       val res = testController.getMyOrganisationsPropertyLinks(GetMyOrganisationPropertyLinksParameters(), None, None)(FakeRequest())
 
-      status(res) mustBe OK
+      status(res) shouldBe OK
 
-      contentAsJson(res) mustBe Json.toJson(ownerAuthResult)
+      contentAsJson(res) shouldBe Json.toJson(ownerAuthResult)
 
     }
 
@@ -196,9 +184,9 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec {
       when(mockPropertyLinkService.getClientsPropertyLinks(any(), any())(any(), any())).thenReturn(OptionT.some[Future](propertyLinksWithClients))
       val res = testController.getClientsPropertyLinks(GetMyClientsPropertyLinkParameters(), None)(FakeRequest())
 
-      status(res) mustBe OK
+      status(res) shouldBe OK
 
-      contentAsJson(res) mustBe Json.toJson(ownerAuthResult)
+      contentAsJson(res) shouldBe Json.toJson(ownerAuthResult)
 
     }
   }
