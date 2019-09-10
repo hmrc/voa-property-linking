@@ -35,7 +35,7 @@ class EnvelopeIdRepositorySpec
 
   val app = appBuilder.build()
 
-  val repository = new EnvelopeIdRepository(app.injector.instanceOf[ReactiveMongoComponent], s"${this.getClass.getSimpleName}") {
+  val repository = new EnvelopeIdRepository(app.injector.instanceOf[ReactiveMongoComponent], this.getClass.getSimpleName) {
     override def indexes: Seq[Index] = Seq.empty
   }
 

@@ -16,7 +16,7 @@
 
 package models
 
-import play.api.libs.json.{Json, OFormat, Reads}
+import play.api.libs.json.Json
 
 case class IndividualAccountId(id: Long)
 

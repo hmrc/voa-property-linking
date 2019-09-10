@@ -19,7 +19,6 @@ package models.searchApi
 import java.time.LocalDate
 
 import models.PropertyRepresentation
-import models.modernised.externalpropertylink.myclients.PropertyLinkWithClient
 import play.api.libs.json.Json
 
 case class AgentAuthorisation(

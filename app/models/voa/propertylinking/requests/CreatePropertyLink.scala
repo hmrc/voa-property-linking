@@ -24,7 +24,6 @@ import models.modernised.ProvidedEvidence.{ProvidedEvidence => Method}
 import models.modernised._
 import play.api.libs.json.{Json, OFormat, Writes}
 import uk.gov.hmrc.voapropertylinking.utils.Formatters
-import uk.gov.hmrc.voapropertylinking.utils.FileNameSanitisationUtils.formatFileName
 
 case class CreatePropertyLink(
                                uarn: Long,
