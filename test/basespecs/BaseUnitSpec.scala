@@ -19,6 +19,7 @@ package basespecs
 import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.mockito.MockitoSugar
+import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.test.AllMocks
@@ -45,6 +46,7 @@ abstract class BaseUnitSpec
 
   implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
   implicit val hc: HeaderCarrier = HeaderCarrier()
-  implicit val requestWithPrincipal = RequestWithPrincipal(FakeRequest(), Principal("external-id", "group-id"))
+  implicit val requestWithPrincipal: RequestWithPrincipal[AnyContentAsEmpty.type] =
+    RequestWithPrincipal(FakeRequest(), Principal("external-id", "group-id"))
 
 }

@@ -19,7 +19,7 @@ package modules.tasks
 import java.util.UUID
 
 import com.google.inject.{Inject, Singleton}
-import models.Closed
+import models.EnvelopeStatus._
 import modules.MongoTask
 import play.api.{Environment, Logger}
 import play.api.libs.concurrent.Execution.Implicits._
@@ -32,8 +32,11 @@ import scala.util.Try
 @Singleton
 class AddEnvelopes @Inject()(override val env: Environment, envelopeRepo: EnvelopeIdRepository) extends MongoTask[EnvelopeId] {
   override val upToVersion: Int = 6
-  override def verify: String => Option[EnvelopeId] = line => Try(UUID.fromString(line)).map(_ => Some(EnvelopeId(line, line, Some(Closed), Some(BSONDateTime(System.currentTimeMillis))))).getOrElse(None)
+
+  override def verify: String => Option[EnvelopeId] = line =>
+    Try(UUID.fromString(line)).map(_ => Some(EnvelopeId(line, line, Some(CLOSED), Some(BSONDateTime(System.currentTimeMillis))))).getOrElse(None)
+
   override def execute: EnvelopeId => Future[Unit] = line => envelopeRepo.insert(line)
     .map(_ => Logger.info(s"Added: $line"))
-    .recover{ case _ => Logger.info(s"Already exists: $line")}
+    .recover { case _ => Logger.info(s"Already exists: $line") }
 }

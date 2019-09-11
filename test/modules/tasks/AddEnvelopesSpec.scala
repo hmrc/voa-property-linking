@@ -18,7 +18,7 @@ package modules.tasks
 
 import java.util.UUID
 
-import models.Closed
+import models.EnvelopeStatus._
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.Environment
@@ -45,7 +45,7 @@ class AddEnvelopesSpec extends UnitSpec
   val unitUnderTest = new AddEnvelopes(mockEnv, repository)
   val timeNow = Some(BSONDateTime(System.currentTimeMillis))
   val uuid = UUID.randomUUID().toString
-  val envId = EnvelopeId(uuid, uuid, Some(Closed), timeNow)
+  val envId = EnvelopeId(uuid, uuid, Some(CLOSED), timeNow)
 
   "execute" should {
     "insert the line into the repo" in {

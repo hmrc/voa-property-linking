@@ -37,9 +37,23 @@ class SequenceGeneratorRepositorySpec
   }
 
   "repository" should {
-    "have an empty index initially" in {
+    "start sequences at 600M" in {
       val noneRepresentationOfLongValue = 600000000
       repository.getNextSequenceId("test").futureValue shouldBe noneRepresentationOfLongValue
+    }
+
+    "produce unique sequence numbers" in {
+      val totalCount = 10
+      val sequenceNumbers: List[Long] = (1 to totalCount).toList.traverse(_ => repository.getNextSequenceId("test")).futureValue
+      sequenceNumbers.distinct should have size totalCount
+    }
+
+    "throw an exception if the current sequence value is too large" in {
+      repository.insert(Sequence("foo", 999999999)).futureValue
+      whenReady(repository.getNextSequenceId("foo").failed) { e =>
+        e shouldBe a[RuntimeException]
+        e.getMessage should startWith("Reached upper limit")
+      }
     }
   }
 

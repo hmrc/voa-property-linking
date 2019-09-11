@@ -19,7 +19,7 @@ package controllers
 import java.util.UUID
 
 import basespecs.BaseControllerSpec
-import models.EnvelopeStatus
+import models.EnvelopeStatus.EnvelopeStatus
 import org.mockito.ArgumentMatchers.{eq => matching, _}
 import org.mockito.Mockito._
 import play.api.libs.json.Json

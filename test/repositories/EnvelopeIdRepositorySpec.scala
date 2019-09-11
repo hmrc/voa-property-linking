@@ -17,7 +17,7 @@
 package repositories
 
 import basespecs.BaseUnitSpec
-import models.{Closed, EnvelopeStatus, Open}
+import models.EnvelopeStatus._
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.indexes.Index
@@ -48,7 +48,7 @@ class EnvelopeIdRepositorySpec
   }
 
   private val envelopeId = "envId1234"
-  private val status = Open
+  private val status = OPEN
 
   "repository" should {
     "have an empty index initially" in {
@@ -85,7 +85,7 @@ class EnvelopeIdRepositorySpec
   "repository" should {
     "get return the status open for the provided envelopeId" in {
       repository.create(envelopeId, status).futureValue
-      repository.getStatus(envelopeId).futureValue shouldBe Some(Open)
+      repository.getStatus(envelopeId).futureValue shouldBe Some(OPEN)
     }
   }
 
@@ -98,14 +98,14 @@ class EnvelopeIdRepositorySpec
   "repository" should {
     "update the envelopeId with the status Closed " in {
       repository.create(envelopeId, status).futureValue
-      repository.update(envelopeId, Closed).futureValue shouldBe (())
-      repository.getStatus(envelopeId).futureValue shouldBe Some(Closed)
+      repository.update(envelopeId, CLOSED).futureValue shouldBe (())
+      repository.getStatus(envelopeId).futureValue shouldBe Some(CLOSED)
     }
   }
 
   "repository" should {
     "not update the status for an envelopeId that does not exist" in {
-      repository.update(envelopeId, Closed).futureValue shouldBe (())
+      repository.update(envelopeId, CLOSED).futureValue shouldBe (())
     }
   }
 

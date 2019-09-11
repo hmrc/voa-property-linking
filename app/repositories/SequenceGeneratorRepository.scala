@@ -22,6 +22,7 @@ import play.api.libs.json._
 import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.bson.{BSONDocument, BSONInteger, BSONString}
 import reactivemongo.play.json.ImplicitBSONHandlers._
+import reactivemongo.play.json.collection.JSONBatchCommands.FindAndModifyCommand
 import uk.gov.hmrc.mongo.{ReactiveRepository, Repository}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -30,53 +31,45 @@ import scala.concurrent.Future
 case class Sequence(_id: String, sequence: Long)
 
 object Sequence {
-  val format = Json.format[Sequence]
+  val format: OFormat[Sequence] = Json.format
 }
 
 trait SequenceGeneratorRepository extends Repository[Sequence, String] {
-
   def getNextSequenceId(key: String): Future[Long]
 }
 
 @Singleton
-class SequenceGeneratorMongoRepository @Inject()(
-                                                  mongo: ReactiveMongoComponent
-                                                ) extends
-  ReactiveRepository[Sequence, String]("sequences", mongo.mongoConnector.db, Json.format[Sequence], implicitly[Format[String]])
-  with SequenceGeneratorRepository {
+class SequenceGeneratorMongoRepository @Inject()(mongo: ReactiveMongoComponent)
+  extends ReactiveRepository[Sequence, String](
+    collectionName = "sequences",
+    mongo = mongo.mongoConnector.db,
+    domainFormat = Json.format[Sequence],
+    idFormat = implicitly[Format[String]]
+  ) with SequenceGeneratorRepository {
 
+  def sequenceNo(in: FindAndModifyCommand.FindAndModifyResult): Long =
+    in.result[Sequence].map(_.sequence).getOrElse(throw new RuntimeException("Unable to generate sequence number"))
 
   override def getNextSequenceId(key: String): Future[Long] = {
     // get latest from sequence, if none - then set next number to 600_000_000, else inc by one
     // if num=999_999_999 throw error
-    findLatestSequence(key).flatMap {
+    val selector: BSONDocument = BSONDocument("_id" -> BSONString(key))
 
-      case Some(sequence) if sequence.sequence == 999999999 =>
-        throw new IllegalStateException("Reached upper limit of 999999999 on generating sequence number")
+    def update(inc: Int): BSONDocument = BSONDocument(s"$$inc" -> BSONDocument("sequence" -> BSONInteger(inc)))
 
-      case Some(sequence) =>
-        collection.findAndUpdate(
-          BSONDocument("_id" -> BSONString(key)),
-          BSONDocument("$inc" -> BSONDocument("sequence" -> BSONInteger(1))),
-          fetchNewObject = true,
-          upsert = true).map(
-          _.result[Sequence].map(Json.toJson(_).\("sequence").as[Long]).getOrElse(throw new IllegalStateException("Unable to generate sequence number"))
-        )
-
-      case None =>
-        collection.findAndUpdate(
-          BSONDocument("_id" -> BSONString(key)),
-          BSONDocument("$inc" -> BSONDocument("sequence" -> BSONInteger(600000000))),
-          fetchNewObject = true,
-          upsert = true).map(
-          _.result[Sequence].map(Json.toJson(_).\("sequence").as[Long]).getOrElse(throw new IllegalStateException("Unable to generate sequence number"))
-        )
+    findLatestSequence(key).flatMap { optSequence =>
+      optSequence.fold(
+        collection.findAndUpdate(selector, update(600000000), fetchNewObject = true, upsert = true).map(sequenceNo)
+      ) {
+        case sequence if sequence.sequence == 999999999 =>
+          Future.failed(new RuntimeException("Reached upper limit of 999999999 on generating sequence number"))
+        case _ =>
+          collection.findAndUpdate(selector, update(1), fetchNewObject = true, upsert = false).map(sequenceNo)
+      }
     }
   }
 
   private def findLatestSequence(key: String): Future[Option[Sequence]] =
-    collection
-      .find(Json.obj("_id" -> key))
-      .sort(Json.obj("_id" -> -1))
-      .one[Sequence]
+    collection.find(Json.obj("_id" -> key)).sort(Json.obj("_id" -> -1)).one[Sequence]
+
 }

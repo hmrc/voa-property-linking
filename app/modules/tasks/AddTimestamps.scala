@@ -18,7 +18,7 @@ package modules.tasks
 
 import javax.inject.{Inject, Singleton}
 
-import models.Closed
+import models.EnvelopeStatus._
 import modules.MongoTask
 import play.api.Environment
 import repositories.{EnvelopeId, EnvelopeIdRepo}
@@ -35,7 +35,7 @@ class AddTimestamps @Inject()(val env: Environment, envelopeRepo: EnvelopeIdRepo
 
   override def run(version: Int): Future[Unit] = {
     envelopeRepo.get() flatMap { envs =>
-      Future.sequence(envs.map { env => envelopeRepo.update(env.envelopeId, env.status.getOrElse(Closed))} )
+      Future.sequence(envs.map { env => envelopeRepo.update(env.envelopeId, env.status.getOrElse(CLOSED))} )
     } map { _ => () }
   }
 }

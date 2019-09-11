@@ -16,18 +16,16 @@
 
 package models
 
-sealed trait EnvelopeStatus extends NamedEnum {
-  val key = "envelopeStatus"
+import play.api.libs.json.Format
+import uk.gov.hmrc.voapropertylinking.utils.JsonUtils
+
+object EnvelopeStatus extends Enumeration {
+  //  val key = "envelopeStatus"
+  type EnvelopeStatus = Value
+  val OPEN: EnvelopeStatus = Value("OPEN")
+  val CLOSED: EnvelopeStatus = Value("CLOSED")
+
+  implicit val format: Format[EnvelopeStatus] = JsonUtils.enumFormat(EnvelopeStatus)
+
 }
 
-case object Open extends EnvelopeStatus {
-  val name = "OPEN"
-}
-
-case object Closed extends EnvelopeStatus {
-  override val name = "CLOSED"
-}
-
-object EnvelopeStatus extends NamedEnumSupport[EnvelopeStatus] {
-  override def all: List[EnvelopeStatus] = List(Open, Closed)
-}

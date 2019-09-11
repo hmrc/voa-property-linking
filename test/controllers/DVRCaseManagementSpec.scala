@@ -83,10 +83,9 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
     }
   }
 
-  //TODO flaky test due to now and 0's being removed from result. e.g 10/10/2010T10.10.10.81 vs 10/10/2010T10.10.10.810
   "get dvr documents" should {
     "return 200 OK with the dvr document information" in {
-      val now = LocalDateTime.now()
+      val now = LocalDateTime.parse("2019-09-11T11:03:25.123")
 
       when(mockExternalValuationManagementapi.getDvrDocuments(any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(Some(DvrDocumentFiles(

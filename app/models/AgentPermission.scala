@@ -16,24 +16,19 @@
 
 package models
 
-sealed trait AgentPermission extends NamedEnum {
-  def key: String = "permission"
-}
+import play.api.libs.json.Format
+import uk.gov.hmrc.voapropertylinking.utils.JsonUtils
 
-case object StartAndContinue extends AgentPermission {
-  override def name: String = "START_AND_CONTINUE"
-}
+object AgentPermission extends Enumeration {
+  type AgentPermission = Value
+  val StartAndContinue: AgentPermission = Value("START_AND_CONTINUE")
+  val ContinueOnly: AgentPermission = Value("CONTINUE_ONLY")
+  val NotPermitted: AgentPermission = Value("NOT_PERMITTED")
 
-case object ContinueOnly extends AgentPermission {
-  override def name: String = "CONTINUE_ONLY"
-}
+  implicit val format: Format[AgentPermission] = JsonUtils.enumFormat(AgentPermission)
 
-case object NotPermitted extends AgentPermission {
-  override def name: String = "NOT_PERMITTED"
-}
-
-object AgentPermission extends NamedEnumSupport[AgentPermission] {
-  //implicit val format = EnumFormat(AgentPermission)
-  override def all = Seq(StartAndContinue, ContinueOnly, NotPermitted)
-  override def options = Seq(StartAndContinue, NotPermitted).map(_.name)
+  def fromName(name: String): Option[AgentPermission] =
+    List(StartAndContinue, ContinueOnly, NotPermitted).collectFirst {
+      case p if p.toString == name => p
+    }
 }

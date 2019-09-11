@@ -38,7 +38,7 @@ import basespecs.BaseUnitSpec
 import com.codahale.metrics.MetricRegistry
 import com.kenshoo.play.metrics.Metrics
 import helpers.AnswerSugar
-import models.Closed
+import models.EnvelopeStatus._
 import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.{eq => mEq, _}
 import org.mockito.Mockito._
@@ -209,7 +209,7 @@ class FileTransferServiceSpec extends BaseUnitSpec with AnswerSugar {
     "delete envelope IDs that don't exist in FUaaS" in {
       val envelopeId = "999"
 
-      when(repo.get()).thenReturn(Future.successful(Seq(EnvelopeId(envelopeId, envelopeId, Some(Closed), Some(BSONDateTime(System.currentTimeMillis))))))
+      when(repo.get()).thenReturn(Future.successful(Seq(EnvelopeId(envelopeId, envelopeId, Some(CLOSED), Some(BSONDateTime(System.currentTimeMillis))))))
       when(fileUploadConnector.getEnvelopeDetails(mEq(envelopeId))(any[HeaderCarrier])) thenReturn {
         Future.successful(EnvelopeInfo(envelopeId, "NOT_EXISTING", Nil, EnvelopeMetadata("nosubmissionid", 1)))
       }
@@ -219,24 +219,24 @@ class FileTransferServiceSpec extends BaseUnitSpec with AnswerSugar {
       fts.justDoIt().futureValue
 
       verify(repo, times(1)).delete(envelopeId)
-      verify(repo, never).create(envelopeId, Closed)
+      verify(repo, never).create(envelopeId, CLOSED)
     }
 
     "move envelopes to the back of the queue if there are any other errors when retrieving envelope data" in {
       val envelopeId = "9999"
 
-      when(repo.get()).thenReturn(Future.successful(Seq(EnvelopeId(envelopeId, envelopeId, Some(Closed), Some(BSONDateTime(System.currentTimeMillis))))))
+      when(repo.get()).thenReturn(Future.successful(Seq(EnvelopeId(envelopeId, envelopeId, Some(CLOSED), Some(BSONDateTime(System.currentTimeMillis))))))
       when(fileUploadConnector.getEnvelopeDetails(mEq(envelopeId))(any[HeaderCarrier])) thenReturn {
         Future.successful(EnvelopeInfo(envelopeId, "UNKNOWN_ERROR", Nil, EnvelopeMetadata("nosubmissionid", 1)))
       }
 
       when(repo.delete(anyString)).thenReturn(Future.successful(()))
-      when(repo.create(envelopeId, Closed)).thenReturn(Future.successful(()))
+      when(repo.create(envelopeId, CLOSED)).thenReturn(Future.successful(()))
 
       Try { fts.justDoIt().futureValue }
 
       verify(repo, times(1)).delete(envelopeId)
-      verify(repo, times(1)).create(envelopeId, Closed)
+      verify(repo, times(1)).create(envelopeId, CLOSED)
     }
 
     "Log metrics for opened and closed envelopes is invoked correctly" in {

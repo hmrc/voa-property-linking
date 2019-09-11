@@ -22,7 +22,7 @@ private object AppDependencies {
     "uk.gov.hmrc" %% "bootstrap-play-25" % "4.13.0",
     "uk.gov.hmrc" %% "mongo-lock" % "5.1.1",
     "uk.gov.hmrc" %% "domain" % "4.1.0",
-    "org.typelevel" %% "cats-core" % "1.0.1",
+    "org.typelevel" %% "cats-core" % "1.6.1",
     "com.google.inject.extensions" % "guice-multibindings" % "4.0",
     "uk.gov.hmrc" %% "reactive-circuit-breaker" % "2.1.0"
   )

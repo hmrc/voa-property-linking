@@ -21,7 +21,7 @@ import com.google.inject.Singleton
 import com.kenshoo.play.metrics.Metrics
 import javax.inject.Inject
 import metrics.MetricsLogger
-import models.{Closed, Open}
+import models.EnvelopeStatus._
 import play.api.Logger
 import repositories.EnvelopeIdRepo
 import uk.gov.hmrc.circuitbreaker.UnhealthyServiceException
@@ -43,7 +43,7 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
 
   def transferManually(envelopeId: String)(implicit hc: HeaderCarrier): Future[Unit] = {
     repo.getStatus(envelopeId) flatMap {
-      case Some(Closed) => transferSingleFile(envelopeId)
+      case Some(CLOSED) => transferSingleFile(envelopeId)
       case _ => Logger.info(s"Received callback for $envelopeId, but declaration has not been submitted"); Future.successful(())
     }
   }
@@ -62,7 +62,7 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
   def justDoIt()(implicit hc: HeaderCarrier): Future[FileTransferComplete] = {
     val allEnvelopes = repo.get()
     allEnvelopes.foreach { envelopes =>
-      val (open, closed) = envelopes.span(_.status.contains(Open))
+      val (open, closed) = envelopes.span(_.status.contains(OPEN))
       logMetrics("mongo.envelope.queue-size", "open", open.size)
       logMetrics("mongo.envelope.queue-size", "closed", closed.size)
       Logger.info(s"${open.size} open, ${closed.size} closed")
@@ -71,7 +71,7 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
 
     {
       for {
-        closedEnvelopes <- allEnvelopes.map(_.filter(_.status.getOrElse(Closed) == Closed))
+        closedEnvelopes <- allEnvelopes.map(_.filter(_.status.getOrElse(CLOSED) == CLOSED))
         envelopeIds = closedEnvelopes.map(_.envelopeId)
         envelopeInfos <- Future.traverse(envelopeIds)( envId => fileUploadConnector.getEnvelopeDetails(envId))
         envelopeFilesNotQuarantine = envelopeInfos.filterNot(env => env.files.map(_.status).contains("QUARANTINED"))
@@ -138,6 +138,6 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
       Future.failed(e)
     case e: Throwable =>
       Logger.error(s"Error processing file(s) in envelope $envelopeId to backend - moving to back of queue", e)
-      repo.delete(envelopeId).flatMap(_ => repo.create(envelopeId, Closed)).flatMap(_ => Future.failed(e))
+      repo.delete(envelopeId).flatMap(_ => repo.create(envelopeId, CLOSED)).flatMap(_ => Future.failed(e))
   }
 }
