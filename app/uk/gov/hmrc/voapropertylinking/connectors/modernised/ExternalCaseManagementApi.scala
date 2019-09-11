@@ -16,13 +16,13 @@
 
 package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
-import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
 import javax.inject.Inject
 import models.{AgentCheckCasesResponse, CanChallengeResponse, CheckCasesResponse, OwnerCheckCasesResponse}
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
+import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -37,9 +37,9 @@ class ExternalCaseManagementApi @Inject()(
 
   def getCheckCases(submissionId: String, party: String)(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[Option[CheckCasesResponse]] = {
     party match {
-      case "agent"  =>  http.GET[Option[AgentCheckCasesResponse]](s"$voaModernisedApiStubBaseUrl/external-case-management-api/my-organisation/clients/all/property-links/$submissionId/check-cases?start=1&size=100") recover { case _ => None }
-      case "client" =>  http.GET[Option[OwnerCheckCasesResponse]](s"$voaModernisedApiStubBaseUrl/external-case-management-api/my-organisation/property-links/$submissionId/check-cases?start=1&size=100") recover { case _ => None }
-      case _        =>  Future.successful(None)
+      case "agent" => http.GET[Option[AgentCheckCasesResponse]](s"$voaModernisedApiStubBaseUrl/external-case-management-api/my-organisation/clients/all/property-links/$submissionId/check-cases?start=1&size=100") recover { case _ => None }
+      case "client" => http.GET[Option[OwnerCheckCasesResponse]](s"$voaModernisedApiStubBaseUrl/external-case-management-api/my-organisation/property-links/$submissionId/check-cases?start=1&size=100") recover { case _ => None }
+      case _ => Future.successful(None)
     }
   }
 
@@ -48,13 +48,13 @@ class ExternalCaseManagementApi @Inject()(
                    valuationId: Long,
                    party: String)(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[Option[CanChallengeResponse]] = {
     party match {
-      case "client"   =>  http.GET[HttpResponse](s"$voaModernisedApiStubBaseUrl/external-case-management-api/my-organisation/property-links/$propertyLinkSubmissionId/check-cases/$checkCaseRef/canChallenge?valuationId=$valuationId").map{ resp =>
+      case "client" => http.GET[HttpResponse](s"$voaModernisedApiStubBaseUrl/external-case-management-api/my-organisation/property-links/$propertyLinkSubmissionId/check-cases/$checkCaseRef/canChallenge?valuationId=$valuationId").map { resp =>
         handleCanChallengeResponse(resp)
       } recover { case _ => None }
-      case "agent"    =>  http.GET[HttpResponse](s"$voaModernisedApiStubBaseUrl/external-case-management-api/my-organisation/clients/all/property-links/$propertyLinkSubmissionId/check-cases/$checkCaseRef/canChallenge?valuationId=$valuationId").map{ resp =>
+      case "agent" => http.GET[HttpResponse](s"$voaModernisedApiStubBaseUrl/external-case-management-api/my-organisation/clients/all/property-links/$propertyLinkSubmissionId/check-cases/$checkCaseRef/canChallenge?valuationId=$valuationId").map { resp =>
         handleCanChallengeResponse(resp)
       } recover { case _ => None }
-      case _          =>  throw new IllegalArgumentException(s"Unknown party $party")
+      case _ => throw new IllegalArgumentException(s"Unknown party $party")
 
     }
   }
@@ -62,7 +62,7 @@ class ExternalCaseManagementApi @Inject()(
   private def handleCanChallengeResponse(resp: HttpResponse): Option[CanChallengeResponse] = {
     resp.status match {
       case 200 => Json.parse(resp.body).asOpt[CanChallengeResponse]
-      case _   => None
+      case _ => None
     }
   }
 }

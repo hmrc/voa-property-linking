@@ -17,15 +17,14 @@
 package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
 import binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
-import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
 import javax.inject.{Inject, Named}
 import models.PaginationParams
 import models.modernised.externalpropertylink.myclients.{ClientPropertyLink, PropertyLinksWithClient}
 import models.modernised.externalpropertylink.myorganisations.{OwnerPropertyLink, PropertyLinksWithAgents}
 import models.voa.propertylinking.requests.CreatePropertyLink
-import play.api.Logger
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
+import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -85,12 +84,10 @@ class ExternalPropertyLinkApi @Inject()(
   private def modernisedPaginationParams(params: Option[PaginationParams]): Seq[(String, String)] =
     params.fold(Seq.empty[(String, String)]){ p =>
       Seq(
-        "start" -> p.startPoint,
-        "size"  -> p.pageSize,
+        "start" -> p.startPoint.toString,
+        "size"  -> p.pageSize.toString,
         "requestTotalRowCount" -> "true"
-      ).map {
-        case (key, value) => (key, value.toString)
-      }
+      )
     }
 
 }

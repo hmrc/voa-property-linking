@@ -16,15 +16,6 @@
 
 package uk.gov.hmrc.voapropertylinking.connectors
 
-import uk.gov.hmrc.http.{HeaderCarrier, JsonHttpReads, OptionHttpReads, RawReads}
-import uk.gov.hmrc.play.HeaderCarrierConverter
-import uk.gov.hmrc.voapropertylinking.auth.{Principal, RequestWithPrincipal}
+import uk.gov.hmrc.http.{JsonHttpReads, OptionHttpReads, RawReads}
 
-trait BaseConnector extends JsonHttpReads with OptionHttpReads with RawReads {
-
-  implicit def hc(implicit request: RequestWithPrincipal[_]): HeaderCarrier =
-    HeaderCarrierConverter.fromHeadersAndSession(request.headers)
-
-  implicit def principal(implicit request: RequestWithPrincipal[_]): Principal =
-    request.principal
-}
+trait BaseConnector extends JsonHttpReads with OptionHttpReads with RawReads

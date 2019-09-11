@@ -19,6 +19,8 @@ package helpers
 import org.mockito.invocation.InvocationOnMock
 import org.mockito.stubbing.Answer
 
+import scala.language.implicitConversions
+
 trait AnswerSugar {
 
   implicit def toAnswer[T](f: () => T): Answer[T] = new Answer[T] {

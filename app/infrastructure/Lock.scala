@@ -16,11 +16,10 @@
 
 package infrastructure
 
-import javax.inject.{Inject, Named}
 import com.google.inject.Singleton
+import javax.inject.{Inject, Named}
 import org.joda.time.Duration
 import play.modules.reactivemongo.ReactiveMongoComponent
-import reactivemongo.api.DB
 import uk.gov.hmrc.lock.{ExclusiveTimePeriodLock, LockMongoRepository, LockRepository}
 
 //TODO remove with file upload components
