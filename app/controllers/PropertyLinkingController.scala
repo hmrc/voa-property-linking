@@ -150,6 +150,7 @@ class PropertyLinkingController @Inject()(
         }
     }
   }
+
   // $COVERAGE-ON$
 
   def getMyOrganisationsAssessments(submissionId: String): Action[AnyContent] = authenticated.async { implicit request =>
@@ -190,9 +191,7 @@ class PropertyLinkingController @Inject()(
   }
 
   private def toClientProperty(authorisation: LegacyPropertiesView)(implicit hc: HeaderCarrier): Future[ClientProperty] = {
-    customerManagementApi.getDetailedGroupAccount(authorisation.authorisationOwnerOrganisationId) map { acc =>
-      ClientProperty.build(authorisation, acc)
-    }
+    customerManagementApi.getDetailedGroupAccount(authorisation.authorisationOwnerOrganisationId).map(ClientProperty.build(authorisation, _))
   }
 }
 

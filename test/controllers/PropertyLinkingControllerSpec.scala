@@ -16,7 +16,7 @@
 
 package controllers
 
-import java.time.Instant
+import java.time.{Instant, LocalDate}
 
 import basespecs.BaseControllerSpec
 import binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
@@ -24,6 +24,7 @@ import cats.data._
 import models._
 import models.mdtp.propertylink.myclients.PropertyLinksWithClients
 import models.mdtp.propertylink.requests.PropertyLinkRequest
+import models.modernised.mdtpdashboard.LegacyPropertiesView
 import models.searchApi.{OwnerAuthResult, OwnerAuthorisation}
 import org.mockito.ArgumentMatchers.{any, eq => mEq}
 import org.mockito.Mockito._
@@ -137,7 +138,8 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec {
 
       val plSubmissionJson = Json.toJson(testPropertyLinkSubmission)
 
-      when(mockPropertyLinkingService.create(any())(any(), any())).thenReturn(Future.failed(new Upstream5xxResponse("Failed to create PL", 501, 501)))
+      when(mockPropertyLinkingService.create(any())(any(), any()))
+        .thenReturn(Future.failed(new Upstream5xxResponse("Failed to create PL", 501, 501)))
 
       val res = testController.create()(FakeRequest().withBody(plSubmissionJson))
       status(res) shouldBe INTERNAL_SERVER_ERROR
@@ -146,7 +148,8 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec {
 
   "getMyPropertyLink" should {
     "return a single my org property link" in {
-      when(mockPropertyLinkingService.getMyOrganisationsPropertyLink(any())(any(), any())).thenReturn(OptionT.some[Future](validPropertiesView))
+      when(mockPropertyLinkingService.getMyOrganisationsPropertyLink(any())(any(), any()))
+        .thenReturn(OptionT.some[Future](validPropertiesView))
       val res = testController.getMyOrganisationsPropertyLink("11111")(FakeRequest())
 
       status(res) shouldBe OK
@@ -154,7 +157,8 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec {
     }
 
     "return a single my client property link" in {
-      when(mockPropertyLinkingService.getClientsPropertyLink(any())(any(), any())).thenReturn(OptionT.some[Future](validPropertiesView))
+      when(mockPropertyLinkingService.getClientsPropertyLink(any())(any(), any()))
+        .thenReturn(OptionT.some[Future](validPropertiesView))
       val res = testController.getClientsPropertyLink("11111")(FakeRequest())
 
       status(res) shouldBe OK
@@ -164,7 +168,8 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec {
 
   "getMyPropertyLinks" should {
     "return owner property links" in {
-      when(mockPropertyLinkingService.getMyOrganisationsPropertyLinks(any(), any())(any(), any())).thenReturn(OptionT.some[Future](ownerAuthResult))
+      when(mockPropertyLinkingService.getMyOrganisationsPropertyLinks(any(), any())(any(), any()))
+        .thenReturn(OptionT.some[Future](ownerAuthResult))
       val res = testController.getMyOrganisationsPropertyLinks(GetMyOrganisationPropertyLinksParameters(), None, None)(FakeRequest())
 
       status(res) shouldBe OK
@@ -174,7 +179,8 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec {
     "search via authorisationSearchApi when AGENT sortField" when {
 
       "organisationId is provided" in {
-        when(mockPropertyLinkingService.getMyOrganisationsPropertyLinks(any(), any())(any(), any())).thenReturn(OptionT.some[Future](ownerAuthResult))
+        when(mockPropertyLinkingService.getMyOrganisationsPropertyLinks(any(), any())(any(), any()))
+          .thenReturn(OptionT.some[Future](ownerAuthResult))
         val res = testController.getMyOrganisationsPropertyLinks(GetMyOrganisationPropertyLinksParameters(sortField = Some("AGENT")), None, None)(FakeRequest())
 
         status(res) shouldBe BAD_REQUEST
@@ -196,6 +202,85 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec {
 
       status(res) shouldBe OK
       contentAsJson(res) shouldBe Json.toJson(ownerAuthResult)
+    }
+  }
+
+  "getMyOrganisationsAssessments" should {
+    "return property links with assessments" in {
+      val submissionId = "SUB123"
+      when(mockAssessmentService.getMyOrganisationsAssessments(mEq(submissionId))(any(), any()))
+        .thenReturn(OptionT.some[Future](assessments))
+
+      val res = testController.getMyOrganisationsAssessments(submissionId)(FakeRequest())
+
+      status(res) shouldBe OK
+    }
+  }
+
+  "getClientsAssessments" should {
+    "return property links with assessments" in {
+      val submissionId = "SUB123"
+      when(mockAssessmentService.getClientsAssessments(mEq(submissionId))(any(), any()))
+        .thenReturn(OptionT.some[Future](assessments))
+
+      val res = testController.getClientsAssessments(submissionId)(FakeRequest())
+
+      status(res) shouldBe OK
+    }
+  }
+
+  trait ClientPropertySetup {
+    protected def legacyPropertiesView(authId: Long) = LegacyPropertiesView(
+      authorisationId = authId,
+      uarn = 123456,
+      authorisationOwnerOrganisationId = 1,
+      authorisationOwnerPersonId = 2,
+      authorisationStatus = "OPEN",
+      authorisationMethod = "RATES_BILL",
+      authorisationOwnerCapacity = "OWNER",
+      startDate = today,
+      endDate = Some(today.plusDays(2)),
+      submissionId = "PL12345",
+      NDRListValuationHistoryItems = Seq.empty[APIValuationHistory],
+      parties = Seq(APIParty(1L, "APPROVED", 1L, Seq(Permissions(1L, "START", "START", None))))
+    )
+
+    val groupAccount = GroupAccount(
+      id = 100L,
+      groupId = "grpId",
+      companyName = "ACME",
+      addressId = 1234L,
+      email = "email@server.com",
+      phone = "01234567",
+      isAgent = false,
+      agentCode = 54321L
+    )
+  }
+
+  "clientProperty" should {
+    "return 200 OK with client property" in new ClientPropertySetup {
+      val authorisationId: Long = 1234L
+      when(mockMdtpDashboardManagementApi.get(mEq(authorisationId))(any()))
+        .thenReturn(Future.successful(Some(legacyPropertiesView(authorisationId))))
+      when(mockCustomerManagementApi.getDetailedGroupAccount(any())(any()))
+        .thenReturn(Future.successful(Some(groupAccount)))
+
+      val res = testController.clientProperty(authorisationId, 1L, 1L)(FakeRequest())
+
+      status(res) shouldBe OK
+    }
+
+
+    "return 404 Not Found" when {
+      "dashboard management api returns no properties" in {
+        val authorisationId: Long = 1234L
+        when(mockMdtpDashboardManagementApi.get(mEq(authorisationId))(any()))
+          .thenReturn(Future.successful(None))
+
+        val res = testController.clientProperty(authorisationId, 1L, 1L)(FakeRequest())
+
+        status(res) shouldBe NOT_FOUND
+      }
     }
   }
 }
