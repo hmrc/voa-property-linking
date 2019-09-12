@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
-import java.time.LocalDate
-
 import basespecs.BaseUnitSpec
 import models.searchApi._
 import models.{PaginationParams, PropertyRepresentation, PropertyRepresentations}
@@ -37,13 +35,10 @@ class AuthorisationSearchApiSpec extends BaseUnitSpec {
 
   "A manage agents" should {
     "find owner agents" in {
-
       val organisationId = 123
 
       when(http.GET[Agents](any())(any(), any(), any())).thenReturn(Future.successful(
-        Agents(
-          Seq(Agent("Test name 1", 123), Agent("Test name 2", 123))
-        )
+        Agents(Seq(Agent("Test name 1", 123), Agent("Test name 2", 123)))
       ))
 
       connector.manageAgents(organisationId)(hc).futureValue.agents.size shouldBe 2
@@ -57,18 +52,18 @@ class AuthorisationSearchApiSpec extends BaseUnitSpec {
         .thenReturn(Future.successful(
           AgentAuthResultBE(
             1, 10, 30, 50, Seq(AgentAuthorisation(
-              987654,
-              34567890,
-              "APPROVED",
-              "xyz123",
-              "123xyz",
-              123456,
-              "The White House",
-              "VOA1",
-              Client(123456, "Fake News Inc"),
-              "APPROVED",
-              "START_AND_CONTINUE",
-              "START_AND_CONTINUE"
+              authorisationId = 987654,
+              authorisedPartyId = 34567890,
+              status = "APPROVED",
+              representationSubmissionId = "xyz123",
+              submissionId = "123xyz",
+              uarn = 123456,
+              address = "The White House",
+              localAuthorityRef = "VOA1",
+              client = Client(123456, "Fake News Inc"),
+              representationStatus = "APPROVED",
+              checkPermission = "START_AND_CONTINUE",
+              challengePermission = "START_AND_CONTINUE"
             ))
           )
         ))
@@ -85,7 +80,7 @@ class AuthorisationSearchApiSpec extends BaseUnitSpec {
         address = "The White House",
         checkPermission = "START_AND_CONTINUE",
         challengePermission = "START_AND_CONTINUE",
-        createDatetime = LocalDate.now(),
+        createDatetime = today,
         status = "APPROVED"
       )
 

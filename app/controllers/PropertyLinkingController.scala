@@ -42,8 +42,7 @@ class PropertyLinkingController @Inject()(
                                            assessmentService: AssessmentService,
                                            customerManagementApi: CustomerManagementApi,
                                            auditingService: AuditingService,
-                                           authorisationManagementApi: AuthorisationManagementApi,
-                                           @Named("agentQueryParameterEnabledExteranl") agentQueryParameterEnabledExteranl: Boolean
+                                           @Named("agentQueryParameterEnabledExternal") agentQueryParameterEnabledExternal: Boolean
                                          )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController with Cats {
 
   def create(): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
@@ -75,7 +74,7 @@ class PropertyLinkingController @Inject()(
                                        organisationId: Option[Long]
                                      ): Action[AnyContent] = authenticated.async { implicit request =>
     //TODO remove once modernised external has caught up.
-    if (searchParams.sortField.contains("AGENT") && agentQueryParameterEnabledExteranl) {
+    if (searchParams.sortField.contains("AGENT") && agentQueryParameterEnabledExternal) {
 
       organisationId.fold(Future.successful(BadRequest("organisationId is required for this query.")))(
         id =>
@@ -111,6 +110,7 @@ class PropertyLinkingController @Inject()(
       .fold(NotFound("client property link not found")) { authorisation => Ok(Json.toJson(authorisation)) }
   }
 
+  // $COVERAGE-OFF$
   /*
   To Remove this method once external endpoints have catched up.
    */
@@ -150,6 +150,7 @@ class PropertyLinkingController @Inject()(
         }
     }
   }
+  // $COVERAGE-ON$
 
   def getMyOrganisationsAssessments(submissionId: String): Action[AnyContent] = authenticated.async { implicit request =>
     assessmentService

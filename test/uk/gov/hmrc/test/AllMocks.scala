@@ -19,18 +19,31 @@ package uk.gov.hmrc.test
 import org.mockito.Mockito
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
-import uk.gov.hmrc.voapropertylinking.connectors.modernised.{AddressManagementApi, AuthorisationSearchApi, MdtpDashboardManagementApi}
+import services.{AssessmentService, PropertyLinkingService}
+import uk.gov.hmrc.voapropertylinking.connectors.mdtp.BusinessRatesAuthConnector
+import uk.gov.hmrc.voapropertylinking.connectors.modernised._
 
-trait AllMocks extends MockitoSugar { me: BeforeAndAfterEach =>
+trait AllMocks extends MockitoSugar {
+  me: BeforeAndAfterEach =>
 
-  val mockAddressManagementApi = mock[AddressManagementApi]
-  val mockAuthorisationSearchApi = mock[AuthorisationSearchApi]
-  val mockMdtpDashboardManagementApi = mock[MdtpDashboardManagementApi]
+  val mockAddressManagementApi: AddressManagementApi = mock[AddressManagementApi]
+  val mockAssessmentService: AssessmentService = mock[AssessmentService]
+  val mockAuthorisationManagementApi: AuthorisationManagementApi = mock[AuthorisationManagementApi]
+  val mockAuthorisationSearchApi: AuthorisationSearchApi = mock[AuthorisationSearchApi]
+  val mockBusinessRatesAuthConnector: BusinessRatesAuthConnector = mock[BusinessRatesAuthConnector]
+  val mockCustomerManagementApi: CustomerManagementApi = mock[CustomerManagementApi]
+  val mockMdtpDashboardManagementApi: MdtpDashboardManagementApi = mock[MdtpDashboardManagementApi]
+  val mockPropertyLinkingService: PropertyLinkingService = mock[PropertyLinkingService]
 
   override protected def beforeEach(): Unit =
     Seq(
       mockAddressManagementApi,
+      mockAssessmentService,
+      mockAuthorisationManagementApi,
       mockAuthorisationSearchApi,
-      mockMdtpDashboardManagementApi
+      mockBusinessRatesAuthConnector,
+      mockCustomerManagementApi,
+      mockMdtpDashboardManagementApi,
+      mockPropertyLinkingService
     ).foreach(Mockito.reset(_))
 }

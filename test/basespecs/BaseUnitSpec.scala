@@ -17,7 +17,8 @@
 package basespecs
 
 import org.scalatest._
-import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.concurrent.{PatienceConfiguration, ScalaFutures}
+import org.scalatest.time.{Milliseconds, Second, Span}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
@@ -42,11 +43,15 @@ abstract class BaseUnitSpec
     with ScalaFutures
     with FakeObjects
     with MockitoSugar
+    with PatienceConfiguration
     with Cats {
 
   implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
   implicit val hc: HeaderCarrier = HeaderCarrier()
   implicit val requestWithPrincipal: RequestWithPrincipal[AnyContentAsEmpty.type] =
     RequestWithPrincipal(FakeRequest(), Principal("external-id", "group-id"))
+
+  override implicit val patienceConfig: PatienceConfig =
+    PatienceConfig(Span(1, Second), Span(10, Milliseconds))
 
 }

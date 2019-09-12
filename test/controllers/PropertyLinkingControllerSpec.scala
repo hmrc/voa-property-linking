@@ -16,7 +16,7 @@
 
 package controllers
 
-import java.time.{Instant, LocalDate}
+import java.time.Instant
 
 import basespecs.BaseControllerSpec
 import binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
@@ -25,42 +25,28 @@ import models._
 import models.mdtp.propertylink.myclients.PropertyLinksWithClients
 import models.mdtp.propertylink.requests.PropertyLinkRequest
 import models.searchApi.{OwnerAuthResult, OwnerAuthorisation}
-import org.mockito.ArgumentMatchers._
+import org.mockito.ArgumentMatchers.{any, eq => mEq}
 import org.mockito.Mockito._
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import services.{AssessmentService, PropertyLinkingService}
 import uk.gov.hmrc.http.{HttpResponse, Upstream5xxResponse}
 import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
-import uk.gov.hmrc.voapropertylinking.connectors.mdtp.BusinessRatesAuthConnector
-import uk.gov.hmrc.voapropertylinking.connectors.modernised.{AuthorisationManagementApi, CustomerManagementApi}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class PropertyLinkingControllerSpec extends BaseControllerSpec {
 
-  lazy val mockPropertyLinkService = mock[PropertyLinkingService]
-
-  lazy val mockGroupAccountConnector = mock[CustomerManagementApi]
-
-  lazy val mockPropertyRepresentationConnector = mock[AuthorisationManagementApi]
-
-  lazy val mockAssessmentService = mock[AssessmentService]
-
-  lazy val mockBrAuth = mock[BusinessRatesAuthConnector]
-
   lazy val testController = new PropertyLinkingController(
     authenticated = preAuthenticatedActionBuilders(),
     authorisationSearchApi = mockAuthorisationSearchApi,
     mdtpDashboardManagementApi = mockMdtpDashboardManagementApi,
-    propertyLinkService = mockPropertyLinkService,
+    propertyLinkService = mockPropertyLinkingService,
     assessmentService = mockAssessmentService,
-    customerManagementApi = mockGroupAccountConnector,
+    customerManagementApi = mockCustomerManagementApi,
     auditingService = mock[AuditingService],
-    authorisationManagementApi = mockPropertyRepresentationConnector,
-    agentQueryParameterEnabledExteranl = true)
+    agentQueryParameterEnabledExternal = true)
 
   val validPropertiesView = PropertiesView(
     authorisationId = 11111,
@@ -101,40 +87,57 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec {
     localAuthorityRef = "localAuthRef",
     agents = Nil)
 
-  val propertyLinksWithClients = PropertyLinksWithClients(1,1,1,1, Seq())
-  val ownerAuthResult = OwnerAuthResult(1,1,1,1, Seq())
+  val propertyLinksWithClients = PropertyLinksWithClients(1, 1, 1, 1, Seq())
+  val ownerAuthResult = OwnerAuthResult(1, 1, 1, 1, Seq())
 
   val assessments = Assessments(
-    1L,
-    "11111",
-    111111,
-    "address",
-    false,
-    Some("OWNER"),
-    Seq(),
-
-    Seq())
+    authorisationId = 1L,
+    submissionId = "11111",
+    uarn = 111111,
+    address = "address",
+    pending = false,
+    capacity = Some("OWNER"),
+    assessments = Seq(),
+    agents = Seq())
 
   "create" should {
     "create a new property link submission in modernised" in {
-      val testCapacityDeclaration = CapacityDeclaration("TEST_CAPACITY", LocalDate.now(), None)
-      val testPropertyLinkSubmission = PropertyLinkRequest(1, 1, 1, testCapacityDeclaration, Instant.now(), "TEST_BASIS", Seq(FileInfo("filename", "evidenceType")), "PL12345")
+      val testCapacityDeclaration = CapacityDeclaration("TEST_CAPACITY", today, None)
+      val testPropertyLinkSubmission = PropertyLinkRequest(
+        uarn = 1,
+        organisationId = 1,
+        individualId = 1,
+        capacityDeclaration = testCapacityDeclaration,
+        linkedDate = Instant.now(),
+        linkBasis = "TEST_BASIS",
+        fileInfo = Seq(FileInfo("filename", "evidenceType")),
+        submissionId = "PL12345"
+      )
 
       val plSubmissionJson = Json.toJson(testPropertyLinkSubmission)
 
-      when(mockPropertyLinkService.create(any())(any(), any())).thenReturn(Future.successful(HttpResponse(200)))
+      when(mockPropertyLinkingService.create(any())(any(), any())).thenReturn(Future.successful(HttpResponse(200)))
 
       val res = testController.create()(FakeRequest().withBody(plSubmissionJson))
       status(res) shouldBe ACCEPTED
     }
 
     "return InternalServerError if property link submission fails" in {
-      val testCapacityDeclaration = CapacityDeclaration("TEST_CAPACITY", LocalDate.now(), None)
-      val testPropertyLinkSubmission = PropertyLinkRequest(1, 1, 1, testCapacityDeclaration, Instant.now(), "TEST_BASIS", Seq(FileInfo("filename", "evidenceType")), "PL12345")
+      val testCapacityDeclaration = CapacityDeclaration("TEST_CAPACITY", today, None)
+      val testPropertyLinkSubmission = PropertyLinkRequest(
+        uarn = 1,
+        organisationId = 1,
+        individualId = 1,
+        capacityDeclaration = testCapacityDeclaration,
+        linkedDate = Instant.now(),
+        linkBasis = "TEST_BASIS",
+        fileInfo = Seq(FileInfo("filename", "evidenceType")),
+        submissionId = "PL12345"
+      )
 
       val plSubmissionJson = Json.toJson(testPropertyLinkSubmission)
 
-      when(mockPropertyLinkService.create(any())(any(), any())).thenReturn(Future.failed(new Upstream5xxResponse("Failed to create PL", 501, 501)))
+      when(mockPropertyLinkingService.create(any())(any(), any())).thenReturn(Future.failed(new Upstream5xxResponse("Failed to create PL", 501, 501)))
 
       val res = testController.create()(FakeRequest().withBody(plSubmissionJson))
       status(res) shouldBe INTERNAL_SERVER_ERROR
@@ -143,51 +146,56 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec {
 
   "getMyPropertyLink" should {
     "return a single my org property link" in {
-
-      when(mockPropertyLinkService.getMyOrganisationsPropertyLink(any())(any(), any())).thenReturn(OptionT.some[Future](validPropertiesView))
+      when(mockPropertyLinkingService.getMyOrganisationsPropertyLink(any())(any(), any())).thenReturn(OptionT.some[Future](validPropertiesView))
       val res = testController.getMyOrganisationsPropertyLink("11111")(FakeRequest())
 
       status(res) shouldBe OK
-
       contentAsJson(res) shouldBe Json.toJson(validPropertiesView)
-
     }
 
     "return a single my client property link" in {
-
-      when(mockPropertyLinkService.getClientsPropertyLink(any())(any(), any())).thenReturn(OptionT.some[Future](validPropertiesView))
+      when(mockPropertyLinkingService.getClientsPropertyLink(any())(any(), any())).thenReturn(OptionT.some[Future](validPropertiesView))
       val res = testController.getClientsPropertyLink("11111")(FakeRequest())
 
       status(res) shouldBe OK
-
       contentAsJson(res) shouldBe Json.toJson(validPropertiesView)
-
     }
   }
 
   "getMyPropertyLinks" should {
     "return owner property links" in {
-
-      when(mockPropertyLinkService.getMyOrganisationsPropertyLinks(any(), any())(any(), any())).thenReturn(OptionT.some[Future](ownerAuthResult))
-
+      when(mockPropertyLinkingService.getMyOrganisationsPropertyLinks(any(), any())(any(), any())).thenReturn(OptionT.some[Future](ownerAuthResult))
       val res = testController.getMyOrganisationsPropertyLinks(GetMyOrganisationPropertyLinksParameters(), None, None)(FakeRequest())
 
       status(res) shouldBe OK
-
       contentAsJson(res) shouldBe Json.toJson(ownerAuthResult)
-
     }
 
+    "search via authorisationSearchApi when AGENT sortField" when {
 
+      "organisationId is provided" in {
+        when(mockPropertyLinkingService.getMyOrganisationsPropertyLinks(any(), any())(any(), any())).thenReturn(OptionT.some[Future](ownerAuthResult))
+        val res = testController.getMyOrganisationsPropertyLinks(GetMyOrganisationPropertyLinksParameters(sortField = Some("AGENT")), None, None)(FakeRequest())
+
+        status(res) shouldBe BAD_REQUEST
+      }
+
+      "organisationId is NOT provided" in {
+        val orgId: Long = 123L
+        when(mockAuthorisationSearchApi.searchAndSort(mEq(orgId), any(), mEq(Some("AGENT")), any(), any(), any(), any(), any(), any())(any()))
+          .thenReturn(Future.successful(ownerAuthResult))
+        val res = testController.getMyOrganisationsPropertyLinks(GetMyOrganisationPropertyLinksParameters(sortField = Some("AGENT")), None, Some(orgId))(FakeRequest())
+
+        status(res) shouldBe OK
+      }
+
+    }
     "return client property links" in {
-
-      when(mockPropertyLinkService.getClientsPropertyLinks(any(), any())(any(), any())).thenReturn(OptionT.some[Future](propertyLinksWithClients))
+      when(mockPropertyLinkingService.getClientsPropertyLinks(any(), any())(any(), any())).thenReturn(OptionT.some[Future](propertyLinksWithClients))
       val res = testController.getClientsPropertyLinks(GetMyClientsPropertyLinkParameters(), None)(FakeRequest())
 
       status(res) shouldBe OK
-
       contentAsJson(res) shouldBe Json.toJson(ownerAuthResult)
-
     }
   }
 }

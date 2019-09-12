@@ -52,11 +52,7 @@ class EnvelopeController @Inject()(
   }
 
   def record(envelopeId: String): Action[AnyContent] = authenticated.async { implicit request =>
-    repo
-      .create(envelopeId)
-      .map { _ =>
-        Ok(envelopeId)
-      }
+    repo.create(envelopeId).map(_ => Ok(envelopeId))
   }
 
   def close(envelopeId: String): Action[AnyContent] = authenticated.async { implicit request =>
