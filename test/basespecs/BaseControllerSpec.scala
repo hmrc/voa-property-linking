@@ -17,9 +17,9 @@
 package basespecs
 
 import controllers.AgentController
-import play.api.http.Status
+import play.api.http.{HeaderNames, Status}
 import play.api.mvc._
-import play.api.test.FakeRequest
+import play.api.test.{FakeRequest, ResultExtractors}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.ws.WSHttp
@@ -29,7 +29,7 @@ import uk.gov.hmrc.voapropertylinking.auth.{Principal, RequestWithPrincipal}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-abstract class BaseControllerSpec extends BaseUnitSpec with Status {
+abstract class BaseControllerSpec extends BaseUnitSpec with ResultExtractors with HeaderNames with Status {
 
   implicit val request = FakeRequest()
 

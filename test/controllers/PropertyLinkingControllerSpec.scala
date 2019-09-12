@@ -16,7 +16,7 @@
 
 package controllers
 
-import java.time.{Instant, LocalDate}
+import java.time.Instant
 
 import basespecs.BaseControllerSpec
 import binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
@@ -30,7 +30,6 @@ import org.mockito.ArgumentMatchers.{any, eq => mEq}
 import org.mockito.Mockito._
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
 import uk.gov.hmrc.http.{HttpResponse, Upstream5xxResponse}
 import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 
@@ -139,7 +138,7 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec {
       val plSubmissionJson = Json.toJson(testPropertyLinkSubmission)
 
       when(mockPropertyLinkingService.create(any())(any(), any()))
-        .thenReturn(Future.failed(new Upstream5xxResponse("Failed to create PL", 501, 501)))
+        .thenReturn(Future.failed(Upstream5xxResponse("Failed to create PL", 501, 501)))
 
       val res = testController.create()(FakeRequest().withBody(plSubmissionJson))
       status(res) shouldBe INTERNAL_SERVER_ERROR
@@ -224,6 +223,31 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec {
         .thenReturn(OptionT.some[Future](assessments))
 
       val res = testController.getClientsAssessments(submissionId)(FakeRequest())
+
+      status(res) shouldBe OK
+    }
+  }
+
+
+  "getMyOrganisationsAssessmentsWithCapacity" should {
+    "return property links with assessments" in {
+      val submissionId = "SUB123"
+      when(mockAssessmentService.getMyOrganisationsAssessments(mEq(submissionId))(any(), any()))
+        .thenReturn(OptionT.some[Future](assessments))
+
+      val res = testController.getMyOrganisationsAssessmentsWithCapacity(submissionId, 1L)(FakeRequest())
+
+      status(res) shouldBe OK
+    }
+  }
+
+  "getClientsAssessmentsWithCapacity" should {
+    "return property links with assessments" in {
+      val submissionId = "SUB123"
+      when(mockAssessmentService.getClientsAssessments(mEq(submissionId))(any(), any()))
+        .thenReturn(OptionT.some[Future](assessments))
+
+      val res = testController.getClientsAssessmentsWithCapacity(submissionId, 1L)(FakeRequest())
 
       status(res) shouldBe OK
     }

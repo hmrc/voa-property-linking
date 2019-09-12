@@ -21,7 +21,7 @@ import org.scalatest.concurrent.{PatienceConfiguration, ScalaFutures}
 import org.scalatest.time.{Milliseconds, Second, Span}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.mvc.AnyContentAsEmpty
-import play.api.test.FakeRequest
+import play.api.test.{DefaultAwaitTimeout, FakeRequest}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.test.AllMocks
 import uk.gov.hmrc.voapropertylinking.auth.{Principal, RequestWithPrincipal}
@@ -44,6 +44,7 @@ abstract class BaseUnitSpec
     with FakeObjects
     with MockitoSugar
     with PatienceConfiguration
+    with DefaultAwaitTimeout
     with Cats {
 
   implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global

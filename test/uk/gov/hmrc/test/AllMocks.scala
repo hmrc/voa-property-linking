@@ -20,14 +20,16 @@ import org.mockito.Mockito
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
 import services.{AssessmentService, PropertyLinkingService}
+import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import uk.gov.hmrc.voapropertylinking.connectors.mdtp.BusinessRatesAuthConnector
-import uk.gov.hmrc.voapropertylinking.connectors.modernised._
+import uk.gov.hmrc.voapropertylinking.connectors.modernised.{AuthorisationManagementApi, _}
 
 trait AllMocks extends MockitoSugar {
   me: BeforeAndAfterEach =>
 
   val mockAddressManagementApi: AddressManagementApi = mock[AddressManagementApi]
   val mockAssessmentService: AssessmentService = mock[AssessmentService]
+  val mockAuditingService: AuditingService = mock[AuditingService]
   val mockAuthorisationManagementApi: AuthorisationManagementApi = mock[AuthorisationManagementApi]
   val mockAuthorisationSearchApi: AuthorisationSearchApi = mock[AuthorisationSearchApi]
   val mockBusinessRatesAuthConnector: BusinessRatesAuthConnector = mock[BusinessRatesAuthConnector]
@@ -35,10 +37,12 @@ trait AllMocks extends MockitoSugar {
   val mockMdtpDashboardManagementApi: MdtpDashboardManagementApi = mock[MdtpDashboardManagementApi]
   val mockPropertyLinkingService: PropertyLinkingService = mock[PropertyLinkingService]
 
+
   override protected def beforeEach(): Unit =
     Seq(
       mockAddressManagementApi,
       mockAssessmentService,
+      mockAuditingService,
       mockAuthorisationManagementApi,
       mockAuthorisationSearchApi,
       mockBusinessRatesAuthConnector,

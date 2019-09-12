@@ -165,17 +165,11 @@ class PropertyLinkingController @Inject()(
       .fold(Ok(Json.toJson(submissionId)))(propertyLinkWithAssessments => Ok(Json.toJson(propertyLinkWithAssessments)))
   }
 
-  def getMyOrganisationsAssessmentsWithCapacity(submissionId: String, authorisationId: Long): Action[AnyContent] = authenticated.async { implicit request =>
-    assessmentService
-      .getMyOrganisationsAssessments(submissionId)
-      .fold(Ok(Json.toJson(submissionId)))(propertyLinkWithAssessmentsAndCapacity => Ok(Json.toJson(propertyLinkWithAssessmentsAndCapacity)))
-  }
+  def getMyOrganisationsAssessmentsWithCapacity(submissionId: String, authorisationId: Long): Action[AnyContent] =
+    getMyOrganisationsAssessments(submissionId)
 
-  def getClientsAssessmentsWithCapacity(submissionId: String, authorisationId: Long): Action[AnyContent] = authenticated.async { implicit request =>
-    assessmentService
-      .getClientsAssessments(submissionId)
-      .fold(Ok(Json.toJson(submissionId)))(propertyLinkWithAssessmentsAndCapacity => Ok(Json.toJson(propertyLinkWithAssessmentsAndCapacity)))
-  }
+  def getClientsAssessmentsWithCapacity(submissionId: String, authorisationId: Long): Action[AnyContent] =
+    getClientsAssessments(submissionId)
 
   def clientProperty(authorisationId: Long, clientOrgId: Long, agentOrgId: Long): Action[AnyContent] = authenticated.async { implicit request =>
     mdtpDashboardManagementApi
@@ -186,7 +180,7 @@ class PropertyLinkingController @Inject()(
       }
   }
 
-  private def authorisedFor(authorisation: LegacyPropertiesView, clientOrgId: Long, agentOrgId: Long) = {
+  private def authorisedFor(authorisation: LegacyPropertiesView, clientOrgId: Long, agentOrgId: Long): Boolean = {
     authorisation.authorisationOwnerOrganisationId == clientOrgId && authorisation.parties.exists(_.authorisedPartyOrganisationId == agentOrgId)
   }
 

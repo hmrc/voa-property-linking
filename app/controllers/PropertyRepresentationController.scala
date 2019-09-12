@@ -16,14 +16,14 @@
 
 package controllers
 
-import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import javax.inject.Inject
 import models._
 import play.api.Logger
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
-import uk.gov.hmrc.voapropertylinking.connectors.modernised.{AuthorisationManagementApi, AuthorisationSearchApi, CustomerManagementApi}
+import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
+import uk.gov.hmrc.voapropertylinking.connectors.modernised._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -50,7 +50,9 @@ class PropertyRepresentationController @Inject()(
     authorisationManagementApi
       .validateAgentCode(agentCode, authorisationId)
       .map { errorOrOrganisationId =>
-        errorOrOrganisationId.fold(orgId => Ok(Json.obj("organisationId" -> orgId)), errorString => Ok(Json.obj("failureCode" -> errorString)))
+        errorOrOrganisationId.fold(
+          orgId => Ok(Json.obj("organisationId" -> orgId)),
+          errorString => Ok(Json.obj("failureCode" -> errorString)))
       }
   }
 
