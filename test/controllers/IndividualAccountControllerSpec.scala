@@ -16,15 +16,14 @@
 
 package controllers
 
-import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import basespecs.BaseControllerSpec
 import models.{IndividualAccount, IndividualAccountId, IndividualAccountSubmission, IndividualDetails}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import uk.gov.hmrc.voapropertylinking.connectors.mdtp.BusinessRatesAuthConnector
 import uk.gov.hmrc.voapropertylinking.connectors.modernised.CustomerManagementApi
 
@@ -55,12 +54,7 @@ class IndividualAccountControllerSpec extends BaseControllerSpec {
       val testIndividualAccountSubmission = IndividualAccountSubmission("test-external-id", "test-trust-id", 1, testIndividualDetails)
 
       val individualJson = Json.toJson(testIndividualAccountSubmission)
-      val testJsonResponse =
-        """
-          |{
-          |  "some": "json"
-          |}
-        """.stripMargin
+      val testJsonResponse = """{ "some": "json" }"""
 
       when(mockIndividualAccountConnector.updateIndividualAccount(any(), any())(any[HeaderCarrier])).thenReturn(Future.successful(Json.parse(testJsonResponse)))
       when(mockBrAuth.clearCache()(any[HeaderCarrier])).thenReturn(Future.successful(()))
@@ -119,11 +113,16 @@ class IndividualAccountControllerSpec extends BaseControllerSpec {
     }
   }
 
-  lazy val mockIndividualAccountConnector = mock[CustomerManagementApi]
+  lazy val mockIndividualAccountConnector: CustomerManagementApi = mock[CustomerManagementApi]
 
-  lazy val mockBrAuth = mock[BusinessRatesAuthConnector]
+  lazy val mockBrAuth: BusinessRatesAuthConnector = mock[BusinessRatesAuthConnector]
 
-  lazy val testController = new IndividualAccountController(preAuthenticatedActionBuilders(), mockIndividualAccountConnector, mock[AuditingService], mockBrAuth)
+  lazy val testController = new IndividualAccountController(
+    authenticated = preAuthenticatedActionBuilders(),
+    customerManagementApi = mockIndividualAccountConnector,
+    auditingService = mock[AuditingService],
+    brAuth = mockBrAuth
+  )
 
 }
 

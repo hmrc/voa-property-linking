@@ -17,10 +17,14 @@
 package controllers
 
 import basespecs.BaseControllerSpec
+import models.searchApi.OwnerAuthResult
+import models.{APIRepresentationResponse, GroupAccount, PaginationParams, PropertyRepresentations}
 import org.mockito.ArgumentMatchers.{any, eq => mEq}
 import org.mockito.Mockito._
 import play.api.libs.json.Json
+import play.api.mvc.Result
 import play.api.test.FakeRequest
+import uk.gov.hmrc.http.HttpResponse
 
 import scala.concurrent.Future
 
@@ -35,9 +39,23 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
         customerManagementApi = mockCustomerManagementApi,
         auditingService = mockAuditingService
       )
-    val agentCode: Long = 12345L
-    val authorisationId: Long = 54321L
-    val orgId: Long = 1L
+    protected val submissionId = "PL123"
+    protected val agentCode = 12345L
+    protected val authorisationId = 54321L
+    protected val orgId = 1L
+    protected val paginationParams = PaginationParams(startPoint = 1, pageSize = 1, requestTotalRowCount = false)
+    protected val groupAccount = GroupAccount(
+      id = 2,
+      groupId = "gggId",
+      companyName = "Fake News Inc",
+      addressId = 345,
+      email = "therealdonald@potus.com",
+      phone = "9876541",
+      isAgent = false,
+      agentCode = 234
+    )
+    protected val ownerAuthResult = OwnerAuthResult(1, 1, 1, 1, Seq())
+
   }
 
   "create" should {
@@ -47,7 +65,7 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
         when(mockAuthorisationManagementApi.create(any())(any()))
           .thenReturn(Future.successful(()))
 
-        val result = testController.create()(FakeRequest().withBody(Json.parse(
+        val result: Future[Result] = testController.create()(FakeRequest().withBody(Json.parse(
           """{
             |  "authorisationId" : 1,
             |  "agentOrganisationId" : 2,
@@ -69,12 +87,101 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
         when(mockAuthorisationManagementApi.validateAgentCode(mEq(agentCode), mEq(authorisationId))(any()))
           .thenReturn(Future.successful(orgId.asLeft[String]))
 
-        val result = testController.validateAgentCode(agentCode, authorisationId)(FakeRequest())
+        val result: Future[Result] = testController.validateAgentCode(agentCode, authorisationId)(FakeRequest())
 
         status(result) shouldBe OK
         contentAsJson(result) shouldBe Json.obj("organisationId" -> orgId)
       }
+
+      "the agent code is NOT valid" in new Setup {
+        when(mockAuthorisationManagementApi.validateAgentCode(mEq(agentCode), mEq(authorisationId))(any()))
+          .thenReturn(Future.successful("ERROR".asRight[Long]))
+
+        val result: Future[Result] = testController.validateAgentCode(agentCode, authorisationId)(FakeRequest())
+
+        status(result) shouldBe OK
+        contentAsJson(result) shouldBe Json.obj("failureCode" -> "ERROR")
+      }
+
     }
+  }
+
+  "forAgent" should {
+    "return OK 200" when {
+      "there is a property representation" in new Setup {
+        when(mockAuthorisationSearchApi.forAgent(any(), any(), any())(any()))
+          .thenReturn(Future.successful(PropertyRepresentations(1, Seq.empty)))
+
+        val result: Future[Result] = testController.forAgent("OPEN", orgId, paginationParams)(FakeRequest())
+
+        status(result) shouldBe OK
+      }
+    }
+  }
+
+  "response" should {
+    "return OK 200" when {
+      "a valid representation response is POSTed" in new Setup {
+        val repResp = APIRepresentationResponse(submissionId, 1L, "OUTCOME")
+        when(mockAuthorisationManagementApi.response(mEq(repResp))(any()))
+          .thenReturn(Future.successful(()))
+
+        val result: Future[Result] =
+          testController.response()(FakeRequest().withBody(Json.toJson(repResp)))
+
+        status(result) shouldBe OK
+
+        verify(mockAuditingService).sendEvent(mEq("agent representation response"), mEq(repResp))(any(), any(), any(), any())
+      }
+    }
+  }
+
+  "revoke" should {
+    "return OK 200" when {
+      "valid PATCH request is made with authorisedPartyId" in new Setup {
+        val authorisedPartyId = 123L
+        when(mockAuthorisationManagementApi.revoke(mEq(authorisedPartyId))(any()))
+          .thenReturn(Future.successful(mock[HttpResponse]))
+
+        val result: Future[Result] =
+          testController.revoke(authorisedPartyId)(FakeRequest().withBody(Json.obj()))
+
+        status(result) shouldBe OK
+        verify(mockAuthorisationManagementApi).revoke(mEq(authorisedPartyId))(any())
+      }
+    }
+  }
+
+  "appointableToAgent" should {
+    "return OK 200" when {
+      "customer management API returns an agent group for specified agent code" in new Setup {
+        when(mockCustomerManagementApi.withAgentCode(mEq(agentCode.toString))(any()))
+          .thenReturn(Future.successful(Some(groupAccount)))
+        when(mockAuthorisationSearchApi.appointableToAgent(any(), any(), any(), any(), any(), any(), any(), any(), any())(any()))
+          .thenReturn(Future.successful(ownerAuthResult))
+
+        val result: Future[Result] =
+          testController.appointableToAgent(1L, agentCode, None, None, paginationParams, None, None, None, None)(FakeRequest())
+
+        status(result) shouldBe OK
+      }
+    }
+
+    "return NOT FOUND 404" when {
+      "customer management API returns nothing for given agent code" in new Setup {
+        when(mockCustomerManagementApi.withAgentCode(mEq(agentCode.toString))(any()))
+          .thenReturn(Future.successful(Option.empty[GroupAccount]))
+
+        val result: Future[Result] =
+          testController.appointableToAgent(1L, agentCode, None, None, paginationParams, None, None, None, None)(FakeRequest())
+
+        status(result) shouldBe NOT_FOUND
+
+        verify(mockAuthorisationSearchApi, never())
+          .appointableToAgent(any(), any(), any(), any(), any(), any(), any(), any(), any())(any())
+      }
+    }
+
   }
 
 }

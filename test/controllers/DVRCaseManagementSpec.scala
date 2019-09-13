@@ -27,7 +27,6 @@ import org.mockito.ArgumentMatchers.{eq => matching, _}
 import org.mockito.Mockito._
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
 import repositories.DVRRecordRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.voapropertylinking.connectors.modernised.{CCACaseManagementApi, ExternalValuationManagementApi}
@@ -54,8 +53,8 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
 
       status(res) shouldBe OK
 
-      verify(mockRepo, times(1)).create(matching(testDvr))
-      verify(mockCcaCaseManagementConnector, times(1)).requestDetailedValuation(matching(testDvr))(any[HeaderCarrier])
+      verify(mockRepo).create(matching(testDvr))
+      verify(mockCcaCaseManagementConnector).requestDetailedValuation(matching(testDvr))(any[HeaderCarrier])
     }
   }
 
@@ -67,7 +66,7 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
       status(res) shouldBe OK
       contentAsJson(res) shouldBe Json.toJson(true)
 
-      verify(mockRepo, times(1)).exists(matching(1l), matching(3l))
+      verify(mockRepo).exists(matching(1l), matching(3l))
       reset(mockRepo)
     }
 
@@ -78,7 +77,7 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
       status(res) shouldBe OK
       contentAsJson(res) shouldBe Json.toJson(false)
 
-      verify(mockRepo, times(1)).exists(matching(1l), matching(3l))
+      verify(mockRepo).exists(matching(1l), matching(3l))
       reset(mockRepo)
     }
   }

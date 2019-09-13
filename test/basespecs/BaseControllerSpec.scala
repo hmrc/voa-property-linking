@@ -29,7 +29,12 @@ import uk.gov.hmrc.voapropertylinking.auth.{Principal, RequestWithPrincipal}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-abstract class BaseControllerSpec extends BaseUnitSpec with ResultExtractors with HeaderNames with Status {
+abstract class BaseControllerSpec
+  extends BaseUnitSpec
+    with ResultExtractors
+    with HeaderNames
+    with Status
+    with Results {
 
   implicit val request = FakeRequest()
 

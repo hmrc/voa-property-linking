@@ -80,16 +80,22 @@ trait ValidationUtils extends Cats {
     Validated.fromOption(r.findFirstIn(value), InvalidFormat(key)).toValidatedNel
 
   lazy val ukPostCodeFormat: Regex =
-    """^(([A-Za-z]\d{1,2})|(([A-Za-z]{2}\d{1,2})|(([A-Za-z]\d[A-Za-z])|([A-Za-z]{2}\d[A-Za-z]))))( \d[A-Za-z]{2}){0,1}$""".r
+    """^(([A-Za-z]\d{1,2})|(([A-Za-z]{2}\d{1,2})|(([A-Za-z]\d[A-Za-z])|([A-Za-z]{2}\d[A-Za-z]))))( \d[A-Za-z]{2})?$""".r
 
   def validPostcode(implicit key: String): String => ValidatedNel[InvalidFormat, String] = regex(ukPostCodeFormat)
+
+  val propertyLinkSubmissionIdFormat: Regex =
+    """^\w[A-Za-z0-9-]{1,44}$""".r
+
+  def validPropertyLinkSubmissionId(implicit key: String): String => ValidatedNel[InvalidFormat, String] =
+    regex(propertyLinkSubmissionIdFormat)
 
   private[validation] class ValidatedOptional[E, A](validated: Validated[E, Option[A]]) {
 
     def ifPresent[B](f: A => Validated[E, B]): Validated[E, Option[B]] =
       validated.andThen {
         case Some(value) => f(value).map(Option.apply)
-        case None        => Valid(Option.empty[B])
+        case None => Valid(Option.empty[B])
       }
   }
 

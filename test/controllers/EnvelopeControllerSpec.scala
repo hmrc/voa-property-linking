@@ -24,7 +24,6 @@ import org.mockito.ArgumentMatchers.{eq => matching, _}
 import org.mockito.Mockito._
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
 import repositories.EnvelopeIdRepo
 import uk.gov.hmrc.circuitbreaker.UnhealthyServiceException
 import uk.gov.hmrc.http._
@@ -45,7 +44,7 @@ class EnvelopeControllerSpec extends BaseControllerSpec {
       val res = testController.create()(FakeRequest().withBody(metadataJson).withHeaders(HOST -> "localhost:9524"))
       status(res) shouldBe OK
 
-      verify(mockFileUpload, once).createEnvelope(matching(EnvelopeMetadata(submissionId, 1)), matching(callbackUrl))(any[HeaderCarrier])
+      verify(mockFileUpload).createEnvelope(matching(EnvelopeMetadata(submissionId, 1)), matching(callbackUrl))(any[HeaderCarrier])
     }
 
     "record the envelope ID in mongo" in {
@@ -59,7 +58,7 @@ class EnvelopeControllerSpec extends BaseControllerSpec {
       val res = testController.create()(FakeRequest().withBody(metadataJson).withHeaders(HOST -> "localhost:9524"))
       status(res) shouldBe OK
 
-      verify(mockRepo, once).create(matching(envelopeId), any())
+      verify(mockRepo).create(matching(envelopeId), any())
     }
 
     "return the envelope ID as json" in {
@@ -117,8 +116,6 @@ class EnvelopeControllerSpec extends BaseControllerSpec {
     when(m.createEnvelope(any[EnvelopeMetadata], matching(callbackUrl))(any[HeaderCarrier])) thenReturn Future.successful(Some(UUID.randomUUID().toString))
     m
   }
-
-  lazy val once = times(1)
 
 }
 

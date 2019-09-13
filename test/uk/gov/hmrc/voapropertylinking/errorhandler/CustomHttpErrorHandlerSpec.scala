@@ -19,15 +19,12 @@ package uk.gov.hmrc.voapropertylinking.errorhandler
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.mvc.RequestHeader
 import play.api.test.FakeRequest
-import uk.gov.hmrc.auth.core.{BearerTokenExpired, InvalidBearerToken, MissingBearerToken}
-import uk.gov.hmrc.voapropertylinking.connectors.modernised.errorhandler.VoaClientException
-//import play.api.http.Status._
 import play.api.test.Helpers._
+import uk.gov.hmrc.auth.core.{BearerTokenExpired, InvalidBearerToken, MissingBearerToken}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import uk.gov.hmrc.voapropertylinking.connectors.modernised.errorhandler.VoaClientException
 
 class CustomHttpErrorHandlerSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
-
-  //implicit val timeout = Timeout(30)
 
   val customHttpErrorHandler = new CustomHttpErrorHandler()
 
@@ -36,14 +33,12 @@ class CustomHttpErrorHandlerSpec extends UnitSpec with MockitoSugar with WithFak
   "when a handling a client side error" which {
 
     "is a NOT_FOUND exception" should {
-      "return a 404, a standard message and incident ID and log the error" in {//new Setup {
+      "return a 404, a standard message and incident ID and log the error" in { //new Setup {
         val result = customHttpErrorHandler.onClientError(mockRequestHeader, NOT_FOUND, "Resource not found.")
 
         status(result) shouldBe NOT_FOUND
         (contentAsJson(result) \ "code").as[String] shouldBe "NOT_FOUND"
         (contentAsJson(result) \ "message").as[String] should endWith("The requested URI does not exist.")
-
-        //verify(mockLogger.logger).warn(matches("\\[.{36}\\] 404 NOT_FOUND - The requested URI does not exist."))
       }
     }
   }
@@ -56,9 +51,6 @@ class CustomHttpErrorHandlerSpec extends UnitSpec with MockitoSugar with WithFak
       (contentAsJson(result) \ "code").as[String] shouldBe "BAD_REQUEST"
       (contentAsJson(result) \ "message").as[String] should endWith(
         "The request parameters or body are invalid. Missing query parameter.")
-
-      //verify(mockLogger.logger).warn(matches(
-        //"\\[.{36}\\] 400 BAD_REQUEST - The request parameters or body are invalid. Missing query parameter."))
     }
   }
 
@@ -72,12 +64,6 @@ class CustomHttpErrorHandlerSpec extends UnitSpec with MockitoSugar with WithFak
         " Unauthorised. " +
           "If the problem persists, please raise a support request via the Developer Hub. " +
           "https://developer.service.hmrc.gov.uk/developer/support")
-
-//      verify(mockLogger.logger).warn(
-//        matches(
-//          "\\[.{36}\\] 401 UNAUTHORIZED - Unauthorised. " +
-//            "If the problem persists, please raise a support request via the Developer Hub. " +
-//            "https://developer.service.hmrc.gov.uk/developer/support"))
     }
   }
 
@@ -94,8 +80,6 @@ class CustomHttpErrorHandlerSpec extends UnitSpec with MockitoSugar with WithFak
         status(result) shouldBe BAD_REQUEST
         (contentAsJson(result) \ "code").as[String] shouldBe "BAD_REQUEST"
         (contentAsJson(result) \ "message").as[String] should endWith(errorMessage)
-
-        //verify(mockLogger.logger).warn(matches(s"\\[.{36}\\] 400 BAD_REQUEST - $errorMessage"), any())
       }
     }
 
@@ -106,8 +90,6 @@ class CustomHttpErrorHandlerSpec extends UnitSpec with MockitoSugar with WithFak
         status(result) shouldBe UNAUTHORIZED
         (contentAsJson(result) \ "code").as[String] shouldBe "UNAUTHORIZED"
         (contentAsJson(result) \ "message").as[String] should endWith("Missing bearer token.")
-
-        //verify(mockLogger.logger).warn(matches("\\[.{36}\\] 401 UNAUTHORIZED - Missing bearer token."), any())
       }
     }
 
@@ -118,8 +100,6 @@ class CustomHttpErrorHandlerSpec extends UnitSpec with MockitoSugar with WithFak
         status(result) shouldBe UNAUTHORIZED
         (contentAsJson(result) \ "code").as[String] shouldBe "UNAUTHORIZED"
         (contentAsJson(result) \ "message").as[String] should endWith("The bearer token has expired.")
-
-        //verify(mockLogger.logger).warn(matches("\\[.{36}\\] 401 UNAUTHORIZED - The bearer token has expired."), any())
       }
     }
 
@@ -130,8 +110,6 @@ class CustomHttpErrorHandlerSpec extends UnitSpec with MockitoSugar with WithFak
         status(result) shouldBe UNAUTHORIZED
         (contentAsJson(result) \ "code").as[String] shouldBe "UNAUTHORIZED"
         (contentAsJson(result) \ "message").as[String] should endWith("Invalid bearer token.")
-
-        //verify(mockLogger.logger).warn(matches("\\[.{36}\\] 401 UNAUTHORIZED - Invalid bearer token."), any())
       }
     }
   }

@@ -18,15 +18,14 @@ package controllers
 
 import java.time.Instant
 
-import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import basespecs.BaseControllerSpec
 import models._
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import uk.gov.hmrc.voapropertylinking.connectors.mdtp.BusinessRatesAuthConnector
 import uk.gov.hmrc.voapropertylinking.connectors.modernised.CustomerManagementApi
 
@@ -56,8 +55,6 @@ class GroupAccountControllerSpec extends BaseControllerSpec {
   "get" should {
     "return group account json from modernised if it exists" in {
       val testGroupAccount = GroupAccount(1, "test-group-id", "Test Company", 1, "test@test.com", "01233421342", false, 1)
-
-      val groupJson = Json.toJson(testGroupAccount)
 
       when(mockGroupAccountConnector.getDetailedGroupAccount(any())(any[HeaderCarrier])).thenReturn(Future.successful(Some(testGroupAccount)))
 
@@ -136,7 +133,6 @@ class GroupAccountControllerSpec extends BaseControllerSpec {
   lazy val mockGroupAccountConnector = mock[CustomerManagementApi]
 
   lazy val mockBrAuth = mock[BusinessRatesAuthConnector]
-
 
   lazy val testController = new GroupAccountController(preAuthenticatedActionBuilders(), mock[AuditingService], mockGroupAccountConnector, mockBrAuth)
 

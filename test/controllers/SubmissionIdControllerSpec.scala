@@ -20,7 +20,6 @@ import basespecs.BaseControllerSpec
 import org.mockito.Mockito._
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
 import repositories.SequenceGeneratorMongoRepository
 
 import scala.concurrent.Future
