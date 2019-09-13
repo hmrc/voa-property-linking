@@ -16,13 +16,19 @@
 
 package uk.gov.hmrc.test
 
+import com.codahale.metrics.{Meter, MetricRegistry}
+import com.kenshoo.play.metrics.Metrics
+import infrastructure.SimpleWSHttp
 import org.mockito.Mockito
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
+import play.api.libs.ws.{StreamedResponse, WSRequest, WSResponseHeaders}
+import repositories.EnvelopeIdRepo
 import services.{AssessmentService, PropertyLinkingService}
+import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
-import uk.gov.hmrc.voapropertylinking.connectors.mdtp.BusinessRatesAuthConnector
-import uk.gov.hmrc.voapropertylinking.connectors.modernised.{AuthorisationManagementApi, _}
+import uk.gov.hmrc.voapropertylinking.connectors.mdtp.{BusinessRatesAuthConnector, EvidenceConnector, FileUploadConnector}
+import uk.gov.hmrc.voapropertylinking.connectors.modernised._
 
 trait AllMocks extends MockitoSugar {
   me: BeforeAndAfterEach =>
@@ -34,9 +40,21 @@ trait AllMocks extends MockitoSugar {
   val mockAuthorisationSearchApi: AuthorisationSearchApi = mock[AuthorisationSearchApi]
   val mockBusinessRatesAuthConnector: BusinessRatesAuthConnector = mock[BusinessRatesAuthConnector]
   val mockCustomerManagementApi: CustomerManagementApi = mock[CustomerManagementApi]
+  val mockEnvelopeIdRepo: EnvelopeIdRepo = mock[EnvelopeIdRepo]
+  val mockEvidenceConnector: EvidenceConnector = mock[EvidenceConnector]
+  val mockExternalPropertyLinkApi: ExternalPropertyLinkApi = mock[ExternalPropertyLinkApi]
+  val mockExternalValuationManagementApi: ExternalValuationManagementApi = mock[ExternalValuationManagementApi]
+  val mockFileUploadConnector: FileUploadConnector = mock[FileUploadConnector]
+  val mockHttpResponse: HttpResponse = mock[HttpResponse]
   val mockMdtpDashboardManagementApi: MdtpDashboardManagementApi = mock[MdtpDashboardManagementApi]
+  val mockMeter: Meter = mock[Meter]
+  val mockMetricRegistry: MetricRegistry = mock[MetricRegistry]
+  val mockMetrics: Metrics = mock[Metrics]
   val mockPropertyLinkingService: PropertyLinkingService = mock[PropertyLinkingService]
-
+  val mockSimpleWSHttp: SimpleWSHttp = mock[SimpleWSHttp]
+  val mockStreamedResponse: StreamedResponse = mock[StreamedResponse]
+  val mockWSRequest: WSRequest = mock[WSRequest]
+  val mockWSResponseHeaders: WSResponseHeaders = mock[WSResponseHeaders]
 
   override protected def beforeEach(): Unit =
     Seq(
@@ -47,7 +65,20 @@ trait AllMocks extends MockitoSugar {
       mockAuthorisationSearchApi,
       mockBusinessRatesAuthConnector,
       mockCustomerManagementApi,
+      mockEnvelopeIdRepo,
+      mockEvidenceConnector,
+      mockExternalPropertyLinkApi,
+      mockExternalValuationManagementApi,
+      mockFileUploadConnector,
+      mockHttpResponse,
       mockMdtpDashboardManagementApi,
-      mockPropertyLinkingService
+      mockMeter,
+      mockMetricRegistry,
+      mockMetrics,
+      mockPropertyLinkingService,
+      mockSimpleWSHttp,
+      mockStreamedResponse,
+      mockWSRequest,
+      mockWSResponseHeaders
     ).foreach(Mockito.reset(_))
 }

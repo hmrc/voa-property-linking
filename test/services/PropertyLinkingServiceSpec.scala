@@ -24,29 +24,22 @@ import models._
 import models.mdtp.propertylink.myclients.{PropertyLinkWithClient, PropertyLinksWithClients}
 import models.mdtp.propertylink.requests.APIPropertyLinkRequest
 import models.modernised._
-import models.modernised.externalpropertylink.myclients
-import models.modernised.externalpropertylink.myclients.{ClientDetails, ClientPropertyLink, PropertyLinksWithClient, SummaryPropertyLinkWithClient, PropertyLinkWithClient => ModernisedPropertyLinkWithClient}
+import models.modernised.externalpropertylink.myclients.{PropertyLinkWithClient => ModernisedPropertyLinkWithClient, _}
 import models.modernised.externalpropertylink.myorganisations._
 import models.searchApi.{OwnerAuthResult, OwnerAuthorisation}
 import models.voa.propertylinking.requests.CreatePropertyLink
 import org.mockito.ArgumentMatchers._
-import org.mockito.Mockito
 import org.mockito.Mockito._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.voapropertylinking.connectors.modernised.{ExternalPropertyLinkApi, ExternalValuationManagementApi}
+import uk.gov.hmrc.http.HttpResponse
 
 import scala.concurrent.Future
 
 class PropertyLinkingServiceSpec extends BaseUnitSpec {
 
-  val mockPropertyLinkingConnector = mock[ExternalPropertyLinkApi]
-  val mockExternalValuationManagementApi = mock[ExternalValuationManagementApi]
-  val mockHttpResponse: HttpResponse = mock[HttpResponse]
   val httpResponse = HttpResponse(200)
-  implicit val fakeHc = HeaderCarrier()
 
   val service = new PropertyLinkingService(
-    propertyLinksConnector = mockPropertyLinkingConnector,
+    propertyLinksConnector = mockExternalPropertyLinkApi,
     mockExternalValuationManagementApi
   )
 
@@ -125,12 +118,12 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
         organisationName = "org name",
         status = "APPROVED",
         representationSubmissionId = "",
-        representativeCode =  1111,
+        representativeCode = 1111,
         checkPermission = "START_AND_CONTINUE",
         challengePermission = "NOT_PERMITTED"))
   )
 
-  val  summaryPropertyLinkWithAgents: SummaryPropertyLinkWithAgents = SummaryPropertyLinkWithAgents(
+  val summaryPropertyLinkWithAgents: SummaryPropertyLinkWithAgents = SummaryPropertyLinkWithAgents(
     authorisationId = 11111,
     status = PropertyLinkStatus.APPROVED,
     startDate = date,
@@ -204,8 +197,8 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
     valuationDetailsAvailable = None,
     billingAuthorityCode = None)))
 
-  val agentAuthorisation = propertyLinkClient
-  val agentSummaryAuthorisation = propertyLinkClient
+  val agentAuthorisation: ModernisedPropertyLinkWithClient = propertyLinkClient
+  val agentSummaryAuthorisation: ModernisedPropertyLinkWithClient = propertyLinkClient
   val ownerAuthResultClient = PropertyLinksWithClients(1, 1, 1, 1, Seq(PropertyLinkWithClient.apply(summaryPropertyLinkClient)))
 
   val ownerAuthorisationAgent = OwnerAuthorisation(summaryPropertyLinkWithAgents)
@@ -216,43 +209,47 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
 
   val getMyOrganisationSearchParams = GetMyOrganisationPropertyLinksParameters()
   val getMyClientsSearchParams = GetMyClientsPropertyLinkParameters()
-  val paginationParams = PaginationParams(1, 1, true)
+  val paginationParams = PaginationParams(startPoint = 1, pageSize = 1, requestTotalRowCount = true)
 
   "getMyOrganisationsPropertyLink" should {
     "call connector and return a properties view for a valid authorisation id containing valid status" in {
 
-      when(mockPropertyLinkingConnector.getMyOrganisationsPropertyLink("11111")).thenReturn(Future.successful(Some(ownerPropertyLink)))
+      when(mockExternalPropertyLinkApi.getMyOrganisationsPropertyLink("11111"))
+        .thenReturn(Future.successful(Some(ownerPropertyLink)))
 
       service.getMyOrganisationsPropertyLink("11111").value.futureValue shouldBe Some(PropertiesView(ownerPropertyLink.authorisation, Nil))
 
-      verify(mockPropertyLinkingConnector).getMyOrganisationsPropertyLink("11111")
+      verify(mockExternalPropertyLinkApi).getMyOrganisationsPropertyLink("11111")
 
     }
 
     "return none when nothing is return from connector" in {
-      when(mockPropertyLinkingConnector.getMyOrganisationsPropertyLink("11111")).thenReturn(Future.successful(None))
+      when(mockExternalPropertyLinkApi.getMyOrganisationsPropertyLink("11111"))
+        .thenReturn(Future.successful(None))
 
       service.getMyOrganisationsPropertyLink("11111").value.futureValue shouldBe None
 
-      verify(mockPropertyLinkingConnector).getMyOrganisationsPropertyLink("11111")
+      verify(mockExternalPropertyLinkApi).getMyOrganisationsPropertyLink("11111")
     }
   }
 
   "getClientsPropertyLink" should {
     "call connector and return a properties view for a valid authorisation id containing valid status" in {
-      when(mockPropertyLinkingConnector.getClientsPropertyLink("11111")).thenReturn(Future.successful(Some(clientPropertyLink)))
+      when(mockExternalPropertyLinkApi.getClientsPropertyLink("11111"))
+        .thenReturn(Future.successful(Some(clientPropertyLink)))
 
       service.getClientsPropertyLink("11111").value.futureValue shouldBe Some(PropertiesView(clientPropertyLink.authorisation, Nil))
 
-      verify(mockPropertyLinkingConnector).getClientsPropertyLink("11111")
+      verify(mockExternalPropertyLinkApi).getClientsPropertyLink("11111")
     }
 
     "return none when nothing is return from connector" in {
-      when(mockPropertyLinkingConnector.getClientsPropertyLink("11111")).thenReturn(Future.successful(None))
+      when(mockExternalPropertyLinkApi.getClientsPropertyLink("11111"))
+        .thenReturn(Future.successful(None))
 
       service.getClientsPropertyLink("11111").value.futureValue shouldBe None
 
-      verify(mockPropertyLinkingConnector).getClientsPropertyLink("11111")
+      verify(mockExternalPropertyLinkApi).getClientsPropertyLink("11111")
 
     }
   }
@@ -276,68 +273,69 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
 
       val httpResponse = HttpResponse(200)
 
-      when(mockPropertyLinkingConnector.createPropertyLink(any())(any(), any())).thenReturn(Future.successful(mockHttpResponse))
+      when(mockExternalPropertyLinkApi.createPropertyLink(any())(any(), any()))
+        .thenReturn(Future.successful(mockHttpResponse))
 
       val response = service.create(request).futureValue
 
       response shouldBe mockHttpResponse
 
-      verify(mockPropertyLinkingConnector).createPropertyLink(any())(any(), any())
+      verify(mockExternalPropertyLinkApi).createPropertyLink(any())(any(), any())
     }
   }
 
   "getClientsPropertyLinks" should {
     "call connector and return a Owner Auth Result for a valid authorisation id" in {
 
-      when(mockPropertyLinkingConnector.getClientsPropertyLinks(getMyClientsSearchParams, Some(paginationParams))).thenReturn(Future.successful(Some(propertyLinksWithClient)))
+      when(mockExternalPropertyLinkApi.getClientsPropertyLinks(getMyClientsSearchParams, Some(paginationParams)))
+        .thenReturn(Future.successful(Some(propertyLinksWithClient)))
 
       val result = service.getClientsPropertyLinks(getMyClientsSearchParams, Some(paginationParams)).value.futureValue
 
       result.getOrElse("None returned") shouldBe ownerAuthResultClient
 
-      verify(mockPropertyLinkingConnector).getClientsPropertyLinks(getMyClientsSearchParams, Some(paginationParams))
+      verify(mockExternalPropertyLinkApi).getClientsPropertyLinks(getMyClientsSearchParams, Some(paginationParams))
     }
 
     "return none when nothing is returned from connector" in {
 
-      when(mockPropertyLinkingConnector.getClientsPropertyLinks(getMyClientsSearchParams, Some(paginationParams))).thenReturn(Future.successful(None))
+      when(mockExternalPropertyLinkApi.getClientsPropertyLinks(getMyClientsSearchParams, Some(paginationParams)))
+        .thenReturn(Future.successful(None))
 
       val result = service.getClientsPropertyLinks(getMyClientsSearchParams, Some(paginationParams)).value.futureValue
 
       result shouldBe None
 
-      verify(mockPropertyLinkingConnector).getClientsPropertyLinks(getMyClientsSearchParams, Some(paginationParams))
+      verify(mockExternalPropertyLinkApi).getClientsPropertyLinks(getMyClientsSearchParams, Some(paginationParams))
     }
   }
-
 
 
   "getMyOrganisationsPropertyLinks" should {
     "call connector and return a Owner Auth Result for a valid authorisation id" in {
 
-      when(mockPropertyLinkingConnector.getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams))).thenReturn(Future.successful(Some(propertyLinksWithAgents)))
+      when(mockExternalPropertyLinkApi.getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams)))
+        .thenReturn(Future.successful(Some(propertyLinksWithAgents)))
 
       val result = service.getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams)).value.futureValue
 
       result.getOrElse("None returned") shouldBe ownerAuthResultAgent
 
-      verify(mockPropertyLinkingConnector).getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams))
+      verify(mockExternalPropertyLinkApi).getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams))
     }
 
     "return none when nothing is returned from connector" in {
 
-      when(mockPropertyLinkingConnector.getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams))).thenReturn(Future.successful(None))
+      when(mockExternalPropertyLinkApi.getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams)))
+        .thenReturn(Future.successful(None))
 
       val result = service.getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams)).value.futureValue
 
       result.getOrElse("None returned") shouldBe "None returned"
 
-      verify(mockPropertyLinkingConnector).getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams))
+      verify(mockExternalPropertyLinkApi).getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams))
 
     }
   }
 
-  override def beforeEach() = {
-    Mockito.reset(mockPropertyLinkingConnector)
-  }
 }

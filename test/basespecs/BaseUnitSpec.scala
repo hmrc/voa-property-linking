@@ -49,8 +49,9 @@ abstract class BaseUnitSpec
 
   implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
   implicit val hc: HeaderCarrier = HeaderCarrier()
+  implicit val principal: Principal = Principal("external-id", "group-id")
   implicit val requestWithPrincipal: RequestWithPrincipal[AnyContentAsEmpty.type] =
-    RequestWithPrincipal(FakeRequest(), Principal("external-id", "group-id"))
+    RequestWithPrincipal(FakeRequest(), principal)
 
   override implicit val patienceConfig: PatienceConfig =
     PatienceConfig(Span(1, Second), Span(10, Milliseconds))

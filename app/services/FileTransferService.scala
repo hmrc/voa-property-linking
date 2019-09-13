@@ -43,19 +43,11 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
 
   def transferManually(envelopeId: String)(implicit hc: HeaderCarrier): Future[Unit] = {
     repo.getStatus(envelopeId) flatMap {
-      case Some(CLOSED) => transferSingleFile(envelopeId)
+      case Some(CLOSED) =>
+        fileUploadConnector.getEnvelopeDetails(envelopeId).flatMap(processEnvelope).map(_ => ()).recover {
+          case NonFatal(t) => Logger.warn(s"Transfer of $envelopeId failed due to ${t.getMessage}")
+        }
       case _ => Logger.info(s"Received callback for $envelopeId, but declaration has not been submitted"); Future.successful(())
-    }
-  }
-
-  private def transferSingleFile(envelopeId: String)(implicit hc: HeaderCarrier): Future[Unit] = {
-    {
-      for {
-        info <- fileUploadConnector.getEnvelopeDetails(envelopeId)
-        _ <- processEnvelope(info)
-      } yield ()
-    } recover {
-      case NonFatal(t) => Logger.warn(s"Transfer of $envelopeId failed due to ${t.getMessage}")
     }
   }
 
@@ -73,7 +65,7 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
       for {
         closedEnvelopes <- allEnvelopes.map(_.filter(_.status.getOrElse(CLOSED) == CLOSED))
         envelopeIds = closedEnvelopes.map(_.envelopeId)
-        envelopeInfos <- Future.traverse(envelopeIds)( envId => fileUploadConnector.getEnvelopeDetails(envId))
+        envelopeInfos <- Future.traverse(envelopeIds)(envId => fileUploadConnector.getEnvelopeDetails(envId))
         envelopeFilesNotQuarantine = envelopeInfos.filterNot(env => env.files.map(_.status).contains("QUARANTINED"))
         _ <- envelopeFilesNotQuarantine.foldLeft(Future.successful(())) {
           case (f, envInfo) => f.flatMap(_ => processEnvelope(envInfo)).recover {
@@ -85,7 +77,7 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
         Logger.info("Ending transfer job run")
         FileTransferComplete(None)
       }
-    }.recoverWith {
+      }.recoverWith {
       case e: Upstream4xxResponse if e.upstreamResponseCode == 429 =>
         Logger.warn("Rate limit exceeded, terminating queue processing")
         Future.successful(FileTransferComplete(None))
@@ -106,10 +98,10 @@ class FileTransferService @Inject()(val fileUploadConnector: FileUploadConnector
   private[services] def transferFile(fileInfo: FileInfo, metadata: EnvelopeMetadata)(implicit hc: HeaderCarrier): Future[Unit] = {
     for {
       file <- fileUploadConnector.downloadFile(fileInfo.href)
-      r <- if(file.headers.status < 400)
-            evidenceConnector.uploadFile(fileInfo.name, file.body, metadata)
-           else
-            failedDownloadFromFUAAS(fileInfo, file.headers.status)
+      r <- if (file.headers.status < 400)
+        evidenceConnector.uploadFile(fileInfo.name, file.body, metadata)
+      else
+        failedDownloadFromFUAAS(fileInfo, file.headers.status)
     } yield r
   }
 
