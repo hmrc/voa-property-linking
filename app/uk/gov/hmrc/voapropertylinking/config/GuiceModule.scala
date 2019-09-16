@@ -38,19 +38,13 @@ import com.google.inject.AbstractModule
 import com.google.inject.name.Names
 import com.google.inject.name.Names.named
 import com.typesafe.config.ConfigException
-import infrastructure.{RegularSchedule, Schedule}
-import org.joda.time.Duration
 import play.api.Mode.Mode
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.play.config.ServicesConfig
 
 class GuiceModule(environment: Environment,
                   configuration: Configuration) extends AbstractModule with ServicesConfig {
-  override def configure() = {
-
-    bind(classOf[String]).annotatedWith(Names.named("lockName")).toInstance("FileTransferLock")
-    bind(classOf[Duration]).annotatedWith(Names.named("lockTimeout")).toInstance(
-      Duration.standardMinutes(configuration.getLong("fileTransfer.lockMinutes").getOrElse(30L)))
+  override def configure(): Unit = {
 
     bind(classOf[ServicesConfig]).toInstance(new ServicesConfig {
       override protected def mode: Mode = environment.mode
@@ -58,10 +52,6 @@ class GuiceModule(environment: Environment,
       override protected def runModeConfiguration: Configuration = configuration
     })
 
-
-    bind(classOf[Schedule]).annotatedWith(Names.named("regularSchedule")).to(classOf[RegularSchedule])
-
-    bindConstant().annotatedWith(Names.named("envelopeCollectionName")).to(configuration.getString("envelope.collection.name").get)
     bindConstant().annotatedWith(Names.named("dvrCollectionName")).to(configuration.getString("dvr.collection.name").get)
     bindConstant().annotatedWith(Names.named("authedAssessmentEndpointEnabled")).to(configuration.getString("featureFlags.authedAssessmentEndpointEnabled").fold(false)(_.toBoolean))
     bindConstant().annotatedWith(Names.named("agentQueryParameterEnabledExternal")).to(configuration.getString("featureFlags.agentQueryParameterEnabledExternal").fold(false)(_.toBoolean))

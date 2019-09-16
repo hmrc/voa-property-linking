@@ -17,17 +17,16 @@
 package uk.gov.hmrc.voapropertylinking.auditing
 
 import basespecs.WireMockSpec
-import helpers.SimpleWsHttpTestApplication
 import play.api.http.ContentTypes
 import play.api.test.FakeRequest
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.test.WithFakeApplication
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class AuditingServiceSpec
   extends WireMockSpec
     with ContentTypes
-    with SimpleWsHttpTestApplication {
+    with WithFakeApplication {
 
   implicit val request = FakeRequest()
 

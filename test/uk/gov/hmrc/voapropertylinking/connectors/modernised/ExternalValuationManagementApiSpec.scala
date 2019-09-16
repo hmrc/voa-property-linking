@@ -19,8 +19,7 @@ package uk.gov.hmrc.voapropertylinking.connectors.modernised
 import java.time.LocalDateTime
 
 import basespecs.WireMockSpec
-import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, stubFor, urlEqualTo, _}
-import helpers.SimpleWsHttpTestApplication
+import com.github.tomakehurst.wiremock.client.WireMock._
 import models.voa.valuation.dvr.StreamedDocument
 import models.voa.valuation.dvr.documents.{Document, DocumentSummary, DvrDocumentFiles}
 import org.mockito.ArgumentMatchers.any
@@ -34,7 +33,7 @@ import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
 
 import scala.concurrent.Future
 
-class ExternalValuationManagementApiSpec extends WireMockSpec with ContentTypes with SimpleWsHttpTestApplication with WithFakeApplication {
+class ExternalValuationManagementApiSpec extends WireMockSpec with ContentTypes with WithFakeApplication {
 
   implicit val mat = fakeApplication.materializer
 
@@ -50,60 +49,60 @@ class ExternalValuationManagementApiSpec extends WireMockSpec with ContentTypes 
     override lazy val baseURL: String = mockServerUrl
   }
 
-    "get dvr documents" should {
-      "return the documents and transfer them into an optional" in {
-        val valuationId = 1L
-        val uarn = 2L
-        val propertyLinkId = "PL-123456789"
+  "get dvr documents" should {
+    "return the documents and transfer them into an optional" in {
+      val valuationId = 1L
+      val uarn = 2L
+      val propertyLinkId = "PL-123456789"
 
-        val now = LocalDateTime.now()
+      val now = LocalDateTime.now()
 
-        when(http.GET[DvrDocumentFiles](any(), any())(any(), any(), any(), any()))
-          .thenReturn(Future.successful(DvrDocumentFiles(
-            checkForm = Document(DocumentSummary("1", "Check Document", now)),
-            detailedValuation = Document(DocumentSummary("2", "Detailed Valuation Document", now))
-          )))
-
-        val result = connector.getDvrDocuments(valuationId, uarn, propertyLinkId).futureValue
-        result shouldBe Some(DvrDocumentFiles(
+      when(http.GET[DvrDocumentFiles](any(), any())(any(), any(), any(), any()))
+        .thenReturn(Future.successful(DvrDocumentFiles(
           checkForm = Document(DocumentSummary("1", "Check Document", now)),
           detailedValuation = Document(DocumentSummary("2", "Detailed Valuation Document", now))
-        ))
-      }
+        )))
 
-      "return a None upon a 404 from modernised" in {
-        val valuationId = 1L
-        val uarn = 2L
-        val propertyLinkId = "PL-123456789"
-
-        when(http.GET[DvrDocumentFiles](any(), any())(any(), any(), any(), any()))
-          .thenReturn(Future.failed(new NotFoundException("not found dvr documents")))
-
-        val result = connector.getDvrDocuments(valuationId, uarn, propertyLinkId).futureValue
-        result shouldBe None
-      }
+      val result = connector.getDvrDocuments(valuationId, uarn, propertyLinkId).futureValue
+      result shouldBe Some(DvrDocumentFiles(
+        checkForm = Document(DocumentSummary("1", "Check Document", now)),
+        detailedValuation = Document(DocumentSummary("2", "Detailed Valuation Document", now))
+      ))
     }
 
-    "get dvr document" should {
-      "stream through the file" in {
-        val valuationId = 1L
-        val uarn = 2L
-        val propertyLinkId = "PL-123456789"
-        val fileRef = "1L"
+    "return a None upon a 404 from modernised" in {
+      val valuationId = 1L
+      val uarn = 2L
+      val propertyLinkId = "PL-123456789"
 
-        val dvrUrl = s"/external-valuation-management-api/properties/$uarn/valuations/$valuationId/files/$fileRef?propertyLinkId=$propertyLinkId"
+      when(http.GET[DvrDocumentFiles](any(), any())(any(), any(), any(), any()))
+        .thenReturn(Future.failed(new NotFoundException("not found dvr documents")))
 
-        stubFor(get(urlEqualTo(dvrUrl))
-          .willReturn(aResponse
-            .withStatus(200)
-            .withHeader("Content-Type", JSON)
-            .withBody(getClass.getResource("/document.pdf").getFile)
-          )
+      val result = connector.getDvrDocuments(valuationId, uarn, propertyLinkId).futureValue
+      result shouldBe None
+    }
+  }
+
+  "get dvr document" should {
+    "stream through the file" in {
+      val valuationId = 1L
+      val uarn = 2L
+      val propertyLinkId = "PL-123456789"
+      val fileRef = "1L"
+
+      val dvrUrl = s"/external-valuation-management-api/properties/$uarn/valuations/$valuationId/files/$fileRef?propertyLinkId=$propertyLinkId"
+
+      stubFor(get(urlEqualTo(dvrUrl))
+        .willReturn(aResponse
+          .withStatus(200)
+          .withHeader("Content-Type", JSON)
+          .withBody(getClass.getResource("/document.pdf").getFile)
         )
+      )
 
-        val result = connector.getDvrDocument(valuationId, uarn, propertyLinkId, fileRef).futureValue
-        result shouldBe a[StreamedDocument]
-      }
+      val result = connector.getDvrDocument(valuationId, uarn, propertyLinkId, fileRef).futureValue
+      result shouldBe a[StreamedDocument]
     }
+  }
 }
 
