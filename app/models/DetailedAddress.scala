@@ -16,7 +16,7 @@
 
 package models
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class DetailedAddress(
                             addressUnitId: Option[Long] = None,
@@ -34,31 +34,21 @@ case class DetailedAddress(
                             postcode: String
                           ) {
 
-  def simplify = {
-    val lines = List(
-      concatenate(organisationName, departmentName),
-      concatenate(subBuildingName, buildingName, buildingNumber),
-      concatenate(dependentThoroughfareName, thoroughfareName),
-      concatenate(doubleDependentLocality, dependentLocality, Some(postTown)))
-      .filter(_.nonEmpty)
-      .zipAll(List.fill(4)(""), "", "")
-      .map{ case (a,b) => a+b }
+  def simplify: SimpleAddress = {
+    def concatenate(lines: Option[String]*): String = lines.toSeq.flatten.mkString(", ")
 
     SimpleAddress(
       addressUnitId = addressUnitId,
-      line1 = lines(0),
-      line2 = lines(1),
-      line3 = lines(2),
-      line4 = lines(3),
+      line1 = concatenate(organisationName, departmentName),
+      line2 = concatenate(subBuildingName, buildingName, buildingNumber),
+      line3 = concatenate(dependentThoroughfareName, thoroughfareName),
+      line4 = concatenate(doubleDependentLocality, dependentLocality, Some(postTown)),
       postcode = postcode
     )
   }
 
-  private def concatenate(lines: Option[String]*) = {
-    lines.toSeq.flatten.mkString(", ")
-  }
 }
 
 object DetailedAddress {
-  implicit val formats = Json.format[DetailedAddress]
+  implicit val formats: OFormat[DetailedAddress] = Json.format
 }

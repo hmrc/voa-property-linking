@@ -20,37 +20,31 @@ import basespecs.BaseUnitSpec
 import models._
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
-import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import uk.gov.hmrc.play.config.ServicesConfig
 
 import scala.concurrent.Future
 
 class AddressManagementApiSpec extends BaseUnitSpec {
 
-  val http = mock[DefaultHttpClient]
-  val testConnector = new AddressManagementApi(http, mock[ServicesConfig]) {
-    override lazy val baseUrl = "http://some-url"
-  }
+  val testConnector = new AddressManagementApi(mockDefaultHttpClient, mock[ServicesConfig])
 
   val url = s"/address-management-api/address"
 
   "AddressConnector.get" should {
     "return the address associated with the address unit id" in {
       val addressUnitId = 1234L
-      when(http.GET[APIAddressLookupResult](any())(any(), any(), any())).thenReturn(Future.successful(APIAddressLookupResult(
-        Seq(
+      when(mockDefaultHttpClient.GET[APIAddressLookupResult](any())(any(), any(), any()))
+        .thenReturn(Future.successful(APIAddressLookupResult(Seq(
           DetailedAddress(
             addressUnitId = Some(123456789),
-            nonAbpAddressId =  Some(1234),
-            organisationName =  Some("Liverpool FC"),
-            departmentName =  Some("First team"),
-            buildingName =  Some("Anfield Stadium"),
+            nonAbpAddressId = Some(1234),
+            organisationName = Some("Liverpool FC"),
+            departmentName = Some("First team"),
+            buildingName = Some("Anfield Stadium"),
             dependentThoroughfareName = Some("Anfield Road"),
-            postTown =  "Liverpool",
-            postcode =  "L4 0TH"
-          )
-        )
-      )))
+            postTown = "Liverpool",
+            postcode = "L4 0TH"
+          )))))
 
       testConnector.get(addressUnitId)(hc).futureValue shouldBe Some(SimpleAddress(
         addressUnitId = Some(123456789),

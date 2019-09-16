@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
+import java.nio.file.Files.readAllBytes
+import java.nio.file.Paths
 import java.time.LocalDateTime
 
 import basespecs.WireMockSpec
@@ -29,7 +31,6 @@ import play.api.libs.ws.WSClient
 import uk.gov.hmrc.http.NotFoundException
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.test.WithFakeApplication
-import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
 
 import scala.concurrent.Future
 
@@ -39,13 +40,12 @@ class ExternalValuationManagementApiSpec extends WireMockSpec with ContentTypes 
 
   val wsClient = fakeApplication.injector.instanceOf[WSClient]
   val config = fakeApplication.injector.instanceOf[ServicesConfig]
-  val http = mock[VoaHttpClient]
 
   val voaApiUrl = "http://voa-modernised-api/external-valuation-management-api"
   val valuationHistoryUrl = s"$voaApiUrl/properties/{uarn}/valuations"
 
 
-  val connector = new ExternalValuationManagementApi(wsClient, http, valuationHistoryUrl, config) {
+  val connector = new ExternalValuationManagementApi(wsClient, mockVoaHttpClient, valuationHistoryUrl, config) {
     override lazy val baseURL: String = mockServerUrl
   }
 
@@ -57,7 +57,7 @@ class ExternalValuationManagementApiSpec extends WireMockSpec with ContentTypes 
 
       val now = LocalDateTime.now()
 
-      when(http.GET[DvrDocumentFiles](any(), any())(any(), any(), any(), any()))
+      when(mockVoaHttpClient.GET[DvrDocumentFiles](any(), any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(DvrDocumentFiles(
           checkForm = Document(DocumentSummary("1", "Check Document", now)),
           detailedValuation = Document(DocumentSummary("2", "Detailed Valuation Document", now))
@@ -75,7 +75,7 @@ class ExternalValuationManagementApiSpec extends WireMockSpec with ContentTypes 
       val uarn = 2L
       val propertyLinkId = "PL-123456789"
 
-      when(http.GET[DvrDocumentFiles](any(), any())(any(), any(), any(), any()))
+      when(mockVoaHttpClient.GET[DvrDocumentFiles](any(), any())(any(), any(), any(), any()))
         .thenReturn(Future.failed(new NotFoundException("not found dvr documents")))
 
       val result = connector.getDvrDocuments(valuationId, uarn, propertyLinkId).futureValue
@@ -92,13 +92,7 @@ class ExternalValuationManagementApiSpec extends WireMockSpec with ContentTypes 
 
       val dvrUrl = s"/external-valuation-management-api/properties/$uarn/valuations/$valuationId/files/$fileRef?propertyLinkId=$propertyLinkId"
 
-      stubFor(get(urlEqualTo(dvrUrl))
-        .willReturn(aResponse
-          .withStatus(200)
-          .withHeader("Content-Type", JSON)
-          .withBody(getClass.getResource("/document.pdf").getFile)
-        )
-      )
+      stubFor(get(urlEqualTo(dvrUrl)).willReturn(ok(new String(readAllBytes(Paths.get(getClass.getResource("/document.pdf").toURI))))))
 
       val result = connector.getDvrDocument(valuationId, uarn, propertyLinkId, fileRef).futureValue
       result shouldBe a[StreamedDocument]

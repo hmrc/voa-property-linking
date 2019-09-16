@@ -30,16 +30,13 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class DVRRepositorySpec
   extends BaseUnitSpec
     with MongoSpecSupport {
-  val app = appBuilder.build()
 
-  val repository = new DVRRepository(app.injector.instanceOf[ReactiveMongoComponent], "test", app.injector.instanceOf[ServicesConfig]) {
-    override def indexes: Seq[Index] = Seq.empty
-  }
+  val app = new GuiceApplicationBuilder()
+    .configure(
+      "mongodb.uri" -> s"mongodb://127.0.0.1:27017/test-${this.getClass.getSimpleName}"
+    ).build()
 
-  protected def appBuilder: GuiceApplicationBuilder =
-    new GuiceApplicationBuilder()
-      .configure(
-        "mongodb.uri" -> s"mongodb://127.0.0.1:27017/test-${this.getClass.getSimpleName}")
+  val repository = new DVRRepository(app.injector.instanceOf[ReactiveMongoComponent], "test", app.injector.instanceOf[ServicesConfig])
 
   override def beforeEach(): Unit = {
     super.beforeEach()
@@ -51,21 +48,23 @@ class DVRRepositorySpec
   private val assessmentRef = 9876
 
   "repository" should {
-    "have an empty index initially" in {
-      repository.indexes shouldBe Seq.empty
+    "have an index with TTL defined" in {
+      inside(repository.indexes.loneElement) {
+        case Index(_, Some(name), _, _, _, _, _, _, _) => name shouldBe "ttl"
+      }
     }
   }
 
   "repository" should {
     "create a DVRRecord in the repository with the provided organisationId and assessmentRef" in {
       repository.create(DetailedValuationRequest(
-        1L,
-        1L,
-        1L,
-        "DVR-1",
-        1L,
-        None,
-        ""
+        authorisationId = 1L,
+        organisationId = 1L,
+        personId = 1L,
+        submissionId = "DVR-1",
+        assessmentRef = 1L,
+        agents = None,
+        billingAuthorityReferenceNumber = ""
       )).futureValue shouldBe (())
     }
   }
@@ -73,13 +72,13 @@ class DVRRepositorySpec
   "repository" should {
     "return true if a record with the organisationId and assessmentRef exists" in {
       repository.create(DetailedValuationRequest(
-        1L,
-        organisationId,
-        1L,
-        "DVR-1",
-        assessmentRef,
-        None,
-        ""
+        authorisationId = 1L,
+        organisationId = organisationId,
+        personId = 1L,
+        submissionId = "DVR-1",
+        assessmentRef = assessmentRef,
+        agents = None,
+        billingAuthorityReferenceNumber = ""
       )).futureValue
 
       repository.exists(organisationId, assessmentRef).futureValue shouldBe true

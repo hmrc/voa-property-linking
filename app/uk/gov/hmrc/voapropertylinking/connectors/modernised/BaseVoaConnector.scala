@@ -19,4 +19,10 @@ package uk.gov.hmrc.voapropertylinking.connectors.modernised
 import uk.gov.hmrc.voapropertylinking.connectors.BaseConnector
 import uk.gov.hmrc.voapropertylinking.connectors.modernised.errorhandler.VoaModernisedHttpErrorFunctions
 
-abstract class BaseVoaConnector extends BaseConnector with VoaModernisedHttpErrorFunctions
+abstract class BaseVoaConnector extends BaseConnector with VoaModernisedHttpErrorFunctions {
+
+  def toNone[T]: PartialFunction[T, None.type] = {
+    case _ => None
+  }
+
+}

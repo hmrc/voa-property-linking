@@ -19,7 +19,7 @@ package uk.gov.hmrc.voapropertylinking.connectors.modernised
 import javax.inject.Inject
 import models.{APIAddressLookupResult, DetailedAddress, SimpleAddress}
 import play.api.libs.json.{JsDefined, JsNumber, JsValue}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import uk.gov.hmrc.play.config.ServicesConfig
 
@@ -30,19 +30,14 @@ class AddressManagementApi @Inject()(
                                       servicesConfig: ServicesConfig
                                     )(implicit executionContext: ExecutionContext) extends BaseVoaConnector {
 
-  lazy val baseUrl: String = servicesConfig.baseUrl("external-business-rates-data-platform")
-  lazy val url = baseUrl + "/address-management-api/address"
+  lazy val url: String = servicesConfig.baseUrl("external-business-rates-data-platform") + "/address-management-api/address"
 
   def find(postcode: String)(implicit hc: HeaderCarrier): Future[Seq[DetailedAddress]] = {
-    http.GET[APIAddressLookupResult](s"""$url?pageSize=100&startPoint=1&searchparams={"postcode": "$postcode"}""") map { res =>
-      res.addressDetails
-    }
+    http.GET[APIAddressLookupResult](s"""$url?pageSize=100&startPoint=1&searchparams={"postcode": "$postcode"}""").map(_.addressDetails)
   }
 
   def get(addressUnitId: Long)(implicit hc: HeaderCarrier): Future[Option[SimpleAddress]] = {
-    http.GET[APIAddressLookupResult](s"$url/$addressUnitId").map(_.addressDetails.headOption.map(_.simplify)).recover {
-      case _ => None
-    }
+    http.GET[APIAddressLookupResult](s"$url/$addressUnitId").map(_.addressDetails.headOption.map(_.simplify)) recover toNone
   }
 
   def create(address: SimpleAddress)(implicit hc: HeaderCarrier): Future[Long] = {
@@ -52,10 +47,6 @@ class AddressManagementApi @Inject()(
         case _ => throw new Exception(s"Failed to create record for address $address")
       }
     }
-  }
-
-  def update(nonAbpId: Long, address: DetailedAddress)(implicit hc: HeaderCarrier): Future[Unit] = {
-    http.PUT[DetailedAddress, HttpResponse](s"$url/non_standard_address/$nonAbpId", address) map { _ => () }
   }
 
 }
