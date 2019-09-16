@@ -29,7 +29,10 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class AuthenticatedActionBuilder @Inject()(
                                             override val authConnector: AuthConnector
-                                          )(implicit override val executionContext: ExecutionContext) extends ActionBuilder[RequestWithPrincipal] with AuthorisedFunctions with Results {
+                                          )(implicit override val executionContext: ExecutionContext)
+  extends ActionBuilder[RequestWithPrincipal]
+    with AuthorisedFunctions
+    with Results {
 
   def invokeBlock[A](request: Request[A], block: RequestWithPrincipal[A] => Future[Result]): Future[Result] = {
 
@@ -39,9 +42,9 @@ class AuthenticatedActionBuilder @Inject()(
       case externalId ~ groupIdentifier =>
         (externalId, groupIdentifier) match {
           case (Some(exId), Some(grpId)) => block(RequestWithPrincipal(request, Principal(exId, grpId)))
-          case (Some(_), None)           => Future.successful(Unauthorized(Json.obj("errorCode" -> "NO_GROUP_ID")))
-          case (None, Some(_))           => Future.successful(Unauthorized(Json.obj("errorCode" -> "NO_EXTERNAL_ID")))
-          case (None, None)              => Future.successful(Unauthorized(Json.obj("errorCode" -> "NO_EXTERNAL_ID_OR_GROUP_ID")))
+          case (Some(_), None) => Future.successful(Unauthorized(Json.obj("errorCode" -> "NO_GROUP_ID")))
+          case (None, Some(_)) => Future.successful(Unauthorized(Json.obj("errorCode" -> "NO_EXTERNAL_ID")))
+          case (None, None) => Future.successful(Unauthorized(Json.obj("errorCode" -> "NO_EXTERNAL_ID_OR_GROUP_ID")))
         }
     }
   }
