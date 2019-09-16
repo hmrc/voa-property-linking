@@ -29,29 +29,26 @@ class SubmissionIdController @Inject()(
                                         val sequenceGenerator: SequenceGeneratorMongoRepository
                                       )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController {
 
+  val charMapping: Map[Char, Char] = Map(
+    // we have 26 alpha numeric character as input, i.e. 0-9, A-P
+    // we convert is to 0-9A-X with the following chars omitted:a, c, e, f, i, k, o
+    'a' -> 'q',
+    'c' -> 'r',
+    'e' -> 'v',
+    'f' -> 'w',
+    'i' -> 'x',
+    'k' -> 'y',
+    'o' -> 'z'
+    //no mapping for s, t, u as they are not allowed.
+  ).withDefault(identity)
+
   def get(prefix: String): Action[AnyContent] = authenticated.async { implicit request =>
-    for {
-      id <- sequenceGenerator.getNextSequenceId(prefix)
-      strId = formatId(id)
-    } yield {
-      Ok(Json.toJson(prefix.toUpperCase + strId))
+    sequenceGenerator.getNextSequenceId(prefix).map { id =>
+      Ok(Json.toJson(formatId(prefix, id)))
     }
   }
 
-  private def formatId(id: Long) = {
-    val charMapping= Map(
-      // we have 26 alpha numeric character as input, i.e. 0-9, A-P
-      // we convert is to 0-9A-X with the following chars omitted:a, c, e, f, i, k, o
-      'a' -> 'q',
-      'c' -> 'r',
-      'e' -> 'v',
-      'f' -> 'w',
-      'i' -> 'x',
-      'k' -> 'y',
-      'o' -> 'z'
-      //no mapping for s, t, u as they are not allowed.
-    )
-    BigInt(id).toString(26).map(x => charMapping.getOrElse(x, x)).toUpperCase
-  }
+  private[controllers] def formatId(prefix: String, id: Long): String =
+    s"${prefix.toUpperCase}${BigInt(id).toString(26).map(charMapping).toUpperCase}"
 
 }

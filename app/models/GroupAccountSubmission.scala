@@ -16,7 +16,7 @@
 
 package models
 
-import java.time.{Clock, Instant}
+import java.time.Instant
 
 import play.api.libs.json.Json
 

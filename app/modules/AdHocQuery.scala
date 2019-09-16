@@ -24,7 +24,8 @@ import org.joda.time.Duration
 import play.api.libs.json.{JsObject, Json}
 import play.api.{Configuration, Environment, Logger}
 import play.modules.reactivemongo.ReactiveMongoComponent
-import reactivemongo.api.{DB, ReadPreference}
+import reactivemongo.api.ReadPreference._
+import reactivemongo.api.{Cursor, DB}
 import reactivemongo.play.json._
 import reactivemongo.play.json.collection.JSONCollection
 import uk.gov.hmrc.lock.{ExclusiveTimePeriodLock, LockMongoRepository, LockRepository}
@@ -50,13 +51,15 @@ trait AdhocQueryRunner extends ExclusiveTimePeriodLock {
 
   override val lockId: String = "AdhocQueryLock"
   override val holdLockFor: Duration = Duration.standardMinutes(10)
+
   override def repo: LockRepository = LockMongoRepository(db)
 }
 
 @Singleton
-class AdhocQueryRunnerImpl @Inject() (reactiveMongoComponent: ReactiveMongoComponent,
-                                      @Named("collection") collection: String,
-                                      @Named("query") query: String) extends AdhocQueryRunner {
+class AdhocQueryRunnerImpl @Inject()(reactiveMongoComponent: ReactiveMongoComponent,
+                                     @Named("collection") collection: String,
+                                     @Named("query") query: String) extends AdhocQueryRunner {
+
   import scala.concurrent.ExecutionContext.Implicits.global
 
   override val db = reactiveMongoComponent.mongoConnector.db
@@ -65,11 +68,13 @@ class AdhocQueryRunnerImpl @Inject() (reactiveMongoComponent: ReactiveMongoCompo
     logger.info(s"Adhoc query running: db.getCollection('$collection').find($query)")
 
     val col = db().collection[JSONCollection](collection)
-    val results = col.find(Json.parse(query).as[JsObject]).cursor[JsObject](ReadPreference.primary, false).collect[List]()
+    val results = col.find(Json.parse(query).as[JsObject])
+      .cursor[JsObject](readPreference = primary, isMongo26WriteOp = false)
+      .collect[List](maxDocs = -1, err = Cursor.ContOnError[List[JsObject]]())
 
     results.map {
       case Nil => logger.info("No results found")
-      case l =>
+      case l@_ =>
         logger.info(s"${l.length} items found")
         logger.info(s"${Json.obj("results" -> l)}")
     }.andThen { case _ => logger.info("Adhoc query processing: end") }

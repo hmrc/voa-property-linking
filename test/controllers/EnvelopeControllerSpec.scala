@@ -19,12 +19,11 @@ package controllers
 import java.util.UUID
 
 import basespecs.BaseControllerSpec
-import models.EnvelopeStatus
+import models.EnvelopeStatus.EnvelopeStatus
 import org.mockito.ArgumentMatchers.{eq => matching, _}
 import org.mockito.Mockito._
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
 import repositories.EnvelopeIdRepo
 import uk.gov.hmrc.circuitbreaker.UnhealthyServiceException
 import uk.gov.hmrc.http._
@@ -43,11 +42,9 @@ class EnvelopeControllerSpec extends BaseControllerSpec {
       val metadataJson = Json.obj("submissionId" -> submissionId, "personId" -> 1)
 
       val res = testController.create()(FakeRequest().withBody(metadataJson).withHeaders(HOST -> "localhost:9524"))
-      await(res)
+      status(res) shouldBe OK
 
-      verify(mockFileUpload, once).createEnvelope(matching(EnvelopeMetadata(submissionId, 1)), matching(callbackUrl))(any[HeaderCarrier])
-
-      status(res) mustBe OK
+      verify(mockFileUpload).createEnvelope(matching(EnvelopeMetadata(submissionId, 1)), matching(callbackUrl))(any[HeaderCarrier])
     }
 
     "record the envelope ID in mongo" in {
@@ -59,11 +56,9 @@ class EnvelopeControllerSpec extends BaseControllerSpec {
       when(mockFileUpload.createEnvelope(matching(metadata), matching(callbackUrl))(any[HeaderCarrier])).thenReturn(Future.successful(Some(envelopeId)))
 
       val res = testController.create()(FakeRequest().withBody(metadataJson).withHeaders(HOST -> "localhost:9524"))
-      await(res)
+      status(res) shouldBe OK
 
-      verify(mockRepo, once).create(matching(envelopeId), any())
-
-      status(res) mustBe OK
+      verify(mockRepo).create(matching(envelopeId), any())
     }
 
     "return the envelope ID as json" in {
@@ -75,21 +70,21 @@ class EnvelopeControllerSpec extends BaseControllerSpec {
       when(mockFileUpload.createEnvelope(matching(metadata), matching(callbackUrl))(any[HeaderCarrier])) thenReturn Future.successful(Some(envelopeId))
 
       val res = testController.create()(FakeRequest().withBody(metadataJson).withHeaders(HOST -> "localhost:9524"))
-      await(res)
 
-      status(res) mustBe OK
-
-      contentAsJson(res) mustBe Json.obj("envelopeId" -> envelopeId)
+      status(res) shouldBe OK
+      contentAsJson(res) shouldBe Json.obj("envelopeId" -> envelopeId)
     }
 
     "return a 503 Service Unavailable when file upload is not available" in {
       val metadataJson = Json.obj("submissionId" -> UUID.randomUUID().toString, "personId" -> 1)
-      when(mockFileUpload.createEnvelope(any[EnvelopeMetadata], any[String])(any[HeaderCarrier])) thenReturn Future.failed { new UnhealthyServiceException("file upload isn't feeling well") }
+      when(mockFileUpload.createEnvelope(any[EnvelopeMetadata], any[String])(any[HeaderCarrier])) thenReturn Future.failed {
+        new UnhealthyServiceException("file upload isn't feeling well")
+      }
 
       val res = testController.create()(FakeRequest().withBody(metadataJson))
 
-      status(res) mustBe SERVICE_UNAVAILABLE
-      contentAsJson(res) mustBe Json.obj("error" -> "file upload service not available")
+      status(res) shouldBe SERVICE_UNAVAILABLE
+      contentAsJson(res) shouldBe Json.obj("error" -> "file upload service not available")
     }
 
   }
@@ -121,8 +116,6 @@ class EnvelopeControllerSpec extends BaseControllerSpec {
     when(m.createEnvelope(any[EnvelopeMetadata], matching(callbackUrl))(any[HeaderCarrier])) thenReturn Future.successful(Some(UUID.randomUUID().toString))
     m
   }
-
-  lazy val once = times(1)
 
 }
 

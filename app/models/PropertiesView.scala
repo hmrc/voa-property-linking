@@ -16,21 +16,12 @@
 
 package models
 
-import java.time.{Clock, Instant, LocalDate, ZoneId}
+import java.time.{Instant, LocalDate}
 
+import models.modernised.ValuationHistory
 import models.modernised.externalpropertylink.myclients.PropertyLinkWithClient
 import models.modernised.externalpropertylink.myorganisations.PropertyLinkWithAgents
-import models.modernised.{ValuationHistory, _}
 import play.api.libs.json._
-
-case class PropertiesViewResponse(resultCount: Option[Int], authorisations: Seq[PropertiesView]){
-
-  def uppercase = this.copy(authorisations = authorisations.map(_.upperCase))
-}
-
-object PropertiesViewResponse {
-  implicit val format: Format[PropertiesViewResponse] = Json.format[PropertiesViewResponse]
-}
 
 case class PropertiesView(authorisationId: Long,
                           uarn: Long,

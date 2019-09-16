@@ -48,7 +48,7 @@ class RemoveEnvelopesSpec extends UnitSpec
   "execute" should {
     "delete the id from the repo" in {
       val function1: String => Future[Unit] = unitUnderTest.execute
-      function1(uuid) onSuccess {case r => r} shouldBe ()
+      function1(uuid) onSuccess {case r => r} shouldBe (())
     }
   }
 

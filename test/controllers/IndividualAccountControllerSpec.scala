@@ -16,15 +16,14 @@
 
 package controllers
 
-import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import basespecs.BaseControllerSpec
 import models.{IndividualAccount, IndividualAccountId, IndividualAccountSubmission, IndividualDetails}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import uk.gov.hmrc.voapropertylinking.connectors.mdtp.BusinessRatesAuthConnector
 import uk.gov.hmrc.voapropertylinking.connectors.modernised.CustomerManagementApi
 
@@ -43,10 +42,9 @@ class IndividualAccountControllerSpec extends BaseControllerSpec {
       when(mockIndividualAccountConnector.createIndividualAccount(any())(any[HeaderCarrier])).thenReturn(Future.successful(IndividualAccountId(1)))
 
       val res = testController.create()(FakeRequest().withBody(individualJson))
-      await(res)
 
-      status(res) mustBe CREATED
-      contentAsJson(res) mustBe Json.toJson(IndividualAccountId(1))
+      status(res) shouldBe CREATED
+      contentAsJson(res) shouldBe Json.toJson(IndividualAccountId(1))
     }
   }
 
@@ -56,20 +54,14 @@ class IndividualAccountControllerSpec extends BaseControllerSpec {
       val testIndividualAccountSubmission = IndividualAccountSubmission("test-external-id", "test-trust-id", 1, testIndividualDetails)
 
       val individualJson = Json.toJson(testIndividualAccountSubmission)
-      val testJsonResponse =
-        """
-          |{
-          |  "some": "json"
-          |}
-        """.stripMargin
+      val testJsonResponse = """{ "some": "json" }"""
 
       when(mockIndividualAccountConnector.updateIndividualAccount(any(), any())(any[HeaderCarrier])).thenReturn(Future.successful(Json.parse(testJsonResponse)))
       when(mockBrAuth.clearCache()(any[HeaderCarrier])).thenReturn(Future.successful(()))
 
       val res = testController.update(1)(FakeRequest().withBody(individualJson))
-      await(res)
 
-      status(res) mustBe OK
+      status(res) shouldBe OK
     }
   }
 
@@ -83,19 +75,17 @@ class IndividualAccountControllerSpec extends BaseControllerSpec {
       when(mockIndividualAccountConnector.getDetailedIndividual(any())(any[HeaderCarrier])).thenReturn(Future.successful(Some(testIndividualAccount)))
 
       val res = testController.get(1)(FakeRequest())
-      await(res)
 
-      status(res) mustBe OK
-      contentAsJson(res) mustBe individualJson
+      status(res) shouldBe OK
+      contentAsJson(res) shouldBe individualJson
     }
 
     "return NotFound for if the individual does not exist in modernised" in {
       when(mockIndividualAccountConnector.getDetailedIndividual(any())(any[HeaderCarrier])).thenReturn(Future.successful(None))
 
       val res = testController.get(1)(FakeRequest())
-      await(res)
 
-      status(res) mustBe NOT_FOUND
+      status(res) shouldBe NOT_FOUND
     }
   }
 
@@ -109,27 +99,30 @@ class IndividualAccountControllerSpec extends BaseControllerSpec {
       when(mockIndividualAccountConnector.findDetailedIndividualAccountByGGID(any())(any[HeaderCarrier])).thenReturn(Future.successful(Some(testIndividualAccount)))
 
       val res = testController.withExternalId("test-external-id")(FakeRequest())
-      await(res)
 
-      status(res) mustBe OK
-      contentAsJson(res) mustBe individualJson
+      status(res) shouldBe OK
+      contentAsJson(res) shouldBe individualJson
     }
 
     "return NotFound for if the individual does not exist in modernised using the GG external ID" in {
       when(mockIndividualAccountConnector.findDetailedIndividualAccountByGGID(any())(any[HeaderCarrier])).thenReturn(Future.successful(None))
 
       val res = testController.withExternalId("test-external-id")(FakeRequest())
-      await(res)
 
-      status(res) mustBe NOT_FOUND
+      status(res) shouldBe NOT_FOUND
     }
   }
 
-  lazy val mockIndividualAccountConnector = mock[CustomerManagementApi]
+  lazy val mockIndividualAccountConnector: CustomerManagementApi = mock[CustomerManagementApi]
 
-  lazy val mockBrAuth = mock[BusinessRatesAuthConnector]
+  lazy val mockBrAuth: BusinessRatesAuthConnector = mock[BusinessRatesAuthConnector]
 
-  lazy val testController = new IndividualAccountController(preAuthenticatedActionBuilders(), mockIndividualAccountConnector, mock[AuditingService], mockBrAuth)
+  lazy val testController = new IndividualAccountController(
+    authenticated = preAuthenticatedActionBuilders(),
+    customerManagementApi = mockIndividualAccountConnector,
+    auditingService = mock[AuditingService],
+    brAuth = mockBrAuth
+  )
 
 }
 

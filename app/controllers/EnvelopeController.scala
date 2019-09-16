@@ -17,7 +17,7 @@
 package controllers
 
 import javax.inject.Inject
-import models.Closed
+import models.EnvelopeStatus
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent}
 import repositories.EnvelopeIdRepo
@@ -43,12 +43,8 @@ class EnvelopeController @Inject()(
         .createEnvelope(metadata, routes.FileTransferController.handleCallback().absoluteURL(mdtpPlatformSsl))
         .flatMap {
           case Some(id) =>
-            repo
-              .create(id)
-              .map { _ =>
-                Ok(Json.obj("envelopeId" -> id))
-              }
-          case None     => Future.successful(InternalServerError(Json.obj("error" -> "envelope creation failed")))
+            repo.create(id).map(_ => Ok(Json.obj("envelopeId" -> id)))
+          case None => Future.successful(InternalServerError(Json.obj("error" -> "envelope creation failed")))
         } recover {
         case _: UnhealthyServiceException => ServiceUnavailable(Json.obj("error" -> "file upload service not available"))
       }
@@ -56,18 +52,10 @@ class EnvelopeController @Inject()(
   }
 
   def record(envelopeId: String): Action[AnyContent] = authenticated.async { implicit request =>
-    repo
-      .create(envelopeId)
-      .map { _ =>
-        Ok(envelopeId)
-      }
+    repo.create(envelopeId).map(_ => Ok(envelopeId))
   }
 
   def close(envelopeId: String): Action[AnyContent] = authenticated.async { implicit request =>
-    repo
-      .update(envelopeId, Closed)
-      .map{ _=>
-        Ok(envelopeId)
-      }
+    repo.update(envelopeId, EnvelopeStatus.CLOSED).map(_ => Ok(envelopeId))
   }
 }

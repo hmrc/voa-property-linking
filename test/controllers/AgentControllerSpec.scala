@@ -20,10 +20,8 @@ import basespecs.BaseControllerSpec
 import models.searchApi.{Agent, Agents}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{reset, when}
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{contentAsString, _}
 import uk.gov.hmrc.voapropertylinking.connectors.modernised.AuthorisationSearchApi
 
 import scala.concurrent.Future
@@ -38,9 +36,8 @@ class AgentControllerSpec extends BaseControllerSpec {
 
   "given authorised access, manage agents" should {
 
-    when(mockConf.baseUrl(any())).thenReturn(baseUrl)
-
     "return owner agents" in new Setup {
+      when(mockConf.baseUrl(any())).thenReturn(baseUrl)
       reset(mockWS)
 
       val organisationId = 111
@@ -52,10 +49,10 @@ class AgentControllerSpec extends BaseControllerSpec {
 
       val res = agentController.manageAgents(organisationId)(FakeRequest())
 
-      status(res) mustBe OK
+      status(res) shouldBe OK
       val names = Json.parse(contentAsString(res)).as[Agents].agents
 
-      names mustBe Seq(Agent("Name1", 1), Agent("Name2", 2))
+      names shouldBe Seq(Agent("Name1", 1), Agent("Name2", 2))
     }
   }
 }

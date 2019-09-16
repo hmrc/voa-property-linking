@@ -16,31 +16,32 @@
 
 package models.voa.propertylinking.requests
 
+import basespecs.BaseUnitSpec
 import models.FileInfo
 import models.modernised.{Capacity, Evidence, EvidenceType, ProvidedEvidence}
-import org.scalatest.{FlatSpec, MustMatchers}
-import utils.FakeObjects
 
-class CreatePropertyLinkSpec extends FlatSpec with MustMatchers with FakeObjects{
-  "CreatePropertyLink" must "create from ApiPropertyLinkRequest " in {
+class CreatePropertyLinkSpec extends BaseUnitSpec {
+  "CreatePropertyLink" should {
+    "create from ApiPropertyLinkRequest " in {
 
-    val fileInfo = FileInfo(FILE_NAME, "serviceCharge")
-    val evidence = Evidence(FILE_NAME, EvidenceType.SERVICE_CHARGE)
+      val fileInfo = FileInfo(FILE_NAME, "serviceCharge")
+      val evidence = Evidence(FILE_NAME, EvidenceType.SERVICE_CHARGE)
 
-    val apiRequest = apiPropertyLinkRequest.copy(
-      uploadedFiles = Seq(fileInfo),
-      authorisationMethod = "NO_EVIDENCE",
-      authorisationOwnerCapacity = "OCCUPIER"
-    )
-    val expectedRequest: CreatePropertyLink = testCreatePropertyLink.copy(
-      uploadedFiles = Seq(evidence),
-      method = ProvidedEvidence.withName("NO_EVIDENCE"),
-      capacity = Capacity.withName("OCCUPIER"))
+      val apiRequest = apiPropertyLinkRequest.copy(
+        uploadedFiles = Seq(fileInfo),
+        authorisationMethod = "NO_EVIDENCE",
+        authorisationOwnerCapacity = "OCCUPIER"
+      )
+      val expectedRequest: CreatePropertyLink = testCreatePropertyLink.copy(
+        uploadedFiles = Seq(evidence),
+        method = ProvidedEvidence.withName("NO_EVIDENCE"),
+        capacity = Capacity.withName("OCCUPIER"))
 
-    val targetRequest: CreatePropertyLink = CreatePropertyLink(apiRequest)
+      val targetRequest: CreatePropertyLink = CreatePropertyLink(apiRequest)
 
-    targetRequest.uploadedFiles  must be  (expectedRequest.uploadedFiles)
-    targetRequest.method  must be  (expectedRequest.method)
-    targetRequest.capacity  must be  (expectedRequest.capacity)
+      targetRequest.uploadedFiles  shouldBe  expectedRequest.uploadedFiles
+      targetRequest.method  shouldBe  expectedRequest.method
+      targetRequest.capacity  shouldBe  expectedRequest.capacity
+    }
   }
 }

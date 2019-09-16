@@ -21,7 +21,7 @@ import play.api.mvc.{Controller, Request, Result}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 trait PropertyLinkingBaseController extends Controller {
 

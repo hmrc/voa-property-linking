@@ -64,7 +64,7 @@ class ExternalValuationManagementApiSpec extends WireMockSpec with ContentTypes 
             detailedValuation = Document(DocumentSummary("2", "Detailed Valuation Document", now))
           )))
 
-        val result = await(connector.getDvrDocuments(valuationId, uarn, propertyLinkId))
+        val result = connector.getDvrDocuments(valuationId, uarn, propertyLinkId).futureValue
         result shouldBe Some(DvrDocumentFiles(
           checkForm = Document(DocumentSummary("1", "Check Document", now)),
           detailedValuation = Document(DocumentSummary("2", "Detailed Valuation Document", now))
@@ -79,7 +79,7 @@ class ExternalValuationManagementApiSpec extends WireMockSpec with ContentTypes 
         when(http.GET[DvrDocumentFiles](any(), any())(any(), any(), any(), any()))
           .thenReturn(Future.failed(new NotFoundException("not found dvr documents")))
 
-        val result = await(connector.getDvrDocuments(valuationId, uarn, propertyLinkId))
+        val result = connector.getDvrDocuments(valuationId, uarn, propertyLinkId).futureValue
         result shouldBe None
       }
     }
@@ -101,7 +101,7 @@ class ExternalValuationManagementApiSpec extends WireMockSpec with ContentTypes 
           )
         )
 
-        val result = await(connector.getDvrDocument(valuationId, uarn, propertyLinkId, fileRef))
+        val result = connector.getDvrDocument(valuationId, uarn, propertyLinkId, fileRef).futureValue
         result shouldBe a[StreamedDocument]
       }
     }

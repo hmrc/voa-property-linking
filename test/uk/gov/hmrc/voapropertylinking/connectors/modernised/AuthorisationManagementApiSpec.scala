@@ -16,14 +16,12 @@
 
 package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
-import java.time.{LocalDate, ZoneOffset}
-
 import basespecs.BaseUnitSpec
 import models._
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import play.api.libs.json.{JsValue, Json}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import uk.gov.hmrc.play.config.ServicesConfig
 
@@ -43,7 +41,7 @@ class AuthorisationManagementApiSpec extends BaseUnitSpec {
 
       when(http.GET[JsValue](any())(any(), any(), any())).thenReturn(Future.successful(Json.parse(validAgentCodeResponse)))
 
-      inside(await(connector.validateAgentCode(agentCode, authId)(hc))) {
+      inside(connector.validateAgentCode(agentCode, authId)(hc).futureValue) {
         case Left(v) => v shouldBe 1234567
       }
     }
@@ -57,7 +55,7 @@ class AuthorisationManagementApiSpec extends BaseUnitSpec {
 
       when(http.GET[JsValue](any())(any(), any(), any())).thenReturn(Future.successful(Json.parse(noAgentFlagResponse)))
 
-      inside(await(connector.validateAgentCode(agentCode, authId)(hc))) {
+      inside(connector.validateAgentCode(agentCode, authId)(hc).futureValue) {
         case Right(v) => v shouldBe "INVALID_CODE"
       }
     }
@@ -71,7 +69,7 @@ class AuthorisationManagementApiSpec extends BaseUnitSpec {
 
       when(http.GET[JsValue](any())(any(), any(), any())).thenReturn(Future.successful(Json.parse(invalidAgentCodeResponse)))
 
-      inside(await(connector.validateAgentCode(agentCode, authId)(hc))){
+      inside(connector.validateAgentCode(agentCode, authId)(hc).futureValue) {
         case Right(v) => v shouldBe "OTHER_ERROR"
       }
     }
@@ -93,8 +91,8 @@ class AuthorisationManagementApiSpec extends BaseUnitSpec {
       when(http.POST[APIRepresentationRequest, HttpResponse](any(), any(), any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(HttpResponse(200)))
 
-      val result: Unit = await(connector.create(createRequest)(hc))
-      result shouldBe ()
+      val result: Unit = connector.create(createRequest)(hc).futureValue
+      result shouldBe (())
     }
   }
 
@@ -109,21 +107,21 @@ class AuthorisationManagementApiSpec extends BaseUnitSpec {
       when(http.PUT[APIRepresentationResponse, HttpResponse](any(), any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(HttpResponse(200)))
 
-      val result: Unit = await(connector.response(response)(hc))
-      result shouldBe ()
+      val result: Unit = connector.response(response)(hc).futureValue
+      result shouldBe (())
     }
   }
 
   "AuthorisationManagementApi.revoke" should {
     "return a unit after revoking property representation response" in {
 
-      val authorisedPartyId =  34567890
+      val authorisedPartyId = 34567890
 
       when(http.PATCH[JsValue, HttpResponse](any(), any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(HttpResponse(200)))
 
-      val result: Unit = await(connector.revoke(authorisedPartyId)(hc))
-      result shouldBe ()
+      val result: Unit = connector.revoke(authorisedPartyId)(hc).futureValue
+      result shouldBe (())
     }
   }
 
@@ -148,6 +146,4 @@ class AuthorisationManagementApiSpec extends BaseUnitSpec {
       |  "failureCode": "OTHER_ERROR"
       |}""".stripMargin
 
-    private val date = LocalDate.parse("2018-09-04")
-    private val instant = date.atStartOfDay().toInstant(ZoneOffset.UTC)
 }

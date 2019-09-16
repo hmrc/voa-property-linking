@@ -70,7 +70,6 @@ class MongoStartupRunnerImpl @Inject() (reactiveMongoComponent: ReactiveMongoCom
               case Nil => Future(logger.info(s"Task ${task.name} version $version not yet executed - running"))
                 .map(_ => mongoTaskRepo.insert(MongoTaskRegister(task.name, version, LocalDateTime.now)))
                 .flatMap(_ => task.run(version))
-              case head :: Nil => alreadyRun(task, version)(head)
               case head :: _ => alreadyRun(task, version)(head)
             }
           }
@@ -84,6 +83,7 @@ class MongoStartupRunnerImpl @Inject() (reactiveMongoComponent: ReactiveMongoCom
   }
 }
 
+// $COVERAGE-OFF$
 trait MongoTask[T] {
   val env: Environment
   val name: String = this.getClass.getSimpleName
@@ -106,3 +106,4 @@ trait MongoTask[T] {
     }
   }
 }
+// $COVERAGE-ON$

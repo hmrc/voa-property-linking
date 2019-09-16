@@ -17,7 +17,8 @@
 package controllers
 
 import javax.inject.Inject
-import models.mdtp.fileupload.{Available, Callback}
+import models.mdtp.fileupload.Callback
+import models.mdtp.fileupload.FileStatus._
 import play.api.Logger
 import play.api.libs.json.JsValue
 import play.api.mvc.{Action, AnyContent}
@@ -32,7 +33,7 @@ class FileTransferController @Inject()(
   def handleCallback(): Action[JsValue] = Action.async(parse.json) { implicit request =>
     Logger.info(request.body.validate[Callback].toString)
     withJsonBody[Callback] {
-      case Callback(envelopeId, _, Available, _)  =>
+      case Callback(envelopeId, _, AVAILABLE, _)  =>
         fileTransferService
           .transferManually(envelopeId)
           .map { _ =>

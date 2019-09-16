@@ -32,5 +32,4 @@ case class RepresentationRequest(
 
 object RepresentationRequest {
   implicit val format = Json.format[RepresentationRequest]
-
 }

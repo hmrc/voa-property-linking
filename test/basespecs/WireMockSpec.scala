@@ -18,14 +18,14 @@ package basespecs
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
-import uk.gov.hmrc.play.it.Port
+import com.github.tomakehurst.wiremock.core.Options.DYNAMIC_PORT
 
 /*
   TODO remove this once we get proper unit tests no need for a wiremock server
  */
 abstract class WireMockSpec extends BaseUnitSpec {
 
-  private lazy val wireMockServer = new WireMockServer(Port.randomAvailable)
+  private lazy val wireMockServer = new WireMockServer(DYNAMIC_PORT)
 
   protected lazy val mockServerUrl = s"http://localhost:${wireMockServer.port}"
 

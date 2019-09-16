@@ -17,31 +17,43 @@
 package basespecs
 
 import org.scalatest._
-import org.scalatest.concurrent.ScalaFutures
-import play.api.test.FakeRequest
+import org.scalatest.concurrent.{PatienceConfiguration, ScalaFutures}
+import org.scalatest.time.{Milliseconds, Second, Span}
+import org.scalatestplus.mockito.MockitoSugar
+import play.api.mvc.AnyContentAsEmpty
+import play.api.test.{DefaultAwaitTimeout, FakeRequest}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.test.UnitSpec
-import uk.gov.hmrc.voapropertylinking.auth.{Principal, RequestWithPrincipal}
 import uk.gov.hmrc.test.AllMocks
+import uk.gov.hmrc.voapropertylinking.auth.{Principal, RequestWithPrincipal}
 import uk.gov.hmrc.voapropertylinking.utils.Cats
+import utils.FakeObjects
 
 import scala.concurrent.ExecutionContext
 
-abstract class BaseUnitSpec extends UnitSpec
-  with BeforeAndAfterEach
-  with BeforeAndAfterAll
-  with AllMocks
-  with Matchers
-  with Inspectors
-  with Inside
-  with EitherValues
-  with LoneElement
-  with ScalaFutures
-  with OptionValues
-  with Cats {
+abstract class BaseUnitSpec
+  extends WordSpec
+    with Matchers
+    with BeforeAndAfterEach
+    with BeforeAndAfterAll
+    with AllMocks
+    with Inspectors
+    with Inside
+    with EitherValues
+    with LoneElement
+    with ScalaFutures
+    with FakeObjects
+    with MockitoSugar
+    with PatienceConfiguration
+    with DefaultAwaitTimeout
+    with Cats {
 
   implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
   implicit val hc: HeaderCarrier = HeaderCarrier()
-  implicit val requestWithPrincipal = RequestWithPrincipal(FakeRequest(), Principal("external-id", "group-id"))
+  implicit val principal: Principal = Principal("external-id", "group-id")
+  implicit val requestWithPrincipal: RequestWithPrincipal[AnyContentAsEmpty.type] =
+    RequestWithPrincipal(FakeRequest(), principal)
+
+  override implicit val patienceConfig: PatienceConfig =
+    PatienceConfig(Span(1, Second), Span(10, Milliseconds))
 
 }

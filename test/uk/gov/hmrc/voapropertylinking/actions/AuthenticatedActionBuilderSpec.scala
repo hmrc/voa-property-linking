@@ -16,12 +16,10 @@
 
 package uk.gov.hmrc.voapropertylinking.actions
 
-import basespecs.BaseUnitSpec
+import basespecs.BaseControllerSpec
 import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.{Result, Results}
+import play.api.mvc.Result
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
-import play.api.test.Helpers.contentAsJson
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.{Retrieval, ~}
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisationException, MissingBearerToken}
@@ -29,7 +27,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class AuthenticatedActionBuilderSpec extends BaseUnitSpec with Results {
+class AuthenticatedActionBuilderSpec extends BaseControllerSpec {
 
   private trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()

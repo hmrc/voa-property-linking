@@ -34,35 +34,25 @@ import scala.concurrent.{ExecutionContext, Future}
 class PropertyLinkingService @Inject()(
                                         val propertyLinksConnector: ExternalPropertyLinkApi,
                                         val externalValuationManagementApi: ExternalValuationManagementApi
-                                      ) (implicit executionContext: ExecutionContext) extends Cats {
+                                      )(implicit executionContext: ExecutionContext) extends Cats {
 
+  def create(propertyLink: APIPropertyLinkRequest)(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[HttpResponse] =
+    propertyLinksConnector.createPropertyLink(CreatePropertyLink(propertyLink))
 
-  def create(propertyLink: APIPropertyLinkRequest)(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[HttpResponse] = {
-      val createPropertyLink = CreatePropertyLink(propertyLink)
-      propertyLinksConnector.createPropertyLink(createPropertyLink)
-  }
+  def getClientsPropertyLink(submissionId: String)(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): OptionT[Future, PropertiesView] =
+    OptionT(propertyLinksConnector.getClientsPropertyLink(submissionId)).map(pl => PropertiesView(pl.authorisation, Nil))
 
-  def getClientsPropertyLink(submissionId: String)(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): OptionT[Future, PropertiesView] = {
-    for {
-      propertyLink <- OptionT(propertyLinksConnector.getClientsPropertyLink(submissionId))
-    } yield PropertiesView(propertyLink.authorisation, Nil)
-  }
-
-  def getMyOrganisationsPropertyLink(submissionId: String)(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): OptionT[Future, PropertiesView] = {
-    for {
-      propertyLink <- OptionT(propertyLinksConnector.getMyOrganisationsPropertyLink(submissionId))
-    } yield PropertiesView(propertyLink.authorisation, Nil)
-  }
+  def getMyOrganisationsPropertyLink(submissionId: String)(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): OptionT[Future, PropertiesView] =
+    OptionT(propertyLinksConnector.getMyOrganisationsPropertyLink(submissionId)).map(pl => PropertiesView(pl.authorisation, Nil))
 
   def getClientsPropertyLinks(
                                searchParams: GetMyClientsPropertyLinkParameters,
                                paginationParams: Option[PaginationParams]
-                             )(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]):OptionT[Future, PropertyLinksWithClients] = {
+                             )(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): OptionT[Future, PropertyLinksWithClients] =
     OptionT(propertyLinksConnector.getClientsPropertyLinks(searchParams, paginationParams)).map(PropertyLinksWithClients.apply)
-  }
 
   def getMyOrganisationsPropertyLinks(searchParams: GetMyOrganisationPropertyLinksParameters, paginationParams: Option[PaginationParams])
-                                     (implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]):OptionT[Future, OwnerAuthResult] = {
+                                     (implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): OptionT[Future, OwnerAuthResult] =
     OptionT(propertyLinksConnector.getMyOrganisationsPropertyLinks(searchParams, paginationParams)).map(OwnerAuthResult.apply)
-  }
+
 }

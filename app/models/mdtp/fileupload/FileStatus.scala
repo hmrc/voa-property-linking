@@ -16,26 +16,15 @@
 
 package models.mdtp.fileupload
 
-import models.{NamedEnum, NamedEnumSupport}
+import play.api.libs.json.Format
+import uk.gov.hmrc.voapropertylinking.utils.JsonUtils
 
-sealed trait FileStatus extends NamedEnum
+object FileStatus extends Enumeration {
+  type FileStatus = Value
+  val QUARANTINED: FileStatus = Value("QUARANTINED")
+  val CLEANED: FileStatus = Value("CLEANED")
+  val AVAILABLE: FileStatus = Value("AVAILABLE")
+  val ERROR: FileStatus = Value("UnKnownFileStatusERROR")
 
-case object Quarantined extends FileStatus {
-  override def name: String = "QUARANTINED"
-}
-
-case object Cleaned extends FileStatus {
-  override def name: String = "CLEANED"
-}
-
-case object Available extends FileStatus {
-  override def name: String = "AVAILABLE"
-}
-
-case object Error extends FileStatus {
-  override def name: String = "UnKnownFileStatusERROR"
-}
-
-object FileStatus extends NamedEnumSupport[FileStatus] {
-  override def all: Seq[FileStatus] = Seq(Quarantined, Cleaned, Available, Error)
+  implicit val format: Format[FileStatus] = JsonUtils.enumFormat(FileStatus)
 }

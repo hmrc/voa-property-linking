@@ -16,7 +16,7 @@
 
 package models.searchApi
 
-import models.AgentPermission
+import models.AgentPermission.AgentPermission
 import play.api.libs.json.Json
 
 case class OwnerAuthAgent(

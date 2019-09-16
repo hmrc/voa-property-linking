@@ -27,7 +27,6 @@ import org.mockito.ArgumentMatchers.{eq => matching, _}
 import org.mockito.Mockito._
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
 import repositories.DVRRecordRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.voapropertylinking.connectors.modernised.{CCACaseManagementApi, ExternalValuationManagementApi}
@@ -52,10 +51,10 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
       val dvrJson = Json.toJson(testDvr)
       val res = testController.requestDetailedValuationV2()(FakeRequest().withBody(dvrJson))
 
-      await(res)
-      verify(mockRepo, times(1)).create(matching(testDvr))
-      verify(mockCcaCaseManagementConnector, times(1)).requestDetailedValuation(matching(testDvr))(any[HeaderCarrier])
-      status(res) mustBe OK
+      status(res) shouldBe OK
+
+      verify(mockRepo).create(matching(testDvr))
+      verify(mockCcaCaseManagementConnector).requestDetailedValuation(matching(testDvr))(any[HeaderCarrier])
     }
   }
 
@@ -64,10 +63,10 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
       when(mockRepo.exists(anyLong(), anyLong())) thenReturn Future.successful((true))
       val res = testController.dvrExists(1l, 3l)(FakeRequest())
 
-      await(res)
-      verify(mockRepo, times(1)).exists(matching(1l), matching(3l))
-      status(res) mustBe OK
-      contentAsJson(res) mustBe Json.toJson(true)
+      status(res) shouldBe OK
+      contentAsJson(res) shouldBe Json.toJson(true)
+
+      verify(mockRepo).exists(matching(1l), matching(3l))
       reset(mockRepo)
     }
 
@@ -75,18 +74,17 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
       when(mockRepo.exists(anyLong(), anyLong())) thenReturn Future.successful((false))
       val res = testController.dvrExists(1l, 3l)(FakeRequest())
 
-      await(res)
-      verify(mockRepo, times(1)).exists(matching(1l), matching(3l))
-      status(res) mustBe OK
-      contentAsJson(res) mustBe Json.toJson(false)
+      status(res) shouldBe OK
+      contentAsJson(res) shouldBe Json.toJson(false)
+
+      verify(mockRepo).exists(matching(1l), matching(3l))
       reset(mockRepo)
     }
   }
 
-  //TODO flaky test due to now and 0's being removed from result. e.g 10/10/2010T10.10.10.81 vs 10/10/2010T10.10.10.810
   "get dvr documents" should {
     "return 200 OK with the dvr document information" in {
-      val now = LocalDateTime.now()
+      val now = LocalDateTime.parse("2019-09-11T11:03:25.123")
 
       when(mockExternalValuationManagementapi.getDvrDocuments(any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(Some(DvrDocumentFiles(
@@ -96,24 +94,25 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
 
       val result = testController.getDvrDocuments(1L, 3L, "PL-12345")(FakeRequest())
 
-      status(result) mustBe OK
-      contentAsJson(result) mustBe Json.parse( s"""
-                                                   |{
-                                                   | "checkForm": {
-                                                   |   "documentSummary": {
-                                                   |     "documentId": "1L",
-                                                   |     "documentName": "Check Document",
-                                                   |     "createDatetime": "$now"
-                                                   |     }
-                                                   | },
-                                                   | "detailedValuation": {
-                                                   |    "documentSummary": {
-                                                   |       "documentId": "2L",
-                                                   |       "documentName": "Detailed Valuation Document",
-                                                   |       "createDatetime": "$now"
-                                                   |    }
-                                                   | }
-                                                   |}
+      status(result) shouldBe OK
+      contentAsJson(result) shouldBe Json.parse(
+        s"""
+           |{
+           | "checkForm": {
+           |   "documentSummary": {
+           |     "documentId": "1L",
+           |     "documentName": "Check Document",
+           |     "createDatetime": "$now"
+           |     }
+           | },
+           | "detailedValuation": {
+           |    "documentSummary": {
+           |       "documentId": "2L",
+           |       "documentName": "Detailed Valuation Document",
+           |       "createDatetime": "$now"
+           |    }
+           | }
+           |}
             """.stripMargin)
     }
 
@@ -123,7 +122,7 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
 
       val result = testController.getDvrDocuments(1L, 3L, "PL-12345")(FakeRequest())
 
-      status(result) mustBe NOT_FOUND
+      status(result) shouldBe NOT_FOUND
     }
   }
 
@@ -134,7 +133,7 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
 
       val result = testController.getDvrDocument(1L, 3L, "PL-12345", "1L")(FakeRequest())
 
-      status(result) mustBe OK
+      status(result) shouldBe OK
     }
   }
 
@@ -154,7 +153,7 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
 
   lazy val mockCcaCaseManagementConnector = {
     val m = mock[CCACaseManagementApi]
-    when(m.requestDetailedValuation(any[DetailedValuationRequest])(any[HeaderCarrier])) thenReturn Future.successful()
+    when(m.requestDetailedValuation(any[DetailedValuationRequest])(any[HeaderCarrier])) thenReturn Future.successful(())
     m
   }
 

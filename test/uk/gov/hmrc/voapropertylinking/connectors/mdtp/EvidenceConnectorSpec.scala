@@ -29,19 +29,17 @@ import infrastructure.SimpleWSHttp
 import org.mockito.ArgumentMatchers.{any => mockitoAny}
 import org.mockito.Mockito.{times, when}
 import org.mockito.{ArgumentMatchers, Mockito}
-import org.scalatest.BeforeAndAfterEach
+import org.scalactic.source.Position
 import org.scalatest.concurrent.Eventually.eventually
-import org.scalatestplus.mockito.MockitoSugar
+import org.scalatest.time.{Milliseconds, Second, Span}
 import play.api.libs.ws.{WSRequest, WSResponse}
 import play.api.mvc.MultipartFormData
-import uk.gov.hmrc.http.{HeaderCarrier, Upstream4xxResponse, Upstream5xxResponse}
-import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
+import uk.gov.hmrc.http.{Upstream4xxResponse, Upstream5xxResponse}
 import uk.gov.hmrc.play.config.ServicesConfig
 
 import scala.concurrent.Future
 
-class EvidenceConnectorSpec extends WireMockSpec with SimpleWsHttpTestApplication
-  with BeforeAndAfterEach with MockitoSugar with AnswerSugar {
+class EvidenceConnectorSpec extends WireMockSpec with SimpleWsHttpTestApplication with AnswerSugar {
 
   val metrics = mock[Metrics]
   val ws = mock[SimpleWSHttp]
@@ -77,7 +75,10 @@ class EvidenceConnectorSpec extends WireMockSpec with SimpleWsHttpTestApplicatio
         .withRequestBody(containing("12345"))
         .willReturn(aResponse().withStatus(200)))
 
-      noException should be thrownBy await(connector.uploadFile("FileName", StreamConverters.fromInputStream { () => new ByteArrayInputStream(file.getBytes) }, metadata))
+      val waitMorePatiently = PatienceConfig(Span(1, Second), Span(20, Milliseconds))
+
+      connector.uploadFile("FileName", StreamConverters.fromInputStream { () => new ByteArrayInputStream(file.getBytes) }, metadata)
+        .futureValue(waitMorePatiently, implicitly[Position])
     }
 
     "prepend the submissionId and remove all non-alphanumeric characters apart from a space, hyphen or full stop in the filename" in {
@@ -103,7 +104,7 @@ class EvidenceConnectorSpec extends WireMockSpec with SimpleWsHttpTestApplicatio
           .withRequestBody(containing("12345"))
           .willReturn(aResponse().withStatus(200)))
 
-        noException should be thrownBy await(connector.uploadFile(encoded, StreamConverters.fromInputStream { () => new ByteArrayInputStream(file.getBytes) }, metadata))
+        noException should be thrownBy connector.uploadFile(encoded, StreamConverters.fromInputStream { () => new ByteArrayInputStream(file.getBytes) }, metadata).futureValue
       }
     }
 
@@ -117,7 +118,7 @@ class EvidenceConnectorSpec extends WireMockSpec with SimpleWsHttpTestApplicatio
         when(http.post(mockitoAny(classOf[Source[MultipartFormData.Part[Source[ByteString, _]], _]]))).thenReturn(Future.successful(response))
         when(response.status).thenReturn(200)
 
-        await(connector.uploadFile("1", Source.empty, metadata))
+        connector.uploadFile("1", Source.empty, metadata).futureValue
         eventually(Mockito.verify(registry, times(1)).meter(ArgumentMatchers.eq("modernized.upload.200")))
       }
 
@@ -126,9 +127,9 @@ class EvidenceConnectorSpec extends WireMockSpec with SimpleWsHttpTestApplicatio
         when(failResponse.status).thenReturn(400)
         when(http.post(mockitoAny(classOf[Source[MultipartFormData.Part[Source[ByteString, _]], _]]))).thenReturn(Future.successful(failResponse))
 
-        intercept[Upstream4xxResponse] {
-          await(connector.uploadFile("1", Source.empty, metadata))
-        }
+        whenReady(
+          connector.uploadFile("1", Source.empty, metadata).failed
+        )(_ shouldBe an[Upstream4xxResponse])
         eventually(Mockito.verify(registry, times(1)).meter(ArgumentMatchers.eq("modernized.upload.400")))
       }
 
@@ -137,36 +138,36 @@ class EvidenceConnectorSpec extends WireMockSpec with SimpleWsHttpTestApplicatio
         when(failResponse.status).thenReturn(502)
         when(http.post(mockitoAny(classOf[Source[MultipartFormData.Part[Source[ByteString, _]], _]]))).thenReturn(Future.successful(failResponse))
 
-        intercept[Upstream5xxResponse] {
-          await(connector.uploadFile("1", Source.empty, metadata))
-        }
+        whenReady(
+          connector.uploadFile("1", Source.empty, metadata).failed
+        )(_ shouldBe an[Upstream5xxResponse])
         eventually(Mockito.verify(registry, times(1)).meter(ArgumentMatchers.eq("modernized.upload.502")))
       }
 
       "map Upstream5xx exceptions to modernized.upload.5xx" in {
         when(http.post(mockitoAny(classOf[Source[MultipartFormData.Part[Source[ByteString, _]], _]]))).thenReturn(Future.failed(Upstream5xxResponse("", 502, 502)))
 
-        intercept[Upstream5xxResponse] {
-          await(connector.uploadFile("1", Source.empty, metadata))
-        }
+        whenReady(
+          connector.uploadFile("1", Source.empty, metadata).failed
+        )(_ shouldBe an[Upstream5xxResponse])
         eventually(Mockito.verify(registry, times(1)).meter(ArgumentMatchers.eq("modernized.upload.502")))
       }
 
       "map Upstream4xx exceptions to modernized.upload.4xx" in {
         when(http.post(mockitoAny(classOf[Source[MultipartFormData.Part[Source[ByteString, _]], _]]))).thenReturn(Future.failed(Upstream4xxResponse("", 400, 400)))
 
-        intercept[Upstream4xxResponse] {
-          await(connector.uploadFile("1", Source.empty, metadata))
-        }
+        whenReady(
+          connector.uploadFile("1", Source.empty, metadata).failed
+        )(_ shouldBe an[Upstream4xxResponse])
         eventually(Mockito.verify(registry, times(1)).meter(ArgumentMatchers.eq("modernized.upload.400")))
       }
 
       "map Other exceptions to modernized.upload.[NAME]" in {
         when(http.post(mockitoAny(classOf[Source[MultipartFormData.Part[Source[ByteString, _]], _]]))).thenReturn(Future.failed(new NullPointerException()))
 
-        intercept[NullPointerException] {
-          await(connector.uploadFile("1", Source.empty, metadata))
-        }
+        whenReady(
+          connector.uploadFile("1", Source.empty, metadata).failed
+        )(_ shouldBe an[NullPointerException])
         eventually(Mockito.verify(registry, times(1)).meter(ArgumentMatchers.eq("modernized.upload.NullPointerException")))
       }
     }

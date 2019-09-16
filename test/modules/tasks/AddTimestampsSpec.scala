@@ -18,24 +18,19 @@ package modules.tasks
 
 import java.util.UUID
 
-import modules.tasks.AddTimestamps
-import org.scalatest.BeforeAndAfterEach
-import org.scalatestplus.mockito.MockitoSugar
-//import org.scalatest.mock.MockitoSugar
+import basespecs.BaseUnitSpec
 import play.api.Environment
 import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.indexes.Index
 import repositories.EnvelopeIdRepository
 import uk.gov.hmrc.mongo.MongoSpecSupport
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import uk.gov.hmrc.play.test.WithFakeApplication
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class AddTimestampsSpec extends UnitSpec
-  with BeforeAndAfterEach
+class AddTimestampsSpec extends BaseUnitSpec
   with MongoSpecSupport
-  with MockitoSugar
-  with WithFakeApplication{
+  with WithFakeApplication {
 
   val repository = new EnvelopeIdRepository(fakeApplication.injector.instanceOf[ReactiveMongoComponent], s"${this.getClass.getSimpleName}") {
     override def indexes: Seq[Index] = Seq.empty
@@ -47,8 +42,7 @@ class AddTimestampsSpec extends UnitSpec
 
   "run" should {
     "update the repo with the envelope" in {
-      unitUnderTest.run(1) onSuccess {
-        case r => r} shouldBe ()
+      unitUnderTest.run(1).futureValue shouldBe (())
     }
   }
 

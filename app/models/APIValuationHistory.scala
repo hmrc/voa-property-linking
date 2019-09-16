@@ -31,23 +31,22 @@ case class APIValuationHistory(
                                 billingAuthorityReference: String,
                                 currentFromDate: Option[LocalDate],
                                 currentToDate: Option[LocalDate]
-                              ){
+                              ) {
 
-  def capatalise = this.copy(address = address.toUpperCase)
+  def capatalise: APIValuationHistory = this.copy(address = address.toUpperCase)
 }
-
 
 
 object APIValuationHistory {
   implicit val formats = Json.format[APIValuationHistory]
 
-  def apply(history: ValuationHistory) :APIValuationHistory =
+  def apply(history: ValuationHistory): APIValuationHistory =
     APIValuationHistory(
       asstRef = history.asstRef,
       listYear = history.listYear,
       uarn = history.uarn,
       effectiveDate = history.effectiveDate,
-      rateableValue = history.rateableValue.map {d => d.longValue()},
+      rateableValue = history.rateableValue.map { d => d.longValue() },
       address = history.address,
       billingAuthorityReference = history.billingAuthorityReference,
       currentFromDate = history.currentFromDate,

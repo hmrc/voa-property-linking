@@ -19,9 +19,6 @@ package services
 import cats.data.OptionT
 import javax.inject.{Inject, Named}
 import models._
-import models.modernised.PropertyLinkStatus
-import models.modernised.externalpropertylink.myclients.ClientPropertyLink
-import models.modernised.externalpropertylink.myorganisations.OwnerPropertyLink
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
 import uk.gov.hmrc.voapropertylinking.connectors.modernised.{AuthorisationManagementApi, ExternalPropertyLinkApi, ExternalValuationManagementApi, MdtpDashboardManagementApi}
@@ -32,8 +29,6 @@ import scala.concurrent.{ExecutionContext, Future}
 class AssessmentService @Inject()(
                                    val propertyLinksConnector: ExternalPropertyLinkApi,
                                    val externalValuationManagementApi: ExternalValuationManagementApi,
-                                   val authorisationManagementApi: AuthorisationManagementApi,
-                                   val mdtpDashboardManagementApi: MdtpDashboardManagementApi,
                                    @Named("authedAssessmentEndpointEnabled") val authedAssessmentEndpointEnabled: Boolean
                                  )(implicit executionContext: ExecutionContext) extends Cats {
 

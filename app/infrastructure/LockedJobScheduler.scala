@@ -24,9 +24,9 @@ import uk.gov.hmrc.lock.ExclusiveTimePeriodLock
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 
-//TODO remove with file upload compoenents
+//TODO remove with file upload components
 abstract class LockedJobScheduler[Event <: AnyRef](lock: ExclusiveTimePeriodLock, actorSystem: ActorSystem) {
-  implicit val t: Timeout = 1 hour
+  implicit val t: Timeout = 1.hour
 
   val name: String
   val schedule: Schedule
@@ -36,7 +36,7 @@ abstract class LockedJobScheduler[Event <: AnyRef](lock: ExclusiveTimePeriodLock
 
   def runJob()(implicit ec: ExecutionContext): Future[Event]
 
-  private def run()(implicit ec: ExecutionContext) = {
+  private def run()(implicit ec: ExecutionContext): Future[Unit] = {
     Logger.info(s"Starting job: $name")
     runJob().map(eventStream.publish) recoverWith {
       case e: Exception =>

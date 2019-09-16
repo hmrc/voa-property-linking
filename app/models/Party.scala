@@ -19,17 +19,18 @@ package models
 import models.modernised.externalpropertylink.myorganisations.AgentDetails
 import play.api.libs.json.Json
 
-case class Party (
+case class Party(
                   authorisedPartyId: Long,
                   agentCode: Long,
                   organisationName: String,
                   organisationId: Long,
                   checkPermission: String,
                   challengePermission: String
-                 )
+                )
 
 object Party {
   implicit val format = Json.format[Party]
+
   def fromAPIParty(party: APIParty, agentDetails: GroupAccount) = {
     party.permissions.headOption.map(permissions => {
       Party(party.id, agentDetails.agentCode, agentDetails.companyName, agentDetails.id,
@@ -39,11 +40,11 @@ object Party {
     })
   }
 
-  def apply(agentDetails: AgentDetails)
-    :Party = Party(agentDetails.authorisedPartyId,
-    agentDetails.representativeCode,
-    agentDetails.organisationName,
-    agentDetails.organisationId,
-    agentDetails.checkPermission,
-    agentDetails.challengePermission)
+  def apply(agentDetails: AgentDetails): Party =
+    Party(agentDetails.authorisedPartyId,
+      agentDetails.representativeCode,
+      agentDetails.organisationName,
+      agentDetails.organisationId,
+      agentDetails.checkPermission,
+      agentDetails.challengePermission)
 }

@@ -19,16 +19,15 @@ package repositories
 import com.google.inject.name.Named
 import com.google.inject.{ImplementedBy, Singleton}
 import javax.inject.Inject
-import models._
+import models.EnvelopeStatus._
 import play.api.Logger
 import play.api.libs.json._
 import play.modules.reactivemongo.ReactiveMongoComponent
-import reactivemongo.api.DB
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.{BSONDateTime, BSONDocument}
 import reactivemongo.core.errors.DatabaseException
-import uk.gov.hmrc.mongo.ReactiveRepository
 import reactivemongo.play.json.ImplicitBSONHandlers._
+import uk.gov.hmrc.mongo.ReactiveRepository
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -71,7 +70,9 @@ class EnvelopeIdRepository @Inject()(
 
   override def getStatus(envelopeId: String): Future[Option[EnvelopeStatus]] = {
     find("envelopeId" -> envelopeId) map {
-      _.headOption flatMap { _.status }
+      _.headOption flatMap {
+        _.status
+      }
     }
   }
 
@@ -92,7 +93,7 @@ object EnvelopeId {
 
 @ImplementedBy(classOf[EnvelopeIdRepository])
 trait EnvelopeIdRepo {
-  def create(envelopeId: String, status: EnvelopeStatus = Open): Future[Unit]
+  def create(envelopeId: String, status: EnvelopeStatus = OPEN): Future[Unit]
 
   def get(): Future[Seq[EnvelopeId]]
 

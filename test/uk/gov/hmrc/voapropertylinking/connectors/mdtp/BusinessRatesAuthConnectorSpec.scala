@@ -37,8 +37,7 @@ class BusinessRatesAuthConnectorSpec extends BaseUnitSpec {
 
       when(http.DELETE[HttpResponse](any())(any(), any(), any())).thenReturn(Future.successful(HttpResponse(200)))
 
-      val result: Unit = await(connector.clearCache())
-      result shouldBe ()
+      connector.clearCache().futureValue shouldBe (())
     }
   }
 

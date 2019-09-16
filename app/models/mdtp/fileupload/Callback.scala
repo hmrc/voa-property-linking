@@ -16,6 +16,7 @@
 
 package models.mdtp.fileupload
 
+import models.mdtp.fileupload.FileStatus.FileStatus
 import play.api.libs.json.Json
 
 case class Callback(envelopeId: String, fileId: String, status: FileStatus, reason: Option[String])

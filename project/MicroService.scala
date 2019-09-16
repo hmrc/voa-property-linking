@@ -39,7 +39,7 @@ trait MicroService {
     // Semicolon-separated list of regexs matching classes to exclude
     import scoverage.ScoverageKeys
     Seq(
-      ScoverageKeys.coverageExcludedPackages := "<empty>;Reverse.*;views.*;uk.gov.hmrc.voapropertylinking.config.*;connectors.test.*;controllers.test.*;poc.view.*;poc.uk.gov.hmrc.voapropertylinking.config.*;.*(AuthService|BuildInfo|Routes).*",
+      ScoverageKeys.coverageExcludedPackages := "<empty>;Reverse.*;views.*;uk.gov.hmrc.voapropertylinking.config.*;.*\\.test\\..*;poc.view.*;poc.uk.gov.hmrc.voapropertylinking.config.*;.*(AuthService|BuildInfo|Routes).*",
       ScoverageKeys.coverageMinimum := 50,
       ScoverageKeys.coverageFailOnMinimum := false,
       ScoverageKeys.coverageHighlighting := true
@@ -64,18 +64,9 @@ trait MicroService {
       testGrouping in Test := TestPhases.oneForkedJvmPerTest((definedTests in Test).value),
       test in Test <<= (test in Test) dependsOn compileScalastyle
     )
-    .configs(IntegrationTest)
-    .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
-    .settings(
-      Keys.fork in IntegrationTest := false,
-      unmanagedSourceDirectories in IntegrationTest := (baseDirectory in IntegrationTest) (base => Seq(base / "it")).value,
-      addTestReportOption(IntegrationTest, "int-test-reports"),
-      testGrouping in IntegrationTest := TestPhases.oneForkedJvmPerTest((definedTests in IntegrationTest).value),
-      parallelExecution in IntegrationTest := false)
-    .settings(
-      resolvers += Resolver.bintrayRepo("hmrc", "releases"),
-      resolvers += Resolver.jcenterRepo
-    )
+
+  scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature")
+
 }
 
 private object TestPhases {
@@ -85,3 +76,4 @@ private object TestPhases {
       test => Group(test.name, Seq(test), SubProcess(ForkOptions(runJVMOptions = Seq("-Dtest.name=" + test.name))))
     }
 }
+

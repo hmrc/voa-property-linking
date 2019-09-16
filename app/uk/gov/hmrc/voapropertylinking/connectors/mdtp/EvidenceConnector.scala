@@ -29,12 +29,12 @@ import play.api.libs.ws.WSResponse
 import play.api.mvc.MultipartFormData.{DataPart, FilePart}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.voapropertylinking.utils.FileNameSanitisationUtils.formatFileName
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.language.existentials
 import scala.util.{Failure, Success, Try}
-
-import uk.gov.hmrc.voapropertylinking.utils.FileNameSanitisationUtils.formatFileName
 
 @ImplementedBy(classOf[EvidenceConnector])
 trait EvidenceTransfer {

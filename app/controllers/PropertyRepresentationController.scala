@@ -16,43 +16,43 @@
 
 package controllers
 
-import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import javax.inject.Inject
 import models._
 import play.api.Logger
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
-import uk.gov.hmrc.voapropertylinking.connectors.modernised.{AuthorisationManagementApi, AuthorisationSearchApi, CustomerManagementApi}
+import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
+import uk.gov.hmrc.voapropertylinking.connectors.modernised._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class PropertyRepresentationController @Inject() (
-                                                   authenticated: AuthenticatedActionBuilder,
-                                                   authorisationManagementApi: AuthorisationManagementApi,
-                                                   authorisationSearchApi: AuthorisationSearchApi,
-                                                   customerManagementApi: CustomerManagementApi,
-                                                   auditingService: AuditingService
-                                                 )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController {
+class PropertyRepresentationController @Inject()(
+                                                  authenticated: AuthenticatedActionBuilder,
+                                                  authorisationManagementApi: AuthorisationManagementApi,
+                                                  authorisationSearchApi: AuthorisationSearchApi,
+                                                  customerManagementApi: CustomerManagementApi,
+                                                  auditingService: AuditingService
+                                                )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController {
 
   def create(): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
     withJsonBody[RepresentationRequest] { reprRequest =>
       authorisationManagementApi
         .create(APIRepresentationRequest.fromRepresentationRequest(reprRequest))
-        .map{ _ =>
-          Ok("")
-        }
+        .map(_ => Ok(""))
     }
   }
 
   def validateAgentCode(
-                         agentCode:Long,
+                         agentCode: Long,
                          authorisationId: Long
                        ): Action[AnyContent] = authenticated.async { implicit request =>
     authorisationManagementApi
       .validateAgentCode(agentCode, authorisationId)
       .map { errorOrOrganisationId =>
-        errorOrOrganisationId.fold(orgId => Ok(Json.obj("organisationId" -> orgId)), errorString => Ok(Json.obj("failureCode" -> errorString)))
+        errorOrOrganisationId.fold(
+          orgId => Ok(Json.obj("organisationId" -> orgId)),
+          errorString => Ok(Json.obj("failureCode" -> errorString)))
       }
   }
 
@@ -79,13 +79,11 @@ class PropertyRepresentationController @Inject() (
     }
   }
 
-   def revoke(authorisedPartyId: Long): Action[JsValue] =  authenticated.async(parse.json) { implicit request =>
-     authorisationManagementApi
-       .revoke(authorisedPartyId)
-       .map { _ =>
-         Ok("")
-       }
-   }
+  def revoke(authorisedPartyId: Long): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
+    authorisationManagementApi
+      .revoke(authorisedPartyId)
+      .map(_ => Ok(""))
+  }
 
   def appointableToAgent(
                           ownerId: Long,
@@ -114,9 +112,9 @@ class PropertyRepresentationController @Inject() (
             agent = agent
           )
             .map(x => Ok(Json.toJson(x)))
-        case None             =>
-        Logger.error(s"Agent details lookup failed for agentCode: $agentCode")
-        Future.successful(NotFound)
-    }
+        case None =>
+          Logger.error(s"Agent details lookup failed for agentCode: $agentCode")
+          Future.successful(NotFound)
+      }
   }
 }
