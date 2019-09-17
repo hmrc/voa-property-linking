@@ -49,5 +49,6 @@ object OwnerAuthorisation {
         organisationName = agent.organisationName,
         status = Some(agent.status),
         checkPermission = AgentPermission.fromName(agent.checkPermission),
-        challengePermission = AgentPermission.fromName(agent.challengePermission))).toList)
+        challengePermission = AgentPermission.fromName(agent.challengePermission),
+        agentCode = agent.representativeCode )).toList)
 }
