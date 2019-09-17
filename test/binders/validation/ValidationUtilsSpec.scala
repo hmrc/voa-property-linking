@@ -85,6 +85,31 @@ class ValidationUtilsSpec extends BaseUnitSpec {
     }
   }
 
+
+  "validating an optional component" should {
+    "be valid" when {
+      "the component is present and considered VALID" in new Setup {
+        implicit val key: String = "optionalLong"
+        implicit val params: Params = Map("optionalLong" -> Seq("123"))
+        (readOption ifPresent asLong) shouldBe Valid(Some(123L))
+      }
+
+      "the component is missing" in new Setup {
+        implicit val key: String = "optionalLong"
+        implicit val params: Params = Map()
+        (readOption ifPresent asLong) shouldBe Valid(None)
+      }
+    }
+
+    "be invalid" when {
+      "the component is provided but considered INVALID" in new Setup {
+        implicit val key: String = "optionalLong"
+        implicit val params: Params = Map("optionalLong" -> Seq("foobar"))
+        (readOption ifPresent asLong) should not be 'valid
+      }
+    }
+  }
+
   "validating a mandatory boolean parameter" should {
     "accept boolean value encoded as 'true' or 'false'" in new Setup {
       implicit val key: String = "boolean"
@@ -99,12 +124,77 @@ class ValidationUtilsSpec extends BaseUnitSpec {
     }
   }
 
+  "validating a LocalDate" should {
+    "accept valid local date" when {
+      "valid string of yyyy-mm-dd format is provided" in new Setup {
+        implicit val params: Params = Map("date" -> Seq("2019-09-17"))
+        implicit val key: String = "date"
+        read andThen asLocalDate shouldBe 'valid
+      }
+    }
+
+    "reject invalid local date" when {
+      "string of yyyy-mm-dd format is provided but date is nonsense" in new Setup {
+        implicit val params: Params = Map("date" -> Seq("2019-50-60"))
+        implicit val key: String = "date"
+        inside(read andThen asLocalDate) {
+          case Invalid(NonEmptyList(InvalidTypeError(k, clazz), _)) =>
+            k shouldBe key
+            clazz.getSimpleName shouldBe "LocalDate"
+        }
+      }
+    }
+  }
+
+  "validating non-blank strings" should {
+    "accept a non-blank string" in new Setup {
+      nonBlankString("foobar")("key") shouldBe 'valid
+    }
+    "reject a string containing only blanks" in new Setup {
+      inside(nonBlankString("    ")("key")) {
+        case Invalid(NonEmptyList(BlankQueryParameterError(k), _)) =>
+          k shouldBe "key"
+      }
+    }
+    "reject an empty string" in new Setup {
+      inside(nonBlankString("")("key")) {
+        case Invalid(NonEmptyList(BlankQueryParameterError(k), _)) =>
+          k shouldBe "key"
+      }
+    }
+  }
+
+  "validating min/max string length" should {
+    "accept strings within valid range" in new Setup {
+      val s = "foo"
+      implicit val key: String = "key"
+      minLength(1)(s) andThen maxLength(5) shouldBe 'valid
+    }
+
+    "reject strings outside valid range" in new Setup {
+      val s = "foo"
+      implicit val key: String = "key"
+      inside(minLength(4)(s) andThen maxLength(5)) {
+        case Invalid(NonEmptyList(UnderMinLengthError(k, limit), _)) =>
+          k shouldBe key
+          limit shouldBe 4
+      }
+
+      inside(minLength(1)(s) andThen maxLength(2)) {
+        case Invalid(NonEmptyList(OverMaxLengthError(k, limit), _)) =>
+          k shouldBe key
+          limit shouldBe 2
+      }
+    }
+  }
+
   "validating the range of numeric values" should {
 
     trait IntRangeTest extends ValidationUtils {
       implicit val key: String = "number"
       val min = 1
       val max = 10
+
       def rangeTest(value: String): Validated[NonEmptyList[ValidationError], Int] =
         read(key, Map(key -> Seq(value))) andThen asInt andThen min(min) andThen max(max)
     }
@@ -130,6 +220,7 @@ class ValidationUtilsSpec extends BaseUnitSpec {
     trait RegExpTest extends ValidationUtils {
       implicit val key: String = "fieldName"
       val pattern = """^([A-Za-z]{2}\d{1,2})$""".r
+
       def regExpTest(value: String): Validated[NonEmptyList[ValidationError], String] =
         read(key, Map(key -> Seq(value))) andThen regex(pattern)
     }

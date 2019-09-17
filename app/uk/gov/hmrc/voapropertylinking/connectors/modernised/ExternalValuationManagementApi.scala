@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
-import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
 import javax.inject.{Inject, Named}
 import models.modernised.ValuationHistoryResponse
 import models.voa.valuation.dvr.StreamedDocument
@@ -26,8 +25,8 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.ws.{StreamedResponse, WSClient}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http.ws.WSHttp
 import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
+import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
 
 import scala.concurrent.Future
 

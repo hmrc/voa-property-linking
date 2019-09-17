@@ -33,7 +33,7 @@ import scala.concurrent.Future
 class CustomerManagementApiSpec extends BaseUnitSpec {
 
   val defaultHttpClient = mock[DefaultHttpClient]
-  val config = mock[ServicesConfig]
+  val config = mockServicesConfig
   val testConnector = new CustomerManagementApi(defaultHttpClient, config) {
     override lazy val baseUrl = "http://some-uri"
   }

@@ -26,7 +26,7 @@ import scala.concurrent.Future
 
 class AddressManagementApiSpec extends BaseUnitSpec {
 
-  val testConnector = new AddressManagementApi(mockDefaultHttpClient, mock[ServicesConfig])
+  val testConnector = new AddressManagementApi(mockDefaultHttpClient, mockServicesConfig)
 
   val url = s"/address-management-api/address"
 

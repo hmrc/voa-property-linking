@@ -31,7 +31,7 @@ import scala.util.{Failure, Try}
 class ExternalCaseManagementApiSpec extends BaseUnitSpec {
 
   val connector: ExternalCaseManagementApi =
-    new ExternalCaseManagementApi(mockVoaHttpClient, mock[ServicesConfig]) {
+    new ExternalCaseManagementApi(mockVoaHttpClient, mockServicesConfig) {
       override lazy val voaModernisedApiStubBaseUrl: String = "http://some-uri"
     }
 

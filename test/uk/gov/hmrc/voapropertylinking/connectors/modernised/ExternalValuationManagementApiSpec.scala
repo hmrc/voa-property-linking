@@ -22,9 +22,10 @@ import java.time.LocalDateTime
 
 import basespecs.WireMockSpec
 import com.github.tomakehurst.wiremock.client.WireMock._
+import models.modernised.ValuationHistoryResponse
 import models.voa.valuation.dvr.StreamedDocument
 import models.voa.valuation.dvr.documents.{Document, DocumentSummary, DvrDocumentFiles}
-import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.{any, eq => mEq}
 import org.mockito.Mockito.when
 import play.api.http.ContentTypes
 import play.api.libs.ws.WSClient
@@ -44,9 +45,25 @@ class ExternalValuationManagementApiSpec extends WireMockSpec with ContentTypes 
   val voaApiUrl = "http://voa-modernised-api/external-valuation-management-api"
   val valuationHistoryUrl = s"$voaApiUrl/properties/{uarn}/valuations"
 
+  trait Setup {
+    val uarn: Long = 123456L
+    val plSubmissionId: String = "PL12AB34"
+    val valuationHistoryResponse: ValuationHistoryResponse = ValuationHistoryResponse(Seq.empty)
+  }
 
   val connector = new ExternalValuationManagementApi(wsClient, mockVoaHttpClient, valuationHistoryUrl, config) {
     override lazy val baseURL: String = mockServerUrl
+  }
+
+  "getting a valuation history" should {
+    "return the history from modernised" when {
+      "there is one for the specified UARN" in new Setup {
+        when(mockVoaHttpClient.GET[Option[ValuationHistoryResponse]](any(), any())(any(), any(), any(), any()))
+          .thenReturn(Future.successful(Some(valuationHistoryResponse)))
+
+        connector.getValuationHistory(uarn, plSubmissionId).futureValue shouldBe Some(valuationHistoryResponse)
+      }
+    }
   }
 
   "get dvr documents" should {

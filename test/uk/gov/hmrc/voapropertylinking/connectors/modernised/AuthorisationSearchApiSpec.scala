@@ -21,23 +21,61 @@ import models.searchApi._
 import models.{PaginationParams, PropertyRepresentation, PropertyRepresentations}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
-import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
-import uk.gov.hmrc.play.config.ServicesConfig
 
 import scala.concurrent.Future
 
 class AuthorisationSearchApiSpec extends BaseUnitSpec {
 
-  val http = mock[DefaultHttpClient]
-  val connector = new AuthorisationSearchApi(http, mock[ServicesConfig]) {
-    override lazy val baseUrl: String = "http://some-uri"
+  val connector: AuthorisationSearchApi =
+    new AuthorisationSearchApi(mockDefaultHttpClient, mockServicesConfig) {
+      override lazy val baseUrl: String = "http://some-uri"
+    }
+
+  trait Setup {
+    val orgId: Long = 1L
+    val paginationParams: PaginationParams =
+      PaginationParams(startPoint = 1, pageSize = 10, requestTotalRowCount = true)
+    val agentId: Long = 2L
+    val ownerAuthResult: OwnerAuthResult = OwnerAuthResult(1, 1, 1, 1, Seq())
+  }
+
+  "searching and sorting agents" should {
+    "return what modernised returned" when {
+      "called with minimal query parameters" in new Setup {
+        when(mockDefaultHttpClient.GET[OwnerAuthResult](any())(any(), any(), any()))
+          .thenReturn(Future.successful(ownerAuthResult))
+
+        val res: OwnerAuthResult = connector.searchAndSort(orgId, paginationParams).futureValue
+
+        res shouldBe ownerAuthResult
+      }
+    }
+  }
+
+  "appointableToAgent" should {
+    "return what modernised returned" when {
+      "called with minimal query parameters" in new Setup {
+        when(mockDefaultHttpClient.GET[OwnerAuthResult](any())(any(), any(), any()))
+          .thenReturn(Future.successful(ownerAuthResult))
+
+        val res: OwnerAuthResult = connector.appointableToAgent(
+          ownerId = orgId,
+          agentId = agentId,
+          checkPermission = None,
+          challengePermission = None,
+          params = paginationParams
+        ).futureValue
+
+        res shouldBe ownerAuthResult
+      }
+    }
   }
 
   "A manage agents" should {
     "find owner agents" in {
       val organisationId = 123
 
-      when(http.GET[Agents](any())(any(), any(), any())).thenReturn(Future.successful(
+      when(mockDefaultHttpClient.GET[Agents](any())(any(), any(), any())).thenReturn(Future.successful(
         Agents(Seq(Agent("Test name 1", 123), Agent("Test name 2", 123)))
       ))
 
@@ -48,7 +86,7 @@ class AuthorisationSearchApiSpec extends BaseUnitSpec {
   "AuthorisationManagementApi.forAgent" should {
     "return the invalid code which is not a no Agent Flag code" in {
 
-      when(http.GET[AgentAuthResultBE](any(), any())(any(), any(), any()))
+      when(mockDefaultHttpClient.GET[AgentAuthResultBE](any(), any())(any(), any(), any()))
         .thenReturn(Future.successful(
           AgentAuthResultBE(
             1, 10, 30, 50, Seq(AgentAuthorisation(

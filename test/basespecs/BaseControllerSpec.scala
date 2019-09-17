@@ -39,7 +39,7 @@ abstract class BaseControllerSpec
   implicit val request = FakeRequest()
 
   val mockWS = mock[WSHttp]
-  val mockConf = mock[ServicesConfig]
+  val mockConf = mockServicesConfig
   val mockAgentConnector = mock[AgentController]
   val baseUrl = "http://localhost:9999"
 
