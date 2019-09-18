@@ -28,6 +28,7 @@ import models.searchApi.{OwnerAuthResult, OwnerAuthorisation}
 import org.mockito.ArgumentMatchers.{any, eq => mEq}
 import org.mockito.Mockito._
 import play.api.libs.json.Json
+import play.api.mvc.Result
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.{HttpResponse, Upstream5xxResponse}
 import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
@@ -47,7 +48,11 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec {
     auditingService = mock[AuditingService],
     agentQueryParameterEnabledExternal = true)
 
+  val clientOrgId: Long = 222L
+  val agentOrgId: Long = 333L
+
   val validPropertiesView = PropertiesView(
+    authorisationOwnerOrganisationId = clientOrgId,
     authorisationId = 11111,
     uarn = 33333,
     address = Some("1 HIGH STREET, BRIGHTON"),
@@ -68,7 +73,7 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec {
     )),
     parties = Seq(APIParty(id = 24680,
       authorisedPartyStatus = "APPROVED",
-      authorisedPartyOrganisationId = 123456,
+      authorisedPartyOrganisationId = agentOrgId,
       permissions = Seq(Permissions(
         id = 24680,
         checkPermission = "APPROVED",
@@ -254,6 +259,7 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec {
 
   trait ClientPropertySetup {
     protected def propertiesView(authId: Long) = PropertiesView(
+      authorisationOwnerOrganisationId = 1234L,
       authorisationId = authId,
       uarn = 123456,
       authorisationStatus = "OPEN",
@@ -262,7 +268,7 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec {
       submissionId = "PL12345",
       address = None,
       NDRListValuationHistoryItems = Seq.empty[APIValuationHistory],
-      parties = Seq(APIParty(1L, "APPROVED", 1L, Seq(Permissions(1L, "START", "START", None)))),
+      parties = Seq(APIParty(1L, "APPROVED", agentOrgId, Seq(Permissions(1L, "START", "START", None)))),
       agents = None
     )
 
@@ -286,7 +292,8 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec {
       when(mockCustomerManagementApi.getDetailedGroupAccount(any())(any()))
         .thenReturn(Future.successful(Some(groupAccount)))
 
-      val res = testController.clientProperty(authorisationId, 1L, 1L)(FakeRequest())
+      val res: Future[Result] =
+        testController.clientProperty(authorisationId, clientOrgId, agentOrgId)(FakeRequest())
 
       status(res) shouldBe OK
     }

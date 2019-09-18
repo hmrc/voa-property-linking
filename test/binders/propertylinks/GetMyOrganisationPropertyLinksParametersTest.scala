@@ -14,12 +14,21 @@
  * limitations under the License.
  */
 
-package models
+package binders.propertylinks
 
-import play.api.libs.json.{Json, OFormat}
+import basespecs.BaseUnitSpec
+import cats.data.Validated.Valid
 
-case class APIAddressLookupResult(addressDetails: Seq[DetailedAddress])
+class GetMyOrganisationPropertyLinksParametersTest extends BaseUnitSpec {
 
-object APIAddressLookupResult {
-  implicit val format: OFormat[APIAddressLookupResult] = Json.format
+  import GetMyOrganisationPropertyLinksParameters._
+
+  "validating GetMyOrganisationPropertyLinksParameters" should {
+    "come out VALID" when {
+      "no parameters are provided because all parameters are optional" in {
+        validate(Map.empty[String, Seq[String]]) shouldBe Valid(GetMyOrganisationPropertyLinksParameters())
+      }
+    }
+  }
+
 }

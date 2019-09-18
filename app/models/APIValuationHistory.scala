@@ -19,7 +19,7 @@ package models
 import java.time.LocalDate
 
 import models.modernised.ValuationHistory
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class APIValuationHistory(
                                 asstRef: Long,
@@ -38,7 +38,8 @@ case class APIValuationHistory(
 
 
 object APIValuationHistory {
-  implicit val formats = Json.format[APIValuationHistory]
+
+  implicit val formats: OFormat[APIValuationHistory] = Json.format
 
   def apply(history: ValuationHistory): APIValuationHistory =
     APIValuationHistory(

@@ -23,7 +23,8 @@ import models.modernised.externalpropertylink.myclients.PropertyLinkWithClient
 import models.modernised.externalpropertylink.myorganisations.PropertyLinkWithAgents
 import play.api.libs.json._
 
-case class PropertiesView(authorisationId: Long,
+case class PropertiesView(authorisationOwnerOrganisationId: Long,
+                          authorisationId: Long,
                           uarn: Long,
                           authorisationStatus: String,
                           startDate: LocalDate,
@@ -34,7 +35,7 @@ case class PropertiesView(authorisationId: Long,
                           parties: Seq[APIParty],
                           agents: Option[Seq[LegacyParty]]) {
 
-  def upperCase = this.copy(NDRListValuationHistoryItems = NDRListValuationHistoryItems.map(_.capatalise))
+  def upperCase: PropertiesView = this.copy(NDRListValuationHistoryItems = NDRListValuationHistoryItems.map(_.capatalise))
 
   def hasValidStatus: Boolean = {
     !Seq("DECLINED", "REVOKED", "MORE_EVIDENCE_REQUIRED").contains(authorisationStatus.toUpperCase)
@@ -46,8 +47,10 @@ object PropertiesView {
   implicit val format: Format[PropertiesView] = Json.format[PropertiesView]
 
   def apply(propertyLink: PropertyLinkWithClient, history: Seq[ValuationHistory])
-  :PropertiesView =
-    PropertiesView(authorisationId = propertyLink.authorisationId,
+  : PropertiesView =
+    PropertiesView(
+      authorisationOwnerOrganisationId = 1L, //TODO FIX THIS PERHAC
+      authorisationId = propertyLink.authorisationId,
       uarn = propertyLink.uarn,
       address = Some(propertyLink.address),
       authorisationStatus = propertyLink.status.toString,
@@ -60,8 +63,10 @@ object PropertiesView {
 
 
   def apply(propertyLink: PropertyLinkWithAgents, history: Seq[ValuationHistory])
-  :PropertiesView =
-    PropertiesView(authorisationId = propertyLink.authorisationId,
+  : PropertiesView =
+    PropertiesView(
+      authorisationOwnerOrganisationId = 1L, // TODO FIX THIS PERHAC
+      authorisationId = propertyLink.authorisationId,
       uarn = propertyLink.uarn,
       address = Some(propertyLink.address),
       authorisationStatus = propertyLink.status.toString,

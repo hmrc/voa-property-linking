@@ -18,6 +18,7 @@ package basespecs
 
 import org.scalatest._
 import org.scalatest.concurrent.{PatienceConfiguration, ScalaFutures}
+import org.scalatest.matchers.{BeMatcher, MatchResult}
 import org.scalatest.time.{Milliseconds, Second, Span}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.mvc.AnyContentAsEmpty
@@ -55,5 +56,8 @@ abstract class BaseUnitSpec
 
   override implicit val patienceConfig: PatienceConfig =
     PatienceConfig(Span(1, Second), Span(10, Milliseconds))
+
+  val upperCased: BeMatcher[String] =
+    BeMatcher(s => MatchResult(s == s.toUpperCase, "not all characters are upper-case", "found upper-case characters"))
 
 }

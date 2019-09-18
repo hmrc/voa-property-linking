@@ -27,7 +27,7 @@ import uk.gov.hmrc.voapropertylinking.utils.PostcodeValidator
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class AddressLookup @Inject()(
+class AddressLookupController @Inject()(
                                authenticated: AuthenticatedActionBuilder,
                                addresses: AddressManagementApi
                              )(implicit executionContext: ExecutionContext)

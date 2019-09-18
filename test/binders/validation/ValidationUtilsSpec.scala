@@ -92,6 +92,7 @@ class ValidationUtilsSpec extends BaseUnitSpec {
         implicit val key: String = "optionalLong"
         implicit val params: Params = Map("optionalLong" -> Seq("123"))
         (readOption ifPresent asLong) shouldBe Valid(Some(123L))
+        (readOption ifPresent asInt) shouldBe Valid(Some(123))
       }
 
       "the component is missing" in new Setup {

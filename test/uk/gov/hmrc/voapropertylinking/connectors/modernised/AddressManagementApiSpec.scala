@@ -20,40 +20,89 @@ import basespecs.BaseUnitSpec
 import models._
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
-import uk.gov.hmrc.play.config.ServicesConfig
+import play.api.libs.json.{JsValue, Json}
 
 import scala.concurrent.Future
 
 class AddressManagementApiSpec extends BaseUnitSpec {
 
-  val testConnector = new AddressManagementApi(mockDefaultHttpClient, mockServicesConfig)
-
-  val url = s"/address-management-api/address"
+  trait Setup {
+    val connector = new AddressManagementApi(mockDefaultHttpClient, mockServicesConfig)
+    val url = s"/address-management-api/address"
+    val addressUnitId = 1234L
+    val postcode = "L4 0TH"
+    val simpleAddress = SimpleAddress(
+      addressUnitId = Some(addressUnitId),
+      line1 = "Liverpool FC, First team",
+      line2 = "Anfield Stadium",
+      line3 = "Anfield Road",
+      line4 = "Liverpool",
+      postcode = postcode
+    )
+    val detailedAddress = DetailedAddress(
+      addressUnitId = Some(addressUnitId),
+      nonAbpAddressId = Some(1234),
+      organisationName = Some("Liverpool FC"),
+      departmentName = Some("First team"),
+      buildingName = Some("Anfield Stadium"),
+      dependentThoroughfareName = Some("Anfield Road"),
+      postTown = "Liverpool",
+      postcode = postcode
+    )
+    val addressLookupResult = APIAddressLookupResult(Seq(detailedAddress))
+  }
 
   "AddressConnector.get" should {
-    "return the address associated with the address unit id" in {
-      val addressUnitId = 1234L
-      when(mockDefaultHttpClient.GET[APIAddressLookupResult](any())(any(), any(), any()))
-        .thenReturn(Future.successful(APIAddressLookupResult(Seq(
-          DetailedAddress(
-            addressUnitId = Some(123456789),
-            nonAbpAddressId = Some(1234),
-            organisationName = Some("Liverpool FC"),
-            departmentName = Some("First team"),
-            buildingName = Some("Anfield Stadium"),
-            dependentThoroughfareName = Some("Anfield Road"),
-            postTown = "Liverpool",
-            postcode = "L4 0TH"
-          )))))
+    "return the address associated with the address unit id" when {
+      "it's returned from modernised" in new Setup {
+        when(mockDefaultHttpClient.GET[APIAddressLookupResult](any())(any(), any(), any()))
+          .thenReturn(Future.successful(addressLookupResult))
 
-      testConnector.get(addressUnitId)(hc).futureValue shouldBe Some(SimpleAddress(
-        addressUnitId = Some(123456789),
-        line1 = "Liverpool FC, First team",
-        line2 = "Anfield Stadium",
-        line3 = "Anfield Road",
-        line4 = "Liverpool",
-        postcode = "L4 0TH")
-      )
+        connector.get(addressUnitId).futureValue shouldBe Some(simpleAddress)
+      }
+    }
+    "return None" when {
+      "the call to modernised fails for whatever reason" in new Setup {
+        when(mockDefaultHttpClient.GET[APIAddressLookupResult](any())(any(), any(), any()))
+          .thenReturn(Future.failed(new RuntimeException()))
+
+        connector.get(addressUnitId).futureValue shouldBe None
+      }
     }
   }
+
+  "find an address by postcode" should {
+    "return a detailed address" when {
+      "it's returned from modernised" in new Setup {
+        when(mockDefaultHttpClient.GET[APIAddressLookupResult](any())(any(), any(), any()))
+          .thenReturn(Future.successful(addressLookupResult))
+
+        connector.find(postcode).futureValue.loneElement shouldBe detailedAddress
+      }
+    }
+  }
+
+  "creating a non standard address" should {
+    "return the ID of the newly created address" when {
+      "the POST is successful and an ID is returned in the response body" in new Setup {
+        val newAddressId = 123L
+        when(mockDefaultHttpClient.POST[DetailedAddress, JsValue](any(), any(), any())(any(), any(), any(), any()))
+          .thenReturn(Future.successful(Json.obj("id" -> newAddressId)))
+
+        connector.create(simpleAddress).futureValue shouldBe newAddressId
+      }
+    }
+    "fail with an exception" when {
+      "the POST is successful but no ID can be extracted from the response body" in new Setup {
+        when(mockDefaultHttpClient.POST[DetailedAddress, JsValue](any(), any(), any())(any(), any(), any(), any()))
+          .thenReturn(Future.successful(Json.obj("foo" -> "bar")))
+
+        whenReady(connector.create(simpleAddress).failed) { e =>
+          e shouldBe an[Exception]
+          e.getMessage shouldBe s"Failed to create record for address $simpleAddress"
+        }
+      }
+    }
+  }
+
 }

@@ -42,6 +42,7 @@ trait AllMocks extends MockitoSugar {
   val mockBusinessRatesAuthConnector: BusinessRatesAuthConnector = mock[BusinessRatesAuthConnector]
   val mockCustomerManagementApi: CustomerManagementApi = mock[CustomerManagementApi]
   val mockDefaultHttpClient: DefaultHttpClient = mock[DefaultHttpClient]
+  val mockExternalCaseManagementApi: ExternalCaseManagementApi = mock[ExternalCaseManagementApi]
   val mockExternalPropertyLinkApi: ExternalPropertyLinkApi = mock[ExternalPropertyLinkApi]
   val mockExternalValuationManagementApi: ExternalValuationManagementApi = mock[ExternalValuationManagementApi]
   val mockHttpResponse: HttpResponse = mock[HttpResponse]
@@ -66,6 +67,7 @@ trait AllMocks extends MockitoSugar {
       mockBusinessRatesAuthConnector,
       mockCustomerManagementApi,
       mockDefaultHttpClient,
+      mockExternalCaseManagementApi,
       mockExternalPropertyLinkApi,
       mockExternalValuationManagementApi,
       mockHttpResponse,
