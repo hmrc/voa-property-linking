@@ -54,7 +54,6 @@ class MdtpDashboardManagementApiSpec extends BaseUnitSpec {
       billingAuthorityCode = None)
 
     val propertiesView = PropertiesView(
-      authorisationOwnerOrganisationId = 1L,
       authorisationId = authorisationId,
       uarn = 123L,
       authorisationStatus = "OPEN",
@@ -75,7 +74,7 @@ class MdtpDashboardManagementApiSpec extends BaseUnitSpec {
           .thenReturn(Future.successful(Some(propertiesView)))
 
         inside(connector.get(authorisationId).futureValue) {
-          case Some(PropertiesView(_, _, _, _, _, _, _, _, valuationHistories, _, _)) =>
+          case Some(PropertiesView(_, _, _, _, _, _, _, valuationHistories, _, _)) =>
             valuationHistories.loneElement.address shouldBe upperCased
         }
       }
@@ -86,14 +85,6 @@ class MdtpDashboardManagementApiSpec extends BaseUnitSpec {
           .thenReturn(Future.successful(Option.empty[PropertiesView]))
 
         connector.get(authorisationId).futureValue shouldBe None
-      }
-    }
-
-    "return an " should {
-      "foo" when {
-        "bar" in new Setup {
-
-        }
       }
     }
 

@@ -40,7 +40,6 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
   )
 
   val validPropertiesView = PropertiesView(
-    authorisationOwnerOrganisationId = 1L,
     authorisationId = 11111,
     uarn = 33333,
     address = Some("1 HIGH STREET, BRIGHTON"),
@@ -77,7 +76,6 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
     ))))
 
   val clientValidPropertiesView = PropertiesView(
-    authorisationOwnerOrganisationId = 1L,
     authorisationId = 11111,
     uarn = 33333,
     address = Some("1 HIGH STREET, BRIGHTON"),

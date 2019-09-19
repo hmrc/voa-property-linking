@@ -52,7 +52,6 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec {
   val agentOrgId: Long = 333L
 
   val validPropertiesView = PropertiesView(
-    authorisationOwnerOrganisationId = clientOrgId,
     authorisationId = 11111,
     uarn = 33333,
     address = Some("1 HIGH STREET, BRIGHTON"),
@@ -258,8 +257,7 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec {
   }
 
   trait ClientPropertySetup {
-    protected def propertiesView(authId: Long) = PropertiesView(
-      authorisationOwnerOrganisationId = 1234L,
+    protected def propertiesView(authId: Long): PropertiesView = PropertiesView(
       authorisationId = authId,
       uarn = 123456,
       authorisationStatus = "OPEN",

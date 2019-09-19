@@ -23,17 +23,17 @@ import models.modernised.externalpropertylink.myclients.PropertyLinkWithClient
 import models.modernised.externalpropertylink.myorganisations.PropertyLinkWithAgents
 import play.api.libs.json._
 
-case class PropertiesView(authorisationOwnerOrganisationId: Long,
-                          authorisationId: Long,
-                          uarn: Long,
-                          authorisationStatus: String,
-                          startDate: LocalDate,
-                          endDate: Option[LocalDate],
-                          submissionId: String,
-                          address: Option[String],
-                          NDRListValuationHistoryItems: Seq[APIValuationHistory],
-                          parties: Seq[APIParty],
-                          agents: Option[Seq[LegacyParty]]) {
+case class PropertiesView(
+                           authorisationId: Long,
+                           uarn: Long,
+                           authorisationStatus: String,
+                           startDate: LocalDate,
+                           endDate: Option[LocalDate],
+                           submissionId: String,
+                           address: Option[String],
+                           NDRListValuationHistoryItems: Seq[APIValuationHistory],
+                           parties: Seq[APIParty],
+                           agents: Option[Seq[LegacyParty]]) {
 
   def upperCase: PropertiesView = this.copy(NDRListValuationHistoryItems = NDRListValuationHistoryItems.map(_.capatalise))
 
@@ -49,7 +49,6 @@ object PropertiesView {
   def apply(propertyLink: PropertyLinkWithClient, history: Seq[ValuationHistory])
   : PropertiesView =
     PropertiesView(
-      authorisationOwnerOrganisationId = 1L, //TODO FIX THIS PERHAC
       authorisationId = propertyLink.authorisationId,
       uarn = propertyLink.uarn,
       address = Some(propertyLink.address),
@@ -57,7 +56,7 @@ object PropertiesView {
       startDate = propertyLink.startDate,
       endDate = propertyLink.endDate,
       submissionId = propertyLink.submissionId,
-      NDRListValuationHistoryItems = history.map(history => APIValuationHistory(history)).toList,
+      NDRListValuationHistoryItems = history.map(APIValuationHistory(_)).toList,
       parties = Seq(),
       agents = Some(Seq()))
 
@@ -65,7 +64,6 @@ object PropertiesView {
   def apply(propertyLink: PropertyLinkWithAgents, history: Seq[ValuationHistory])
   : PropertiesView =
     PropertiesView(
-      authorisationOwnerOrganisationId = 1L, // TODO FIX THIS PERHAC
       authorisationId = propertyLink.authorisationId,
       uarn = propertyLink.uarn,
       address = Some(propertyLink.address),
