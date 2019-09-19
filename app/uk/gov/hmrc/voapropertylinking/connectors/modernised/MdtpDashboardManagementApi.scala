@@ -17,7 +17,6 @@
 package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
 import javax.inject.Inject
-import models.modernised.mdtpdashboard.LegacyPropertiesView
 import models.{APIParty, PropertiesView}
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
@@ -35,13 +34,10 @@ class MdtpDashboardManagementApi @Inject()(
   val listYear = 2017
 
   //TODO remove this as it is not an authed endpoint
-  def get(authorisationId: Long)(implicit hc: HeaderCarrier): Future[Option[LegacyPropertiesView]] = {
-    val url = baseUrl +
-      s"/mdtp-dashboard-management-api/mdtp_dashboard/view_assessment" +
-      s"?listYear=$listYear" +
-      s"&authorisationId=$authorisationId"
+  def get(authorisationId: Long)(implicit hc: HeaderCarrier): Future[Option[PropertiesView]] = {
+    val url = baseUrl + s"/mdtp-dashboard-management-api/mdtp_dashboard/view_assessment"
 
-    http.GET[Option[LegacyPropertiesView]](url) map {
+    http.GET[Option[PropertiesView]](url, Seq("listYear" -> s"$listYear", "authorisationId" -> s"$authorisationId")) map {
       case Some(view) if view.hasValidStatus => Some(view.copy(parties = filterInvalidParties(view.parties)).upperCase)
       case _ => None
     }

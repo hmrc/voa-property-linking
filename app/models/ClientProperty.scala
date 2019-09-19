@@ -16,7 +16,6 @@
 
 package models
 
-import models.modernised.mdtpdashboard.LegacyPropertiesView
 import play.api.libs.json.Json
 
 case class ClientProperty(
@@ -36,10 +35,10 @@ case class ClientProperty(
 object ClientProperty {
   implicit val format = Json.format[ClientProperty]
 
-  def build(prop: LegacyPropertiesView, userAccount: Option[GroupAccount]) = {
+  def build(prop: PropertiesView, userAccount: GroupAccount): ClientProperty = {
     ClientProperty(
-      prop.authorisationOwnerOrganisationId,
-      userAccount.map(_.companyName).getOrElse("Name not found"),
+      userAccount.id,
+      userAccount.companyName,
       prop.uarn,
       prop.NDRListValuationHistoryItems.headOption.map(_.billingAuthorityReference).getOrElse("BARef not found"),
       prop.parties.head.id,
