@@ -18,8 +18,8 @@ package models.modernised.externalpropertylink.myclients
 
 import java.time.LocalDate
 
-import models.modernised.PropertyLinkStatus.PropertyLinkStatus
 import models.modernised.PropertyLink
+import models.modernised.PropertyLinkStatus.PropertyLinkStatus
 import play.api.libs.json.{Json, OFormat}
 
 

@@ -18,10 +18,10 @@ package controllers
 
 import binders.propertylinks.temp.GetMyOrganisationsPropertyLinksParametersWithAgentFiltering
 import binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
+import cats.data.OptionT
 import javax.inject.{Inject, Named}
 import models._
 import models.mdtp.propertylink.requests.{APIPropertyLinkRequest, PropertyLinkRequest}
-import models.modernised.mdtpdashboard.LegacyPropertiesView
 import play.api.Logger
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent}
@@ -175,17 +175,17 @@ class PropertyLinkingController @Inject()(
     mdtpDashboardManagementApi
       .get(authorisationId)
       .flatMap {
-        case Some(authorisation) if authorisedFor(authorisation, clientOrgId, agentOrgId) => toClientProperty(authorisation) map { p => Ok(Json.toJson(p)) }
-        case _ => Future.successful(NotFound)
+        case Some(authorisation) if authorisedFor(authorisation, agentOrgId) =>
+          toClientProperty(clientOrgId, authorisation).fold(NotFound("organisation not found")){ p => Ok(Json.toJson(p)) }
+        case _ => Future.successful(NotFound("property link not found"))
       }
   }
 
-  private def authorisedFor(authorisation: LegacyPropertiesView, clientOrgId: Long, agentOrgId: Long): Boolean = {
-    authorisation.authorisationOwnerOrganisationId == clientOrgId && authorisation.parties.exists(_.authorisedPartyOrganisationId == agentOrgId)
-  }
+  private def authorisedFor(authorisation: PropertiesView, agentOrgId: Long): Boolean =
+    authorisation.parties.exists(_.authorisedPartyOrganisationId == agentOrgId)
 
-  private def toClientProperty(authorisation: LegacyPropertiesView)(implicit hc: HeaderCarrier): Future[ClientProperty] = {
-    customerManagementApi.getDetailedGroupAccount(authorisation.authorisationOwnerOrganisationId).map(ClientProperty.build(authorisation, _))
+  private def toClientProperty(clientOrgId: Long, authorisation: PropertiesView)(implicit hc: HeaderCarrier): OptionT[Future, ClientProperty] = {
+    OptionT(customerManagementApi.getDetailedGroupAccount(clientOrgId)).map(ClientProperty.build(authorisation, _))
   }
 }
 

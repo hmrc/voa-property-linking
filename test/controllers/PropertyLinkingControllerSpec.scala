@@ -24,7 +24,6 @@ import cats.data._
 import models._
 import models.mdtp.propertylink.myclients.PropertyLinksWithClients
 import models.mdtp.propertylink.requests.PropertyLinkRequest
-import models.modernised.mdtpdashboard.LegacyPropertiesView
 import models.searchApi.{OwnerAuthResult, OwnerAuthorisation}
 import org.mockito.ArgumentMatchers.{any, eq => mEq}
 import org.mockito.Mockito._
@@ -254,19 +253,17 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec {
   }
 
   trait ClientPropertySetup {
-    protected def legacyPropertiesView(authId: Long) = LegacyPropertiesView(
+    protected def propertiesView(authId: Long) = PropertiesView(
       authorisationId = authId,
       uarn = 123456,
-      authorisationOwnerOrganisationId = 1,
-      authorisationOwnerPersonId = 2,
       authorisationStatus = "OPEN",
-      authorisationMethod = "RATES_BILL",
-      authorisationOwnerCapacity = "OWNER",
       startDate = today,
       endDate = Some(today.plusDays(2)),
       submissionId = "PL12345",
+      address = None,
       NDRListValuationHistoryItems = Seq.empty[APIValuationHistory],
-      parties = Seq(APIParty(1L, "APPROVED", 1L, Seq(Permissions(1L, "START", "START", None))))
+      parties = Seq(APIParty(1L, "APPROVED", 1L, Seq(Permissions(1L, "START", "START", None)))),
+      agents = None
     )
 
     val groupAccount = GroupAccount(
@@ -285,7 +282,7 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec {
     "return 200 OK with client property" in new ClientPropertySetup {
       val authorisationId: Long = 1234L
       when(mockMdtpDashboardManagementApi.get(mEq(authorisationId))(any()))
-        .thenReturn(Future.successful(Some(legacyPropertiesView(authorisationId))))
+        .thenReturn(Future.successful(Some(propertiesView(authorisationId))))
       when(mockCustomerManagementApi.getDetailedGroupAccount(any())(any()))
         .thenReturn(Future.successful(Some(groupAccount)))
 
