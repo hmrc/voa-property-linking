@@ -19,6 +19,7 @@ package binders.propertylinks
 import basespecs.BaseUnitSpec
 import cats.data.Validated.Valid
 
+
 class GetMyClientsPropertyLinkParametersSpec extends BaseUnitSpec {
 
   import GetMyClientsPropertyLinkParameters._
@@ -26,7 +27,14 @@ class GetMyClientsPropertyLinkParametersSpec extends BaseUnitSpec {
   "validating GetMyClientsPropertyLinkParameters" should {
     "come out VALID" when {
       "no parameters are provided because all parameters are optional" in {
-        validate(Map.empty[String, Seq[String]]) shouldBe Valid(GetMyClientsPropertyLinkParameters())
+        val params = Map.empty[String, Seq[String]]
+        val theExpectedValidThing = GetMyClientsPropertyLinkParameters()
+
+        validate(params) shouldBe Valid(theExpectedValidThing)
+
+        inside(binder.bind("", params)) {
+          case Some(Right(ps)) => ps shouldBe theExpectedValidThing
+        }
       }
     }
   }

@@ -17,16 +17,24 @@
 package binders.propertylinks
 
 import basespecs.BaseUnitSpec
+import binders._
 import cats.data.Validated.Valid
 
-class GetMyOrganisationPropertyLinksParametersTest extends BaseUnitSpec {
+class GetMyOrganisationPropertyLinksParametersSpec extends BaseUnitSpec {
 
   import GetMyOrganisationPropertyLinksParameters._
 
   "validating GetMyOrganisationPropertyLinksParameters" should {
     "come out VALID" when {
       "no parameters are provided because all parameters are optional" in {
-        validate(Map.empty[String, Seq[String]]) shouldBe Valid(GetMyOrganisationPropertyLinksParameters())
+        val params: Params = Map.empty[String, Seq[String]]
+        val theExpectedValidThing = GetMyOrganisationPropertyLinksParameters()
+
+        validate(params) shouldBe Valid(theExpectedValidThing)
+
+        inside(binder.bind("", params)) {
+          case Some(Right(ps)) => ps shouldBe theExpectedValidThing
+        }
       }
     }
   }
