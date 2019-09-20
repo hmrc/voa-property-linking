@@ -20,27 +20,23 @@ import basespecs.BaseUnitSpec
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import uk.gov.hmrc.http.HttpResponse
-import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
-import uk.gov.hmrc.play.config.ServicesConfig
 
 import scala.concurrent.Future
 
 class BusinessRatesAuthConnectorSpec extends BaseUnitSpec {
 
-  val http = mock[DefaultHttpClient]
-  val connector = new BusinessRatesAuthConnector(http, mock[ServicesConfig]) {
-    override lazy val baseUrl: String = "http://some-uri"
-  }
+  val connector: BusinessRatesAuthConnector =
+    new BusinessRatesAuthConnector(mockDefaultHttpClient, mockServicesConfig) {
+      override lazy val baseUrl: String = "http://some-uri"
+    }
 
   "BusinessRatesAuthConnector clear cache" should {
     "delete the cache" in {
-
-      when(http.DELETE[HttpResponse](any())(any(), any(), any())).thenReturn(Future.successful(HttpResponse(200)))
+      when(mockDefaultHttpClient.DELETE[HttpResponse](any())(any(), any(), any()))
+        .thenReturn(Future.successful(HttpResponse(200)))
 
       connector.clearCache().futureValue shouldBe (())
     }
   }
-
-  val emptyCache ="{}"
 
 }

@@ -19,187 +19,147 @@ package uk.gov.hmrc.voapropertylinking.connectors.modernised
 import java.time.LocalDateTime
 
 import basespecs.BaseUnitSpec
-import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
 import models._
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
-import uk.gov.hmrc.http.{NotFoundException, UnauthorizedException}
+import uk.gov.hmrc.http.{HttpResponse, UnauthorizedException}
 import uk.gov.hmrc.play.config.ServicesConfig
 
 import scala.concurrent.Future
+import scala.util.{Failure, Try}
 
 class ExternalCaseManagementApiSpec extends BaseUnitSpec {
 
-  val http = mock[VoaHttpClient]
+  val connector: ExternalCaseManagementApi =
+    new ExternalCaseManagementApi(mockVoaHttpClient, mockServicesConfig) {
+      override lazy val voaModernisedApiStubBaseUrl: String = "http://some-uri"
+    }
 
-  val connector = new ExternalCaseManagementApi(http, mock[ServicesConfig]) {
-    override lazy val baseUrl: String = "http://some-uri"
-    override lazy val voaModernisedApiStubBaseUrl: String = "http://some-uri"
+  trait Setup {
+    val submissionId: String = "PL123AB"
+    val checkCaseRef: String = "CHK123ABC"
+    val valuationId: Long = 123456L
+  }
+
+  trait AgentSetup extends Setup {
+    val agentCheckCases = List(
+      AgentCheckCase(
+        checkCaseSubmissionId = "CHK-1ZRPW9Q",
+        checkCaseReference = "CHK100028783",
+        checkCaseStatus = "OPEN",
+        address = "Not Available",
+        uarn = 7538840000L,
+        createdDateTime = LocalDateTime.parse("2018-07-31T08:16:54"),
+        settledDate = None,
+        client = Client(
+          organisationId = 123,
+          organisationName = "ABC"
+        ),
+        submittedBy = "OA Ltd"
+      )
+    )
+  }
+
+  trait OwnerSetup extends Setup {
+    val ownerCheckCases = List(
+      OwnerCheckCase(
+        checkCaseSubmissionId = "CHK-1ZRPW9Q",
+        checkCaseReference = "CHK100028783",
+        checkCaseStatus = "OPEN",
+        address = "Not Available",
+        uarn = 7538840000L,
+        createdDateTime = LocalDateTime.parse("2018-07-31T08:16:54"),
+        settledDate = None,
+        agent = None,
+        submittedBy = "OA Ltd"
+      )
+    )
   }
 
   "ExternalCaseManagementApi get check cases" should {
-    "get agents check cases" in {
-
-      val submissionId = "123"
-
-      when(http.GET[Option[AgentCheckCasesResponse]](any())(any(), any(), any(), any())).thenReturn(Future.successful(Some(AgentCheckCasesResponse(1, 15, 4, 4, List(
-       AgentCheckCase(
-         checkCaseSubmissionId = "CHK-1ZRPW9Q",
-         checkCaseReference = "CHK100028783",
-         checkCaseStatus = "OPEN",
-         address = "Not Available",
-         uarn = 7538840000L,
-         createdDateTime = LocalDateTime.parse("2018-07-31T08:16:54"),
-         settledDate = None,
-         client = Client(
-           organisationId = 123,
-           organisationName = "ABC"
-         ),
-         submittedBy = "OA Ltd"
-       ),
-        AgentCheckCase(
-          checkCaseSubmissionId = "CHK-1ZRPW99",
-          checkCaseReference = "CHK100028784",
-          checkCaseStatus = "OPEN",
-          address = "Not Available",
-          uarn = 7538840000L,
-          createdDateTime = LocalDateTime.parse("2018-07-31T08:16:54"),
-          settledDate = None,
-          client = Client(
-            organisationId = 123,
-            organisationName = "ABC"
-          ),
-          submittedBy = "OA Ltd"
-        ),
-        AgentCheckCase(
-          checkCaseSubmissionId = "CHK-1ZRPW5B",
-          checkCaseReference = "CHK100028650",
-          checkCaseStatus = "OPEN",
-          address = "Not Available",
-          uarn = 7538840000L,
-          createdDateTime = LocalDateTime.parse("2018-07-31T08:16:54"),
-          settledDate = None,
-          client = Client(
-            organisationId = 123,
-            organisationName = "ABC"
-          ),
-          submittedBy = "OA Ltd"
-        ),
-        AgentCheckCase(
-          checkCaseSubmissionId = "CHK-1ZRPW39",
-          checkCaseReference = "CHK100028589",
-          checkCaseStatus = "OPEN",
-          address = "Not Available",
-          uarn = 7538840000L,
-          createdDateTime = LocalDateTime.parse("2018-07-31T08:16:54"),
-          settledDate = None,
-          client = Client(
-            organisationId = 123,
-            organisationName = "ABC"
-          ),
-          submittedBy = "OA Ltd"
-        )
-      )))))
+    "get agents check cases" in new AgentSetup {
+      when(mockVoaHttpClient.GET[Option[AgentCheckCasesResponse]](any())(any(), any(), any(), any()))
+        .thenReturn(Future.successful(Some(AgentCheckCasesResponse(1, 15, 4, 4, agentCheckCases))))
 
       connector.getCheckCases(submissionId, "agent")(hc, requestWithPrincipal).futureValue.get.filterTotal shouldBe 4
     }
 
-    "handle 403 from get agents check cases" in {
-
-      val submissionId = "123"
-
-      when(http.GET[Option[AgentCheckCasesResponse]](any())(any(), any(), any(), any()))
+    "handle 403 from get agents check cases" in new AgentSetup {
+      when(mockVoaHttpClient.GET[Option[AgentCheckCasesResponse]](any())(any(), any(), any(), any()))
         .thenReturn(Future.failed(new UnauthorizedException("unauthorised")))
 
       connector.getCheckCases(submissionId, "agent")(hc, requestWithPrincipal).futureValue shouldBe None
     }
 
-    "handle 404 get agent check cases" in {
-
-      val submissionId = "123"
-
-      when(http.GET[Option[AgentCheckCasesResponse]](any())(any(), any(), any(), any()))
-        .thenReturn(Future.failed(new NotFoundException("unauthorised")))
+    "handle 404 get agent check cases" in new AgentSetup {
+      when(mockVoaHttpClient.GET[Option[AgentCheckCasesResponse]](any())(any(), any(), any(), any()))
+        .thenReturn(Future.successful(None))
 
       connector.getCheckCases(submissionId, "agent")(hc, requestWithPrincipal).futureValue shouldBe None
     }
 
-    "get client check cases" in {
 
-      val submissionId = "123"
+    //this is really not a great solution but it's what I found
+    "return nothing when party String is not recognised" in new AgentSetup {
+      connector.getCheckCases(submissionId, "foobar")(hc, requestWithPrincipal).futureValue shouldBe None
+    }
 
-      when(http.GET[Option[OwnerCheckCasesResponse]](any())(any(), any(), any(), any()))
-        .thenReturn(Future.successful(Some(OwnerCheckCasesResponse(1, 15, 4, 4, List(
-        OwnerCheckCase(
-          checkCaseSubmissionId = "CHK-1ZRPW9Q",
-          checkCaseReference = "CHK100028783",
-          checkCaseStatus = "OPEN",
-          address = "Not Available",
-          uarn = 7538840000L,
-          createdDateTime = LocalDateTime.parse("2018-07-31T08:16:54"),
-          settledDate = None,
-          agent = None,
-
-          submittedBy = "OA Ltd"
-        ),
-          OwnerCheckCase(
-          checkCaseSubmissionId = "CHK-1ZRPW99",
-          checkCaseReference = "CHK100028784",
-          checkCaseStatus = "OPEN",
-          address = "Not Available",
-          uarn = 7538840000L,
-          createdDateTime = LocalDateTime.parse("2018-07-31T08:16:54"),
-          settledDate = None,
-            agent = None,
-
-          submittedBy = "OA Ltd"
-        ),
-          OwnerCheckCase(
-          checkCaseSubmissionId = "CHK-1ZRPW5B",
-          checkCaseReference = "CHK100028650",
-          checkCaseStatus = "OPEN",
-          address = "Not Available",
-          uarn = 7538840000L,
-          createdDateTime = LocalDateTime.parse("2018-07-31T08:16:54"),
-          settledDate = None,
-            agent = None,
-          submittedBy = "OA Ltd"
-        ),
-          OwnerCheckCase(
-          checkCaseSubmissionId = "CHK-1ZRPW39",
-          checkCaseReference = "CHK100028589",
-          checkCaseStatus = "OPEN",
-          address = "Not Available",
-          uarn = 7538840000L,
-          createdDateTime = LocalDateTime.parse("2018-07-31T08:16:54"),
-          settledDate = None,
-            agent = None,
-          submittedBy = "OA Ltd"
-        )
-      )))))
-
+    "get client check cases" in new OwnerSetup {
+      when(mockVoaHttpClient.GET[Option[OwnerCheckCasesResponse]](any())(any(), any(), any(), any()))
+        .thenReturn(Future.successful(Some(OwnerCheckCasesResponse(1, 15, 4, 4, ownerCheckCases))))
 
       connector.getCheckCases(submissionId, "client")(hc, requestWithPrincipal).futureValue.get.filterTotal shouldBe 4
     }
 
-    "handle 403 from get client check cases" in {
-
-      val submissionId = "123"
-
-      when(http.GET[Option[AgentCheckCasesResponse]](any())(any(), any(), any(), any()))
+    "handle 403 from get client check cases" in new OwnerSetup {
+      when(mockVoaHttpClient.GET[Option[AgentCheckCasesResponse]](any())(any(), any(), any(), any()))
         .thenReturn(Future.failed(new UnauthorizedException("unauthorised")))
 
       connector.getCheckCases(submissionId, "client")(hc, requestWithPrincipal).futureValue shouldBe None
     }
 
-    "handle 404 get client check cases" in {
+    "handle 404 get client check cases" in new OwnerSetup {
+      connector.getCheckCases(submissionId, "foobar")(hc, requestWithPrincipal).futureValue shouldBe None
+    }
+  }
 
-      val submissionId = "123"
+  "canChallenge" should {
 
-      when(http.GET[Option[AgentCheckCasesResponse]](any())(any(), any(), any(), any()))
-        .thenReturn(Future.failed(new NotFoundException("unauthorised")))
+    trait CanChallangeSetup extends Setup {
+      when(mockHttpResponse.status).thenReturn(200)
+      when(mockHttpResponse.body).thenReturn("""{"result": true}""")
+      when(mockVoaHttpClient.GET[HttpResponse](any())(any(), any(), any(), any()))
+        .thenReturn(Future.successful(mockHttpResponse))
+    }
 
-      connector.getCheckCases(submissionId, "client")(hc, requestWithPrincipal).futureValue shouldBe None
+    "return a successful CanChallengeResponse" when {
+      "client party calling" in new CanChallangeSetup {
+        inside(connector.canChallenge(submissionId, checkCaseRef, valuationId, "client").futureValue) {
+          case Some(CanChallengeResponse(result, _, _)) => result shouldBe true
+        }
+      }
+      "agent party calling" in new CanChallangeSetup {
+        inside(connector.canChallenge(submissionId, checkCaseRef, valuationId, "agent").futureValue) {
+          case Some(CanChallengeResponse(result, _, _)) => result shouldBe true
+        }
+      }
+
+      "return nothing" when {
+        "call to modernised returns non-200 status code" in new CanChallangeSetup {
+          when(mockHttpResponse.status).thenReturn(400)
+          connector.canChallenge(submissionId, checkCaseRef, valuationId, "client").futureValue shouldBe None
+        }
+      }
+
+      "error with an exception" when {
+        "unrecognised party" in new CanChallangeSetup {
+          inside(Try(connector.canChallenge(submissionId, checkCaseRef, valuationId, "foobar"))) {
+            case Failure(e) =>
+              e shouldBe an[IllegalArgumentException]
+              e.getMessage shouldBe "Unknown party foobar"
+          }
+        }
+      }
     }
   }
 }

@@ -16,18 +16,14 @@
 
 package services
 
-import java.time._
-
 import basespecs.BaseUnitSpec
 import binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import models._
 import models.mdtp.propertylink.myclients.{PropertyLinkWithClient, PropertyLinksWithClients}
-import models.mdtp.propertylink.requests.APIPropertyLinkRequest
 import models.modernised._
 import models.modernised.externalpropertylink.myclients.{PropertyLinkWithClient => ModernisedPropertyLinkWithClient, _}
 import models.modernised.externalpropertylink.myorganisations._
 import models.searchApi.{OwnerAuthResult, OwnerAuthorisation}
-import models.voa.propertylinking.requests.CreatePropertyLink
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import uk.gov.hmrc.http.HttpResponse
@@ -256,27 +252,10 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
 
   "create" should {
     "call create connector method with correct params" in {
-
-      val request = APIPropertyLinkRequest(
-        uarn = 11111,
-        authorisationOwnerOrganisationId = 2222,
-        authorisationOwnerPersonId = 33333,
-        createDatetime = Instant.now(),
-        authorisationMethod = "RATES_BILL",
-        uploadedFiles = Seq(),
-        submissionId = "44444",
-        authorisationOwnerCapacity = "OWNER",
-        startDate = date,
-        endDate = Some(date))
-
-      val propertyLink = CreatePropertyLink(request)
-
-      val httpResponse = HttpResponse(200)
-
       when(mockExternalPropertyLinkApi.createPropertyLink(any())(any(), any()))
         .thenReturn(Future.successful(mockHttpResponse))
 
-      val response = service.create(request).futureValue
+      val response = service.create(apiPropertyLinkRequest).futureValue
 
       response shouldBe mockHttpResponse
 

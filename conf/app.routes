@@ -27,9 +27,9 @@ GET          /groups/agentCode/:agentCode                                       
 POST         /groups                                                                          @controllers.GroupAccountController.create()
 PUT          /groups/:orgId                                                                   @controllers.GroupAccountController.update(orgId: Long)
 
-GET          /address                                                                         @controllers.AddressLookup.find(postcode)
-GET          /address/:id                                                                     @controllers.AddressLookup.get(id: Long)
-POST         /address                                                                         @controllers.AddressLookup.create
+GET          /address                                                                         @controllers.AddressLookupController.find(postcode)
+GET          /address/:id                                                                     @controllers.AddressLookupController.get(id: Long)
+POST         /address                                                                         @controllers.AddressLookupController.create
 
 GET          /submissionId/:prefix                                                            @controllers.SubmissionIdController.get(prefix: String)
 

@@ -39,7 +39,7 @@ private object AppDependencies {
         "org.scalatest" %% "scalatest" % "3.0.6" % scope,
         "org.pegdown" % "pegdown" % "1.6.0" % scope,
         "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
-        "com.github.tomakehurst" % "wiremock" % "2.5.1" % scope,
+        "com.github.tomakehurst" %  "wiremock-jre8" % "2.21.0" % scope,
         "org.mockito" % "mockito-core" % "2.25.0" % scope
       )
     }.test

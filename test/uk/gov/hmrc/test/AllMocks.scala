@@ -24,9 +24,12 @@ import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.ws.{StreamedResponse, WSRequest, WSResponseHeaders}
 import services.{AssessmentService, PropertyLinkingService}
 import uk.gov.hmrc.http.HttpResponse
+import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
+import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import uk.gov.hmrc.voapropertylinking.connectors.mdtp.BusinessRatesAuthConnector
 import uk.gov.hmrc.voapropertylinking.connectors.modernised._
+import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
 
 trait AllMocks extends MockitoSugar {
   me: BeforeAndAfterEach =>
@@ -38,6 +41,8 @@ trait AllMocks extends MockitoSugar {
   val mockAuthorisationSearchApi: AuthorisationSearchApi = mock[AuthorisationSearchApi]
   val mockBusinessRatesAuthConnector: BusinessRatesAuthConnector = mock[BusinessRatesAuthConnector]
   val mockCustomerManagementApi: CustomerManagementApi = mock[CustomerManagementApi]
+  val mockDefaultHttpClient: DefaultHttpClient = mock[DefaultHttpClient]
+  val mockExternalCaseManagementApi: ExternalCaseManagementApi = mock[ExternalCaseManagementApi]
   val mockExternalPropertyLinkApi: ExternalPropertyLinkApi = mock[ExternalPropertyLinkApi]
   val mockExternalValuationManagementApi: ExternalValuationManagementApi = mock[ExternalValuationManagementApi]
   val mockHttpResponse: HttpResponse = mock[HttpResponse]
@@ -46,7 +51,9 @@ trait AllMocks extends MockitoSugar {
   val mockMetricRegistry: MetricRegistry = mock[MetricRegistry]
   val mockMetrics: Metrics = mock[Metrics]
   val mockPropertyLinkingService: PropertyLinkingService = mock[PropertyLinkingService]
+  val mockServicesConfig: ServicesConfig = mock[ServicesConfig]
   val mockStreamedResponse: StreamedResponse = mock[StreamedResponse]
+  val mockVoaHttpClient: VoaHttpClient = mock[VoaHttpClient]
   val mockWSRequest: WSRequest = mock[WSRequest]
   val mockWSResponseHeaders: WSResponseHeaders = mock[WSResponseHeaders]
 
@@ -59,6 +66,8 @@ trait AllMocks extends MockitoSugar {
       mockAuthorisationSearchApi,
       mockBusinessRatesAuthConnector,
       mockCustomerManagementApi,
+      mockDefaultHttpClient,
+      mockExternalCaseManagementApi,
       mockExternalPropertyLinkApi,
       mockExternalValuationManagementApi,
       mockHttpResponse,
@@ -67,7 +76,9 @@ trait AllMocks extends MockitoSugar {
       mockMetricRegistry,
       mockMetrics,
       mockPropertyLinkingService,
+      mockServicesConfig,
       mockStreamedResponse,
+      mockVoaHttpClient,
       mockWSRequest,
       mockWSResponseHeaders
     ).foreach(Mockito.reset(_))

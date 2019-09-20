@@ -16,7 +16,7 @@
 
 package models
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class ClientProperty(
                            ownerOrganisationId: Long,
@@ -33,9 +33,10 @@ case class ClientProperty(
                            address: String)
 
 object ClientProperty {
-  implicit val format = Json.format[ClientProperty]
 
-  def build(prop: PropertiesView, userAccount: GroupAccount): ClientProperty = {
+  implicit val format: OFormat[ClientProperty] = Json.format
+
+  def build(prop: PropertiesView, userAccount: GroupAccount): ClientProperty =
     ClientProperty(
       userAccount.id,
       userAccount.companyName,
@@ -51,5 +52,4 @@ object ClientProperty {
       prop.NDRListValuationHistoryItems.headOption.map(_.address).getOrElse("Address not found")
     )
 
-  }
 }

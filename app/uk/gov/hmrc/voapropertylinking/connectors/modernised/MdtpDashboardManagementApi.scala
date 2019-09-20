@@ -37,10 +37,10 @@ class MdtpDashboardManagementApi @Inject()(
   def get(authorisationId: Long)(implicit hc: HeaderCarrier): Future[Option[PropertiesView]] = {
     val url = baseUrl + s"/mdtp-dashboard-management-api/mdtp_dashboard/view_assessment"
 
-    http.GET[Option[PropertiesView]](url, Seq("listYear" -> s"$listYear", "authorisationId" -> s"$authorisationId")) map {
-      case Some(view) if view.hasValidStatus => Some(view.copy(parties = filterInvalidParties(view.parties)).upperCase)
-      case _ => None
-    }
+    http.GET[Option[PropertiesView]](url, Seq("listYear" -> s"$listYear", "authorisationId" -> s"$authorisationId"))
+      .map(_.collect {
+        case view if view.hasValidStatus => view.copy(parties = filterInvalidParties(view.parties)).upperCase
+      })
   }
 
   def getAssessment(authorisationId: Long)(implicit hc: HeaderCarrier): Future[Option[PropertiesView]] = {

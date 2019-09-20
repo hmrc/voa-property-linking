@@ -64,7 +64,6 @@
     <check level="warning" class="org.scalastyle.scalariform.NoCloneChecker" enabled="true"/>
     <check level="warning" class="org.scalastyle.scalariform.NoFinalizeChecker" enabled="true"/>
     <check level="warning" class="org.scalastyle.scalariform.CovariantEqualsChecker" enabled="true"/>
-    <check enabled="true" class="org.scalastyle.scalariform.LowercasePatternMatchChecker" level="warning"/>
     <check level="warning" class="org.scalastyle.scalariform.StructuralTypeChecker" enabled="true"/>
     <check enabled="true" class="org.scalastyle.scalariform.ProcedureDeclarationChecker" level="warning"/>
     <check level="warning" class="org.scalastyle.file.RegexChecker" enabled="true">
@@ -112,7 +111,7 @@
     <check enabled="true" class="org.scalastyle.scalariform.EmptyClassChecker" level="warning"/>
     <check enabled="true" class="org.scalastyle.scalariform.ForBraceChecker" level="warning"/>
     <check enabled="false" class="org.scalastyle.scalariform.ImportGroupingChecker" level="warning"/>
-    <check enabled="true" class="org.scalastyle.scalariform.MultipleStringLiteralsChecker" level="warning">
+    <check enabled="false" class="org.scalastyle.scalariform.MultipleStringLiteralsChecker" level="warning">
         <parameters>
             <parameter name="allowed">2</parameter>
             <parameter name="ignoreRegex"><![CDATA[^("")|.$]]></parameter>

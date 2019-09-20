@@ -23,18 +23,19 @@ import models.modernised.externalpropertylink.myclients.PropertyLinkWithClient
 import models.modernised.externalpropertylink.myorganisations.PropertyLinkWithAgents
 import play.api.libs.json._
 
-case class PropertiesView(authorisationId: Long,
-                          uarn: Long,
-                          authorisationStatus: String,
-                          startDate: LocalDate,
-                          endDate: Option[LocalDate],
-                          submissionId: String,
-                          address: Option[String],
-                          NDRListValuationHistoryItems: Seq[APIValuationHistory],
-                          parties: Seq[APIParty],
-                          agents: Option[Seq[LegacyParty]]) {
+case class PropertiesView(
+                           authorisationId: Long,
+                           uarn: Long,
+                           authorisationStatus: String,
+                           startDate: LocalDate,
+                           endDate: Option[LocalDate],
+                           submissionId: String,
+                           address: Option[String],
+                           NDRListValuationHistoryItems: Seq[APIValuationHistory],
+                           parties: Seq[APIParty],
+                           agents: Option[Seq[LegacyParty]]) {
 
-  def upperCase = this.copy(NDRListValuationHistoryItems = NDRListValuationHistoryItems.map(_.capatalise))
+  def upperCase: PropertiesView = this.copy(NDRListValuationHistoryItems = NDRListValuationHistoryItems.map(_.capatalise))
 
   def hasValidStatus: Boolean = {
     !Seq("DECLINED", "REVOKED", "MORE_EVIDENCE_REQUIRED").contains(authorisationStatus.toUpperCase)
@@ -46,22 +47,24 @@ object PropertiesView {
   implicit val format: Format[PropertiesView] = Json.format[PropertiesView]
 
   def apply(propertyLink: PropertyLinkWithClient, history: Seq[ValuationHistory])
-  :PropertiesView =
-    PropertiesView(authorisationId = propertyLink.authorisationId,
+  : PropertiesView =
+    PropertiesView(
+      authorisationId = propertyLink.authorisationId,
       uarn = propertyLink.uarn,
       address = Some(propertyLink.address),
       authorisationStatus = propertyLink.status.toString,
       startDate = propertyLink.startDate,
       endDate = propertyLink.endDate,
       submissionId = propertyLink.submissionId,
-      NDRListValuationHistoryItems = history.map(history => APIValuationHistory(history)).toList,
+      NDRListValuationHistoryItems = history.map(APIValuationHistory(_)).toList,
       parties = Seq(),
       agents = Some(Seq()))
 
 
   def apply(propertyLink: PropertyLinkWithAgents, history: Seq[ValuationHistory])
-  :PropertiesView =
-    PropertiesView(authorisationId = propertyLink.authorisationId,
+  : PropertiesView =
+    PropertiesView(
+      authorisationId = propertyLink.authorisationId,
       uarn = propertyLink.uarn,
       address = Some(propertyLink.address),
       authorisationStatus = propertyLink.status.toString,

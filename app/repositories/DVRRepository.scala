@@ -23,7 +23,6 @@ import models.voa.valuation.dvr.DetailedValuationRequest
 import play.api.Logger
 import play.api.libs.json._
 import play.modules.reactivemongo.ReactiveMongoComponent
-import reactivemongo.api.DB
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.{BSONDateTime, BSONDocument}
 import reactivemongo.core.errors.DatabaseException
@@ -90,10 +89,8 @@ case class DVRRecord(
                     )
 
 object DVRRecord {
-
   import reactivemongo.play.json.BSONFormats.BSONDateTimeFormat
-
-  val mongoFormat = Json.format[DVRRecord]
+  val mongoFormat: OFormat[DVRRecord] = Json.format
 }
 
 @ImplementedBy(classOf[DVRRepository])

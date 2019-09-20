@@ -112,7 +112,7 @@ class PropertyLinkingController @Inject()(
 
   // $COVERAGE-OFF$
   /*
-  To Remove this method once external endpoints have catched up.
+  TODO Remove this method once external endpoints have caught up.
    */
   def getMyOrganisationPropertyLinksWithAppointable(
                                                      searchParams: GetMyOrganisationsPropertyLinksParametersWithAgentFiltering,
@@ -176,16 +176,17 @@ class PropertyLinkingController @Inject()(
       .get(authorisationId)
       .flatMap {
         case Some(authorisation) if authorisedFor(authorisation, agentOrgId) =>
-          toClientProperty(clientOrgId, authorisation).fold(NotFound("organisation not found")){ p => Ok(Json.toJson(p)) }
-        case _ => Future.successful(NotFound("property link not found"))
+          toClientProperty(clientOrgId, authorisation).fold(NotFound("organisation not found"))(p => Ok(Json.toJson(p)))
+        case _ =>
+          Future.successful(NotFound("property link not found"))
       }
   }
 
   private def authorisedFor(authorisation: PropertiesView, agentOrgId: Long): Boolean =
     authorisation.parties.exists(_.authorisedPartyOrganisationId == agentOrgId)
 
-  private def toClientProperty(clientOrgId: Long, authorisation: PropertiesView)(implicit hc: HeaderCarrier): OptionT[Future, ClientProperty] = {
+  private def toClientProperty(clientOrgId: Long, authorisation: PropertiesView)(implicit hc: HeaderCarrier): OptionT[Future, ClientProperty] =
     OptionT(customerManagementApi.getDetailedGroupAccount(clientOrgId)).map(ClientProperty.build(authorisation, _))
-  }
+
 }
 

@@ -16,44 +16,33 @@
 
 package binders.propertylinks
 
-import binders.validation.ValidationUtils
+import binders.validation.ValidatingBinder
 import binders.{Params, ValidationResult}
-import play.api.mvc.QueryStringBindable
-import uk.gov.hmrc.voapropertylinking.utils.Cats
-import uk.gov.hmrc.voapropertylinking.utils.QueryParamUtils.toQueryString
 
 case class GetMyClientsPropertyLinkParameters(
-                                                     address: Option[String] = None,
-                                                     baref: Option[String] = None,
-                                                     client: Option[String] = None,
-                                                     status: Option[String] = None,
-                                                     sortField: Option[String] = None,
-                                                     sortOrder: Option[String] = None,
-                                                     representationStatus: Option[String] = None
-                                                   )
+                                               address: Option[String] = None,
+                                               baref: Option[String] = None,
+                                               client: Option[String] = None,
+                                               status: Option[String] = None,
+                                               sortField: Option[String] = None,
+                                               sortOrder: Option[String] = None,
+                                               representationStatus: Option[String] = None
+                                             )
 
-object GetMyClientsPropertyLinkParameters extends ValidationUtils {
+object GetMyClientsPropertyLinkParameters extends ValidatingBinder[GetMyClientsPropertyLinkParameters] {
 
-  implicit object Binder extends QueryStringBindable[GetMyClientsPropertyLinkParameters] with Cats {
-
-    override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, GetMyClientsPropertyLinkParameters]] =
-
-      Some(validate(params).leftMap(_.map(_.show).toList.mkString(", ")).toEither)
-
-    override def unbind(key: String, value: GetMyClientsPropertyLinkParameters): String = toQueryString(value)
-
-    private def validate(params: Params): ValidationResult[GetMyClientsPropertyLinkParameters] =
-      (
-        validateString("address", params),
-        validateString("baref", params),
-        validateString("client", params),
-        validateString("status", params),
-        validateString("sortField", params),
-        validateString("sortOrder", params),
-        validateString("representationStatus", params)
+  override def validate(params: Params): ValidationResult[GetMyClientsPropertyLinkParameters] =
+    (
+      validateString("address", params),
+      validateString("baref", params),
+      validateString("client", params),
+      validateString("status", params),
+      validateString("sortField", params),
+      validateString("sortOrder", params),
+      validateString("representationStatus", params)
       ).mapN(GetMyClientsPropertyLinkParameters.apply)
 
-    def validateString(implicit key: String, params: Params): ValidationResult[Option[String]] =
-      readOption(key, params)
-  }
+  def validateString(implicit key: String, params: Params): ValidationResult[Option[String]] =
+    readOption(key, params)
+
 }

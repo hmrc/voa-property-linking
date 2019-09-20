@@ -16,22 +16,26 @@
 
 package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
+import java.nio.file.Files.readAllBytes
+import java.nio.file.Paths
 import java.time.LocalDateTime
 
 import basespecs.WireMockSpec
 import com.github.tomakehurst.wiremock.client.WireMock._
+import models.modernised.ValuationHistoryResponse
 import models.voa.valuation.dvr.StreamedDocument
 import models.voa.valuation.dvr.documents.{Document, DocumentSummary, DvrDocumentFiles}
-import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.{any, eq => mEq}
 import org.mockito.Mockito.when
 import play.api.http.ContentTypes
 import play.api.libs.ws.WSClient
 import uk.gov.hmrc.http.NotFoundException
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.test.WithFakeApplication
-import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
 
 import scala.concurrent.Future
+
+// TODO move this to IT Specs
 
 class ExternalValuationManagementApiSpec extends WireMockSpec with ContentTypes with WithFakeApplication {
 
@@ -39,14 +43,29 @@ class ExternalValuationManagementApiSpec extends WireMockSpec with ContentTypes 
 
   val wsClient = fakeApplication.injector.instanceOf[WSClient]
   val config = fakeApplication.injector.instanceOf[ServicesConfig]
-  val http = mock[VoaHttpClient]
 
   val voaApiUrl = "http://voa-modernised-api/external-valuation-management-api"
   val valuationHistoryUrl = s"$voaApiUrl/properties/{uarn}/valuations"
 
+  trait Setup {
+    val uarn: Long = 123456L
+    val plSubmissionId: String = "PL12AB34"
+    val valuationHistoryResponse: ValuationHistoryResponse = ValuationHistoryResponse(Seq.empty)
+  }
 
-  val connector = new ExternalValuationManagementApi(wsClient, http, valuationHistoryUrl, config) {
+  val connector = new ExternalValuationManagementApi(wsClient, mockVoaHttpClient, valuationHistoryUrl, config) {
     override lazy val baseURL: String = mockServerUrl
+  }
+
+  "getting a valuation history" should {
+    "return the history from modernised" when {
+      "there is one for the specified UARN" in new Setup {
+        when(mockVoaHttpClient.GET[Option[ValuationHistoryResponse]](any(), any())(any(), any(), any(), any()))
+          .thenReturn(Future.successful(Some(valuationHistoryResponse)))
+
+        connector.getValuationHistory(uarn, plSubmissionId).futureValue shouldBe Some(valuationHistoryResponse)
+      }
+    }
   }
 
   "get dvr documents" should {
@@ -57,7 +76,7 @@ class ExternalValuationManagementApiSpec extends WireMockSpec with ContentTypes 
 
       val now = LocalDateTime.now()
 
-      when(http.GET[DvrDocumentFiles](any(), any())(any(), any(), any(), any()))
+      when(mockVoaHttpClient.GET[DvrDocumentFiles](any(), any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(DvrDocumentFiles(
           checkForm = Document(DocumentSummary("1", "Check Document", now)),
           detailedValuation = Document(DocumentSummary("2", "Detailed Valuation Document", now))
@@ -75,7 +94,7 @@ class ExternalValuationManagementApiSpec extends WireMockSpec with ContentTypes 
       val uarn = 2L
       val propertyLinkId = "PL-123456789"
 
-      when(http.GET[DvrDocumentFiles](any(), any())(any(), any(), any(), any()))
+      when(mockVoaHttpClient.GET[DvrDocumentFiles](any(), any())(any(), any(), any(), any()))
         .thenReturn(Future.failed(new NotFoundException("not found dvr documents")))
 
       val result = connector.getDvrDocuments(valuationId, uarn, propertyLinkId).futureValue
@@ -92,13 +111,7 @@ class ExternalValuationManagementApiSpec extends WireMockSpec with ContentTypes 
 
       val dvrUrl = s"/external-valuation-management-api/properties/$uarn/valuations/$valuationId/files/$fileRef?propertyLinkId=$propertyLinkId"
 
-      stubFor(get(urlEqualTo(dvrUrl))
-        .willReturn(aResponse
-          .withStatus(200)
-          .withHeader("Content-Type", JSON)
-          .withBody(getClass.getResource("/document.pdf").getFile)
-        )
-      )
+      stubFor(get(urlEqualTo(dvrUrl)).willReturn(ok(new String(readAllBytes(Paths.get(getClass.getResource("/document.pdf").toURI))))))
 
       val result = connector.getDvrDocument(valuationId, uarn, propertyLinkId, fileRef).futureValue
       result shouldBe a[StreamedDocument]

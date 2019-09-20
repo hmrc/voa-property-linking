@@ -16,10 +16,10 @@
 
 package models
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class APIAddressLookupResult(addressDetails: Seq[DetailedAddress])
 
 object APIAddressLookupResult {
-  implicit val format = Json.format[APIAddressLookupResult]
+  implicit val format: OFormat[APIAddressLookupResult] = Json.format
 }

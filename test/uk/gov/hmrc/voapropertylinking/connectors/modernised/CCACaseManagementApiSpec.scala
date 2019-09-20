@@ -29,7 +29,7 @@ import scala.concurrent.Future
 class CCACaseManagementApiSpec extends BaseUnitSpec {
 
   val http = mock[DefaultHttpClient]
-  val connector = new CCACaseManagementApi(http, mock[ServicesConfig]) {
+  val connector = new CCACaseManagementApi(http, mockServicesConfig) {
     override lazy val baseURL: String = "http://some-url"
   }
 

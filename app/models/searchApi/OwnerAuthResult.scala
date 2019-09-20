@@ -17,21 +17,22 @@
 package models.searchApi
 
 import models.modernised.externalpropertylink.myorganisations.PropertyLinksWithAgents
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class OwnerAuthResult(
-                      start: Int,
-                      size: Int,
-                      filterTotal: Int,
-                      total: Int,
-                      authorisations: Seq[OwnerAuthorisation]
-                    ){
+                            start: Int,
+                            size: Int,
+                            filterTotal: Int,
+                            total: Int,
+                            authorisations: Seq[OwnerAuthorisation]
+                          ) {
 
-  def uppercase = this.copy(authorisations = authorisations.map(_.capatilise()))
+  def uppercase: OwnerAuthResult =
+    this.copy(authorisations = authorisations.map(_.capatilise()))
 }
 
 object OwnerAuthResult {
-  implicit val ownerAuthResult = Json.format[OwnerAuthResult]
+  implicit val ownerAuthResult: OFormat[OwnerAuthResult] = Json.format
 
   def apply(propertLinks: PropertyLinksWithAgents)
   : OwnerAuthResult = OwnerAuthResult(start = propertLinks.start,
