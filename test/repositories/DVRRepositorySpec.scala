@@ -19,6 +19,7 @@ package repositories
 
 import basespecs.BaseUnitSpec
 import models.voa.valuation.dvr.DetailedValuationRequest
+import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.indexes.Index
@@ -27,14 +28,13 @@ import uk.gov.hmrc.play.config.ServicesConfig
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
+// TODO move this to IT Specs
 class DVRRepositorySpec
   extends BaseUnitSpec
     with MongoSpecSupport {
 
-  val app = new GuiceApplicationBuilder()
-    .configure(
-      "mongodb.uri" -> s"mongodb://127.0.0.1:27017/test-${this.getClass.getSimpleName}"
-    ).build()
+  lazy val app: Application = new GuiceApplicationBuilder()
+    .configure("mongodb.uri" -> s"mongodb://127.0.0.1:27017/$databaseName").build()
 
   val repository = new DVRRepository(app.injector.instanceOf[ReactiveMongoComponent], "test", app.injector.instanceOf[ServicesConfig])
 

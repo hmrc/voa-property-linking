@@ -40,8 +40,8 @@ trait MicroService {
     import scoverage.ScoverageKeys
     Seq(
       ScoverageKeys.coverageExcludedPackages := "<empty>;Reverse.*;views.*;uk.gov.hmrc.voapropertylinking.config.*;.*\\.temp\\..*;.*\\.test\\..*;poc.view.*;poc.uk.gov.hmrc.voapropertylinking.config.*;.*(AuthService|BuildInfo|Routes).*",
-      ScoverageKeys.coverageMinimum := 50,
-      ScoverageKeys.coverageFailOnMinimum := false,
+      ScoverageKeys.coverageMinimum := 80,
+      ScoverageKeys.coverageFailOnMinimum := true,
       ScoverageKeys.coverageHighlighting := true
     )
   }
