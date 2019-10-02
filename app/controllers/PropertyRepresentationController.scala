@@ -18,6 +18,7 @@ package controllers
 
 import javax.inject.Inject
 import models._
+import models.mdtp.propertylink.projections.OwnerAuthResult
 import play.api.Logger
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent}
@@ -111,7 +112,7 @@ class PropertyRepresentationController @Inject()(
             address = address,
             agent = agent
           )
-            .map(x => Ok(Json.toJson(x)))
+            .map(x => Ok(Json.toJson(OwnerAuthResult(x))))
         case None =>
           Logger.error(s"Agent details lookup failed for agentCode: $agentCode")
           Future.successful(NotFound)

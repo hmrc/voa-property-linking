@@ -21,6 +21,7 @@ import binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisat
 import cats.data.OptionT
 import javax.inject.{Inject, Named}
 import models._
+import models.mdtp.propertylink.projections.OwnerAuthResult
 import models.mdtp.propertylink.requests.{APIPropertyLinkRequest, PropertyLinkRequest}
 import play.api.Logger
 import play.api.libs.json.{JsValue, Json}
@@ -88,7 +89,7 @@ class PropertyLinkingController @Inject()(
             searchParams.baref,
             searchParams.agent
           )
-            .map(response => Ok(Json.toJson(response))))
+            .map(response => Ok(Json.toJson(OwnerAuthResult(response)))))
     } else {
       propertyLinkService
         .getMyOrganisationsPropertyLinks(searchParams, paginationParams)
@@ -132,7 +133,7 @@ class PropertyLinkingController @Inject()(
           searchParams.agent,
           searchParams.agentAppointed
         ).map { response =>
-          Ok(Json.toJson(response))
+          Ok(Json.toJson(OwnerAuthResult(response)))
         }
       case _ =>
         authorisationSearchApi.appointableToAgent(
@@ -146,7 +147,7 @@ class PropertyLinkingController @Inject()(
           searchParams.address,
           searchParams.agent
         ).map { response =>
-          Ok(Json.toJson(response))
+          Ok(Json.toJson(OwnerAuthResult(response)))
         }
     }
   }

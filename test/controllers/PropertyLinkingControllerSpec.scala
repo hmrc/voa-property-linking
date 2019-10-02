@@ -22,9 +22,10 @@ import basespecs.BaseControllerSpec
 import binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import cats.data._
 import models._
+import models.searchApi.{ OwnerAuthResult => ModernisedOwnerAuthResult }
 import models.mdtp.propertylink.myclients.PropertyLinksWithClients
+import models.mdtp.propertylink.projections.{OwnerAuthResult, OwnerAuthorisation}
 import models.mdtp.propertylink.requests.PropertyLinkRequest
-import models.searchApi.{OwnerAuthResult, OwnerAuthorisation}
 import org.mockito.ArgumentMatchers.{any, eq => mEq}
 import org.mockito.Mockito._
 import play.api.libs.json.Json
@@ -75,8 +76,8 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec {
       authorisedPartyOrganisationId = agentOrgId,
       permissions = Seq(Permissions(
         id = 24680,
-        checkPermission = "APPROVED",
-        challengePermission = "APPROVED",
+        checkPermission = AgentPermission.StartAndContinue,
+        challengePermission = AgentPermission.StartAndContinue,
         endDate = None)))),
     agents = Some(Nil))
 
@@ -91,6 +92,7 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec {
     agents = Nil)
 
   val propertyLinksWithClients = PropertyLinksWithClients(1, 1, 1, 1, Seq())
+  val modernisedOwnerAuthResult = ModernisedOwnerAuthResult(1, 1, 1, 1, Seq())
   val ownerAuthResult = OwnerAuthResult(1, 1, 1, 1, Seq())
 
   val assessments = Assessments(
@@ -191,7 +193,7 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec {
       "organisationId is NOT provided" in {
         val orgId: Long = 123L
         when(mockAuthorisationSearchApi.searchAndSort(mEq(orgId), any(), mEq(Some("AGENT")), any(), any(), any(), any(), any(), any())(any()))
-          .thenReturn(Future.successful(ownerAuthResult))
+          .thenReturn(Future.successful(modernisedOwnerAuthResult))
         val res = testController.getMyOrganisationsPropertyLinks(GetMyOrganisationPropertyLinksParameters(sortField = Some("AGENT")), None, Some(orgId))(FakeRequest())
 
         status(res) shouldBe OK
@@ -266,7 +268,7 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec {
       submissionId = "PL12345",
       address = None,
       NDRListValuationHistoryItems = Seq.empty[APIValuationHistory],
-      parties = Seq(APIParty(1L, "APPROVED", agentOrgId, Seq(Permissions(1L, "START", "START", None)))),
+      parties = Seq(APIParty(1L, "APPROVED", agentOrgId, Seq(Permissions(1L, AgentPermission.StartAndContinue, AgentPermission.StartAndContinue, None)))),
       agents = None
     )
 

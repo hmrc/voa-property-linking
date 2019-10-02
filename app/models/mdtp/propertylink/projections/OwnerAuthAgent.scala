@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package models.searchApi
+package models.mdtp.propertylink.projections
 
+import models.searchApi.{ OwnerAuthAgent => ModernisedOwnerAuthAgent }
 import models.AgentPermission.AgentPermission
 import play.api.libs.json.Json
 
@@ -26,9 +27,22 @@ case class OwnerAuthAgent(
                            status: String,
                            checkPermission: AgentPermission,
                            challengePermission: AgentPermission,
-                           representativeCode: Long
+                           agentCode: Long
                          )
 
 object OwnerAuthAgent {
-  implicit val ownerAuthAgent = Json.format[OwnerAuthAgent]
+  implicit val format = Json.format[OwnerAuthAgent]
+
+  def apply(agent: ModernisedOwnerAuthAgent): OwnerAuthAgent = {
+    OwnerAuthAgent(
+      agent.authorisedPartyId,
+      agent.organisationId,
+      agent.organisationName,
+      agent.status,
+      agent.checkPermission,
+      agent.challengePermission,
+      agent.representativeCode
+    )
+  }
 }
+

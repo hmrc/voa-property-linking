@@ -16,12 +16,13 @@
 
 package models
 
+import models.AgentPermission.AgentPermission
 import play.api.libs.json.Json
 
 case class Permissions(
                         id: Long,
-                        checkPermission: String,
-                        challengePermission:String,
+                        checkPermission: AgentPermission,
+                        challengePermission: AgentPermission,
                         endDate: Option[String]
                       )
 object Permissions{
@@ -43,8 +44,8 @@ case class LegacyParty (
                    agentCode: Long,
                    organisationName: String,
                    organisationId: Long,
-                   checkPermission: String,
-                   challengePermission: String
+                   checkPermission: AgentPermission,
+                   challengePermission: AgentPermission
                  )
 
 object LegacyParty {

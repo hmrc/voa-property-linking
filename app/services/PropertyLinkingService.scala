@@ -21,8 +21,8 @@ import cats.data.OptionT
 import javax.inject.Inject
 import models._
 import models.mdtp.propertylink.myclients.PropertyLinksWithClients
+import models.mdtp.propertylink.projections.OwnerAuthResult
 import models.mdtp.propertylink.requests.APIPropertyLinkRequest
-import models.searchApi.OwnerAuthResult
 import models.voa.propertylinking.requests.CreatePropertyLink
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
