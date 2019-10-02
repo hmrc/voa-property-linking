@@ -16,6 +16,7 @@
 
 package models.modernised.externalpropertylink.myorganisations
 
+import models.AgentPermission.AgentPermission
 import play.api.libs.json.{Json, OFormat}
 
 case class AgentDetails(
@@ -25,8 +26,8 @@ case class AgentDetails(
                          status: String,
                          representationSubmissionId: String,
                          representativeCode: Long,
-                         checkPermission: String,
-                         challengePermission: String)
+                         checkPermission: AgentPermission,
+                         challengePermission: AgentPermission)
 
 object AgentDetails {
   implicit val format: OFormat[AgentDetails] = Json.format

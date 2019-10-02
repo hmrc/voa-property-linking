@@ -17,7 +17,7 @@
 package controllers
 
 import basespecs.BaseControllerSpec
-import models.searchApi.OwnerAuthResult
+import models.searchApi.{ OwnerAuthResult => ModernisedOwnerAuthResult }
 import models.{APIRepresentationResponse, GroupAccount, PaginationParams, PropertyRepresentations}
 import org.mockito.ArgumentMatchers.{any, eq => mEq}
 import org.mockito.Mockito._
@@ -54,7 +54,7 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
       isAgent = false,
       agentCode = 234
     )
-    protected val ownerAuthResult = OwnerAuthResult(1, 1, 1, 1, Seq())
+    protected val ownerAuthResult = ModernisedOwnerAuthResult(1, 1, 1, 1, Seq())
 
   }
 

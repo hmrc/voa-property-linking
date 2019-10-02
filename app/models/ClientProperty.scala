@@ -16,6 +16,7 @@
 
 package models
 
+import models.AgentPermission.AgentPermission
 import play.api.libs.json.{Json, OFormat}
 
 case class ClientProperty(
@@ -28,8 +29,8 @@ case class ClientProperty(
                            authorisationStatus: Boolean,
                            authorisedPartyStatus: String,
                            permissionId: Long,
-                           checkPermission: String,
-                           challengePermission: String,
+                           checkPermission: AgentPermission,
+                           challengePermission: AgentPermission,
                            address: String)
 
 object ClientProperty {

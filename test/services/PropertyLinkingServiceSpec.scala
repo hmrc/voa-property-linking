@@ -20,10 +20,10 @@ import basespecs.BaseUnitSpec
 import binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import models._
 import models.mdtp.propertylink.myclients.{PropertyLinkWithClient, PropertyLinksWithClients}
+import models.mdtp.propertylink.projections.{OwnerAuthResult, OwnerAuthorisation}
 import models.modernised._
 import models.modernised.externalpropertylink.myclients.{PropertyLinkWithClient => ModernisedPropertyLinkWithClient, _}
 import models.modernised.externalpropertylink.myorganisations._
-import models.searchApi.{OwnerAuthResult, OwnerAuthorisation}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import uk.gov.hmrc.http.HttpResponse
@@ -63,16 +63,16 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
       authorisedPartyOrganisationId = 123456,
       permissions = Seq(Permissions(
         id = 24680,
-        checkPermission = "START_AND_CONTINUE",
-        challengePermission = "NOT_PERMITTED",
+        checkPermission = AgentPermission.StartAndContinue,
+        challengePermission = AgentPermission.StartAndContinue,
         endDate = None)))),
     agents = Some(Seq(LegacyParty(
       authorisedPartyId = 24680,
       agentCode = 1111,
       organisationName = "org name",
       organisationId = 123456,
-      checkPermission = "START_AND_CONTINUE",
-      challengePermission = "NOT_PERMITTED"
+      checkPermission = AgentPermission.StartAndContinue,
+      challengePermission = AgentPermission.StartAndContinue
     ))))
 
   val clientValidPropertiesView = PropertiesView(
@@ -115,8 +115,8 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
         status = "APPROVED",
         representationSubmissionId = "",
         representativeCode = 1111,
-        checkPermission = "START_AND_CONTINUE",
-        challengePermission = "NOT_PERMITTED"))
+        checkPermission = AgentPermission.StartAndContinue,
+        challengePermission = AgentPermission.StartAndContinue))
   )
 
   val summaryPropertyLinkWithAgents: SummaryPropertyLinkWithAgents = SummaryPropertyLinkWithAgents(
@@ -136,8 +136,8 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
         status = "APPROVED",
         representationSubmissionId = "",
         representativeCode = 1111,
-        checkPermission = "START_AND_CONTINUE",
-        challengePermission = "NOT_PERMITTED"))
+        checkPermission = AgentPermission.StartAndContinue,
+        challengePermission = AgentPermission.StartAndContinue))
   )
   val ownerPropertyLink = OwnerPropertyLink(propertyLinkWithAgents)
 

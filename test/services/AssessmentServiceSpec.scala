@@ -20,7 +20,7 @@ import java.time.LocalDate
 
 import basespecs.BaseUnitSpec
 import cats.data.OptionT
-import models.Assessments
+import models.{AgentPermission, Assessments}
 import models.modernised._
 import models.modernised.externalpropertylink.myclients.{ClientDetails, ClientPropertyLink, PropertyLinkWithClient}
 import models.modernised.externalpropertylink.myorganisations._
@@ -57,8 +57,8 @@ class AssessmentServiceSpec extends BaseUnitSpec {
           status = "APPROVED",
           representationSubmissionId = "",
           representativeCode = 1111,
-          checkPermission = "START_AND_CONTINUE",
-          challengePermission = "NOT_PERMITTED")),
+          checkPermission = AgentPermission.StartAndContinue,
+          challengePermission = AgentPermission.StartAndContinue)),
       capacity = "OWNER"
     )
 

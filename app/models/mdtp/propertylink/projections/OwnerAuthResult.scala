@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-package models.searchApi
+package models.mdtp.propertylink.projections
 
+import models.searchApi.{ OwnerAuthResult => ModernisedOwnerAuthResult }
+import models.modernised.externalpropertylink.myorganisations.PropertyLinksWithAgents
 import play.api.libs.json.{Json, OFormat}
 
 case class OwnerAuthResult(
@@ -32,5 +34,21 @@ case class OwnerAuthResult(
 
 object OwnerAuthResult {
   implicit val ownerAuthResult: OFormat[OwnerAuthResult] = Json.format
+
+  def apply(authResult: ModernisedOwnerAuthResult): OwnerAuthResult = {
+    OwnerAuthResult(
+      start = authResult.start,
+      size = authResult.size,
+      filterTotal = authResult.filterTotal,
+      total = authResult.total,
+      authorisations = authResult.authorisations.map(OwnerAuthorisation.apply)
+    )
+  }
+  def apply(propertLinks: PropertyLinksWithAgents)
+  : OwnerAuthResult = OwnerAuthResult(start = propertLinks.start,
+    size = propertLinks.size,
+    filterTotal = propertLinks.filterTotal,
+    total = propertLinks.total,
+    authorisations = propertLinks.authorisations.map(auth => OwnerAuthorisation(auth)))
 
 }

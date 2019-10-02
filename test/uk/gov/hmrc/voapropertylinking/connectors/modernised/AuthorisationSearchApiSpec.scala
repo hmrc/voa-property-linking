@@ -17,7 +17,9 @@
 package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
 import basespecs.BaseUnitSpec
+import models.mdtp.propertylink.projections.OwnerAuthResult
 import models.searchApi._
+import models.searchApi.{ OwnerAuthResult => ModernisedAuthResult }
 import models.{PaginationParams, PropertyRepresentation, PropertyRepresentations}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
@@ -36,16 +38,16 @@ class AuthorisationSearchApiSpec extends BaseUnitSpec {
     val paginationParams: PaginationParams =
       PaginationParams(startPoint = 1, pageSize = 10, requestTotalRowCount = true)
     val agentId: Long = 2L
-    val ownerAuthResult: OwnerAuthResult = OwnerAuthResult(1, 1, 1, 1, Seq())
+    val ownerAuthResult: ModernisedAuthResult = ModernisedAuthResult(1, 1, 1, 1, Seq())
   }
 
   "searching and sorting agents" should {
     "return what modernised returned" when {
       "called with minimal query parameters" in new Setup {
-        when(mockDefaultHttpClient.GET[OwnerAuthResult](any())(any(), any(), any()))
+        when(mockDefaultHttpClient.GET[ModernisedAuthResult](any())(any(), any(), any()))
           .thenReturn(Future.successful(ownerAuthResult))
 
-        val res: OwnerAuthResult = connector.searchAndSort(orgId, paginationParams).futureValue
+        val res: ModernisedAuthResult = connector.searchAndSort(orgId, paginationParams).futureValue
 
         res shouldBe ownerAuthResult
       }
@@ -55,10 +57,10 @@ class AuthorisationSearchApiSpec extends BaseUnitSpec {
   "appointableToAgent" should {
     "return what modernised returned" when {
       "called with minimal query parameters" in new Setup {
-        when(mockDefaultHttpClient.GET[OwnerAuthResult](any())(any(), any(), any()))
+        when(mockDefaultHttpClient.GET[ModernisedAuthResult](any())(any(), any(), any()))
           .thenReturn(Future.successful(ownerAuthResult))
 
-        val res: OwnerAuthResult = connector.appointableToAgent(
+        val res: ModernisedAuthResult = connector.appointableToAgent(
           ownerId = orgId,
           agentId = agentId,
           checkPermission = None,
@@ -131,6 +133,4 @@ class AuthorisationSearchApiSpec extends BaseUnitSpec {
       result shouldBe validPropertyRepresentations
     }
   }
-
-
 }
