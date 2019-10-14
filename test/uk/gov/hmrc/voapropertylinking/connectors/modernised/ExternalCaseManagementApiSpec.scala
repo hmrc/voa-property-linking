@@ -16,14 +16,13 @@
 
 package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
-import java.time.LocalDateTime
-
 import basespecs.BaseUnitSpec
 import models._
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
-import uk.gov.hmrc.http.{HttpResponse, UnauthorizedException}
-import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.http.HttpResponse
+import uk.gov.hmrc.voapropertylinking.models.modernised.casemanagement.check.myclients.{CheckCaseWithClient, CheckCasesWithClient}
+import uk.gov.hmrc.voapropertylinking.models.modernised.casemanagement.check.myorganisation.{CheckCaseWithAgent, CheckCasesWithAgent}
 
 import scala.concurrent.Future
 import scala.util.{Failure, Try}
@@ -41,85 +40,41 @@ class ExternalCaseManagementApiSpec extends BaseUnitSpec {
     val valuationId: Long = 123456L
   }
 
-  trait AgentSetup extends Setup {
-    val agentCheckCases = List(
-      AgentCheckCase(
-        checkCaseSubmissionId = "CHK-1ZRPW9Q",
-        checkCaseReference = "CHK100028783",
-        checkCaseStatus = "OPEN",
-        address = "Not Available",
-        uarn = 7538840000L,
-        createdDateTime = LocalDateTime.parse("2018-07-31T08:16:54"),
-        settledDate = None,
-        client = Client(
-          organisationId = 123,
-          organisationName = "ABC"
-        ),
-        submittedBy = "OA Ltd"
-      )
-    )
+  "get my organisation check cases" when {
+    "check cases exist under a property link" should {
+      "return the my organisation check case response" in new Setup {
+        val mockCheckCase = mock[CheckCaseWithAgent]
+
+        when(mockVoaHttpClient.GET[CheckCasesWithAgent](any(), any())(any(), any(), any(), any()))
+          .thenReturn(Future.successful(CheckCasesWithAgent(1, 15, 4, 4, List(mockCheckCase))))
+
+        val result: CheckCasesWithAgent = connector.getMyOrganisationCheckCases(submissionId)(hc, requestWithPrincipal).futureValue
+
+        result.start shouldBe 1
+        result.size shouldBe 15
+        result.total shouldBe 4
+        result.filterTotal shouldBe 4
+        result.checkCases.loneElement shouldBe mockCheckCase
+      }
+    }
   }
 
-  trait OwnerSetup extends Setup {
-    val ownerCheckCases = List(
-      OwnerCheckCase(
-        checkCaseSubmissionId = "CHK-1ZRPW9Q",
-        checkCaseReference = "CHK100028783",
-        checkCaseStatus = "OPEN",
-        address = "Not Available",
-        uarn = 7538840000L,
-        createdDateTime = LocalDateTime.parse("2018-07-31T08:16:54"),
-        settledDate = None,
-        agent = None,
-        submittedBy = "OA Ltd"
-      )
-    )
-  }
+  "get my clients check cases" when {
+    "check cases exist under a property link" should {
+      "return the my clients check case response" in new Setup {
+        val mockCheckCase = mock[CheckCaseWithClient]
 
-  "ExternalCaseManagementApi get check cases" should {
-    "get agents check cases" in new AgentSetup {
-      when(mockVoaHttpClient.GET[Option[AgentCheckCasesResponse]](any())(any(), any(), any(), any()))
-        .thenReturn(Future.successful(Some(AgentCheckCasesResponse(1, 15, 4, 4, agentCheckCases))))
+        when(mockVoaHttpClient.GET[CheckCasesWithClient](any(), any())(any(), any(), any(), any()))
+          .thenReturn(Future.successful(CheckCasesWithClient(1, 15, 4, 4, List(mockCheckCase))))
 
-      connector.getCheckCases(submissionId, "agent")(hc, requestWithPrincipal).futureValue.get.filterTotal shouldBe 4
-    }
+        val result: CheckCasesWithClient = connector.getMyClientsCheckCases(submissionId)(hc, requestWithPrincipal).futureValue
 
-    "handle 403 from get agents check cases" in new AgentSetup {
-      when(mockVoaHttpClient.GET[Option[AgentCheckCasesResponse]](any())(any(), any(), any(), any()))
-        .thenReturn(Future.failed(new UnauthorizedException("unauthorised")))
-
-      connector.getCheckCases(submissionId, "agent")(hc, requestWithPrincipal).futureValue shouldBe None
-    }
-
-    "handle 404 get agent check cases" in new AgentSetup {
-      when(mockVoaHttpClient.GET[Option[AgentCheckCasesResponse]](any())(any(), any(), any(), any()))
-        .thenReturn(Future.successful(None))
-
-      connector.getCheckCases(submissionId, "agent")(hc, requestWithPrincipal).futureValue shouldBe None
-    }
-
-
-    //this is really not a great solution but it's what I found
-    "return nothing when party String is not recognised" in new AgentSetup {
-      connector.getCheckCases(submissionId, "foobar")(hc, requestWithPrincipal).futureValue shouldBe None
-    }
-
-    "get client check cases" in new OwnerSetup {
-      when(mockVoaHttpClient.GET[Option[OwnerCheckCasesResponse]](any())(any(), any(), any(), any()))
-        .thenReturn(Future.successful(Some(OwnerCheckCasesResponse(1, 15, 4, 4, ownerCheckCases))))
-
-      connector.getCheckCases(submissionId, "client")(hc, requestWithPrincipal).futureValue.get.filterTotal shouldBe 4
-    }
-
-    "handle 403 from get client check cases" in new OwnerSetup {
-      when(mockVoaHttpClient.GET[Option[AgentCheckCasesResponse]](any())(any(), any(), any(), any()))
-        .thenReturn(Future.failed(new UnauthorizedException("unauthorised")))
-
-      connector.getCheckCases(submissionId, "client")(hc, requestWithPrincipal).futureValue shouldBe None
-    }
-
-    "handle 404 get client check cases" in new OwnerSetup {
-      connector.getCheckCases(submissionId, "foobar")(hc, requestWithPrincipal).futureValue shouldBe None
+        result.start shouldBe 1
+        result.size shouldBe 15
+        result.total shouldBe 4
+        result.filterTotal shouldBe 4
+        result.checkCases.loneElement shouldBe mockCheckCase
+      }
     }
   }
 

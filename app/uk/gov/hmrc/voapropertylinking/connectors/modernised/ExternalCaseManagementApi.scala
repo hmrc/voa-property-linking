@@ -23,9 +23,14 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
 import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
+import uk.gov.hmrc.voapropertylinking.models.modernised.casemanagement.check.myclients.CheckCasesWithClient
+import uk.gov.hmrc.voapropertylinking.models.modernised.casemanagement.check.myorganisation.CheckCasesWithAgent
 
 import scala.concurrent.{ExecutionContext, Future}
 
+/*
+  TODO this connector should be moved to check backend after the planned migration to external-case-management-api
+ */
 class ExternalCaseManagementApi @Inject()(
                                            http: VoaHttpClient,
                                            servicesConfig: ServicesConfig
@@ -33,13 +38,17 @@ class ExternalCaseManagementApi @Inject()(
 
   lazy val voaModernisedApiStubBaseUrl: String = servicesConfig.baseUrl("voa-modernised-api")
 
-  def getCheckCases(submissionId: String, party: String)(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[Option[CheckCasesResponse]] = {
-    party match {
-      case "agent" => http.GET[Option[AgentCheckCasesResponse]](s"$voaModernisedApiStubBaseUrl/external-case-management-api/my-organisation/clients/all/property-links/$submissionId/check-cases?start=1&size=100") recover toNone
-      case "client" => http.GET[Option[OwnerCheckCasesResponse]](s"$voaModernisedApiStubBaseUrl/external-case-management-api/my-organisation/property-links/$submissionId/check-cases?start=1&size=100") recover toNone
-      case _ => Future.successful(None)
-    }
-  }
+  def getMyOrganisationCheckCases(propertyLinkSubmissionId: String)(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[CheckCasesWithAgent] =
+    http.GET[CheckCasesWithAgent](
+      s"$voaModernisedApiStubBaseUrl/external-case-management-api/my-organisation/clients/all/property-links/$propertyLinkSubmissionId/check-cases",
+      Seq("start" -> "1", "size" -> "100")
+    )
+
+  def getMyClientsCheckCases(propertyLinkSubmissionId: String)(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[CheckCasesWithClient] =
+    http.GET[CheckCasesWithClient](
+      s"$voaModernisedApiStubBaseUrl/external-case-management-api/my-organisation/property-links/$propertyLinkSubmissionId/check-cases",
+      Seq("start" -> "1", "size" -> "100")
+    )
 
   def canChallenge(propertyLinkSubmissionId: String,
                    checkCaseRef: String,
