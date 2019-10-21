@@ -17,25 +17,57 @@
 package controllers
 
 import javax.inject.Inject
+import play.api.Logger
 import play.api.libs.json.Json
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.{Action, AnyContent, Result}
+import uk.gov.hmrc.http.NotFoundException
 import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
+import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
 import uk.gov.hmrc.voapropertylinking.connectors.modernised.ExternalCaseManagementApi
+import uk.gov.hmrc.voapropertylinking.models.modernised.casemanagement.check.myclients.CheckCasesWithClient
+import uk.gov.hmrc.voapropertylinking.models.modernised.casemanagement.check.myorganisation.CheckCasesWithAgent
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
+/*
+  TODO this controller will move to check backend after planned migration to external case management api
+ */
 class CheckCaseController @Inject()(
                                      authenticated: AuthenticatedActionBuilder,
                                      externalCaseManagementApi: ExternalCaseManagementApi
                                    )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController {
 
+  private val logger = Logger(this.getClass.getName)
+
   def getCheckCases(submissionId: String, party: String): Action[AnyContent] = authenticated.async { implicit request =>
-    externalCaseManagementApi
-      .getCheckCases(submissionId, party)
-      .map {
-        case Some(checkCasesResponse) => Ok(Json.toJson(checkCasesResponse))
-        case _                        => NotFound
+    party match {
+      case "agent"  => getMyClientsCheckCases(propertyLinkSubmissionId = submissionId)
+      case "client" => getMyOrganisationCheckCases(propertyLinkSubmissionId = submissionId)
+      case p        => Future.successful(NotImplemented(s"invalid party (projection) supplied: $p"))
     }
+  }
+
+  private def getMyOrganisationCheckCases(propertyLinkSubmissionId: String)(implicit request: RequestWithPrincipal[_]): Future[Result] =  {
+    externalCaseManagementApi
+      .getMyOrganisationCheckCases(propertyLinkSubmissionId)
+      .recover {
+        case e: Throwable =>
+          logger.warn("get my organisation check cases returned unexpected exception", e)
+          CheckCasesWithAgent(1, 100, 0, 0, Nil) // I believe this shouldnt be handled here. I think this should return the error it got.
+      }
+      .map(response => Ok(Json.toJson(response)))
+  }
+
+  private def getMyClientsCheckCases(propertyLinkSubmissionId: String)(implicit request: RequestWithPrincipal[_]): Future[Result] = {
+    externalCaseManagementApi
+      .getMyClientsCheckCases(propertyLinkSubmissionId)
+      .recover {
+        case e: Throwable =>
+          logger.warn("get my clients check cases returned unexpected exception", e)
+          CheckCasesWithClient(1, 100, 0, 0, Nil) // I believe this shouldnt be handled here. I think this should return the error it got.
+      }
+      .map(response => Ok(Json.toJson(response)))
+
   }
 }
 
