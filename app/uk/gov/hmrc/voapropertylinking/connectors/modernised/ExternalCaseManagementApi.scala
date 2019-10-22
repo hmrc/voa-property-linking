@@ -40,13 +40,13 @@ class ExternalCaseManagementApi @Inject()(
 
   def getMyOrganisationCheckCases(propertyLinkSubmissionId: String)(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[CheckCasesWithAgent] =
     http.GET[CheckCasesWithAgent](
-      s"$voaModernisedApiStubBaseUrl/external-case-management-api/my-organisation/clients/all/property-links/$propertyLinkSubmissionId/check-cases",
+      s"$voaModernisedApiStubBaseUrl/external-case-management-api/my-organisation/property-links/$propertyLinkSubmissionId/check-cases",
       Seq("start" -> "1", "size" -> "100")
     )
 
   def getMyClientsCheckCases(propertyLinkSubmissionId: String)(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[CheckCasesWithClient] =
     http.GET[CheckCasesWithClient](
-      s"$voaModernisedApiStubBaseUrl/external-case-management-api/my-organisation/property-links/$propertyLinkSubmissionId/check-cases",
+      s"$voaModernisedApiStubBaseUrl/external-case-management-api/my-organisation/clients/all/property-links/$propertyLinkSubmissionId/check-cases",
       Seq("start" -> "1", "size" -> "100")
     )
 
