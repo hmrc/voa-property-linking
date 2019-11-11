@@ -19,10 +19,12 @@ package services
 import binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import cats.data.OptionT
 import javax.inject.Inject
+
 import models._
 import models.mdtp.propertylink.myclients.PropertyLinksWithClients
 import models.mdtp.propertylink.projections.OwnerAuthResult
 import models.mdtp.propertylink.requests.APIPropertyLinkRequest
+import models.modernised.externalpropertylink.myclients.ClientPropertyLink
 import models.voa.propertylinking.requests.CreatePropertyLink
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
@@ -39,8 +41,8 @@ class PropertyLinkingService @Inject()(
   def create(propertyLink: APIPropertyLinkRequest)(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[HttpResponse] =
     propertyLinksConnector.createPropertyLink(CreatePropertyLink(propertyLink))
 
-  def getClientsPropertyLink(submissionId: String)(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): OptionT[Future, PropertiesView] =
-    OptionT(propertyLinksConnector.getClientsPropertyLink(submissionId)).map(pl => PropertiesView(pl.authorisation, Nil))
+  def getClientsPropertyLink(submissionId: String)(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): OptionT[Future, ClientPropertyLink] =
+    OptionT(propertyLinksConnector.getClientsPropertyLink(submissionId))
 
   def getMyOrganisationsPropertyLink(submissionId: String)(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): OptionT[Future, PropertiesView] =
     OptionT(propertyLinksConnector.getMyOrganisationsPropertyLink(submissionId)).map(pl => PropertiesView(pl.authorisation, Nil))

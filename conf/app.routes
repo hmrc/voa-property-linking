@@ -55,7 +55,7 @@ GET          /dashboard/owner/assessments/:submissionId/:authorisationId        
 
 #My Clients Property Links
 GET          /agent/property-links                                                            @controllers.PropertyLinkingController.getClientsPropertyLinks(searchParams: GetMyClientsPropertyLinkParameters, params: Option[models.PaginationParams])
-GET          /agent/property-links/:submissionId                                             @controllers.PropertyLinkingController.getClientsPropertyLink(submissionId: String)
+GET          /agent/property-links/:submissionId                                             @controllers.PropertyLinkingController.getClientsPropertyLink(submissionId: String, projection: String ?= "propertiesView")
 GET          /dashboard/agent/assessments/:submissionId                                       @controllers.PropertyLinkingController.getClientsAssessments(submissionId: String)
 GET          /dashboard/agent/assessments/:submissionId/:authorisationId                      @controllers.PropertyLinkingController.getClientsAssessmentsWithCapacity(submissionId: String, authorisationId: Long)
 

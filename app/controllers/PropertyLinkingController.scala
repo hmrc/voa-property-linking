@@ -20,6 +20,7 @@ import binders.propertylinks.temp.GetMyOrganisationsPropertyLinksParametersWithA
 import binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import cats.data.OptionT
 import javax.inject.{Inject, Named}
+
 import models._
 import models.mdtp.propertylink.projections.OwnerAuthResult
 import models.mdtp.propertylink.requests.{APIPropertyLinkRequest, PropertyLinkRequest}
@@ -31,6 +32,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, Upstream5xxResponse}
 import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
 import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import uk.gov.hmrc.voapropertylinking.connectors.modernised._
+import uk.gov.hmrc.voapropertylinking.errorhandler.models.ErrorResponse
 import uk.gov.hmrc.voapropertylinking.utils.Cats
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -105,10 +107,22 @@ class PropertyLinkingController @Inject()(
       .fold(NotFound("clients property links not found"))(propertyLinks => Ok(Json.toJson(propertyLinks)))
   }
 
-  def getClientsPropertyLink(submissionId: String): Action[AnyContent] = authenticated.async { implicit request =>
-    propertyLinkService
-      .getClientsPropertyLink(submissionId)
-      .fold(NotFound("client property link not found")) { authorisation => Ok(Json.toJson(authorisation)) }
+  def getClientsPropertyLink(submissionId: String, projection: String = "propertiesView"): Action[AnyContent] = authenticated.async { implicit request =>
+    projection match {
+      case "propertiesView" => {
+        propertyLinkService
+          .getClientsPropertyLink(submissionId)
+          .fold(NotFound("client property link not found")) { pl => Ok(Json.toJson(PropertiesView(pl.authorisation, Nil))) }
+      }
+      case "clientsPropertyLink" => {
+        propertyLinkService
+          .getClientsPropertyLink(submissionId)
+          .fold(NotFound("client property link not found")) { pl => Ok(Json.toJson(pl.authorisation)) }
+      }
+      case _ => Future successful  ErrorResponse.notImplementedJsonResult(s"Projection $projection is not implemented")
+    }
+
+
   }
 
   // $COVERAGE-OFF$

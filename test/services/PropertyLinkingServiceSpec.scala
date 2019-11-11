@@ -234,7 +234,7 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
       when(mockExternalPropertyLinkApi.getClientsPropertyLink("11111"))
         .thenReturn(Future.successful(Some(clientPropertyLink)))
 
-      service.getClientsPropertyLink("11111").value.futureValue shouldBe Some(PropertiesView(clientPropertyLink.authorisation, Nil))
+      service.getClientsPropertyLink("11111").value.futureValue shouldBe Some(clientPropertyLink)
 
       verify(mockExternalPropertyLinkApi).getClientsPropertyLink("11111")
     }

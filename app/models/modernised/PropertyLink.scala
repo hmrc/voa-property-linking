@@ -29,5 +29,7 @@ abstract class PropertyLink(
                              capacity: String,
                              uarn: Long,
                              address: String,
-                             localAuthorityRef: String)
+                             localAuthorityRef: String,
+                             checkPermission: Option[String] = None,
+                             challengePermission: Option[String] = None)
 

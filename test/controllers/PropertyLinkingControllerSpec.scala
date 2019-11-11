@@ -22,10 +22,12 @@ import basespecs.BaseControllerSpec
 import binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import cats.data._
 import models._
-import models.searchApi.{ OwnerAuthResult => ModernisedOwnerAuthResult }
+import models.searchApi.{OwnerAuthResult => ModernisedOwnerAuthResult}
 import models.mdtp.propertylink.myclients.PropertyLinksWithClients
 import models.mdtp.propertylink.projections.{OwnerAuthResult, OwnerAuthorisation}
 import models.mdtp.propertylink.requests.PropertyLinkRequest
+import models.modernised.PropertyLinkStatus
+import models.modernised.externalpropertylink.myclients.{ClientDetails, ClientPropertyLink, PropertyLinkWithClient}
 import org.mockito.ArgumentMatchers.{any, eq => mEq}
 import org.mockito.Mockito._
 import play.api.libs.json.Json
@@ -51,6 +53,26 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec {
 
   val clientOrgId: Long = 222L
   val agentOrgId: Long = 333L
+
+
+  val propertyLinkWithClient = PropertyLinkWithClient(
+    authorisationId = 11111L,
+    authorisedPartyId = 1234567L,
+    uarn = 33333L,
+    address = "1 HIGH STREET, BRIGHTON",
+    startDate = date,
+    endDate = Some(date),
+    submissionId = "22222",
+    status = PropertyLinkStatus.APPROVED,
+    capacity = "someCapacity",
+    localAuthorityRef = "21323",
+    client = ClientDetails(123L, "Org Name"),
+    representationStatus = "APPROVED",
+    checkPermission = Some("START_AND_CONTINUE"),
+    challengePermission = Some("START_AND_CONTINUE"))
+
+
+  val clientPropertyLink = ClientPropertyLink(propertyLinkWithClient)
 
   val validPropertiesView = PropertiesView(
     authorisationId = 11111,
@@ -160,13 +182,22 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec {
       contentAsJson(res) shouldBe Json.toJson(validPropertiesView)
     }
 
-    "return a single my client property link" in {
+    "return a single my client property link - propertiesView" in {
       when(mockPropertyLinkingService.getClientsPropertyLink(any())(any(), any()))
-        .thenReturn(OptionT.some[Future](validPropertiesView))
-      val res = testController.getClientsPropertyLink("11111")(FakeRequest())
+        .thenReturn(OptionT.some[Future](clientPropertyLink))
+      val res = testController.getClientsPropertyLink("11111", "propertiesView")(FakeRequest())
 
       status(res) shouldBe OK
-      contentAsJson(res) shouldBe Json.toJson(validPropertiesView)
+      contentAsJson(res) shouldBe Json.toJson(PropertiesView(clientPropertyLink.authorisation, Nil))
+    }
+
+    "return a single my client property link - clientPropertyLink" in {
+      when(mockPropertyLinkingService.getClientsPropertyLink(any())(any(), any()))
+        .thenReturn(OptionT.some[Future](clientPropertyLink))
+      val res = testController.getClientsPropertyLink("11111", "clientsPropertyLink")(FakeRequest())
+
+      status(res) shouldBe OK
+      contentAsJson(res) shouldBe Json.toJson(clientPropertyLink.authorisation)
     }
   }
 
