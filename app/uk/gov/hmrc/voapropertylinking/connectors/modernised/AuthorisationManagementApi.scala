@@ -18,8 +18,8 @@ package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
 import java.time.LocalDate
 
-import javax.inject.Inject
-import models.{APIRepresentationRequest, APIRepresentationResponse, Capacity}
+import javax.inject.{Inject, Named}
+import models.{APIRepresentationRequest, APIRepresentationResponse}
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
@@ -28,8 +28,10 @@ import uk.gov.hmrc.play.config.ServicesConfig
 import scala.concurrent.{ExecutionContext, Future}
 
 class AuthorisationManagementApi @Inject()(
-                                          http: DefaultHttpClient,
-                                          servicesConfig: ServicesConfig
+                                            http: DefaultHttpClient,
+                                            servicesConfig: ServicesConfig,
+                                            @Named("voa.createRepresentationRequest") createRepresentationRequestUrl: String,
+                                            @Named("voa.representationRequestResponse") representationRequestResponseUrl: String
                                           )(implicit executionContext: ExecutionContext) extends BaseVoaConnector {
 
   lazy val baseUrl: String = servicesConfig.baseUrl("external-business-rates-data-platform") + "/authorisation-management-api"
@@ -51,21 +53,13 @@ class AuthorisationManagementApi @Inject()(
     })
   }
 
-  def getCapacity(authorisationId: Long)(implicit hc: HeaderCarrier): Future[Option[Capacity]] = {
-    val url = baseUrl + s"/authorisation/$authorisationId"
+  def create(reprRequest: APIRepresentationRequest)(implicit hc: HeaderCarrier): Future[HttpResponse] =
+    http
+      .POST[APIRepresentationRequest, HttpResponse](createRepresentationRequestUrl, reprRequest)
 
-    http.GET[Option[Capacity]](url)
-  }
-
-  def create(reprRequest: APIRepresentationRequest)(implicit hc: HeaderCarrier): Future[Unit] = {
-    val url = baseUrl + s"/agent/submit_agent_representation"
-    http.POST[APIRepresentationRequest, HttpResponse](url, reprRequest) map { _ => () }
-  }
-
-  def response(representationResponse: APIRepresentationResponse)(implicit hc: HeaderCarrier): Future[Unit] = {
-    val url = baseUrl + s"/agent/submit_agent_rep_reponse"
-    http.PUT[APIRepresentationResponse, HttpResponse](url, representationResponse) map { _ => () }
-  }
+  def response(representationResponse: APIRepresentationResponse)(implicit hc: HeaderCarrier): Future[HttpResponse] =
+    http
+      .PUT[APIRepresentationResponse, HttpResponse](representationRequestResponseUrl, representationResponse)
 
   def revoke(authorisedPartyId: Long)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     val url = baseUrl + s"/authorisedParty/$authorisedPartyId"

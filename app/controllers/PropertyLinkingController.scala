@@ -180,12 +180,6 @@ class PropertyLinkingController @Inject()(
       .fold(Ok(Json.toJson(submissionId)))(propertyLinkWithAssessments => Ok(Json.toJson(propertyLinkWithAssessments)))
   }
 
-  def getMyOrganisationsAssessmentsWithCapacity(submissionId: String, authorisationId: Long): Action[AnyContent] =
-    getMyOrganisationsAssessments(submissionId)
-
-  def getClientsAssessmentsWithCapacity(submissionId: String, authorisationId: Long): Action[AnyContent] =
-    getClientsAssessments(submissionId)
-
   def clientProperty(authorisationId: Long, clientOrgId: Long, agentOrgId: Long): Action[AnyContent] = authenticated.async { implicit request =>
     mdtpDashboardManagementApi
       .get(authorisationId)

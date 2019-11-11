@@ -30,7 +30,11 @@ import scala.concurrent.Future
 class AuthorisationManagementApiSpec extends BaseUnitSpec {
 
   val http: DefaultHttpClient = mock[DefaultHttpClient]
-  val connector: AuthorisationManagementApi = new AuthorisationManagementApi(http, mockServicesConfig) {
+  val connector: AuthorisationManagementApi = new AuthorisationManagementApi(
+    http,
+    mockServicesConfig,
+    "http://localhost:9540/authorisation-management-api/agent/submit_agent_representation",
+  "http://localhost:9540authorisation-management-api/agent/submit_agent_rep_reponse") {
     override lazy val baseUrl: String = "http://some-url"
   }
 
