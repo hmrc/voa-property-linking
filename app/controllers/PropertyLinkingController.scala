@@ -20,6 +20,7 @@ import binders.propertylinks.temp.GetMyOrganisationsPropertyLinksParametersWithA
 import binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import cats.data.OptionT
 import javax.inject.{Inject, Named}
+
 import models._
 import models.mdtp.propertylink.projections.OwnerAuthResult
 import models.mdtp.propertylink.requests.{APIPropertyLinkRequest, PropertyLinkRequest}
@@ -105,10 +106,22 @@ class PropertyLinkingController @Inject()(
       .fold(NotFound("clients property links not found"))(propertyLinks => Ok(Json.toJson(propertyLinks)))
   }
 
-  def getClientsPropertyLink(submissionId: String): Action[AnyContent] = authenticated.async { implicit request =>
-    propertyLinkService
-      .getClientsPropertyLink(submissionId)
-      .fold(NotFound("client property link not found")) { authorisation => Ok(Json.toJson(authorisation)) }
+  def getClientsPropertyLink(submissionId: String, projection: String = "propertiesView"): Action[AnyContent] = authenticated.async { implicit request => //fixme add projection for propertyView (current behaviour) and clientProperty to support permissions
+    projection match {
+      case "propertiesView" => {
+        propertyLinkService
+          .getClientsPropertyLink(submissionId)
+          .fold(NotFound("client property link not found")) { pl => Ok(Json.toJson(PropertiesView(pl.authorisation, Nil))) }
+      }
+      case "clientsPropertyLink" => {
+        propertyLinkService
+          .getClientsPropertyLink(submissionId)
+          .fold(NotFound("client property link not found")) { pl => Ok(Json.toJson(pl.authorisation)) }
+      }
+      case _ => throw new IllegalArgumentException(s"unsupported projection: $projection")
+    }
+
+
   }
 
   // $COVERAGE-OFF$

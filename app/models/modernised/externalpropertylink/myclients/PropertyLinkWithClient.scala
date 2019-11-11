@@ -35,7 +35,9 @@ case class PropertyLinkWithClient(
                                    address: String,
                                    localAuthorityRef: String,
                                    client: ClientDetails,
-                                   representationStatus: String) extends PropertyLink(authorisationId: Long,
+                                   representationStatus: String,
+                                   checkPermission: Option[String] = None,
+                                   challengePermission: Option[String] = None) extends PropertyLink(authorisationId: Long,
                                                                                       status: PropertyLinkStatus,
                                                                                       startDate: LocalDate,
                                                                                       endDate: Option[LocalDate],
@@ -43,7 +45,9 @@ case class PropertyLinkWithClient(
                                                                                       capacity,
                                                                                       uarn: Long,
                                                                                       address: String,
-                                                                                      localAuthorityRef: String)
+                                                                                      localAuthorityRef: String,
+                                                                                      checkPermission: Option[String],
+                                                                                      challengePermission: Option[String])
 
 object PropertyLinkWithClient {
   implicit val format: OFormat[PropertyLinkWithClient] = Json.format

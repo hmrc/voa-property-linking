@@ -74,7 +74,6 @@ class GuiceModule(environment: Environment,
         "voa.myOrganisationsPropertyLink"  -> "voa.resources.externalPropertyLink.myOrganisationsPropertyLink.path",
         "voa.myClientsPropertyLink"        -> "voa.resources.externalPropertyLink.myClientsPropertyLink.path",
         "voa.myClientsPropertyLinks"       -> "voa.resources.externalPropertyLink.myClientsPropertyLinks.path",
-        "voa.myOrganisationsPropertyLink"  -> "voa.resources.externalPropertyLink.myOrganisationsPropertyLink.path",
         "voa.createPropertyLink"           -> "voa.resources.externalPropertyLink.createPropertyLink.path"
       ),
       baseUrl("voa-modernised-api")
