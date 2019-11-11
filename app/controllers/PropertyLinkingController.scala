@@ -32,6 +32,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, Upstream5xxResponse}
 import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
 import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import uk.gov.hmrc.voapropertylinking.connectors.modernised._
+import uk.gov.hmrc.voapropertylinking.errorhandler.models.ErrorResponse
 import uk.gov.hmrc.voapropertylinking.utils.Cats
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -106,7 +107,7 @@ class PropertyLinkingController @Inject()(
       .fold(NotFound("clients property links not found"))(propertyLinks => Ok(Json.toJson(propertyLinks)))
   }
 
-  def getClientsPropertyLink(submissionId: String, projection: String = "propertiesView"): Action[AnyContent] = authenticated.async { implicit request => //fixme add projection for propertyView (current behaviour) and clientProperty to support permissions
+  def getClientsPropertyLink(submissionId: String, projection: String = "propertiesView"): Action[AnyContent] = authenticated.async { implicit request =>
     projection match {
       case "propertiesView" => {
         propertyLinkService
@@ -118,7 +119,7 @@ class PropertyLinkingController @Inject()(
           .getClientsPropertyLink(submissionId)
           .fold(NotFound("client property link not found")) { pl => Ok(Json.toJson(pl.authorisation)) }
       }
-      case _ => throw new IllegalArgumentException(s"unsupported projection: $projection")
+      case _ => Future successful  ErrorResponse.notImplementedJsonResult(s"Projection $projection is not implemented")
     }
 
 
