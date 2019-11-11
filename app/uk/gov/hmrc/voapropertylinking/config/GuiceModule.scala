@@ -69,12 +69,14 @@ class GuiceModule(environment: Environment,
   private def bindModernisedEndpoints(): Unit =
     bindEndpoints(
       Map(
-        "voa.authValuationHistoryUrl"      -> "voa.resources.externalValuationManagement.valuationHistory.path",
-        "voa.myOrganisationsPropertyLinks" -> "voa.resources.externalPropertyLink.myOrganisationsPropertyLinks.path",
-        "voa.myOrganisationsPropertyLink"  -> "voa.resources.externalPropertyLink.myOrganisationsPropertyLink.path",
-        "voa.myClientsPropertyLink"        -> "voa.resources.externalPropertyLink.myClientsPropertyLink.path",
-        "voa.myClientsPropertyLinks"       -> "voa.resources.externalPropertyLink.myClientsPropertyLinks.path",
-        "voa.createPropertyLink"           -> "voa.resources.externalPropertyLink.createPropertyLink.path"
+        "voa.authValuationHistoryUrl"       -> "voa.resources.externalValuationManagement.valuationHistory.path",
+        "voa.myOrganisationsPropertyLinks"  -> "voa.resources.externalPropertyLink.myOrganisationsPropertyLinks.path",
+        "voa.myOrganisationsPropertyLink"   -> "voa.resources.externalPropertyLink.myOrganisationsPropertyLink.path",
+        "voa.myClientsPropertyLink"         -> "voa.resources.externalPropertyLink.myClientsPropertyLink.path",
+        "voa.myClientsPropertyLinks"        -> "voa.resources.externalPropertyLink.myClientsPropertyLinks.path",
+        "voa.createPropertyLink"            -> "voa.resources.externalPropertyLink.createPropertyLink.path",
+        "voa.createRepresentationRequest"   -> "voa.resources.authorisationManagementApi.createRepresentationRequest.path",
+        "voa.representationRequestResponse" -> "voa.resources.authorisationManagementApi.representationRequestResponse.path"
       ),
       baseUrl("voa-modernised-api")
     )

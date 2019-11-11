@@ -264,31 +264,6 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec {
     }
   }
 
-
-  "getMyOrganisationsAssessmentsWithCapacity" should {
-    "return property links with assessments" in {
-      val submissionId = "SUB123"
-      when(mockAssessmentService.getMyOrganisationsAssessments(mEq(submissionId))(any(), any()))
-        .thenReturn(OptionT.some[Future](assessments))
-
-      val res = testController.getMyOrganisationsAssessmentsWithCapacity(submissionId, 1L)(FakeRequest())
-
-      status(res) shouldBe OK
-    }
-  }
-
-  "getClientsAssessmentsWithCapacity" should {
-    "return property links with assessments" in {
-      val submissionId = "SUB123"
-      when(mockAssessmentService.getClientsAssessments(mEq(submissionId))(any(), any()))
-        .thenReturn(OptionT.some[Future](assessments))
-
-      val res = testController.getClientsAssessmentsWithCapacity(submissionId, 1L)(FakeRequest())
-
-      status(res) shouldBe OK
-    }
-  }
-
   trait ClientPropertySetup {
     protected def propertiesView(authId: Long): PropertiesView = PropertiesView(
       authorisationId = authId,

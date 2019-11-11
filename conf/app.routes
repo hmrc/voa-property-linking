@@ -10,9 +10,6 @@ PUT          /property-representations/response                                 
 
 GET          /property-links-appointable                                                      @controllers.PropertyRepresentationController.appointableToAgent(ownerId: Long, agentCode: Long, checkPermission: Option[String], challengePermission: Option[String], params: models.PaginationParams, sortfield: Option[String], sortorder: Option[String], address: Option[String], agent: Option[String])
 
-GET          /property-links/client-property/:authorisationId                                 @controllers.PropertyLinkingController.clientProperty(authorisationId: Long, clientOrganisationId: Long, agentOrganisationId: Long)
-
-
 # Manage Agents
 GET          /manage-agents/:id/agents                                                        @controllers.AgentController.manageAgents(id: Long)
 
@@ -51,11 +48,9 @@ GET          /owner/property-links                                              
 GET          /owner/property-links/appointable                                                @controllers.PropertyLinkingController.getMyOrganisationPropertyLinksWithAppointable(searchParams: GetMyOrganisationsPropertyLinksParametersWithAgentFiltering, params: Option[models.PaginationParams])
 GET          /owner/property-links/:submissionId                                              @controllers.PropertyLinkingController.getMyOrganisationsPropertyLink(submissionId: String)
 GET          /dashboard/owner/assessments/:submissionId                                       @controllers.PropertyLinkingController.getMyOrganisationsAssessments(submissionId: String)
-GET          /dashboard/owner/assessments/:submissionId/:authorisationId                      @controllers.PropertyLinkingController.getMyOrganisationsAssessmentsWithCapacity(submissionId: String, authorisationId: Long)
 
 #My Clients Property Links
 GET          /agent/property-links                                                            @controllers.PropertyLinkingController.getClientsPropertyLinks(searchParams: GetMyClientsPropertyLinkParameters, params: Option[models.PaginationParams])
 GET          /agent/property-links/:submissionId                                             @controllers.PropertyLinkingController.getClientsPropertyLink(submissionId: String, projection: String ?= "propertiesView")
 GET          /dashboard/agent/assessments/:submissionId                                       @controllers.PropertyLinkingController.getClientsAssessments(submissionId: String)
-GET          /dashboard/agent/assessments/:submissionId/:authorisationId                      @controllers.PropertyLinkingController.getClientsAssessmentsWithCapacity(submissionId: String, authorisationId: Long)
 

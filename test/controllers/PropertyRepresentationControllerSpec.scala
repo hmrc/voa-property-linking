@@ -63,7 +63,7 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
       "valid JSON payload is POSTed" in new Setup {
 
         when(mockAuthorisationManagementApi.create(any())(any()))
-          .thenReturn(Future.successful(()))
+          .thenReturn(Future.successful(HttpResponse(OK)))
 
         val result: Future[Result] = testController.create()(FakeRequest().withBody(Json.parse(
           """{
@@ -124,7 +124,7 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
       "a valid representation response is POSTed" in new Setup {
         val repResp = APIRepresentationResponse(submissionId, 1L, "OUTCOME")
         when(mockAuthorisationManagementApi.response(mEq(repResp))(any()))
-          .thenReturn(Future.successful(()))
+          .thenReturn(Future.successful(HttpResponse(OK)))
 
         val result: Future[Result] =
           testController.response()(FakeRequest().withBody(Json.toJson(repResp)))
