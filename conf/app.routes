@@ -10,6 +10,8 @@ PUT          /property-representations/response                                 
 
 GET          /property-links-appointable                                                      @controllers.PropertyRepresentationController.appointableToAgent(ownerId: Long, agentCode: Long, checkPermission: Option[String], challengePermission: Option[String], params: models.PaginationParams, sortfield: Option[String], sortorder: Option[String], address: Option[String], agent: Option[String])
 
+GET          /property-links/client-property/:authorisationId                                 @controllers.PropertyLinkingController.clientProperty(authorisationId: Long, clientOrganisationId: Long, agentOrganisationId: Long)
+
 # Manage Agents
 GET          /manage-agents/:id/agents                                                        @controllers.AgentController.manageAgents(id: Long)
 
