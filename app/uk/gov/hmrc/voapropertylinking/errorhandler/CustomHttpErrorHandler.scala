@@ -48,7 +48,7 @@ class CustomHttpErrorHandler @Inject()() extends HttpErrorHandler with EventLogg
       case REQUEST_URI_TOO_LONG =>
         ErrorResponse.requestUriTooLong
       case _ =>
-        ErrorResponse(statusCode, HttpStatusCodes.codeName(statusCode), supportRequestMessage(message))
+        ErrorResponse(statusCode, HttpStatusCodes.codeName(statusCode), message)
     }
 
     logger.warn(errorResponse.toString)
@@ -79,9 +79,9 @@ class CustomHttpErrorHandler @Inject()() extends HttpErrorHandler with EventLogg
       case _: BearerTokenExpired => ErrorResponse.unauthorized("The bearer token has expired.")
       case _: InvalidBearerToken => ErrorResponse.unauthorized("Invalid bearer token.")
 
-      case _: Throwable =>
+      case e: Throwable =>
         logResponse(InternalServerErrorEvent, exceptionDetails: _*)
-        ErrorResponse.internalServerError(supportRequestMessage("An unexpected exception has occurred."))
+        ErrorResponse.internalServerError(e.getMessage)
     }
 
     errorResponse.httpStatusCode match {
@@ -91,10 +91,4 @@ class CustomHttpErrorHandler @Inject()() extends HttpErrorHandler with EventLogg
 
     Future.successful(Status(errorResponse.httpStatusCode)(Json.toJson(errorResponse)))
   }
-
-
-  private def supportRequestMessage(message: String): String =
-    s"$message " +
-      "If the problem persists, please raise a support request via the Developer Hub. " +
-      "https://developer.service.hmrc.gov.uk/developer/support"
 }

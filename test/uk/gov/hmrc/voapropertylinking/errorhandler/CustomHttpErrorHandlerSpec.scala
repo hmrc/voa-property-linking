@@ -41,29 +41,26 @@ class CustomHttpErrorHandlerSpec extends UnitSpec with MockitoSugar with WithFak
         (contentAsJson(result) \ "message").as[String] should endWith("The requested URI does not exist.")
       }
     }
-  }
 
-  "is a BAD_REQUEST exception" should {
-    "return a 400, a standard message and incident ID and log the error" in {
-      val result = customHttpErrorHandler.onClientError(mockRequestHeader, BAD_REQUEST, "Missing query parameter.")
+    "is a BAD_REQUEST exception" should {
+      "return a 400, a standard message and incident ID and log the error" in {
+        val result = customHttpErrorHandler.onClientError(mockRequestHeader, BAD_REQUEST, "Missing query parameter.")
 
-      status(result) shouldBe BAD_REQUEST
-      (contentAsJson(result) \ "code").as[String] shouldBe "BAD_REQUEST"
-      (contentAsJson(result) \ "message").as[String] should endWith(
-        "The request parameters or body are invalid. Missing query parameter.")
+        status(result) shouldBe BAD_REQUEST
+        (contentAsJson(result) \ "code").as[String] shouldBe "BAD_REQUEST"
+        (contentAsJson(result) \ "message").as[String] should endWith(
+          "The request parameters or body are invalid. Missing query parameter.")
+      }
     }
-  }
 
-  "is any other exception exception" should {
-    "return the error code, the support message and incident ID and log the error" in {
-      val result = customHttpErrorHandler.onClientError(mockRequestHeader, UNAUTHORIZED, "Unauthorised.")
+    "is any other exception exception" should {
+      "return the error code, the support message and incident ID and log the error" in {
+        val result = customHttpErrorHandler.onClientError(mockRequestHeader, UNAUTHORIZED, "Unauthorised.")
 
-      status(result) shouldBe UNAUTHORIZED
-      (contentAsJson(result) \ "code").as[String] shouldBe "UNAUTHORIZED"
-      (contentAsJson(result) \ "message").as[String] should endWith(
-        " Unauthorised. " +
-          "If the problem persists, please raise a support request via the Developer Hub. " +
-          "https://developer.service.hmrc.gov.uk/developer/support")
+        status(result) shouldBe UNAUTHORIZED
+        (contentAsJson(result) \ "code").as[String] shouldBe "UNAUTHORIZED"
+        (contentAsJson(result) \ "message").as[String] should endWith("Unauthorised.")
+      }
     }
   }
 
@@ -110,6 +107,16 @@ class CustomHttpErrorHandlerSpec extends UnitSpec with MockitoSugar with WithFak
         status(result) shouldBe UNAUTHORIZED
         (contentAsJson(result) \ "code").as[String] shouldBe "UNAUTHORIZED"
         (contentAsJson(result) \ "message").as[String] should endWith("Invalid bearer token.")
+      }
+    }
+
+    "is a RunTime exception thrown from server" should {
+      "return 500 Internal Server Error, a standard message and incident ID and log the error" in new {
+        val result = customHttpErrorHandler.onServerError(mockRequestHeader, new RuntimeException("server failure"))
+
+        status(result) shouldBe INTERNAL_SERVER_ERROR
+        (contentAsJson(result) \ "code").as[String] shouldBe "INTERNAL_SERVER_ERROR"
+        (contentAsJson(result) \ "message").as[String] should endWith("server failure")
       }
     }
   }
