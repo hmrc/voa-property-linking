@@ -26,7 +26,7 @@ case class GroupAccount(
                          email: String,
                          phone: String,
                          isAgent: Boolean,
-                         agentCode: Long
+                         agentCode: Option[Long]
                        )
 
 object GroupAccount {
