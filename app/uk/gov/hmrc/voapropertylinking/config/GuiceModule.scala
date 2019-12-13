@@ -53,8 +53,6 @@ class GuiceModule(environment: Environment,
     })
 
     bindConstant().annotatedWith(Names.named("dvrCollectionName")).to(configuration.getString("dvr.collection.name").get)
-    bindConstant().annotatedWith(Names.named("authedAssessmentEndpointEnabled")).to(configuration.getString("featureFlags.authedAssessmentEndpointEnabled").fold(false)(_.toBoolean))
-    bindConstant().annotatedWith(Names.named("agentQueryParameterEnabledExternal")).to(configuration.getString("featureFlags.agentQueryParameterEnabledExternal").fold(false)(_.toBoolean))
 
     bind(classOf[Clock]).toInstance(Clock.systemUTC())
 

@@ -54,7 +54,7 @@ class GroupAccountControllerSpec extends BaseControllerSpec {
 
   "get" should {
     "return group account json from modernised if it exists" in {
-      val testGroupAccount = GroupAccount(1, "test-group-id", "Test Company", 1, "test@test.com", "01233421342", false, 1)
+      val testGroupAccount = GroupAccount(1, "test-group-id", "Test Company", 1, "test@test.com", "01233421342", false, Some(1))
 
       when(mockGroupAccountConnector.getDetailedGroupAccount(any())(any[HeaderCarrier])).thenReturn(Future.successful(Some(testGroupAccount)))
 
@@ -75,7 +75,7 @@ class GroupAccountControllerSpec extends BaseControllerSpec {
 
   "withGroupId" should {
     "return group account json from modernised if it exists using the group ID" in {
-      val testGroupAccount = GroupAccount(1, "test-group-id", "Test Company", 1, "test@test.com", "01233421342", false, 1)
+      val testGroupAccount = GroupAccount(1, "test-group-id", "Test Company", 1, "test@test.com", "01233421342", false, Some(1))
 
       when(mockGroupAccountConnector.findDetailedGroupAccountByGGID(any())(any[HeaderCarrier])).thenReturn(Future.successful(Some(testGroupAccount)))
 
@@ -96,7 +96,7 @@ class GroupAccountControllerSpec extends BaseControllerSpec {
 
   "withAgentCode" should {
     "return group account json from modernised if it exists using the agent code" in {
-      val testGroupAccount = GroupAccount(1, "test-group-id", "Test Company", 1, "test@test.com", "01233421342", true, 1)
+      val testGroupAccount = GroupAccount(1, "test-group-id", "Test Company", 1, "test@test.com", "01233421342", true, Some(1))
 
       when(mockGroupAccountConnector.withAgentCode(any())(any[HeaderCarrier])).thenReturn(Future.successful(Some(testGroupAccount)))
 

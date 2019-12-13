@@ -100,7 +100,7 @@ class AssessmentServiceSpec extends BaseUnitSpec {
       valuationDetailsAvailable = None,
       billingAuthorityCode = None)
 
-    val assessmentService = new AssessmentService(mockExternalPropertyLinkApi, mockExternalValuationManagementApi, true)
+    val assessmentService = new AssessmentService(mockExternalPropertyLinkApi, mockExternalValuationManagementApi)
   }
 
   "getMyOrganisationsAssessments" should {

@@ -18,17 +18,37 @@ package models
 
 import play.api.libs.json.Json
 
-case class APIDetailedGroupAccount(id: Long, governmentGatewayGroupId: String, representativeCode: Long, organisationLatestDetail: GroupDetails, persons: Seq[IndividualSummary]) {
+case class APIDetailedGroupAccount(
+                                    id: Long,
+                                    governmentGatewayGroupId: String,
+                                    representativeCode: Option[Long],
+                                    organisationLatestDetail: GroupDetails,
+                                    persons: Seq[IndividualSummary]
+                                  ) {
 
   def toGroupAccount = {
-    GroupAccount(id, governmentGatewayGroupId, organisationLatestDetail.organisationName, organisationLatestDetail.addressUnitId, organisationLatestDetail.organisationEmailAddress, organisationLatestDetail.organisationTelephoneNumber.getOrElse("not set"), organisationLatestDetail.representativeFlag, representativeCode)
+    GroupAccount(
+      id,
+      governmentGatewayGroupId,
+      organisationLatestDetail.organisationName,
+      organisationLatestDetail.addressUnitId,
+      organisationLatestDetail.organisationEmailAddress,
+      organisationLatestDetail.organisationTelephoneNumber.getOrElse("not set"),
+      organisationLatestDetail.representativeFlag,
+      representativeCode.filter(_ => organisationLatestDetail.representativeFlag)
+    )
   }
 }
 
 case class IndividualSummary(personLatestDetail: APIIndividualDetails)
 
-case class GroupDetails(addressUnitId: Long, representativeFlag: Boolean, organisationName: String, organisationEmailAddress: String,
-                        organisationTelephoneNumber: Option[String])
+case class GroupDetails(
+                         addressUnitId: Long,
+                         representativeFlag: Boolean,
+                         organisationName: String,
+                         organisationEmailAddress: String,
+                         organisationTelephoneNumber: Option[String]
+                       )
 
 object GroupDetails {
   implicit val format = Json.format[GroupDetails]

@@ -286,7 +286,7 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec {
       email = "email@server.com",
       phone = "01234567",
       isAgent = false,
-      agentCode = 54321L
+      agentCode = Some(54321L)
     )
   }
 

@@ -20,9 +20,18 @@ import java.time.Instant
 
 import play.api.libs.json.Json
 
-case class PersonData(identifyVerificationId: String, firstName: String, lastName: String,
-                      organisationId: Long, addressUnitId: Long, telephoneNumber: String, mobileNumber: Option[String],
-                      emailAddress: String, governmentGatewayExternalId: String, effectiveFrom: Instant)
+case class PersonData(
+                       identifyVerificationId: String,
+                       firstName: String,
+                       lastName: String,
+                       organisationId: Long,
+                       addressUnitId: Long,
+                       telephoneNumber: String,
+                       mobileNumber: Option[String],
+                       emailAddress: String,
+                       governmentGatewayExternalId: String,
+                       effectiveFrom: Instant
+                     )
 
 object PersonData {
   implicit val format = Json.format[PersonData]

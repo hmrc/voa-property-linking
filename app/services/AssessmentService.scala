@@ -28,8 +28,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class AssessmentService @Inject()(
                                    val propertyLinksConnector: ExternalPropertyLinkApi,
-                                   val externalValuationManagementApi: ExternalValuationManagementApi,
-                                   @Named("authedAssessmentEndpointEnabled") val authedAssessmentEndpointEnabled: Boolean
+                                   val externalValuationManagementApi: ExternalValuationManagementApi
                                  )(implicit executionContext: ExecutionContext) extends Cats {
 
 

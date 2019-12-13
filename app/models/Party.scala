@@ -32,15 +32,6 @@ case class Party(
 object Party {
   implicit val format = Json.format[Party]
 
-  def fromAPIParty(party: APIParty, agentDetails: GroupAccount) = {
-    party.permissions.headOption.map(permissions => {
-      Party(party.id, agentDetails.agentCode, agentDetails.companyName, agentDetails.id,
-        permissions.checkPermission,
-        permissions.challengePermission
-      )
-    })
-  }
-
   def apply(agentDetails: AgentDetails): Party =
     Party(agentDetails.authorisedPartyId,
       agentDetails.representativeCode,

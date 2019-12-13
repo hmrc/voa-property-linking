@@ -52,7 +52,7 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
       email = "therealdonald@potus.com",
       phone = "9876541",
       isAgent = false,
-      agentCode = 234
+      agentCode = Some(234)
     )
     protected val ownerAuthResult = ModernisedOwnerAuthResult(1, 1, 1, 1, Seq())
 

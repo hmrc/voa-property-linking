@@ -176,7 +176,7 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
           APIDetailedGroupAccount(
             2,
             "gggId",
-            234L,
+            Some(234L),
             GroupDetails(
               345,
               false,
@@ -210,7 +210,7 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
           APIDetailedGroupAccount(
             2,
             "gggId",
-            234L,
+            Some(234L),
             GroupDetails(
               345,
               false,
@@ -245,7 +245,7 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
           APIDetailedGroupAccount(
             2,
             "gggId",
-            234L,
+            Some(234L),
             GroupDetails(
               345,
               false,
@@ -398,7 +398,7 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
     email="therealdonald@potus.com",
     phone = "9876541",
     isAgent = false,
-    agentCode = 234)
+    agentCode = None)
   )
 
 }
