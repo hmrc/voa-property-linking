@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,12 @@ import java.time.LocalDateTime
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import basespecs.BaseControllerSpec
-import models.voa.valuation.dvr.documents.{Document, DocumentSummary, DvrDocumentFiles}
-import models.voa.valuation.dvr.{DetailedValuationRequest, StreamedDocument}
+import models.modernised.ccacasemanagement.requests.DetailedValuationRequest
+import models.modernised.externalvaluationmanagement.documents.{Document, DocumentSummary, DvrDocumentFiles}
 import org.mockito.ArgumentMatchers.{eq => matching, _}
 import org.mockito.Mockito._
 import play.api.libs.json.Json
+import play.api.libs.ws.{DefaultWSResponseHeaders, StreamedResponse}
 import play.api.test.FakeRequest
 import repositories.DVRRecordRepository
 import uk.gov.hmrc.http.HeaderCarrier
@@ -86,7 +87,7 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
     "return 200 OK with the dvr document information" in {
       val now = LocalDateTime.parse("2019-09-11T11:03:25.123")
 
-      when(mockExternalValuationManagementapi.getDvrDocuments(any(), any(), any())(any(), any()))
+      when(mockExternalValuationManagementapi.getDvrDocuments(any(), any(), any())(any()))
         .thenReturn(Future.successful(Some(DvrDocumentFiles(
           checkForm = Document(DocumentSummary("1L", "Check Document", now)),
           detailedValuation = Document(DocumentSummary("2L", "Detailed Valuation Document", now))
@@ -117,7 +118,7 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
     }
 
     "return 404 NOT_FOUND when the dvr documents dont exists" in {
-      when(mockExternalValuationManagementapi.getDvrDocuments(any(), any(), any())(any(), any()))
+      when(mockExternalValuationManagementapi.getDvrDocuments(any(), any(), any())(any()))
         .thenReturn(Future.successful(None))
 
       val result = testController.getDvrDocuments(1L, 3L, "PL-12345")(FakeRequest())
@@ -128,8 +129,8 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
 
   "get dvr document" should {
     "return 200 Ok with the file chunked." in {
-      when(mockExternalValuationManagementapi.getDvrDocument(any(), any(), any(), any())(any(), any()))
-        .thenReturn(Future.successful(StreamedDocument(None, None, Map(), Source.single(ByteString(12)))))
+      when(mockExternalValuationManagementapi.getDvrDocument(any(), any(), any(), any())(any()))
+        .thenReturn(Future.successful(StreamedResponse(DefaultWSResponseHeaders(200, Map()), Source.single(ByteString(12)))))
 
       val result = testController.getDvrDocument(1L, 3L, "PL-12345", "1L")(FakeRequest())
 

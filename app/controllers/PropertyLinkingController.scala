@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package controllers
 
-import binders.propertylinks.temp.GetMyOrganisationsPropertyLinksParametersWithAgentFiltering
-import binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
+import uk.gov.hmrc.voapropertylinking.binders.propertylinks.temp.GetMyOrganisationsPropertyLinksParametersWithAgentFiltering
+import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import cats.data.OptionT
 import javax.inject.{Inject, Named}
 
@@ -27,7 +27,7 @@ import models.mdtp.propertylink.requests.{APIPropertyLinkRequest, PropertyLinkRe
 import play.api.Logger
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent}
-import services.{AssessmentService, PropertyLinkingService}
+import uk.gov.hmrc.voapropertylinking.services.{AssessmentService, PropertyLinkingService}
 import uk.gov.hmrc.http.{HeaderCarrier, Upstream5xxResponse}
 import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
 import uk.gov.hmrc.voapropertylinking.auditing.AuditingService

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,12 +23,11 @@ import java.time.LocalDateTime
 import basespecs.WireMockSpec
 import com.github.tomakehurst.wiremock.client.WireMock._
 import models.modernised.ValuationHistoryResponse
-import models.voa.valuation.dvr.StreamedDocument
-import models.voa.valuation.dvr.documents.{Document, DocumentSummary, DvrDocumentFiles}
-import org.mockito.ArgumentMatchers.{any, eq => mEq}
+import models.modernised.externalvaluationmanagement.documents.{Document, DocumentSummary, DvrDocumentFiles}
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import play.api.http.ContentTypes
-import play.api.libs.ws.WSClient
+import play.api.libs.ws.{StreamedResponse, WSClient}
 import uk.gov.hmrc.http.NotFoundException
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.test.WithFakeApplication
@@ -114,7 +113,7 @@ class ExternalValuationManagementApiSpec extends WireMockSpec with ContentTypes 
       stubFor(get(urlEqualTo(dvrUrl)).willReturn(ok(new String(readAllBytes(Paths.get(getClass.getResource("/document.pdf").toURI))))))
 
       val result = connector.getDvrDocument(valuationId, uarn, propertyLinkId, fileRef).futureValue
-      result shouldBe a[StreamedDocument]
+      result shouldBe a[StreamedResponse]
     }
   }
 }

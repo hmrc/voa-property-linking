@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,13 +38,13 @@ class ExternalCaseManagementApi @Inject()(
 
   lazy val voaModernisedApiStubBaseUrl: String = servicesConfig.baseUrl("voa-modernised-api")
 
-  def getMyOrganisationCheckCases(propertyLinkSubmissionId: String)(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[CheckCasesWithAgent] =
+  def getMyOrganisationCheckCases(propertyLinkSubmissionId: String)(implicit request: RequestWithPrincipal[_]): Future[CheckCasesWithAgent] =
     http.GET[CheckCasesWithAgent](
       s"$voaModernisedApiStubBaseUrl/external-case-management-api/my-organisation/property-links/$propertyLinkSubmissionId/check-cases",
       Seq("start" -> "1", "size" -> "100")
     )
 
-  def getMyClientsCheckCases(propertyLinkSubmissionId: String)(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[CheckCasesWithClient] =
+  def getMyClientsCheckCases(propertyLinkSubmissionId: String)(implicit request: RequestWithPrincipal[_]): Future[CheckCasesWithClient] =
     http.GET[CheckCasesWithClient](
       s"$voaModernisedApiStubBaseUrl/external-case-management-api/my-organisation/clients/all/property-links/$propertyLinkSubmissionId/check-cases",
       Seq("start" -> "1", "size" -> "100")
@@ -53,7 +53,7 @@ class ExternalCaseManagementApi @Inject()(
   def canChallenge(propertyLinkSubmissionId: String,
                    checkCaseRef: String,
                    valuationId: Long,
-                   party: String)(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[Option[CanChallengeResponse]] = {
+                   party: String)(implicit request: RequestWithPrincipal[_]): Future[Option[CanChallengeResponse]] = {
     party match {
       case "client" => http.GET[HttpResponse](s"$voaModernisedApiStubBaseUrl/external-case-management-api/my-organisation/property-links/$propertyLinkSubmissionId/check-cases/$checkCaseRef/canChallenge?valuationId=$valuationId")
         .map(handleCanChallengeResponse) recover toNone

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,12 @@
 package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
 import basespecs.BaseUnitSpec
-import binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
+import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
 import models.PaginationParams
 import models.modernised.externalpropertylink.myclients.{ClientPropertyLink, PropertyLinksWithClient}
 import models.modernised.externalpropertylink.myorganisations.{PropertyLinkWithAgents, PropertyLinksWithAgents}
-import models.voa.propertylinking.requests.CreatePropertyLink
+import models.modernised.externalpropertylink.requests.CreatePropertyLink
 import org.mockito.ArgumentMatchers.{any, eq => mEq}
 import org.mockito.Mockito._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}

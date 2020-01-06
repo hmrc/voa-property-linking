@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package models.voa.propertylinking.requests
 
 import basespecs.BaseUnitSpec
 import models.FileInfo
+import models.modernised.externalpropertylink.requests.CreatePropertyLink
 import models.modernised.{Capacity, Evidence, EvidenceType, ProvidedEvidence}
 
 class CreatePropertyLinkSpec extends BaseUnitSpec {

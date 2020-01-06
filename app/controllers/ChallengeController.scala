@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,9 @@ import uk.gov.hmrc.voapropertylinking.connectors.modernised.ExternalCaseManageme
 
 import scala.concurrent.ExecutionContext
 
+/*
+  TODO move this to challenge backend.
+ */
 class ChallengeController @Inject()(
                                      authenticated: AuthenticatedActionBuilder,
                                      externalCaseManagementApi: ExternalCaseManagementApi

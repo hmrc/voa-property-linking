@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package repositories
 import com.google.inject.name.Named
 import com.google.inject.{ImplementedBy, Singleton}
 import javax.inject.Inject
-import models.voa.valuation.dvr.DetailedValuationRequest
+import models.modernised.ccacasemanagement.requests.DetailedValuationRequest
 import play.api.Logger
 import play.api.libs.json._
 import play.modules.reactivemongo.ReactiveMongoComponent

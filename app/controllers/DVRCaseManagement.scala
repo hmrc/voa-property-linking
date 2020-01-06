@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package controllers
 
 import javax.inject.Inject
-import models.voa.valuation.dvr.DetailedValuationRequest
+import models.modernised.ccacasemanagement.requests.DetailedValuationRequest
 import play.api.Logger
 import play.api.http.HttpEntity.Streamed
 import play.api.libs.json.{JsValue, Json}
@@ -70,11 +70,12 @@ class DVRCaseManagement @Inject()(
                     ): Action[AnyContent] = authenticated.async { implicit request =>
     externalValuationManagementApi
       .getDvrDocument(valuationId, uarn, propertyLinkId, fileRef)
-      .map(document =>
+      .map { document =>
+        val headers = document.headers.headers.mapValues(_.mkString(","))
         Result(
-          ResponseHeader(200, document.headers),
-          Streamed(document.body, document.contentLength, document.contentType))
-      )
+          ResponseHeader(200, headers),
+          Streamed(document.body, headers.get(CONTENT_LENGTH).map(_.toLong), headers.get(CONTENT_TYPE)))
+      }
   }
 
   def dvrExists(

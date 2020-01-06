@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ class CheckCaseControllerSpec extends BaseControllerSpec with AllMocks {
               client = Client(1L, "test acne"),
               submittedBy = "test user")))
 
-        when(mockExternalCaseManagementApi.getMyClientsCheckCases(any())(any(), any()))
+        when(mockExternalCaseManagementApi.getMyClientsCheckCases(any())(any()))
           .thenReturn(Future.successful(checkCasesWithClient))
 
         val result: Future[Result] = controller.getCheckCases("PL1", "agent")(request)
@@ -69,8 +69,8 @@ class CheckCaseControllerSpec extends BaseControllerSpec with AllMocks {
             checkcases shouldBe checkCasesWithClient
         }
 
-        verify(mockExternalCaseManagementApi, times(1)).getMyClientsCheckCases(any())(any(), any())
-        verify(mockExternalCaseManagementApi, never()).getMyOrganisationCheckCases(any())(any(), any())
+        verify(mockExternalCaseManagementApi, times(1)).getMyClientsCheckCases(any())(any())
+        verify(mockExternalCaseManagementApi, never()).getMyOrganisationCheckCases(any())(any())
       }
     }
 
@@ -94,7 +94,7 @@ class CheckCaseControllerSpec extends BaseControllerSpec with AllMocks {
               agent = None,
               submittedBy = "test user")))
 
-        when(mockExternalCaseManagementApi.getMyOrganisationCheckCases(any())(any(), any()))
+        when(mockExternalCaseManagementApi.getMyOrganisationCheckCases(any())(any()))
           .thenReturn(Future.successful(checkCasesWithAgent))
 
         val result: Future[Result] = controller.getCheckCases("PL1", "client")(request)
@@ -105,15 +105,15 @@ class CheckCaseControllerSpec extends BaseControllerSpec with AllMocks {
             checkcases shouldBe checkCasesWithAgent
         }
 
-        verify(mockExternalCaseManagementApi, never()).getMyClientsCheckCases(any())(any(), any())
-        verify(mockExternalCaseManagementApi, times(1)).getMyOrganisationCheckCases(any())(any(), any())
+        verify(mockExternalCaseManagementApi, never()).getMyClientsCheckCases(any())(any())
+        verify(mockExternalCaseManagementApi, times(1)).getMyOrganisationCheckCases(any())(any())
       }
     }
 
     "their is an error calling modernised the controller" should {
       "return 200 OK with a defaulted CheckCaseWithAgent" in new Setup {
 
-        when(mockExternalCaseManagementApi.getMyOrganisationCheckCases(any())(any(), any()))
+        when(mockExternalCaseManagementApi.getMyOrganisationCheckCases(any())(any()))
           .thenReturn(Future.failed(new Exception))
 
         val result: Future[Result] = controller.getCheckCases("PL1", "client")(request)
@@ -124,13 +124,13 @@ class CheckCaseControllerSpec extends BaseControllerSpec with AllMocks {
             checkcases shouldBe CheckCasesWithAgent(1, 100, 0, 0, Nil)
         }
 
-        verify(mockExternalCaseManagementApi, never()).getMyClientsCheckCases(any())(any(), any())
-        verify(mockExternalCaseManagementApi, times(1)).getMyOrganisationCheckCases(any())(any(), any())
+        verify(mockExternalCaseManagementApi, never()).getMyClientsCheckCases(any())(any())
+        verify(mockExternalCaseManagementApi, times(1)).getMyOrganisationCheckCases(any())(any())
       }
 
       "return 200 OK with a defaulted CheckCaseWithClient" in new Setup {
 
-        when(mockExternalCaseManagementApi.getMyClientsCheckCases(any())(any(), any()))
+        when(mockExternalCaseManagementApi.getMyClientsCheckCases(any())(any()))
           .thenReturn(Future.failed(new Exception))
 
         val result: Future[Result] = controller.getCheckCases("PL1", "agent")(request)
@@ -141,8 +141,8 @@ class CheckCaseControllerSpec extends BaseControllerSpec with AllMocks {
             checkcases shouldBe CheckCasesWithClient(1, 100, 0, 0, Nil)
         }
 
-        verify(mockExternalCaseManagementApi, times(1)).getMyClientsCheckCases(any())(any(), any())
-        verify(mockExternalCaseManagementApi, never()).getMyOrganisationCheckCases(any())(any(), any())
+        verify(mockExternalCaseManagementApi, times(1)).getMyClientsCheckCases(any())(any())
+        verify(mockExternalCaseManagementApi, never()).getMyOrganisationCheckCases(any())(any())
       }
     }
 
@@ -153,8 +153,8 @@ class CheckCaseControllerSpec extends BaseControllerSpec with AllMocks {
         status(result) shouldBe NOT_IMPLEMENTED
         contentAsString(result) shouldBe "invalid party (projection) supplied: INVALID"
 
-        verify(mockExternalCaseManagementApi, never()).getMyClientsCheckCases(any())(any(), any())
-        verify(mockExternalCaseManagementApi, never()).getMyOrganisationCheckCases(any())(any(), any())
+        verify(mockExternalCaseManagementApi, never()).getMyClientsCheckCases(any())(any())
+        verify(mockExternalCaseManagementApi, never()).getMyOrganisationCheckCases(any())(any())
       }
     }
   }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ class ChallengeControllerSpec extends BaseControllerSpec {
   "canChallenge endpoint" should {
     "return 200 OK" when {
       "user can challenge" in new Setup {
-        when(mockExternalCaseManagementApi.canChallenge(mEq(plSubmissionId), any(), any(), any())(any(), any()))
+        when(mockExternalCaseManagementApi.canChallenge(mEq(plSubmissionId), any(), any(), any())(any()))
           .thenReturn(Future.successful(Some(canChallengeResponse)))
 
         val result: Future[Result] =

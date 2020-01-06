@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
 import basespecs.BaseUnitSpec
 import models._
+import models.modernised.addressmanagement.{Addresses, DetailedAddress, SimpleAddress}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import play.api.libs.json.{JsValue, Json}
@@ -49,13 +50,13 @@ class AddressManagementApiSpec extends BaseUnitSpec {
       postTown = "Liverpool",
       postcode = postcode
     )
-    val addressLookupResult = APIAddressLookupResult(Seq(detailedAddress))
+    val addressLookupResult = Addresses(Seq(detailedAddress))
   }
 
   "AddressConnector.get" should {
     "return the address associated with the address unit id" when {
       "it's returned from modernised" in new Setup {
-        when(mockDefaultHttpClient.GET[APIAddressLookupResult](any())(any(), any(), any()))
+        when(mockDefaultHttpClient.GET[Addresses](any())(any(), any(), any()))
           .thenReturn(Future.successful(addressLookupResult))
 
         connector.get(addressUnitId).futureValue shouldBe Some(simpleAddress)
@@ -63,7 +64,7 @@ class AddressManagementApiSpec extends BaseUnitSpec {
     }
     "return None" when {
       "the call to modernised fails for whatever reason" in new Setup {
-        when(mockDefaultHttpClient.GET[APIAddressLookupResult](any())(any(), any(), any()))
+        when(mockDefaultHttpClient.GET[Addresses](any())(any(), any(), any()))
           .thenReturn(Future.failed(new RuntimeException()))
 
         connector.get(addressUnitId).futureValue shouldBe None
@@ -74,7 +75,7 @@ class AddressManagementApiSpec extends BaseUnitSpec {
   "find an address by postcode" should {
     "return a detailed address" when {
       "it's returned from modernised" in new Setup {
-        when(mockDefaultHttpClient.GET[APIAddressLookupResult](any())(any(), any(), any()))
+        when(mockDefaultHttpClient.GET[Addresses](any())(any(), any(), any()))
           .thenReturn(Future.successful(addressLookupResult))
 
         connector.find(postcode).futureValue.loneElement shouldBe detailedAddress
