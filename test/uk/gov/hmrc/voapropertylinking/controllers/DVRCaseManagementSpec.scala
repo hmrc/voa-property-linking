@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package controllers
+package uk.gov.hmrc.voapropertylinking.controllers
 
+import java.net.URI
 import java.time.LocalDateTime
 
 import akka.stream.scaladsl.Source
@@ -25,15 +26,16 @@ import models.modernised.ccacasemanagement.requests.DetailedValuationRequest
 import models.modernised.externalvaluationmanagement.documents.{Document, DocumentSummary, DvrDocumentFiles}
 import org.mockito.ArgumentMatchers.{eq => matching, _}
 import org.mockito.Mockito._
-import play.api.libs.json.Json
-import play.api.libs.ws.{DefaultWSResponseHeaders, StreamedResponse}
-import play.api.test.FakeRequest
-import repositories.DVRRecordRepository
+import play.api.libs.json.{JsValue, Json}
+import play.api.libs.ws.{WSCookie, WSResponse}
+import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.voapropertylinking.connectors.modernised.{CCACaseManagementApi, ExternalValuationManagementApi}
+import uk.gov.hmrc.voapropertylinking.repositories.DVRRecordRepository
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.xml.Elem
 
 class DVRCaseManagementSpec extends BaseControllerSpec {
 
@@ -129,8 +131,39 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
 
   "get dvr document" should {
     "return 200 Ok with the file chunked." in {
+      val mockWsResponse = {
+        val m = new WSResponse {
+          override def status: Int = ???
+
+          override def statusText: String = ???
+
+          override def headers: Map[String, Seq[String]] = Map()
+
+          override def underlying[T]: T = ???
+
+          override def cookies: Seq[WSCookie] = ???
+
+          override def cookie(name: String): Option[WSCookie] = ???
+
+          override def body: String = ???
+
+          override def bodyAsBytes: ByteString = ???
+
+          override def bodyAsSource: Source[ByteString, _] = Source.empty[ByteString]
+
+          override def allHeaders: Map[String, Seq[String]] = ???
+
+          override def xml: Elem = ???
+
+          override def json: JsValue = ???
+
+          override def uri: URI = ???
+        }
+        m
+      }
+
       when(mockExternalValuationManagementapi.getDvrDocument(any(), any(), any(), any())(any()))
-        .thenReturn(Future.successful(StreamedResponse(DefaultWSResponseHeaders(200, Map()), Source.single(ByteString(12)))))
+        .thenReturn(Future.successful(mockWsResponse))
 
       val result = testController.getDvrDocument(1L, 3L, "PL-12345", "1L")(FakeRequest())
 
@@ -139,6 +172,7 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
   }
 
   lazy val testController = new DVRCaseManagement(
+    Helpers.stubControllerComponents(),
     preAuthenticatedActionBuilders(),
     mockCcaCaseManagementConnector,
     mockExternalValuationManagementapi,

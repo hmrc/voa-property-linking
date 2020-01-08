@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package controllers
+package uk.gov.hmrc.voapropertylinking.controllers
 
 import java.time.LocalDateTime
 
@@ -23,6 +23,7 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import play.api.libs.json.JsSuccess
 import play.api.mvc.Result
+import play.api.test.Helpers
 import uk.gov.hmrc.test.AllMocks
 import uk.gov.hmrc.voapropertylinking.models.modernised.casemanagement.check.CheckCaseStatus
 import uk.gov.hmrc.voapropertylinking.models.modernised.casemanagement.check.myclients.{CheckCaseWithClient, CheckCasesWithClient, Client}
@@ -33,7 +34,7 @@ import scala.concurrent.Future
 class CheckCaseControllerSpec extends BaseControllerSpec with AllMocks {
 
   trait Setup {
-    val controller = new CheckCaseController(preAuthenticatedActionBuilders(), mockExternalCaseManagementApi)
+    val controller = new CheckCaseController(Helpers.stubControllerComponents(), preAuthenticatedActionBuilders(), mockExternalCaseManagementApi)
   }
 
   "retrieving check cases" when {

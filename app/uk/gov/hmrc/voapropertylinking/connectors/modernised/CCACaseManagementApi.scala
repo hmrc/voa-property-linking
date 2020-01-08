@@ -19,8 +19,8 @@ package uk.gov.hmrc.voapropertylinking.connectors.modernised
 import javax.inject.Inject
 import models.modernised.ccacasemanagement.requests.DetailedValuationRequest
 import uk.gov.hmrc.http._
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
-import uk.gov.hmrc.play.config.ServicesConfig
 
 import scala.concurrent.{ExecutionContext, Future}
 

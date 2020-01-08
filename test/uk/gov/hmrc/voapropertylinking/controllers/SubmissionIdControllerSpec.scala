@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package controllers
+package uk.gov.hmrc.voapropertylinking.controllers
 
 import basespecs.BaseControllerSpec
 import org.mockito.Mockito._
 import play.api.libs.json.Json
-import play.api.test.FakeRequest
-import repositories.SequenceGeneratorMongoRepository
+import play.api.test.{FakeRequest, Helpers}
+import uk.gov.hmrc.voapropertylinking.repositories.SequenceGeneratorMongoRepository
 
 import scala.concurrent.Future
 
@@ -33,7 +33,7 @@ class SubmissionIdControllerSpec extends BaseControllerSpec {
     val mockSequenceGeneratorMongoRepository: SequenceGeneratorMongoRepository =
       mock[SequenceGeneratorMongoRepository]
     when(mockSequenceGeneratorMongoRepository.getNextSequenceId(prefix)).thenReturn(Future.successful(100000L))
-    val submissionIdController = new SubmissionIdController(preAuthenticatedActionBuilders(), mockSequenceGeneratorMongoRepository)
+    val submissionIdController = new SubmissionIdController(Helpers.stubControllerComponents(), preAuthenticatedActionBuilders(), mockSequenceGeneratorMongoRepository)
   }
 
 

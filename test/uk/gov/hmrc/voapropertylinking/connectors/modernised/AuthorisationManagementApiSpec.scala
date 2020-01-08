@@ -23,7 +23,6 @@ import org.mockito.Mockito.when
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
-import uk.gov.hmrc.play.config.ServicesConfig
 
 import scala.concurrent.Future
 
@@ -108,7 +107,7 @@ class AuthorisationManagementApiSpec extends BaseUnitSpec {
         outcome = "ok"
       )
 
-      when(http.PUT[APIRepresentationResponse, HttpResponse](any(), any())(any(), any(), any(), any()))
+      when(http.PUT[APIRepresentationResponse, HttpResponse](any(), any(), any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(HttpResponse(200)))
 
       val result: Unit = connector.response(response)(hc).futureValue
@@ -121,7 +120,7 @@ class AuthorisationManagementApiSpec extends BaseUnitSpec {
 
       val authorisedPartyId = 34567890
 
-      when(http.PATCH[JsValue, HttpResponse](any(), any())(any(), any(), any(), any()))
+      when(http.PATCH[JsValue, HttpResponse](any(), any(), any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(HttpResponse(200)))
 
       val result: Unit = connector.revoke(authorisedPartyId)(hc).futureValue

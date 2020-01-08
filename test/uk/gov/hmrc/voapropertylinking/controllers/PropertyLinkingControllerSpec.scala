@@ -14,27 +14,27 @@
  * limitations under the License.
  */
 
-package controllers
+package uk.gov.hmrc.voapropertylinking.controllers
 
 import java.time.Instant
 
 import basespecs.BaseControllerSpec
-import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import cats.data._
 import models._
-import models.searchApi.{OwnerAuthResult => ModernisedOwnerAuthResult}
 import models.mdtp.propertylink.myclients.PropertyLinksWithClients
 import models.mdtp.propertylink.projections.{OwnerAuthResult, OwnerAuthorisation}
 import models.mdtp.propertylink.requests.PropertyLinkRequest
 import models.modernised.PropertyLinkStatus
 import models.modernised.externalpropertylink.myclients.{ClientDetails, ClientPropertyLink, PropertyLinkWithClient}
+import models.searchApi.{OwnerAuthResult => ModernisedOwnerAuthResult}
 import org.mockito.ArgumentMatchers.{any, eq => mEq}
 import org.mockito.Mockito._
 import play.api.libs.json.Json
 import play.api.mvc.Result
-import play.api.test.FakeRequest
+import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.http.{HttpResponse, Upstream5xxResponse}
 import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
+import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -42,6 +42,7 @@ import scala.concurrent.Future
 class PropertyLinkingControllerSpec extends BaseControllerSpec {
 
   lazy val testController = new PropertyLinkingController(
+    controllerComponents = Helpers.stubControllerComponents(),
     authenticated = preAuthenticatedActionBuilders(),
     authorisationSearchApi = mockAuthorisationSearchApi,
     mdtpDashboardManagementApi = mockMdtpDashboardManagementApi,

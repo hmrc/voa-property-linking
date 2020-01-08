@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package repositories
+package uk.gov.hmrc.voapropertylinking.repositories
 
 import com.google.inject.Singleton
 import javax.inject.Inject
@@ -23,7 +23,7 @@ import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.bson.{BSONDocument, BSONInteger, BSONString}
 import reactivemongo.play.json.ImplicitBSONHandlers._
 import reactivemongo.play.json.collection.JSONBatchCommands.FindAndModifyCommand
-import uk.gov.hmrc.mongo.{ReactiveRepository, Repository}
+import uk.gov.hmrc.mongo.ReactiveRepository
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -34,7 +34,7 @@ object Sequence {
   val format: OFormat[Sequence] = Json.format
 }
 
-trait SequenceGeneratorRepository extends Repository[Sequence, String] {
+trait SequenceGeneratorRepository extends ReactiveRepository[Sequence, String] {
   def getNextSequenceId(key: String): Future[Long]
 }
 
@@ -43,7 +43,7 @@ class SequenceGeneratorMongoRepository @Inject()(mongo: ReactiveMongoComponent)
   extends ReactiveRepository[Sequence, String](
     collectionName = "sequences",
     mongo = mongo.mongoConnector.db,
-    domainFormat = Json.format[Sequence],
+    domainFormat = Sequence.format,
     idFormat = implicitly[Format[String]]
   ) with SequenceGeneratorRepository {
 
@@ -70,6 +70,6 @@ class SequenceGeneratorMongoRepository @Inject()(mongo: ReactiveMongoComponent)
   }
 
   private def findLatestSequence(key: String): Future[Option[Sequence]] =
-    collection.find(Json.obj("_id" -> key)).sort(Json.obj("_id" -> -1)).one[Sequence]
+    find("_id" -> key).map(_.headOption)
 
 }

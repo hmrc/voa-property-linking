@@ -53,7 +53,9 @@
         <appender-ref ref="STDOUT"/>
     </logger>
 
+
     <logger name="reactivemongo.core.actors.MongoDBSystem" level="WARN"/>
+    <logger name="uk.gov.hmrc.audit.handler.DatastreamHandler" level="WARN"/>
 
     <root level="INFO">
         <appender-ref ref="FILE"/>

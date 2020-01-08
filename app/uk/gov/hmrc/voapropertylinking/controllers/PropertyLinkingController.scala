@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-package controllers
+package uk.gov.hmrc.voapropertylinking.controllers
 
 import uk.gov.hmrc.voapropertylinking.binders.propertylinks.temp.GetMyOrganisationsPropertyLinksParametersWithAgentFiltering
 import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import cats.data.OptionT
 import javax.inject.{Inject, Named}
-
 import models._
 import models.mdtp.propertylink.projections.OwnerAuthResult
 import models.mdtp.propertylink.requests.{APIPropertyLinkRequest, PropertyLinkRequest}
 import play.api.Logger
 import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.voapropertylinking.services.{AssessmentService, PropertyLinkingService}
 import uk.gov.hmrc.http.{HeaderCarrier, Upstream5xxResponse}
 import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
@@ -38,6 +37,7 @@ import uk.gov.hmrc.voapropertylinking.utils.Cats
 import scala.concurrent.{ExecutionContext, Future}
 
 class PropertyLinkingController @Inject()(
+                                           controllerComponents: ControllerComponents,
                                            authenticated: AuthenticatedActionBuilder,
                                            authorisationSearchApi: AuthorisationSearchApi,
                                            mdtpDashboardManagementApi: MdtpDashboardManagementApi,
@@ -46,7 +46,7 @@ class PropertyLinkingController @Inject()(
                                            customerManagementApi: CustomerManagementApi,
                                            auditingService: AuditingService,
                                            @Named("agentQueryParameterEnabledExternal") agentQueryParameterEnabledExternal: Boolean
-                                         )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController with Cats {
+                                         )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController(controllerComponents) with Cats {
 
   def create(): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
     withJsonBody[PropertyLinkRequest] { propertyLinkRequest =>

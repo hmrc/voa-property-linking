@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package repositories
+package uk.gov.hmrc.voapropertylinking.repositories
 
 import com.google.inject.name.Named
 import com.google.inject.{ImplementedBy, Singleton}
@@ -24,13 +24,12 @@ import play.api.Logger
 import play.api.libs.json._
 import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.indexes.{Index, IndexType}
-import reactivemongo.bson.{BSONDateTime, BSONDocument}
+import reactivemongo.bson.BSONDocument
 import reactivemongo.core.errors.DatabaseException
 import uk.gov.hmrc.mongo.ReactiveRepository
-import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
 
 @Singleton
@@ -38,7 +37,7 @@ class DVRRepository @Inject()(
                                mongo: ReactiveMongoComponent,
                                @Named("dvrCollectionName") val dvrCollectionName: String,
                                config: ServicesConfig
-                             ) extends ReactiveRepository[DVRRecord, String](
+                             )(implicit executionContext: ExecutionContext) extends ReactiveRepository[DVRRecord, String](
   dvrCollectionName,
   mongo.mongoConnector.db,
   DVRRecord.mongoFormat,
@@ -56,7 +55,7 @@ class DVRRepository @Inject()(
         request.organisationId,
         request.assessmentRef,
         request.agents,
-        now))
+        System.currentTimeMillis()))
       .map(_ => ())
       .recover {
         case e: DatabaseException => Logger.debug(e.getMessage())
@@ -77,19 +76,16 @@ class DVRRepository @Inject()(
 
   private def query(organisationId: Long): (String, Json.JsValueWrapper) =
     "$or" -> Json.arr(Json.obj("organisationId" -> organisationId), Json.obj("agents" -> organisationId))
-
-  private def now = Some(BSONDateTime(System.currentTimeMillis))
 }
 
 case class DVRRecord(
                       organisationId: Long,
                       assessmentRef: Long,
                       agents: Option[List[Long]],
-                      createdAt: Option[BSONDateTime]
+                      createdAt: Long
                     )
 
 object DVRRecord {
-  import reactivemongo.play.json.BSONFormats.BSONDateTimeFormat
   val mongoFormat: OFormat[DVRRecord] = Json.format
 }
 

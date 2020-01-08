@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package controllers
+package uk.gov.hmrc.voapropertylinking.controllers
 
 import javax.inject.Inject
 import models._
 import models.mdtp.propertylink.projections.OwnerAuthResult
 import play.api.Logger
 import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
 import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import uk.gov.hmrc.voapropertylinking.connectors.modernised._
@@ -29,12 +29,13 @@ import uk.gov.hmrc.voapropertylinking.connectors.modernised._
 import scala.concurrent.{ExecutionContext, Future}
 
 class PropertyRepresentationController @Inject()(
+                                                  controllerComponents: ControllerComponents,
                                                   authenticated: AuthenticatedActionBuilder,
                                                   authorisationManagementApi: AuthorisationManagementApi,
                                                   authorisationSearchApi: AuthorisationSearchApi,
                                                   customerManagementApi: CustomerManagementApi,
                                                   auditingService: AuditingService
-                                                )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController {
+                                                )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController(controllerComponents) {
 
   def create(): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
     withJsonBody[RepresentationRequest] { reprRequest =>

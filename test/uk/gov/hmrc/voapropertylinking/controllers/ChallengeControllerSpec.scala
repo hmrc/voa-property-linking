@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package controllers
+package uk.gov.hmrc.voapropertylinking.controllers
 
 import basespecs.BaseControllerSpec
 import models.CanChallengeResponse
@@ -22,7 +22,7 @@ import org.mockito.ArgumentMatchers.{any, eq => mEq}
 import org.mockito.Mockito._
 import play.api.libs.json.{JsBoolean, JsDefined}
 import play.api.mvc.Result
-import play.api.test.FakeRequest
+import play.api.test.{FakeRequest, Helpers}
 
 import scala.concurrent.Future
 
@@ -31,7 +31,7 @@ class ChallengeControllerSpec extends BaseControllerSpec {
 
   trait Setup {
     val foo = 1L
-    val controller = new ChallengeController(preAuthenticatedActionBuilders(), mockExternalCaseManagementApi)
+    val controller = new ChallengeController(Helpers.stubControllerComponents(), preAuthenticatedActionBuilders(), mockExternalCaseManagementApi)
     val plSubmissionId = "PL12AB34"
     val canChallengeResponse = CanChallengeResponse(result = true, reasonCode = None, reason = None)
   }

@@ -14,28 +14,28 @@
  * limitations under the License.
  */
 
-package controllers
+package uk.gov.hmrc.voapropertylinking.controllers
 
 import javax.inject.Inject
 import models.modernised.ccacasemanagement.requests.DetailedValuationRequest
 import play.api.Logger
+import play.api.http.HttpEntity
 import play.api.http.HttpEntity.Streamed
 import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.{Action, AnyContent, ResponseHeader, Result}
-import repositories.DVRRecordRepository
+import play.api.mvc._
+import uk.gov.hmrc.voapropertylinking.repositories.DVRRecordRepository
 import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
 import uk.gov.hmrc.voapropertylinking.connectors.modernised.{CCACaseManagementApi, ExternalValuationManagementApi}
 
 import scala.concurrent.ExecutionContext
 
 class DVRCaseManagement @Inject()(
+                                   controllerComponents: ControllerComponents,
                                    authenticated: AuthenticatedActionBuilder,
                                    dvrCaseManagementV2: CCACaseManagementApi,
                                    externalValuationManagementApi: ExternalValuationManagementApi,
                                    dvrRecordRepository: DVRRecordRepository
-                                 )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController {
-
-  val logger = Logger(this.getClass.getName)
+                                 )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController(controllerComponents) {
 
   def requestDetailedValuationV2: Action[JsValue] = authenticated.async(parse.json) { implicit request =>
     withJsonBody[DetailedValuationRequest] { dvrRequest =>
@@ -71,10 +71,12 @@ class DVRCaseManagement @Inject()(
     externalValuationManagementApi
       .getDvrDocument(valuationId, uarn, propertyLinkId, fileRef)
       .map { document =>
-        val headers = document.headers.headers.mapValues(_.mkString(","))
-        Result(
-          ResponseHeader(200, headers),
-          Streamed(document.body, headers.get(CONTENT_LENGTH).map(_.toLong), headers.get(CONTENT_TYPE)))
+
+        val contentType = document.headers.mapValues(_.mkString(",")).getOrElse(CONTENT_TYPE, "application/octet-stream")
+
+        document.headers.mapValues(_.mkString(",")).get(CONTENT_LENGTH).map(_.toLong)
+          .fold(Ok.chunked(document.bodyAsSource).as(contentType))(
+            length => Ok.sendEntity(HttpEntity.Streamed(document.bodyAsSource, Some(length), Some(contentType))))
       }
   }
 

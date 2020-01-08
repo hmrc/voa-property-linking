@@ -14,24 +14,18 @@
  * limitations under the License.
  */
 
-package controllers
+package uk.gov.hmrc.voapropertylinking.controllers
 
-import play.api.libs.json.{JsError, JsSuccess, JsValue, Reads}
-import play.api.mvc.{Controller, Request, Result}
+import play.api.Logger
+import play.api.mvc.{ControllerComponents, Request}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
+import uk.gov.hmrc.play.bootstrap.controller.BackendController
 import uk.gov.hmrc.voapropertylinking.utils.Cats
 
-import scala.concurrent.Future
+abstract class PropertyLinkingBaseController(controllerComponents: ControllerComponents) extends BackendController(controllerComponents) with Cats {
 
-trait PropertyLinkingBaseController extends Controller with Cats {
-
+  protected val logger = Logger(this.getClass.getName)
   implicit def hc(implicit request: Request[_]): HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
 
-  def withJsonBody[T](f: T => Future[Result])(implicit request: Request[JsValue], reads: Reads[T]): Future[Result] = {
-    request.body.validate[T] match {
-      case JsSuccess(v, _) => f(v)
-      case JsError(err) => Future.successful(BadRequest(err.toString))
-    }
-  }
 }

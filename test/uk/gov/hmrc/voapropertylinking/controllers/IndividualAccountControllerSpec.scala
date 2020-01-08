@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package controllers
+package uk.gov.hmrc.voapropertylinking.controllers
 
 import basespecs.BaseControllerSpec
 import models.{IndividualAccount, IndividualAccountId, IndividualAccountSubmission, IndividualDetails}
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import play.api.libs.json.Json
-import play.api.test.FakeRequest
+import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import uk.gov.hmrc.voapropertylinking.connectors.mdtp.BusinessRatesAuthConnector
@@ -118,6 +118,7 @@ class IndividualAccountControllerSpec extends BaseControllerSpec {
   lazy val mockBrAuth: BusinessRatesAuthConnector = mock[BusinessRatesAuthConnector]
 
   lazy val testController = new IndividualAccountController(
+    controllerComponents = Helpers.stubControllerComponents(),
     authenticated = preAuthenticatedActionBuilders(),
     customerManagementApi = mockIndividualAccountConnector,
     auditingService = mock[AuditingService],

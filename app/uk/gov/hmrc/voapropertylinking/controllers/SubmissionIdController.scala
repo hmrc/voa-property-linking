@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-package controllers
+package uk.gov.hmrc.voapropertylinking.controllers
 
 import javax.inject.Inject
 import play.api.libs.json.Json
-import play.api.mvc.{Action, AnyContent}
-import repositories.SequenceGeneratorMongoRepository
+import play.api.mvc.{Action, AnyContent, ControllerComponents}
+import uk.gov.hmrc.voapropertylinking.repositories.SequenceGeneratorMongoRepository
 import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
 
 import scala.concurrent.ExecutionContext
 
 class SubmissionIdController @Inject()(
+                                        controllerComponents: ControllerComponents,
                                         authenticated: AuthenticatedActionBuilder,
                                         val sequenceGenerator: SequenceGeneratorMongoRepository
-                                      )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController {
+                                      )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController(controllerComponents) {
 
   val charMapping: Map[Char, Char] = Map(
     // we have 26 alpha numeric character as input, i.e. 0-9, A-P

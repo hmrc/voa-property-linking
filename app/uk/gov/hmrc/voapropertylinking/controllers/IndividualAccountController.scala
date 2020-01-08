@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package controllers
+package uk.gov.hmrc.voapropertylinking.controllers
 
 import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import javax.inject.Inject
 import models.{IndividualAccountId, IndividualAccountSubmission}
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Results.EmptyContent
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
 import uk.gov.hmrc.voapropertylinking.connectors.mdtp.BusinessRatesAuthConnector
 import uk.gov.hmrc.voapropertylinking.connectors.modernised.CustomerManagementApi
@@ -29,11 +29,12 @@ import uk.gov.hmrc.voapropertylinking.connectors.modernised.CustomerManagementAp
 import scala.concurrent.ExecutionContext
 
 class IndividualAccountController @Inject()(
+                                             controllerComponents: ControllerComponents,
                                              authenticated: AuthenticatedActionBuilder,
                                              customerManagementApi: CustomerManagementApi,
                                              auditingService: AuditingService,
                                              brAuth: BusinessRatesAuthConnector
-                                           )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController {
+                                           )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController(controllerComponents) {
 
   case class IndividualAccount(id: IndividualAccountId, submission: IndividualAccountSubmission)
 

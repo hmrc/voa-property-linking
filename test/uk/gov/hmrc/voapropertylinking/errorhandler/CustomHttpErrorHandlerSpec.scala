@@ -16,15 +16,15 @@
 
 package uk.gov.hmrc.voapropertylinking.errorhandler
 
+import basespecs.BaseUnitSpec
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.mvc.RequestHeader
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.{BearerTokenExpired, InvalidBearerToken, MissingBearerToken}
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import uk.gov.hmrc.voapropertylinking.connectors.modernised.errorhandler.VoaClientException
 
-class CustomHttpErrorHandlerSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
+class CustomHttpErrorHandlerSpec extends BaseUnitSpec with MockitoSugar {
 
   val customHttpErrorHandler = new CustomHttpErrorHandler()
 

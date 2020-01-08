@@ -19,7 +19,8 @@ package uk.gov.hmrc.voapropertylinking.actions
 import javax.inject.Inject
 import play.api.libs.json.Json
 import play.api.mvc._
-import uk.gov.hmrc.auth.core.retrieve._
+import uk.gov.hmrc.auth.core.retrieve.v2._
+import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
@@ -28,9 +29,10 @@ import uk.gov.hmrc.voapropertylinking.auth.{Principal, RequestWithPrincipal}
 import scala.concurrent.{ExecutionContext, Future}
 
 class AuthenticatedActionBuilder @Inject()(
+                                            controllerComponents: ControllerComponents,
                                             override val authConnector: AuthConnector
                                           )(implicit override val executionContext: ExecutionContext)
-  extends ActionBuilder[RequestWithPrincipal]
+  extends ActionBuilder[RequestWithPrincipal, AnyContent]
     with AuthorisedFunctions
     with Results {
 
@@ -48,5 +50,8 @@ class AuthenticatedActionBuilder @Inject()(
         }
     }
   }
+
+  override def parser: BodyParser[AnyContent] = controllerComponents.parsers.anyContent
+
 }
 

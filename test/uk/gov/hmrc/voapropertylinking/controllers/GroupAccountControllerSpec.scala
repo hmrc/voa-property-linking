@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package controllers
+package uk.gov.hmrc.voapropertylinking.controllers
 
 import java.time.Instant
 
@@ -23,7 +23,7 @@ import models._
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import play.api.libs.json.Json
-import play.api.test.FakeRequest
+import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import uk.gov.hmrc.voapropertylinking.connectors.mdtp.BusinessRatesAuthConnector
@@ -134,7 +134,7 @@ class GroupAccountControllerSpec extends BaseControllerSpec {
 
   lazy val mockBrAuth = mock[BusinessRatesAuthConnector]
 
-  lazy val testController = new GroupAccountController(preAuthenticatedActionBuilders(), mock[AuditingService], mockGroupAccountConnector, mockBrAuth)
+  lazy val testController = new GroupAccountController(Helpers.stubControllerComponents(), preAuthenticatedActionBuilders(), mock[AuditingService], mockGroupAccountConnector, mockBrAuth)
 
 }
 

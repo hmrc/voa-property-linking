@@ -16,24 +16,54 @@
 
 package uk.gov.hmrc.voapropertylinking.auditing
 
-import basespecs.WireMockSpec
+import basespecs.BaseUnitSpec
+import org.mockito.ArgumentMatchers._
+import org.mockito.Mockito._
 import play.api.http.ContentTypes
 import play.api.test.FakeRequest
-import uk.gov.hmrc.play.test.WithFakeApplication
+import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
-// TODO move this to IT Specs
 class AuditingServiceSpec
-  extends WireMockSpec
-    with ContentTypes
-    with WithFakeApplication {
+  extends BaseUnitSpec
+    with ContentTypes {
 
   implicit val request = FakeRequest()
 
-  "AuditingService.sendEvent" should {
-    "audit the extended event" in {
-      fakeApplication.injector.instanceOf[AuditingService].sendEvent[Int]("test", 999) shouldBe (())
+  trait Setup {
+    val mockAuditingConnector = mock[AuditConnector]
+
+    val auditingService = new AuditingService(mockAuditingConnector)
+  }
+
+  "sending audit event" when {
+    "auditing is working" should {
+      "audit the extended event and return unit" in new Setup {
+        when(mockAuditingConnector.sendEvent(any())(any(), any())).thenReturn(Future.successful(AuditResult.Success))
+        val result = auditingService.sendEvent("test", 999)
+
+        result shouldBe ()
+      }
+    }
+
+    "auditing is disabled" should {
+      "return unit" in new Setup {
+        when(mockAuditingConnector.sendEvent(any())(any(), any())).thenReturn(Future.successful(AuditResult.Disabled))
+        val result = auditingService.sendEvent("test", 999)
+
+        result shouldBe ()
+      }
+
+      "auditing fails" should {
+        "return unit" in new Setup {
+          when(mockAuditingConnector.sendEvent(any())(any(), any())).thenReturn(Future.successful(AuditResult.Failure("failure")))
+          val result = auditingService.sendEvent("test", 999)
+
+          result shouldBe ()
+        }
+      }
     }
   }
 

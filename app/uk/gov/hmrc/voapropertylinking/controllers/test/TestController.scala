@@ -14,22 +14,23 @@
  * limitations under the License.
  */
 
-package controllers.test
+package uk.gov.hmrc.voapropertylinking.controllers.test
 
-import controllers.PropertyLinkingBaseController
 import javax.inject.Inject
-import play.api.mvc.{Action, AnyContent}
-import repositories.DVRRecordRepository
+import play.api.mvc.{Action, AnyContent, ControllerComponents}
+import uk.gov.hmrc.voapropertylinking.repositories.DVRRecordRepository
 import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
 import uk.gov.hmrc.voapropertylinking.connectors.test.TestConnector
+import uk.gov.hmrc.voapropertylinking.controllers.PropertyLinkingBaseController
 
 import scala.concurrent.ExecutionContext
 
 class TestController @Inject()(
+                                controllerComponents: ControllerComponents,
                                 authenticated: AuthenticatedActionBuilder,
                                 testConnector: TestConnector,
                                 dvrRecordRepository: DVRRecordRepository
-                              )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController {
+                              )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController(controllerComponents) {
 
   /*
   Move tests away from this method.

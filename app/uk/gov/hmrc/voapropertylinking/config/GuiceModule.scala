@@ -38,23 +38,23 @@ import com.google.inject.AbstractModule
 import com.google.inject.name.Names
 import com.google.inject.name.Names.named
 import com.typesafe.config.ConfigException
-import play.api.Mode.Mode
 import play.api.{Configuration, Environment}
-import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
 
-class GuiceModule(environment: Environment,
-                  configuration: Configuration) extends AbstractModule with ServicesConfig {
+class GuiceModule(
+                   environment: Environment,
+                   configuration: Configuration
+                 ) extends AbstractModule {
+
+  val servicesConfig = new ServicesConfig(configuration, new RunMode(configuration, environment.mode))
+
   override def configure(): Unit = {
 
-    bind(classOf[ServicesConfig]).toInstance(new ServicesConfig {
-      override protected def mode: Mode = environment.mode
+    bind(classOf[ServicesConfig]).toInstance(servicesConfig)
 
-      override protected def runModeConfiguration: Configuration = configuration
-    })
-
-    bindConstant().annotatedWith(Names.named("dvrCollectionName")).to(configuration.getString("dvr.collection.name").get)
+    bindConstant().annotatedWith(Names.named("dvrCollectionName")).to(configuration.get[String]("dvr.collection.name"))
     bindConstant().annotatedWith(Names.named("agentQueryParameterEnabledExternal"))
-      .to(configuration.getString("featureFlags.agentQueryParameterEnabledExternal").fold(false)(_.toBoolean))
+      .to(configuration.getAndValidate[String]("featureFlags.agentQueryParameterEnabledExternal", Set("true", "false")).toBoolean)
 
     bind(classOf[Clock]).toInstance(Clock.systemUTC())
 
@@ -78,13 +78,13 @@ class GuiceModule(environment: Environment,
         "voa.createRepresentationRequest"   -> "voa.resources.authorisationManagementApi.createRepresentationRequest.path",
         "voa.representationRequestResponse" -> "voa.resources.authorisationManagementApi.representationRequestResponse.path"
       ),
-      baseUrl("voa-modernised-api")
+      servicesConfig.baseUrl("voa-modernised-api")
     )
 
   protected def bindStringWithPrefix(path: String, prefix: String, name: String = ""): Unit =
     bindConstant()
       .annotatedWith(named(resolveAnnotationName(path, name)))
-      .to(s"$prefix${configuration.getString(path).getOrElse(configException(path))}")
+      .to(s"$prefix${configuration.get[String](path)}")
 
   private def resolveAnnotationName(path: String, name: String): String = name match {
     case "" => path
@@ -92,8 +92,4 @@ class GuiceModule(environment: Environment,
   }
 
   private def configException(path: String) = throw new ConfigException.Missing(path)
-
-  override protected def mode: Mode = environment.mode
-
-  override protected def runModeConfiguration: Configuration = configuration
 }

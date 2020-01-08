@@ -19,10 +19,10 @@ package uk.gov.hmrc.voapropertylinking.connectors.modernised
 import javax.inject.{Inject, Named}
 import models.modernised.ValuationHistoryResponse
 import models.modernised.externalvaluationmanagement.documents.DvrDocumentFiles
-import play.api.http.HeaderNames.{CONTENT_LENGTH, CONTENT_TYPE, _}
-import play.api.libs.ws.{StreamedResponse, WSClient}
+import play.api.http.HeaderNames._
+import play.api.libs.ws.{WSClient, WSResponse}
 import uk.gov.hmrc.http._
-import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
 import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
 
@@ -62,21 +62,20 @@ class ExternalValuationManagementApi @Inject()(
                       valuationId: Long,
                       uarn: Long,
                       propertyLinkId: String,
-                      fileRef: String)(implicit request: RequestWithPrincipal[_]): Future[StreamedResponse] =
+                      fileRef: String)(implicit request: RequestWithPrincipal[_]): Future[WSResponse] =
     wsClient
       .url(s"$url/properties/$uarn/valuations/$valuationId/files/$fileRef?propertyLinkId=$propertyLinkId")
       .withMethod("GET")
-      .withHeaders(List(
+      .withHttpHeaders(List(
         "GG-EXTERNAL-ID" -> request.principal.externalId,
         USER_AGENT -> appName,
         "GG-GROUP-ID"    -> request.principal.groupId): _*)
-      .stream().flatMap {
-      case sr @StreamedResponse(hs, _) =>
-        hs.status match {
-          case s if is4xx(s) => Future.failed(Upstream4xxResponse(s"Upload failed with status ${hs.status}.", s, s))
-          case s if is5xx(s) => Future.failed(Upstream5xxResponse(s"Upload failed with status ${hs.status}.", s, s))
-          case _ => Future.successful(sr)
-        }
+      .stream().flatMap { response =>
+      response.status match {
+        case s if is4xx(s)  => Future.failed(Upstream4xxResponse(s"Upload failed with status ${response.status}.", s, s))
+        case s if is5xx(s)  => Future.failed(Upstream5xxResponse(s"Upload failed with status ${response.status}.", s, s))
+        case _              => Future.successful(response)
+      }
     }
 
   private def modernisedValuationHistoryQueryParameters(propertyLinkSubmissionId: String) =

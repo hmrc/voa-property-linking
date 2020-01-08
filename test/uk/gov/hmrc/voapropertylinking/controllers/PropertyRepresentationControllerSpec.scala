@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package controllers
+package uk.gov.hmrc.voapropertylinking.controllers
 
 import basespecs.BaseControllerSpec
-import models.searchApi.{ OwnerAuthResult => ModernisedOwnerAuthResult }
+import models.searchApi.{OwnerAuthResult => ModernisedOwnerAuthResult}
 import models.{APIRepresentationResponse, GroupAccount, PaginationParams, PropertyRepresentations}
 import org.mockito.ArgumentMatchers.{any, eq => mEq}
 import org.mockito.Mockito._
 import play.api.libs.json.Json
 import play.api.mvc.Result
-import play.api.test.FakeRequest
+import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.http.HttpResponse
 
 import scala.concurrent.Future
@@ -33,6 +33,7 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
   trait Setup {
     val testController: PropertyRepresentationController =
       new PropertyRepresentationController(
+        controllerComponents = Helpers.stubControllerComponents(),
         authenticated = preAuthenticatedActionBuilders(),
         authorisationManagementApi = mockAuthorisationManagementApi,
         authorisationSearchApi = mockAuthorisationSearchApi,
@@ -131,7 +132,7 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
 
         status(result) shouldBe OK
 
-        verify(mockAuditingService).sendEvent(mEq("agent representation response"), mEq(repResp))(any(), any(), any(), any())
+        verify(mockAuditingService).sendEvent(mEq("agent representation response"), mEq(repResp))(any(), any(), any())
       }
     }
   }

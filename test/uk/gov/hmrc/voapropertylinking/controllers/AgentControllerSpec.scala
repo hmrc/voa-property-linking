@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package controllers
+package uk.gov.hmrc.voapropertylinking.controllers
 
 import basespecs.BaseControllerSpec
 import models.searchApi.{Agent, Agents}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{reset, when}
 import play.api.libs.json.Json
-import play.api.test.FakeRequest
+import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.voapropertylinking.connectors.modernised.AuthorisationSearchApi
 
 import scala.concurrent.Future
@@ -31,7 +31,7 @@ class AgentControllerSpec extends BaseControllerSpec {
   trait Setup {
     val mockAgentConnector = mock[AuthorisationSearchApi]
 
-    val agentController = new AgentController(preAuthenticatedActionBuilders(), mockAgentConnector)
+    val agentController = new AgentController(Helpers.stubControllerComponents(), preAuthenticatedActionBuilders(), mockAgentConnector)
   }
 
   "given authorised access, manage agents" should {

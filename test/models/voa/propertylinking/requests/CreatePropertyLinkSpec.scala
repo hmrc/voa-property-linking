@@ -22,6 +22,7 @@ import models.modernised.externalpropertylink.requests.CreatePropertyLink
 import models.modernised.{Capacity, Evidence, EvidenceType, ProvidedEvidence}
 
 class CreatePropertyLinkSpec extends BaseUnitSpec {
+
   "CreatePropertyLink" should {
     "create from ApiPropertyLinkRequest " in {
 

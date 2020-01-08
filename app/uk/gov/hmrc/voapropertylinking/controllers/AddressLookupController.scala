@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package controllers
+package uk.gov.hmrc.voapropertylinking.controllers
 
 import cats.data.OptionT
 import javax.inject.Inject
 import models.modernised.addressmanagement.SimpleAddress
 import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.{Action, AnyContent, Result}
+import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
 import uk.gov.hmrc.voapropertylinking.connectors.modernised.AddressManagementApi
 import uk.gov.hmrc.voapropertylinking.utils.PostcodeValidator
@@ -28,10 +28,11 @@ import uk.gov.hmrc.voapropertylinking.utils.PostcodeValidator
 import scala.concurrent.{ExecutionContext, Future}
 
 class AddressLookupController @Inject()(
-                               authenticated: AuthenticatedActionBuilder,
-                               addresses: AddressManagementApi
-                             )(implicit executionContext: ExecutionContext)
-  extends PropertyLinkingBaseController {
+                                         controllerComponents: ControllerComponents,
+                                         authenticated: AuthenticatedActionBuilder,
+                                         addresses: AddressManagementApi
+                                       )(implicit executionContext: ExecutionContext)
+  extends PropertyLinkingBaseController(controllerComponents) {
 
   def find(postcode: String): Action[AnyContent] = authenticated.async { implicit request =>
     PostcodeValidator.validateAndFormat(postcode) match {

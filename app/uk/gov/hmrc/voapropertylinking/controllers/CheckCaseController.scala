@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package controllers
+package uk.gov.hmrc.voapropertylinking.controllers
 
 import javax.inject.Inject
 import play.api.Logger
 import play.api.libs.json.Json
-import play.api.mvc.{Action, AnyContent, Result}
+import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import uk.gov.hmrc.http.NotFoundException
 import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
 import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
@@ -33,11 +33,10 @@ import scala.concurrent.{ExecutionContext, Future}
   TODO this controller will move to check backend after planned migration to external case management api
  */
 class CheckCaseController @Inject()(
+                                     controllerComponents: ControllerComponents,
                                      authenticated: AuthenticatedActionBuilder,
                                      externalCaseManagementApi: ExternalCaseManagementApi
-                                   )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController {
-
-  private val logger = Logger(this.getClass.getName)
+                                   )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController(controllerComponents) {
 
   def getCheckCases(submissionId: String, party: String): Action[AnyContent] = authenticated.async { implicit request =>
     party match {

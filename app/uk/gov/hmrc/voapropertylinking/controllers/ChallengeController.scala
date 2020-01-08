@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package controllers
+package uk.gov.hmrc.voapropertylinking.controllers
 
 import javax.inject.Inject
 import play.api.libs.json.Json
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
 import uk.gov.hmrc.voapropertylinking.connectors.modernised.ExternalCaseManagementApi
 
@@ -28,9 +28,10 @@ import scala.concurrent.ExecutionContext
   TODO move this to challenge backend.
  */
 class ChallengeController @Inject()(
+                                     controllerComponents: ControllerComponents,
                                      authenticated: AuthenticatedActionBuilder,
                                      externalCaseManagementApi: ExternalCaseManagementApi
-                                   )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController {
+                                   )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController(controllerComponents) {
 
   def canChallenge(propertyLinkSubmissionId: String,
                           checkCaseRef: String,

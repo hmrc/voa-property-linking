@@ -88,7 +88,7 @@ class VoaHttpClientSpec extends BaseUnitSpec {
       voaHttpClient.DELETE[HttpResponse](mockUrl)
 
       verify(mockHttpClient)
-        .DELETE(ArgumentMatchers.eq(mockUrl))(any(), headerCaptor.capture(), any())
+        .DELETE(ArgumentMatchers.eq(mockUrl), any())(any(), headerCaptor.capture(), any())
 
       checkGovernmentGatewayHeaders(headerCaptor)
     }
@@ -97,7 +97,7 @@ class VoaHttpClientSpec extends BaseUnitSpec {
       voaHttpClient.PUT[String, HttpResponse](mockUrl, "")
 
       verify(mockHttpClient)
-        .PUT(ArgumentMatchers.eq(mockUrl), ArgumentMatchers.eq(""))(any(), any(), headerCaptor.capture(), any())
+        .PUT(ArgumentMatchers.eq(mockUrl), ArgumentMatchers.eq(""), any())(any(), any(), headerCaptor.capture(), any())
 
       checkGovernmentGatewayHeaders(headerCaptor)
     }
