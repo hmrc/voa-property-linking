@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,7 +88,7 @@ class VoaHttpClientSpec extends BaseUnitSpec {
       voaHttpClient.DELETE[HttpResponse](mockUrl)
 
       verify(mockHttpClient)
-        .DELETE(ArgumentMatchers.eq(mockUrl))(any(), headerCaptor.capture(), any())
+        .DELETE(ArgumentMatchers.eq(mockUrl), any())(any(), headerCaptor.capture(), any())
 
       checkGovernmentGatewayHeaders(headerCaptor)
     }
@@ -97,7 +97,7 @@ class VoaHttpClientSpec extends BaseUnitSpec {
       voaHttpClient.PUT[String, HttpResponse](mockUrl, "")
 
       verify(mockHttpClient)
-        .PUT(ArgumentMatchers.eq(mockUrl), ArgumentMatchers.eq(""))(any(), any(), headerCaptor.capture(), any())
+        .PUT(ArgumentMatchers.eq(mockUrl), ArgumentMatchers.eq(""), any())(any(), any(), headerCaptor.capture(), any())
 
       checkGovernmentGatewayHeaders(headerCaptor)
     }

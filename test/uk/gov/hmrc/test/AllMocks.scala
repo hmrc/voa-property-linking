@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,15 +21,15 @@ import com.kenshoo.play.metrics.Metrics
 import org.mockito.Mockito
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
-import play.api.libs.ws.{StreamedResponse, WSRequest, WSResponseHeaders}
-import services.{AssessmentService, PropertyLinkingService}
+import play.api.libs.ws.WSRequest
 import uk.gov.hmrc.http.HttpResponse
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
-import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import uk.gov.hmrc.voapropertylinking.connectors.mdtp.BusinessRatesAuthConnector
 import uk.gov.hmrc.voapropertylinking.connectors.modernised._
 import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
+import uk.gov.hmrc.voapropertylinking.services.{AssessmentService, PropertyLinkingService}
 
 trait AllMocks extends MockitoSugar {
   me: BeforeAndAfterEach =>
@@ -52,10 +52,8 @@ trait AllMocks extends MockitoSugar {
   val mockMetrics: Metrics = mock[Metrics]
   val mockPropertyLinkingService: PropertyLinkingService = mock[PropertyLinkingService]
   val mockServicesConfig: ServicesConfig = mock[ServicesConfig]
-  val mockStreamedResponse: StreamedResponse = mock[StreamedResponse]
   val mockVoaHttpClient: VoaHttpClient = mock[VoaHttpClient]
   val mockWSRequest: WSRequest = mock[WSRequest]
-  val mockWSResponseHeaders: WSResponseHeaders = mock[WSResponseHeaders]
 
   override protected def beforeEach(): Unit =
     Seq(
@@ -77,9 +75,7 @@ trait AllMocks extends MockitoSugar {
       mockMetrics,
       mockPropertyLinkingService,
       mockServicesConfig,
-      mockStreamedResponse,
       mockVoaHttpClient,
-      mockWSRequest,
-      mockWSResponseHeaders
+      mockWSRequest
     ).foreach(Mockito.reset(_))
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@
 
 package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
-import binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
+import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import javax.inject.{Inject, Named}
 import models.PaginationParams
 import models.modernised.externalpropertylink.myclients.{ClientPropertyLink, PropertyLinksWithClient}
 import models.modernised.externalpropertylink.myorganisations.{OwnerPropertyLink, PropertyLinksWithAgents}
-import models.voa.propertylinking.requests.CreatePropertyLink
+import models.modernised.externalpropertylink.requests.CreatePropertyLink
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
 import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
@@ -40,7 +40,7 @@ class ExternalPropertyLinkApi @Inject()(
 
 
   def getMyOrganisationsPropertyLinks(searchParams: GetMyOrganisationPropertyLinksParameters, params: Option[PaginationParams])
-                                     (implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[Option[PropertyLinksWithAgents]] = {
+                                     (implicit request: RequestWithPrincipal[_]): Future[Option[PropertyLinksWithAgents]] = {
 
     http.GET[Option[PropertyLinksWithAgents]](
       myOrganisationsPropertyLinksUrl,
@@ -54,11 +54,11 @@ class ExternalPropertyLinkApi @Inject()(
   }
 
   def getMyOrganisationsPropertyLink(submissionId: String)
-                                    (implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[Option[OwnerPropertyLink]] =
+                                    (implicit request: RequestWithPrincipal[_]): Future[Option[OwnerPropertyLink]] =
     http.GET[Option[OwnerPropertyLink]](myOrganisationsPropertyLinkUrl.replace("{propertyLinkId}", submissionId))
 
   def getClientsPropertyLinks(searchParams: GetMyClientsPropertyLinkParameters, params: Option[PaginationParams])
-                             (implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[Option[PropertyLinksWithClient]] =
+                             (implicit request: RequestWithPrincipal[_]): Future[Option[PropertyLinksWithClient]] =
     http
       .GET[Option[PropertyLinksWithClient]](
       myClientsPropertyLinksUrl,
@@ -74,7 +74,7 @@ class ExternalPropertyLinkApi @Inject()(
         ).flatten)
 
   def getClientsPropertyLink(submissionId: String)
-                            (implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[Option[ClientPropertyLink]] =
+                            (implicit request: RequestWithPrincipal[_]): Future[Option[ClientPropertyLink]] =
     http.GET[Option[ClientPropertyLink]](myClientsPropertyLinkUrl.replace("{propertyLinkId}", submissionId))
 
   def createPropertyLink(propertyLink: CreatePropertyLink)(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[HttpResponse] =

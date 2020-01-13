@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import org.mockito.Mockito.when
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
-import uk.gov.hmrc.play.config.ServicesConfig
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -138,7 +137,7 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
       val personId = 1234L
       val updateUrl = s"$url/$personId"
 
-      when(defaultHttpClient.PUT[APIIndividualAccount, JsValue](any(), any())(any(), any(), any(), any()))
+      when(defaultHttpClient.PUT[APIIndividualAccount, JsValue](any(), any(), any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(
           Json.toJson(APIDetailedIndividualAccount(
             2,
@@ -297,7 +296,7 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
         changedByGGExternalId = "tester1"
       )
 
-      when(defaultHttpClient.PUT[UpdatedOrganisationAccount, HttpResponse](any(), any())(any(), any(), any(), any()))
+      when(defaultHttpClient.PUT[UpdatedOrganisationAccount, HttpResponse](any(), any(), any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(HttpResponse(200)))
 
       val result: Unit = testConnector.updateGroupAccount(orgId = orgId, updatedOrgAccount).futureValue

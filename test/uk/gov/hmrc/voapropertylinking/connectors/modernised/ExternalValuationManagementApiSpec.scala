@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,33 +16,26 @@
 
 package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
-import java.nio.file.Files.readAllBytes
-import java.nio.file.Paths
+import java.net.URI
 import java.time.LocalDateTime
 
-import basespecs.WireMockSpec
-import com.github.tomakehurst.wiremock.client.WireMock._
+import akka.stream.scaladsl.Source
+import akka.util.ByteString
+import basespecs.BaseUnitSpec
 import models.modernised.ValuationHistoryResponse
-import models.voa.valuation.dvr.StreamedDocument
-import models.voa.valuation.dvr.documents.{Document, DocumentSummary, DvrDocumentFiles}
-import org.mockito.ArgumentMatchers.{any, eq => mEq}
+import models.modernised.externalvaluationmanagement.documents.{Document, DocumentSummary, DvrDocumentFiles}
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import play.api.http.ContentTypes
-import play.api.libs.ws.WSClient
+import play.api.libs.json.JsValue
+import play.api.libs.ws.{WSClient, WSCookie, WSRequest, WSResponse}
 import uk.gov.hmrc.http.NotFoundException
-import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.test.WithFakeApplication
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.Future
+import scala.xml.Elem
 
-// TODO move this to IT Specs
-
-class ExternalValuationManagementApiSpec extends WireMockSpec with ContentTypes with WithFakeApplication {
-
-  implicit val mat = fakeApplication.materializer
-
-  val wsClient = fakeApplication.injector.instanceOf[WSClient]
-  val config = fakeApplication.injector.instanceOf[ServicesConfig]
+class ExternalValuationManagementApiSpec extends BaseUnitSpec with ContentTypes {
 
   val voaApiUrl = "http://voa-modernised-api/external-valuation-management-api"
   val valuationHistoryUrl = s"$voaApiUrl/properties/{uarn}/valuations"
@@ -51,10 +44,13 @@ class ExternalValuationManagementApiSpec extends WireMockSpec with ContentTypes 
     val uarn: Long = 123456L
     val plSubmissionId: String = "PL12AB34"
     val valuationHistoryResponse: ValuationHistoryResponse = ValuationHistoryResponse(Seq.empty)
-  }
 
-  val connector = new ExternalValuationManagementApi(wsClient, mockVoaHttpClient, valuationHistoryUrl, config) {
-    override lazy val baseURL: String = mockServerUrl
+    val wsClient = mock[WSClient]
+    val config = mock[ServicesConfig]
+
+    val connector = new ExternalValuationManagementApi(wsClient, mockVoaHttpClient, valuationHistoryUrl, config) {
+      override lazy val baseURL: String = "http://localhost:9555"
+    }
   }
 
   "getting a valuation history" should {
@@ -69,9 +65,8 @@ class ExternalValuationManagementApiSpec extends WireMockSpec with ContentTypes 
   }
 
   "get dvr documents" should {
-    "return the documents and transfer them into an optional" in {
+    "return the documents and transfer them into an optional" in new Setup {
       val valuationId = 1L
-      val uarn = 2L
       val propertyLinkId = "PL-123456789"
 
       val now = LocalDateTime.now()
@@ -89,9 +84,8 @@ class ExternalValuationManagementApiSpec extends WireMockSpec with ContentTypes 
       ))
     }
 
-    "return a None upon a 404 from modernised" in {
+    "return a None upon a 404 from modernised" in new Setup {
       val valuationId = 1L
-      val uarn = 2L
       val propertyLinkId = "PL-123456789"
 
       when(mockVoaHttpClient.GET[DvrDocumentFiles](any(), any())(any(), any(), any(), any()))
@@ -103,18 +97,52 @@ class ExternalValuationManagementApiSpec extends WireMockSpec with ContentTypes 
   }
 
   "get dvr document" should {
-    "stream through the file" in {
+    "stream through the file" in new Setup {
       val valuationId = 1L
-      val uarn = 2L
       val propertyLinkId = "PL-123456789"
       val fileRef = "1L"
 
       val dvrUrl = s"/external-valuation-management-api/properties/$uarn/valuations/$valuationId/files/$fileRef?propertyLinkId=$propertyLinkId"
 
-      stubFor(get(urlEqualTo(dvrUrl)).willReturn(ok(new String(readAllBytes(Paths.get(getClass.getResource("/document.pdf").toURI))))))
+      val mockWsResponse = {
+        val m = new WSResponse {
+          override def status: Int = 200
+
+          override def statusText: String = ???
+
+          override def headers: Map[String, Seq[String]] = Map()
+
+          override def underlying[T]: T = ???
+
+          override def cookies: Seq[WSCookie] = ???
+
+          override def cookie(name: String): Option[WSCookie] = ???
+
+          override def body: String = ???
+
+          override def bodyAsBytes: ByteString = ???
+
+          override def bodyAsSource: Source[ByteString, _] = Source.empty[ByteString]
+
+          override def allHeaders: Map[String, Seq[String]] = ???
+
+          override def xml: Elem = ???
+
+          override def json: JsValue = ???
+
+          override def uri: URI = ???
+        }
+        m
+      }
+
+      val mockWsRequest = mock[WSRequest]
+      when(wsClient.url(any())).thenReturn(mockWsRequest)
+      when(mockWsRequest.withHttpHeaders(any())).thenReturn(mockWsRequest)
+      when(mockWsRequest.withMethod(any())).thenReturn(mockWsRequest)
+      when(mockWsRequest.stream()).thenReturn(Future.successful(mockWsResponse))
 
       val result = connector.getDvrDocument(valuationId, uarn, propertyLinkId, fileRef).futureValue
-      result shouldBe a[StreamedDocument]
+      result shouldBe a[WSResponse]
     }
   }
 }

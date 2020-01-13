@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,14 +27,14 @@ import scala.concurrent.ExecutionContext
 
 class AuditingService @Inject()(
                                auditConnector: AuditConnector
-                               ) {
+                               )(implicit executionContext: ExecutionContext) {
 
-  def sendEvent[A: Writes](auditType: String, obj: A)(implicit ec: ExecutionContext, hc: HeaderCarrier, request: Request[_]): Unit = {
+  def sendEvent[A: Writes](auditType: String, obj: A)(implicit hc: HeaderCarrier, request: Request[_]): Unit = {
     val event = eventFor(auditType, obj)
     auditConnector.sendExtendedEvent(event)
   }
 
-  def eventFor[A: Writes](auditType: String, obj: A)(implicit hc: HeaderCarrier, request: Request[_]) = {
+  def eventFor[A: Writes](auditType: String, obj: A)(implicit hc: HeaderCarrier, request: Request[_]): ExtendedDataEvent = {
     ExtendedDataEvent(
       auditSource = "voa-property-linking",
       auditType = auditType,

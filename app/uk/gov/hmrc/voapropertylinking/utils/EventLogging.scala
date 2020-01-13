@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import scala.collection.SortedMap
 import scala.util.Try
 
 sealed abstract class LogEvent(val code: String, val description: String) {
-  override def toString: String = s"#BRA$code - $description"
+  override def toString: String = s"#VPL$code - $description"
 }
 
 trait EventLogging {

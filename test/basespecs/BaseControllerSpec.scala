@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,14 @@
 
 package basespecs
 
-import controllers.AgentController
 import play.api.http.{HeaderNames, Status}
 import play.api.mvc._
-import play.api.test.{FakeRequest, ResultExtractors}
+import play.api.test.{FakeRequest, Helpers, ResultExtractors}
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.ws.WSHttp
 import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
 import uk.gov.hmrc.voapropertylinking.auth.{Principal, RequestWithPrincipal}
+import uk.gov.hmrc.voapropertylinking.controllers.AgentController
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -47,7 +46,7 @@ abstract class BaseControllerSpec
                                       externalId: String = "gg_external_id",
                                       groupId: String = "gg_group_id"
                                     ): AuthenticatedActionBuilder =
-    new AuthenticatedActionBuilder(mock[AuthConnector]) {
+    new AuthenticatedActionBuilder(Helpers.stubControllerComponents(), mock[AuthConnector]) {
 
       override def invokeBlock[A](request: Request[A], block: RequestWithPrincipal[A] => Future[Result]): Future[Result] = {
         block(RequestWithPrincipal(request, Principal(externalId, groupId)))

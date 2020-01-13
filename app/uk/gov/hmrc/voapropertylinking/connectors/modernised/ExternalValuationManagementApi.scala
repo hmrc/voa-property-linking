@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,17 +18,15 @@ package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
 import javax.inject.{Inject, Named}
 import models.modernised.ValuationHistoryResponse
-import models.voa.valuation.dvr.StreamedDocument
-import models.voa.valuation.dvr.documents.DvrDocumentFiles
-import play.api.http.HeaderNames.{CONTENT_LENGTH, CONTENT_TYPE, _}
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import play.api.libs.ws.{StreamedResponse, WSClient}
+import models.modernised.externalvaluationmanagement.documents.DvrDocumentFiles
+import play.api.http.HeaderNames._
+import play.api.libs.ws.{WSClient, WSResponse}
 import uk.gov.hmrc.http._
-import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
 import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 
 class ExternalValuationManagementApi @Inject()(
@@ -36,14 +34,14 @@ class ExternalValuationManagementApi @Inject()(
                                       http: VoaHttpClient,
                                       @Named("voa.authValuationHistoryUrl") valuationHistoryUrl: String,
                                       config: ServicesConfig
-                                    ) extends BaseVoaConnector {
+                                    )(implicit executionContext: ExecutionContext) extends BaseVoaConnector {
 
   lazy val appName = config.getConfString("appName", "voa-property-linking")
 
   lazy val baseURL = config.baseUrl("external-business-rates-data-platform")
   lazy val url = baseURL + "/external-valuation-management-api"
 
-  def getDvrDocuments(valuationId: Long, uarn: Long, propertyLinkId: String)(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[Option[DvrDocumentFiles]] =
+  def getDvrDocuments(valuationId: Long, uarn: Long, propertyLinkId: String)(implicit request: RequestWithPrincipal[_]): Future[Option[DvrDocumentFiles]] =
     http.GET[DvrDocumentFiles](s"$url/properties/$uarn/valuations/$valuationId/files", Seq("propertyLinkId" -> propertyLinkId))
       .map(Option.apply)
       .recover {
@@ -53,7 +51,7 @@ class ExternalValuationManagementApi @Inject()(
           throw e
       }
 
-  def getValuationHistory(uarn: Long, propertyLinkSubmissionId: String)(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[Option[ValuationHistoryResponse]] = {
+  def getValuationHistory(uarn: Long, propertyLinkSubmissionId: String)(implicit request: RequestWithPrincipal[_]): Future[Option[ValuationHistoryResponse]] = {
     http
       .GET[Option[ValuationHistoryResponse]](
       valuationHistoryUrl.replace("{uarn}", uarn.toString),
@@ -64,25 +62,20 @@ class ExternalValuationManagementApi @Inject()(
                       valuationId: Long,
                       uarn: Long,
                       propertyLinkId: String,
-                      fileRef: String)(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[StreamedDocument] =
+                      fileRef: String)(implicit request: RequestWithPrincipal[_]): Future[WSResponse] =
     wsClient
       .url(s"$url/properties/$uarn/valuations/$valuationId/files/$fileRef?propertyLinkId=$propertyLinkId")
       .withMethod("GET")
-      .withHeaders(List(
+      .withHttpHeaders(List(
         "GG-EXTERNAL-ID" -> request.principal.externalId,
         USER_AGENT -> appName,
         "GG-GROUP-ID"    -> request.principal.groupId): _*)
-      .stream().flatMap {
-      case StreamedResponse(hs, body) =>
-
-        val headers = hs.headers.mapValues(_.mkString(","))
-        hs.status match {
-          case s if is4xx(s) => Future.failed(Upstream4xxResponse(s"Upload failed with status ${hs.status}.", s, s))
-          case s if is5xx(s) => Future.failed(Upstream5xxResponse(s"Upload failed with status ${hs.status}.", s, s))
-          case _ => Future.successful(
-            StreamedDocument(headers.get(CONTENT_TYPE), headers.get(CONTENT_LENGTH).map(_.toLong), headers.filter(_._1 != CONTENT_TYPE), body)
-          )
-        }
+      .stream().flatMap { response =>
+      response.status match {
+        case s if is4xx(s)  => Future.failed(Upstream4xxResponse(s"Upload failed with status ${response.status}.", s, s))
+        case s if is5xx(s)  => Future.failed(Upstream5xxResponse(s"Upload failed with status ${response.status}.", s, s))
+        case _              => Future.successful(response)
+      }
     }
 
   private def modernisedValuationHistoryQueryParameters(propertyLinkSubmissionId: String) =

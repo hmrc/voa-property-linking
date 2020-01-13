@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package uk.gov.hmrc.voapropertylinking.actions
 import basespecs.BaseControllerSpec
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Result
-import play.api.test.FakeRequest
+import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.{Retrieval, ~}
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisationException, MissingBearerToken}
@@ -43,7 +43,7 @@ class AuthenticatedActionBuilderSpec extends BaseControllerSpec {
         exception.fold(Future.successful(success.asInstanceOf[A]))(Future.failed(_))
     }
 
-    val authenticatedAction = new AuthenticatedActionBuilder(authConnector)
+    val authenticatedAction = new AuthenticatedActionBuilder(Helpers.stubControllerComponents(), authConnector)
 
   }
 

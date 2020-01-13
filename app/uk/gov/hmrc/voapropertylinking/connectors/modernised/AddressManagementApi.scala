@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,11 @@
 package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
 import javax.inject.Inject
-import models.{APIAddressLookupResult, DetailedAddress, SimpleAddress}
+import models.modernised.addressmanagement.{Addresses, DetailedAddress, SimpleAddress}
 import play.api.libs.json.{JsDefined, JsNumber, JsValue}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
-import uk.gov.hmrc.play.config.ServicesConfig
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -33,11 +33,11 @@ class AddressManagementApi @Inject()(
   lazy val url: String = servicesConfig.baseUrl("external-business-rates-data-platform") + "/address-management-api/address"
 
   def find(postcode: String)(implicit hc: HeaderCarrier): Future[Seq[DetailedAddress]] = {
-    http.GET[APIAddressLookupResult](s"""$url?pageSize=100&startPoint=1&searchparams={"postcode": "$postcode"}""").map(_.addressDetails)
+    http.GET[Addresses](s"""$url?pageSize=100&startPoint=1&searchparams={"postcode": "$postcode"}""").map(_.addressDetails)
   }
 
   def get(addressUnitId: Long)(implicit hc: HeaderCarrier): Future[Option[SimpleAddress]] = {
-    http.GET[APIAddressLookupResult](s"$url/$addressUnitId").map(_.addressDetails.headOption.map(_.simplify)) recover toNone
+    http.GET[Addresses](s"$url/$addressUnitId").map(_.addressDetails.headOption.map(_.simplify)) recover toNone
   }
 
   def create(address: SimpleAddress)(implicit hc: HeaderCarrier): Future[Long] = {

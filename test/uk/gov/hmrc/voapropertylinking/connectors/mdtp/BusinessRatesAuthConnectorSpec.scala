@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ class BusinessRatesAuthConnectorSpec extends BaseUnitSpec {
 
   "BusinessRatesAuthConnector clear cache" should {
     "delete the cache" in {
-      when(mockDefaultHttpClient.DELETE[HttpResponse](any())(any(), any(), any()))
+      when(mockDefaultHttpClient.DELETE[HttpResponse](any(), any())(any(), any(), any()))
         .thenReturn(Future.successful(HttpResponse(200)))
 
       connector.clearCache().futureValue shouldBe (())

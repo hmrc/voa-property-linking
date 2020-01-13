@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ class ExternalCaseManagementApiSpec extends BaseUnitSpec {
         when(mockVoaHttpClient.GET[CheckCasesWithAgent](any(), any())(any(), any(), any(), any()))
           .thenReturn(Future.successful(CheckCasesWithAgent(1, 15, 4, 4, List(mockCheckCase))))
 
-        val result: CheckCasesWithAgent = connector.getMyOrganisationCheckCases(submissionId)(hc, requestWithPrincipal).futureValue
+        val result: CheckCasesWithAgent = connector.getMyOrganisationCheckCases(submissionId)(requestWithPrincipal).futureValue
 
         result.start shouldBe 1
         result.size shouldBe 15
@@ -67,7 +67,7 @@ class ExternalCaseManagementApiSpec extends BaseUnitSpec {
         when(mockVoaHttpClient.GET[CheckCasesWithClient](any(), any())(any(), any(), any(), any()))
           .thenReturn(Future.successful(CheckCasesWithClient(1, 15, 4, 4, List(mockCheckCase))))
 
-        val result: CheckCasesWithClient = connector.getMyClientsCheckCases(submissionId)(hc, requestWithPrincipal).futureValue
+        val result: CheckCasesWithClient = connector.getMyClientsCheckCases(submissionId)(requestWithPrincipal).futureValue
 
         result.start shouldBe 1
         result.size shouldBe 15

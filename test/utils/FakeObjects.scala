@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ import models.mdtp.propertylink.requests.APIPropertyLinkRequest
 import models.modernised.Capacity.{Capacity => _, _}
 import models.modernised.{Capacity, Evidence, EvidenceType, ProvidedEvidence}
 import models.modernised.ProvidedEvidence.{apply => _, _}
-import models.voa.propertylinking.requests.CreatePropertyLink
 import models.FileInfo
+import models.modernised.externalpropertylink.requests.CreatePropertyLink
 
 
 trait FakeObjects {
