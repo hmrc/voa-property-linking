@@ -34,7 +34,6 @@ class VoaHttpClient @Inject()(httpClient: DefaultHttpClient) {
         "GG-GROUP-ID"    -> principal.groupId
       )
 
-  // scalastyle:off method.name
   def GET[A](url: String)(
         implicit rds: HttpReads[A],
         hc: HeaderCarrier,
