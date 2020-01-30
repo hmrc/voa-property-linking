@@ -18,10 +18,8 @@ package models
 
 import play.api.libs.json.{Format, Json}
 
-
 case class Capacity(authorisationOwnerCapacity: String)
 
 object Capacity {
   implicit val format: Format[Capacity] = Json.format[Capacity]
 }
-

@@ -28,21 +28,22 @@ import scala.concurrent.ExecutionContext
   TODO move this to challenge backend.
  */
 class ChallengeController @Inject()(
-                                     controllerComponents: ControllerComponents,
-                                     authenticated: AuthenticatedActionBuilder,
-                                     externalCaseManagementApi: ExternalCaseManagementApi
-                                   )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController(controllerComponents) {
+      controllerComponents: ControllerComponents,
+      authenticated: AuthenticatedActionBuilder,
+      externalCaseManagementApi: ExternalCaseManagementApi
+)(implicit executionContext: ExecutionContext)
+    extends PropertyLinkingBaseController(controllerComponents) {
 
-  def canChallenge(propertyLinkSubmissionId: String,
-                          checkCaseRef: String,
-                          valuationId: Long,
-                          party: String): Action[AnyContent] = authenticated.async { implicit request =>
+  def canChallenge(
+        propertyLinkSubmissionId: String,
+        checkCaseRef: String,
+        valuationId: Long,
+        party: String): Action[AnyContent] = authenticated.async { implicit request =>
     externalCaseManagementApi
       .canChallenge(propertyLinkSubmissionId, checkCaseRef, valuationId, party)
       .map {
         case Some(resp) => Ok(Json.toJson(resp))
         case _          => Forbidden
-    }
+      }
   }
 }
-

@@ -26,22 +26,22 @@ import play.api.libs.json.{Json, OFormat, Writes}
 import uk.gov.hmrc.voapropertylinking.utils.Formatters
 
 case class CreatePropertyLink(
-                               uarn: Long,
-                               capacity: Capacity,
-                               startDate: LocalDate,
-                               endDate: Option[LocalDate],
-                               method: Method,
-                               PLsubmissionId: String,
-                               createDatetime: LocalDateTime,
-                               uploadedFiles: Seq[Evidence],
-                               submissionSource: String)
+      uarn: Long,
+      capacity: Capacity,
+      startDate: LocalDate,
+      endDate: Option[LocalDate],
+      method: Method,
+      PLsubmissionId: String,
+      createDatetime: LocalDateTime,
+      uploadedFiles: Seq[Evidence],
+      submissionSource: String)
 
 object CreatePropertyLink {
 
   implicit val voaDateTimeWrites: Writes[LocalDateTime] = Formatters.writes
   implicit val format: OFormat[CreatePropertyLink] = Json.format
 
-  def apply(request: APIPropertyLinkRequest):CreatePropertyLink =
+  def apply(request: APIPropertyLinkRequest): CreatePropertyLink =
     CreatePropertyLink(
       uarn = request.uarn,
       capacity = Capacity.withName(request.authorisationOwnerCapacity),
@@ -51,5 +51,6 @@ object CreatePropertyLink {
       PLsubmissionId = request.submissionId,
       createDatetime = LocalDateTime.now(),
       uploadedFiles = request.uploadedFiles.map(e => Evidence(e.name, EvidenceType.withName(e.evidenceType))),
-      submissionSource = "DFE_UI")
+      submissionSource = "DFE_UI"
+    )
 }

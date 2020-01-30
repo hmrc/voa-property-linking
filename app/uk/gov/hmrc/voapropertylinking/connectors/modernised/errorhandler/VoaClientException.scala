@@ -19,4 +19,4 @@ package uk.gov.hmrc.voapropertylinking.connectors.modernised.errorhandler
 import uk.gov.hmrc.http.HttpException
 
 case class VoaClientException(override val message: String, override val responseCode: Int)
-  extends HttpException(message, responseCode)
+    extends HttpException(message, responseCode)

@@ -32,41 +32,46 @@ import scala.concurrent.{ExecutionContext, Future}
   TODO this connector should be moved to check backend after the planned migration to external-case-management-api
  */
 class ExternalCaseManagementApi @Inject()(
-                                           http: VoaHttpClient,
-                                           servicesConfig: ServicesConfig
-                                         )(implicit executionContext: ExecutionContext) extends BaseVoaConnector {
+      http: VoaHttpClient,
+      servicesConfig: ServicesConfig
+)(implicit executionContext: ExecutionContext)
+    extends BaseVoaConnector {
 
   lazy val voaModernisedApiStubBaseUrl: String = servicesConfig.baseUrl("voa-modernised-api")
 
-  def getMyOrganisationCheckCases(propertyLinkSubmissionId: String)(implicit request: RequestWithPrincipal[_]): Future[CheckCasesWithAgent] =
+  def getMyOrganisationCheckCases(propertyLinkSubmissionId: String)(
+        implicit request: RequestWithPrincipal[_]): Future[CheckCasesWithAgent] =
     http.GET[CheckCasesWithAgent](
       s"$voaModernisedApiStubBaseUrl/external-case-management-api/my-organisation/property-links/$propertyLinkSubmissionId/check-cases",
       Seq("start" -> "1", "size" -> "100")
     )
 
-  def getMyClientsCheckCases(propertyLinkSubmissionId: String)(implicit request: RequestWithPrincipal[_]): Future[CheckCasesWithClient] =
+  def getMyClientsCheckCases(propertyLinkSubmissionId: String)(
+        implicit request: RequestWithPrincipal[_]): Future[CheckCasesWithClient] =
     http.GET[CheckCasesWithClient](
       s"$voaModernisedApiStubBaseUrl/external-case-management-api/my-organisation/clients/all/property-links/$propertyLinkSubmissionId/check-cases",
       Seq("start" -> "1", "size" -> "100")
     )
 
-  def canChallenge(propertyLinkSubmissionId: String,
-                   checkCaseRef: String,
-                   valuationId: Long,
-                   party: String)(implicit request: RequestWithPrincipal[_]): Future[Option[CanChallengeResponse]] = {
+  def canChallenge(propertyLinkSubmissionId: String, checkCaseRef: String, valuationId: Long, party: String)(
+        implicit request: RequestWithPrincipal[_]): Future[Option[CanChallengeResponse]] =
     party match {
-      case "client" => http.GET[HttpResponse](s"$voaModernisedApiStubBaseUrl/external-case-management-api/my-organisation/property-links/$propertyLinkSubmissionId/check-cases/$checkCaseRef/canChallenge?valuationId=$valuationId")
-        .map(handleCanChallengeResponse) recover toNone
-      case "agent" => http.GET[HttpResponse](s"$voaModernisedApiStubBaseUrl/external-case-management-api/my-organisation/clients/all/property-links/$propertyLinkSubmissionId/check-cases/$checkCaseRef/canChallenge?valuationId=$valuationId")
-        .map(handleCanChallengeResponse) recover toNone
+      case "client" =>
+        http
+          .GET[HttpResponse](
+            s"$voaModernisedApiStubBaseUrl/external-case-management-api/my-organisation/property-links/$propertyLinkSubmissionId/check-cases/$checkCaseRef/canChallenge?valuationId=$valuationId")
+          .map(handleCanChallengeResponse) recover toNone
+      case "agent" =>
+        http
+          .GET[HttpResponse](
+            s"$voaModernisedApiStubBaseUrl/external-case-management-api/my-organisation/clients/all/property-links/$propertyLinkSubmissionId/check-cases/$checkCaseRef/canChallenge?valuationId=$valuationId")
+          .map(handleCanChallengeResponse) recover toNone
       case _ => throw new IllegalArgumentException(s"Unknown party $party")
     }
-  }
 
-  private def handleCanChallengeResponse(resp: HttpResponse): Option[CanChallengeResponse] = {
+  private def handleCanChallengeResponse(resp: HttpResponse): Option[CanChallengeResponse] =
     resp.status match {
       case 200 => Json.parse(resp.body).asOpt[CanChallengeResponse]
-      case _ => None
+      case _   => None
     }
-  }
 }

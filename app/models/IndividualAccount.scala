@@ -20,33 +20,49 @@ import java.time.Instant
 
 import play.api.libs.json.Json
 
-case class IndividualDetails(firstName: String, lastName: String, email: String, phone1: String, phone2: Option[String], addressId: Long)
+case class IndividualDetails(
+      firstName: String,
+      lastName: String,
+      email: String,
+      phone1: String,
+      phone2: Option[String],
+      addressId: Long)
 
 object IndividualDetails {
   implicit val formats = Json.format[IndividualDetails]
 }
 
-case class IndividualAccount(externalId: String, trustId: String, organisationId: Long, individualId: Long, details: IndividualDetails)
+case class IndividualAccount(
+      externalId: String,
+      trustId: String,
+      organisationId: Long,
+      individualId: Long,
+      details: IndividualDetails)
 
 object IndividualAccount {
   implicit val formats = Json.format[IndividualAccount]
 }
 
-case class IndividualAccountSubmission(externalId: String, trustId: String, organisationId: Long, details: IndividualDetails) {
+case class IndividualAccountSubmission(
+      externalId: String,
+      trustId: String,
+      organisationId: Long,
+      details: IndividualDetails) {
 
-  def toAPIIndividualAccount = {
-    APIIndividualAccount(PersonData(
-      identifyVerificationId = trustId,
-      firstName = details.firstName,
-      lastName = details.lastName,
-      organisationId = organisationId,
-      addressUnitId = details.addressId,
-      telephoneNumber = details.phone1,
-      mobileNumber = details.phone2,
-      emailAddress = details.email,
-      governmentGatewayExternalId = externalId,
-      effectiveFrom = Instant.now))
-  }
+  def toAPIIndividualAccount =
+    APIIndividualAccount(
+      PersonData(
+        identifyVerificationId = trustId,
+        firstName = details.firstName,
+        lastName = details.lastName,
+        organisationId = organisationId,
+        addressUnitId = details.addressId,
+        telephoneNumber = details.phone1,
+        mobileNumber = details.phone2,
+        emailAddress = details.email,
+        governmentGatewayExternalId = externalId,
+        effectiveFrom = Instant.now
+      ))
 }
 
 object IndividualAccountSubmission {

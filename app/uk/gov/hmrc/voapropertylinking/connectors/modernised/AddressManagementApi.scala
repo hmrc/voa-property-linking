@@ -26,27 +26,28 @@ import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import scala.concurrent.{ExecutionContext, Future}
 
 class AddressManagementApi @Inject()(
-                                      http: DefaultHttpClient,
-                                      servicesConfig: ServicesConfig
-                                    )(implicit executionContext: ExecutionContext) extends BaseVoaConnector {
+      http: DefaultHttpClient,
+      servicesConfig: ServicesConfig
+)(implicit executionContext: ExecutionContext)
+    extends BaseVoaConnector {
 
-  lazy val url: String = servicesConfig.baseUrl("external-business-rates-data-platform") + "/address-management-api/address"
+  lazy val url
+    : String = servicesConfig.baseUrl("external-business-rates-data-platform") + "/address-management-api/address"
 
-  def find(postcode: String)(implicit hc: HeaderCarrier): Future[Seq[DetailedAddress]] = {
-    http.GET[Addresses](s"""$url?pageSize=100&startPoint=1&searchparams={"postcode": "$postcode"}""").map(_.addressDetails)
-  }
+  def find(postcode: String)(implicit hc: HeaderCarrier): Future[Seq[DetailedAddress]] =
+    http
+      .GET[Addresses](s"""$url?pageSize=100&startPoint=1&searchparams={"postcode": "$postcode"}""")
+      .map(_.addressDetails)
 
-  def get(addressUnitId: Long)(implicit hc: HeaderCarrier): Future[Option[SimpleAddress]] = {
+  def get(addressUnitId: Long)(implicit hc: HeaderCarrier): Future[Option[SimpleAddress]] =
     http.GET[Addresses](s"$url/$addressUnitId").map(_.addressDetails.headOption.map(_.simplify)) recover toNone
-  }
 
-  def create(address: SimpleAddress)(implicit hc: HeaderCarrier): Future[Long] = {
+  def create(address: SimpleAddress)(implicit hc: HeaderCarrier): Future[Long] =
     http.POST[DetailedAddress, JsValue](s"$url/non_standard_address", address.toDetailedAddress) map { js =>
       js \ "id" match {
         case JsDefined(JsNumber(n)) => n.toLong
-        case _ => throw new Exception(s"Failed to create record for address $address")
+        case _                      => throw new Exception(s"Failed to create record for address $address")
       }
     }
-  }
 
 }

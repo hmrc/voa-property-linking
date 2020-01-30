@@ -16,17 +16,17 @@
 
 package models.mdtp.propertylink.projections
 
-import models.searchApi.{ OwnerAuthResult => ModernisedOwnerAuthResult }
+import models.searchApi.{OwnerAuthResult => ModernisedOwnerAuthResult}
 import models.modernised.externalpropertylink.myorganisations.PropertyLinksWithAgents
 import play.api.libs.json.{Json, OFormat}
 
 case class OwnerAuthResult(
-                            start: Int,
-                            size: Int,
-                            filterTotal: Int,
-                            total: Int,
-                            authorisations: Seq[OwnerAuthorisation]
-                          ) {
+      start: Int,
+      size: Int,
+      filterTotal: Int,
+      total: Int,
+      authorisations: Seq[OwnerAuthorisation]
+) {
 
   def uppercase: OwnerAuthResult =
     this.copy(authorisations = authorisations.map(_.capatilise()))
@@ -35,7 +35,7 @@ case class OwnerAuthResult(
 object OwnerAuthResult {
   implicit val ownerAuthResult: OFormat[OwnerAuthResult] = Json.format
 
-  def apply(authResult: ModernisedOwnerAuthResult): OwnerAuthResult = {
+  def apply(authResult: ModernisedOwnerAuthResult): OwnerAuthResult =
     OwnerAuthResult(
       start = authResult.start,
       size = authResult.size,
@@ -43,12 +43,13 @@ object OwnerAuthResult {
       total = authResult.total,
       authorisations = authResult.authorisations.map(OwnerAuthorisation.apply)
     )
-  }
-  def apply(propertLinks: PropertyLinksWithAgents)
-  : OwnerAuthResult = OwnerAuthResult(start = propertLinks.start,
-    size = propertLinks.size,
-    filterTotal = propertLinks.filterTotal,
-    total = propertLinks.total,
-    authorisations = propertLinks.authorisations.map(auth => OwnerAuthorisation(auth)))
+  def apply(propertLinks: PropertyLinksWithAgents): OwnerAuthResult =
+    OwnerAuthResult(
+      start = propertLinks.start,
+      size = propertLinks.size,
+      filterTotal = propertLinks.filterTotal,
+      total = propertLinks.total,
+      authorisations = propertLinks.authorisations.map(auth => OwnerAuthorisation(auth))
+    )
 
 }

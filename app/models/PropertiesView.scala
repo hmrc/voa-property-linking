@@ -24,30 +24,29 @@ import models.modernised.externalpropertylink.myorganisations.PropertyLinkWithAg
 import play.api.libs.json._
 
 case class PropertiesView(
-                           authorisationId: Long,
-                           uarn: Long,
-                           authorisationStatus: String,
-                           startDate: LocalDate,
-                           endDate: Option[LocalDate],
-                           submissionId: String,
-                           address: Option[String],
-                           NDRListValuationHistoryItems: Seq[APIValuationHistory],
-                           parties: Seq[APIParty],
-                           agents: Option[Seq[LegacyParty]]) {
+      authorisationId: Long,
+      uarn: Long,
+      authorisationStatus: String,
+      startDate: LocalDate,
+      endDate: Option[LocalDate],
+      submissionId: String,
+      address: Option[String],
+      NDRListValuationHistoryItems: Seq[APIValuationHistory],
+      parties: Seq[APIParty],
+      agents: Option[Seq[LegacyParty]]) {
 
-  def upperCase: PropertiesView = this.copy(NDRListValuationHistoryItems = NDRListValuationHistoryItems.map(_.capatalise))
+  def upperCase: PropertiesView =
+    this.copy(NDRListValuationHistoryItems = NDRListValuationHistoryItems.map(_.capatalise))
 
-  def hasValidStatus: Boolean = {
+  def hasValidStatus: Boolean =
     !Seq("DECLINED", "REVOKED", "MORE_EVIDENCE_REQUIRED").contains(authorisationStatus.toUpperCase)
-  }
 }
 
 object PropertiesView {
   implicit val instantReads: Reads[Instant] = Reads.instantReads("yyyy-MM-dd'T'HH:mm:ss.SSS[XXX][X]")
   implicit val format: Format[PropertiesView] = Json.format[PropertiesView]
 
-  def apply(propertyLink: PropertyLinkWithClient, history: Seq[ValuationHistory])
-  : PropertiesView =
+  def apply(propertyLink: PropertyLinkWithClient, history: Seq[ValuationHistory]): PropertiesView =
     PropertiesView(
       authorisationId = propertyLink.authorisationId,
       uarn = propertyLink.uarn,
@@ -58,11 +57,10 @@ object PropertiesView {
       submissionId = propertyLink.submissionId,
       NDRListValuationHistoryItems = history.map(APIValuationHistory(_)).toList,
       parties = Seq(),
-      agents = Some(Seq()))
+      agents = Some(Seq())
+    )
 
-
-  def apply(propertyLink: PropertyLinkWithAgents, history: Seq[ValuationHistory])
-  : PropertiesView =
+  def apply(propertyLink: PropertyLinkWithAgents, history: Seq[ValuationHistory]): PropertiesView =
     PropertiesView(
       authorisationId = propertyLink.authorisationId,
       uarn = propertyLink.uarn,
@@ -72,17 +70,25 @@ object PropertiesView {
       endDate = propertyLink.endDate,
       submissionId = propertyLink.submissionId,
       NDRListValuationHistoryItems = history.map(history => APIValuationHistory(history)).toList,
-      parties = propertyLink.agents.map(agent => APIParty(id = agent.authorisedPartyId,
-        authorisedPartyStatus = agent.status,
-        authorisedPartyOrganisationId = agent.organisationId,
-        permissions = Seq(Permissions(agent.authorisedPartyId, agent.checkPermission, agent.challengePermission, None)))),
-      agents = Some(propertyLink.agents.map(agent => LegacyParty(
-        authorisedPartyId = agent.authorisedPartyId,
-        agentCode = agent.representativeCode,
-        organisationName = agent.organisationName,
-        organisationId = agent.organisationId,
-        checkPermission = agent.checkPermission,
-        challengePermission = agent.challengePermission))))
-
+      parties = propertyLink.agents.map(
+        agent =>
+          APIParty(
+            id = agent.authorisedPartyId,
+            authorisedPartyStatus = agent.status,
+            authorisedPartyOrganisationId = agent.organisationId,
+            permissions =
+              Seq(Permissions(agent.authorisedPartyId, agent.checkPermission, agent.challengePermission, None))
+        )),
+      agents = Some(
+        propertyLink.agents.map(agent =>
+          LegacyParty(
+            authorisedPartyId = agent.authorisedPartyId,
+            agentCode = agent.representativeCode,
+            organisationName = agent.organisationName,
+            organisationId = agent.organisationId,
+            checkPermission = agent.checkPermission,
+            challengePermission = agent.challengePermission
+        )))
+    )
 
 }

@@ -26,21 +26,23 @@ import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import scala.concurrent.{ExecutionContext, Future}
 
 class AuthorisationSearchApi @Inject()(
-                                        http: DefaultHttpClient,
-                                        servicesConfig: ServicesConfig
-                                      )(implicit executionContext: ExecutionContext) extends BaseVoaConnector {
+      http: DefaultHttpClient,
+      servicesConfig: ServicesConfig
+)(implicit executionContext: ExecutionContext)
+    extends BaseVoaConnector {
 
   lazy val baseUrl: String = servicesConfig.baseUrl("external-business-rates-data-platform")
 
-  def searchAndSort(organisationId: Long,
-                    params: PaginationParams,
-                    sortfield: Option[String] = None,
-                    sortorder: Option[String] = None,
-                    status: Option[String] = None,
-                    address: Option[String] = None,
-                    baref: Option[String] = None,
-                    agent: Option[String] = None,
-                    agentAppointed: Option[String] = Some("BOTH"))(implicit hc: HeaderCarrier): Future[OwnerAuthResult] = {
+  def searchAndSort(
+        organisationId: Long,
+        params: PaginationParams,
+        sortfield: Option[String] = None,
+        sortorder: Option[String] = None,
+        status: Option[String] = None,
+        address: Option[String] = None,
+        baref: Option[String] = None,
+        agent: Option[String] = None,
+        agentAppointed: Option[String] = Some("BOTH"))(implicit hc: HeaderCarrier): Future[OwnerAuthResult] = {
     val url = baseUrl +
       s"/authorisation-search-api/owners/$organisationId/authorisations" +
       s"?start=${params.startPoint}" +
@@ -57,15 +59,15 @@ class AuthorisationSearchApi @Inject()(
   }
 
   def appointableToAgent(
-                          ownerId: Long,
-                          agentId: Long,
-                          checkPermission: Option[String],
-                          challengePermission: Option[String],
-                          params: PaginationParams,
-                          sortfield: Option[String] = None,
-                          sortorder: Option[String] = None,
-                          address: Option[String] = None,
-                          agent: Option[String] = None)(implicit hc: HeaderCarrier): Future[OwnerAuthResult] = {
+        ownerId: Long,
+        agentId: Long,
+        checkPermission: Option[String],
+        challengePermission: Option[String],
+        params: PaginationParams,
+        sortfield: Option[String] = None,
+        sortorder: Option[String] = None,
+        address: Option[String] = None,
+        agent: Option[String] = None)(implicit hc: HeaderCarrier): Future[OwnerAuthResult] = {
     val url = baseUrl +
       s"/authorisation-search-api/owners/$ownerId/agents/$agentId/availableAuthorisations" +
       s"?start=${params.startPoint}&size=${params.pageSize}" +
@@ -79,25 +81,32 @@ class AuthorisationSearchApi @Inject()(
     http.GET[OwnerAuthResult](url).map(_.uppercase)
   }
 
-  def forAgent(status: String, organisationId: Long, params: PaginationParams)(implicit hc: HeaderCarrier): Future[PropertyRepresentations] = {
+  def forAgent(status: String, organisationId: Long, params: PaginationParams)(
+        implicit hc: HeaderCarrier): Future[PropertyRepresentations] = {
     val url = s"$baseUrl/authorisation-search-api/agents/$organisationId/authorisations"
 
-    http.GET[AgentAuthResultBE](url, Seq("start" -> params.startPoint.toString, "size" -> params.pageSize.toString, "representationStatus" -> "PENDING")).map(x => {
-      PropertyRepresentations(x.filterTotal, x.authorisations.map(_.toPropertyRepresentation))
-    })
+    http
+      .GET[AgentAuthResultBE](
+        url,
+        Seq(
+          "start"                -> params.startPoint.toString,
+          "size"                 -> params.pageSize.toString,
+          "representationStatus" -> "PENDING"))
+      .map(x => {
+        PropertyRepresentations(x.filterTotal, x.authorisations.map(_.toPropertyRepresentation))
+      })
   }
 
-  def manageAgents (organisationId: Long)(implicit hc: HeaderCarrier): Future[Agents] = {
+  def manageAgents(organisationId: Long)(implicit hc: HeaderCarrier): Future[Agents] = {
     val url = baseUrl +
       s"/authorisation-search-api/owners/$organisationId/agents"
     http.GET[Agents](url)
   }
 
-  private def buildQueryParams(name: String, value: Option[String]): String = {
+  private def buildQueryParams(name: String, value: Option[String]): String =
     value match {
       case Some(paramValue) if paramValue != "" => s"&$name=$paramValue";
-      case _ => ""
+      case _                                    => ""
     }
-  }
 
 }

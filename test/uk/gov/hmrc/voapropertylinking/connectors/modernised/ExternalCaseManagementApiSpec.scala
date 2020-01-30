@@ -48,7 +48,8 @@ class ExternalCaseManagementApiSpec extends BaseUnitSpec {
         when(mockVoaHttpClient.GET[CheckCasesWithAgent](any(), any())(any(), any(), any(), any()))
           .thenReturn(Future.successful(CheckCasesWithAgent(1, 15, 4, 4, List(mockCheckCase))))
 
-        val result: CheckCasesWithAgent = connector.getMyOrganisationCheckCases(submissionId)(requestWithPrincipal).futureValue
+        val result: CheckCasesWithAgent =
+          connector.getMyOrganisationCheckCases(submissionId)(requestWithPrincipal).futureValue
 
         result.start shouldBe 1
         result.size shouldBe 15
@@ -67,7 +68,8 @@ class ExternalCaseManagementApiSpec extends BaseUnitSpec {
         when(mockVoaHttpClient.GET[CheckCasesWithClient](any(), any())(any(), any(), any(), any()))
           .thenReturn(Future.successful(CheckCasesWithClient(1, 15, 4, 4, List(mockCheckCase))))
 
-        val result: CheckCasesWithClient = connector.getMyClientsCheckCases(submissionId)(requestWithPrincipal).futureValue
+        val result: CheckCasesWithClient =
+          connector.getMyClientsCheckCases(submissionId)(requestWithPrincipal).futureValue
 
         result.start shouldBe 1
         result.size shouldBe 15

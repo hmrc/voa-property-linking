@@ -22,17 +22,17 @@ import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.voapropertylinking.models.modernised.casemanagement.check.CheckCaseStatus.CheckCaseStatus
 
 case class CheckCaseWithAgent(
-                               checkCaseSubmissionId: String,
-                               checkCaseReference: String,
-                               checkCaseStatus: CheckCaseStatus,
-                               address: String,
-                               uarn: Long,
-                               createdDateTime: LocalDateTime,
-                               settledDate: Option[LocalDate],
-                               agent: Option[Agent],
-                               submittedBy: String,
-                               originatingAssessmentReference: Long
-                             )
+      checkCaseSubmissionId: String,
+      checkCaseReference: String,
+      checkCaseStatus: CheckCaseStatus,
+      address: String,
+      uarn: Long,
+      createdDateTime: LocalDateTime,
+      settledDate: Option[LocalDate],
+      agent: Option[Agent],
+      submittedBy: String,
+      originatingAssessmentReference: Long
+)
 
 object CheckCaseWithAgent {
   implicit val format: OFormat[CheckCaseWithAgent] = Json.format

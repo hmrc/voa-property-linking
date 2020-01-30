@@ -24,14 +24,16 @@ import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import scala.concurrent.{ExecutionContext, Future}
 
 class BusinessRatesAuthConnector @Inject()(
-                                            http: DefaultHttpClient,
-                                            servicesConfig: ServicesConfig
-                                          )(implicit executionContext: ExecutionContext) extends BaseMdtpConnector {
+      http: DefaultHttpClient,
+      servicesConfig: ServicesConfig
+)(implicit executionContext: ExecutionContext)
+    extends BaseMdtpConnector {
 
   lazy val baseUrl = servicesConfig.baseUrl("business-rates-auth")
   lazy val url = baseUrl + "/business-rates-authorisation"
 
-  def clearCache()(implicit hc: HeaderCarrier): Future[Unit] = {
-    http.DELETE[HttpResponse](url + "/cache") map { _ => () }
-  }
+  def clearCache()(implicit hc: HeaderCarrier): Future[Unit] =
+    http.DELETE[HttpResponse](url + "/cache") map { _ =>
+      ()
+    }
 }

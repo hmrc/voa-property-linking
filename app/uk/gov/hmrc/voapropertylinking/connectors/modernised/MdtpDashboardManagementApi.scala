@@ -25,9 +25,10 @@ import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import scala.concurrent.{ExecutionContext, Future}
 
 class MdtpDashboardManagementApi @Inject()(
-                                            http: DefaultHttpClient,
-                                            servicesConfig: ServicesConfig
-                                          )(implicit executionContext: ExecutionContext) extends BaseVoaConnector {
+      http: DefaultHttpClient,
+      servicesConfig: ServicesConfig
+)(implicit executionContext: ExecutionContext)
+    extends BaseVoaConnector {
 
   lazy val baseUrl: String = servicesConfig.baseUrl("external-business-rates-data-platform")
 
@@ -37,7 +38,8 @@ class MdtpDashboardManagementApi @Inject()(
   def get(authorisationId: Long)(implicit hc: HeaderCarrier): Future[Option[PropertiesView]] = {
     val url = baseUrl + s"/mdtp-dashboard-management-api/mdtp_dashboard/view_assessment"
 
-    http.GET[Option[PropertiesView]](url, Seq("listYear" -> s"$listYear", "authorisationId" -> s"$authorisationId"))
+    http
+      .GET[Option[PropertiesView]](url, Seq("listYear" -> s"$listYear", "authorisationId" -> s"$authorisationId"))
       .map(_.collect {
         case view if view.hasValidStatus => view.copy(parties = filterInvalidParties(view.parties)).upperCase
       })

@@ -19,14 +19,14 @@ package models
 import play.api.libs.json.Json
 
 case class APIDetailedGroupAccount(
-                                    id: Long,
-                                    governmentGatewayGroupId: String,
-                                    representativeCode: Option[Long],
-                                    organisationLatestDetail: GroupDetails,
-                                    persons: Seq[IndividualSummary]
-                                  ) {
+      id: Long,
+      governmentGatewayGroupId: String,
+      representativeCode: Option[Long],
+      organisationLatestDetail: GroupDetails,
+      persons: Seq[IndividualSummary]
+) {
 
-  def toGroupAccount = {
+  def toGroupAccount =
     GroupAccount(
       id,
       governmentGatewayGroupId,
@@ -37,18 +37,17 @@ case class APIDetailedGroupAccount(
       organisationLatestDetail.representativeFlag,
       representativeCode.filter(_ => organisationLatestDetail.representativeFlag)
     )
-  }
 }
 
 case class IndividualSummary(personLatestDetail: APIIndividualDetails)
 
 case class GroupDetails(
-                         addressUnitId: Long,
-                         representativeFlag: Boolean,
-                         organisationName: String,
-                         organisationEmailAddress: String,
-                         organisationTelephoneNumber: Option[String]
-                       )
+      addressUnitId: Long,
+      representativeFlag: Boolean,
+      organisationName: String,
+      organisationEmailAddress: String,
+      organisationTelephoneNumber: Option[String]
+)
 
 object GroupDetails {
   implicit val format = Json.format[GroupDetails]

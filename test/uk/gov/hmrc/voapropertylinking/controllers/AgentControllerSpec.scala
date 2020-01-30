@@ -31,7 +31,8 @@ class AgentControllerSpec extends BaseControllerSpec {
   trait Setup {
     val mockAgentConnector = mock[AuthorisationSearchApi]
 
-    val agentController = new AgentController(Helpers.stubControllerComponents(), preAuthenticatedActionBuilders(), mockAgentConnector)
+    val agentController =
+      new AgentController(Helpers.stubControllerComponents(), preAuthenticatedActionBuilders(), mockAgentConnector)
   }
 
   "given authorised access, manage agents" should {
@@ -56,5 +57,3 @@ class AgentControllerSpec extends BaseControllerSpec {
     }
   }
 }
-
-

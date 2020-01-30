@@ -33,20 +33,23 @@ import scala.concurrent.{ExecutionContext, Future}
   TODO this controller will move to check backend after planned migration to external case management api
  */
 class CheckCaseController @Inject()(
-                                     controllerComponents: ControllerComponents,
-                                     authenticated: AuthenticatedActionBuilder,
-                                     externalCaseManagementApi: ExternalCaseManagementApi
-                                   )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController(controllerComponents) {
+      controllerComponents: ControllerComponents,
+      authenticated: AuthenticatedActionBuilder,
+      externalCaseManagementApi: ExternalCaseManagementApi
+)(implicit executionContext: ExecutionContext)
+    extends PropertyLinkingBaseController(controllerComponents) {
 
-  def getCheckCases(submissionId: String, party: String): Action[AnyContent] = authenticated.async { implicit request =>
-    party match {
-      case "agent"  => getMyClientsCheckCases(propertyLinkSubmissionId = submissionId)
-      case "client" => getMyOrganisationCheckCases(propertyLinkSubmissionId = submissionId)
-      case p        => Future.successful(NotImplemented(s"invalid party (projection) supplied: $p"))
-    }
+  def getCheckCases(submissionId: String, party: String): Action[AnyContent] = authenticated.async {
+    implicit request =>
+      party match {
+        case "agent"  => getMyClientsCheckCases(propertyLinkSubmissionId = submissionId)
+        case "client" => getMyOrganisationCheckCases(propertyLinkSubmissionId = submissionId)
+        case p        => Future.successful(NotImplemented(s"invalid party (projection) supplied: $p"))
+      }
   }
 
-  private def getMyOrganisationCheckCases(propertyLinkSubmissionId: String)(implicit request: RequestWithPrincipal[_]): Future[Result] =  {
+  private def getMyOrganisationCheckCases(propertyLinkSubmissionId: String)(
+        implicit request: RequestWithPrincipal[_]): Future[Result] =
     externalCaseManagementApi
       .getMyOrganisationCheckCases(propertyLinkSubmissionId)
       .recover {
@@ -55,9 +58,9 @@ class CheckCaseController @Inject()(
           CheckCasesWithAgent(1, 100, 0, 0, Nil) // I believe this shouldnt be handled here. I think this should return the error it got.
       }
       .map(response => Ok(Json.toJson(response)))
-  }
 
-  private def getMyClientsCheckCases(propertyLinkSubmissionId: String)(implicit request: RequestWithPrincipal[_]): Future[Result] = {
+  private def getMyClientsCheckCases(propertyLinkSubmissionId: String)(
+        implicit request: RequestWithPrincipal[_]): Future[Result] =
     externalCaseManagementApi
       .getMyClientsCheckCases(propertyLinkSubmissionId)
       .recover {
@@ -67,6 +70,4 @@ class CheckCaseController @Inject()(
       }
       .map(response => Ok(Json.toJson(response)))
 
-  }
 }
-

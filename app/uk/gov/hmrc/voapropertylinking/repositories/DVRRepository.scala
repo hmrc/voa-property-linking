@@ -34,56 +34,53 @@ import scala.language.postfixOps
 
 @Singleton
 class DVRRepository @Inject()(
-                               mongo: ReactiveMongoComponent,
-                               @Named("dvrCollectionName") val dvrCollectionName: String,
-                               config: ServicesConfig
-                             )(implicit executionContext: ExecutionContext) extends ReactiveRepository[DVRRecord, String](
-  dvrCollectionName,
-  mongo.mongoConnector.db,
-  DVRRecord.mongoFormat,
-  implicitly[Format[String]]) with DVRRecordRepository {
+      mongo: ReactiveMongoComponent,
+      @Named("dvrCollectionName") val dvrCollectionName: String,
+      config: ServicesConfig
+)(implicit executionContext: ExecutionContext)
+    extends ReactiveRepository[DVRRecord, String](
+      dvrCollectionName,
+      mongo.mongoConnector.db,
+      DVRRecord.mongoFormat,
+      implicitly[Format[String]]) with DVRRecordRepository {
 
   lazy val ttlDuration = config.getDuration("dvr.record.ttl.duration")
 
   override def indexes: Seq[Index] = Seq(
-    Index(key = Seq("createdAt" -> IndexType.Ascending), name = Some("ttl"), options = BSONDocument("expireAfterSeconds" -> (ttlDuration).toSeconds))
+    Index(
+      key = Seq("createdAt" -> IndexType.Ascending),
+      name = Some("ttl"),
+      options = BSONDocument("expireAfterSeconds" -> (ttlDuration).toSeconds))
   )
 
-  override def create(request: DetailedValuationRequest): Future[Unit] = {
-    insert(
-      DVRRecord(
-        request.organisationId,
-        request.assessmentRef,
-        request.agents,
-        System.currentTimeMillis()))
+  override def create(request: DetailedValuationRequest): Future[Unit] =
+    insert(DVRRecord(request.organisationId, request.assessmentRef, request.agents, System.currentTimeMillis()))
       .map(_ => ())
       .recover {
         case e: DatabaseException => Logger.debug(e.getMessage())
       }
-  }
 
   override def exists(organisationId: Long, assessmentRef: Long): Future[Boolean] =
     find(query(organisationId))
       .map(_.exists(_.assessmentRef == assessmentRef))
 
-  override def clear(organisationId: Long): Future[Unit] = {
+  override def clear(organisationId: Long): Future[Unit] =
     remove(query(organisationId))
       .map(_ => ())
       .recover {
         case e: DatabaseException => Logger.debug(e.getMessage())
       }
-  }
 
   private def query(organisationId: Long): (String, Json.JsValueWrapper) =
     "$or" -> Json.arr(Json.obj("organisationId" -> organisationId), Json.obj("agents" -> organisationId))
 }
 
 case class DVRRecord(
-                      organisationId: Long,
-                      assessmentRef: Long,
-                      agents: Option[List[Long]],
-                      createdAt: Long
-                    )
+      organisationId: Long,
+      assessmentRef: Long,
+      agents: Option[List[Long]],
+      createdAt: Long
+)
 
 object DVRRecord {
   val mongoFormat: OFormat[DVRRecord] = Json.format
@@ -97,5 +94,3 @@ trait DVRRecordRepository {
 
   def clear(organisationId: Long): Future[Unit]
 }
-
-

@@ -26,12 +26,14 @@ import play.api.test.{FakeRequest, Helpers}
 
 import scala.concurrent.Future
 
-
 class ChallengeControllerSpec extends BaseControllerSpec {
 
   trait Setup {
     val foo = 1L
-    val controller = new ChallengeController(Helpers.stubControllerComponents(), preAuthenticatedActionBuilders(), mockExternalCaseManagementApi)
+    val controller = new ChallengeController(
+      Helpers.stubControllerComponents(),
+      preAuthenticatedActionBuilders(),
+      mockExternalCaseManagementApi)
     val plSubmissionId = "PL12AB34"
     val canChallengeResponse = CanChallengeResponse(result = true, reasonCode = None, reason = None)
   }

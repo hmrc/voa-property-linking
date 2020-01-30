@@ -25,7 +25,6 @@ import models.modernised.ProvidedEvidence.{apply => _, _}
 import models.FileInfo
 import models.modernised.externalpropertylink.requests.CreatePropertyLink
 
-
 trait FakeObjects {
 
   val date = LocalDate.parse("2018-09-05")
@@ -44,16 +43,18 @@ trait FakeObjects {
     submissionId = "44444",
     authorisationOwnerCapacity = "OWNER",
     startDate = date,
-    endDate = Some(date))
+    endDate = Some(date)
+  )
 
   val testCreatePropertyLink: CreatePropertyLink = CreatePropertyLink(
     uarn = 11111,
     capacity = Capacity.withName("OWNER"),
     startDate = date,
-    endDate =  Some(date),
+    endDate = Some(date),
     method = ProvidedEvidence.withName("RATES_BILL"),
     PLsubmissionId = "44444",
     createDatetime = LocalDateTime.now(),
-    uploadedFiles =  Seq(evidence),
-    submissionSource = "DFE_UI")
+    uploadedFiles = Seq(evidence),
+    submissionSource = "DFE_UI"
+  )
 }

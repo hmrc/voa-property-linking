@@ -33,15 +33,19 @@ class SubmissionIdControllerSpec extends BaseControllerSpec {
     val mockSequenceGeneratorMongoRepository: SequenceGeneratorMongoRepository =
       mock[SequenceGeneratorMongoRepository]
     when(mockSequenceGeneratorMongoRepository.getNextSequenceId(prefix)).thenReturn(Future.successful(100000L))
-    val submissionIdController = new SubmissionIdController(Helpers.stubControllerComponents(), preAuthenticatedActionBuilders(), mockSequenceGeneratorMongoRepository)
+    val submissionIdController = new SubmissionIdController(
+      Helpers.stubControllerComponents(),
+      preAuthenticatedActionBuilders(),
+      mockSequenceGeneratorMongoRepository)
   }
-
 
   "getting a submission id from the controller" should {
     "return a correctly formatted ID with specified prefix" in new Setup {
-      Json.parse(
-        contentAsString(submissionIdController.get(prefix)(FakeRequest()))
-      ).as[String] shouldBe "PREFIX5HZ4"
+      Json
+        .parse(
+          contentAsString(submissionIdController.get(prefix)(FakeRequest()))
+        )
+        .as[String] shouldBe "PREFIX5HZ4"
     }
   }
 

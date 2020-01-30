@@ -19,9 +19,9 @@ package uk.gov.hmrc.voapropertylinking.auth
 import play.api.mvc.{Request, WrappedRequest}
 
 class RequestWithPrincipal[A](
-                               request: Request[A],
-                               val principal: Principal
-                             ) extends WrappedRequest[A](request)
+      request: Request[A],
+      val principal: Principal
+) extends WrappedRequest[A](request)
 
 object RequestWithPrincipal {
   def apply[A](request: Request[A], principal: Principal): RequestWithPrincipal[A] =

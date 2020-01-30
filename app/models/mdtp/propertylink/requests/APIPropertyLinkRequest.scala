@@ -22,22 +22,22 @@ import models.FileInfo
 import play.api.libs.json.{Json, OFormat, Reads}
 
 case class APIPropertyLinkRequest(
-                                   uarn: Long,
-                                   authorisationOwnerOrganisationId: Long,
-                                   authorisationOwnerPersonId: Long,
-                                   createDatetime: Instant,
-                                   authorisationMethod: String,
-                                   uploadedFiles: Seq[FileInfo],
-                                   submissionId: String,
-                                   authorisationOwnerCapacity: String,
-                                   startDate: LocalDate,
-                                   endDate: Option[LocalDate] = None)
+      uarn: Long,
+      authorisationOwnerOrganisationId: Long,
+      authorisationOwnerPersonId: Long,
+      createDatetime: Instant,
+      authorisationMethod: String,
+      uploadedFiles: Seq[FileInfo],
+      submissionId: String,
+      authorisationOwnerCapacity: String,
+      startDate: LocalDate,
+      endDate: Option[LocalDate] = None)
 
 object APIPropertyLinkRequest {
   implicit val instantReads: Reads[Instant] = Reads.instantReads("yyyy-MM-dd'T'HH:mm:ss.SSS[XXX][X]")
   implicit val format: OFormat[APIPropertyLinkRequest] = Json.format[APIPropertyLinkRequest]
 
-  def fromPropertyLinkRequest(propertyLinkRequest: PropertyLinkRequest) = {
+  def fromPropertyLinkRequest(propertyLinkRequest: PropertyLinkRequest) =
     APIPropertyLinkRequest(
       uarn = propertyLinkRequest.uarn,
       authorisationOwnerOrganisationId = propertyLinkRequest.organisationId,
@@ -48,6 +48,6 @@ object APIPropertyLinkRequest {
       submissionId = propertyLinkRequest.submissionId,
       authorisationOwnerCapacity = propertyLinkRequest.capacityDeclaration.capacity,
       startDate = propertyLinkRequest.capacityDeclaration.fromDate,
-      endDate = propertyLinkRequest.capacityDeclaration.toDate)
-  }
+      endDate = propertyLinkRequest.capacityDeclaration.toDate
+    )
 }

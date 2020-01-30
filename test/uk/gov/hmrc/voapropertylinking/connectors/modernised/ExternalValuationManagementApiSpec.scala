@@ -72,16 +72,19 @@ class ExternalValuationManagementApiSpec extends BaseUnitSpec with ContentTypes 
       val now = LocalDateTime.now()
 
       when(mockVoaHttpClient.GET[DvrDocumentFiles](any(), any())(any(), any(), any(), any()))
-        .thenReturn(Future.successful(DvrDocumentFiles(
-          checkForm = Document(DocumentSummary("1", "Check Document", now)),
-          detailedValuation = Document(DocumentSummary("2", "Detailed Valuation Document", now))
-        )))
+        .thenReturn(
+          Future.successful(
+            DvrDocumentFiles(
+              checkForm = Document(DocumentSummary("1", "Check Document", now)),
+              detailedValuation = Document(DocumentSummary("2", "Detailed Valuation Document", now))
+            )))
 
       val result = connector.getDvrDocuments(valuationId, uarn, propertyLinkId).futureValue
-      result shouldBe Some(DvrDocumentFiles(
-        checkForm = Document(DocumentSummary("1", "Check Document", now)),
-        detailedValuation = Document(DocumentSummary("2", "Detailed Valuation Document", now))
-      ))
+      result shouldBe Some(
+        DvrDocumentFiles(
+          checkForm = Document(DocumentSummary("1", "Check Document", now)),
+          detailedValuation = Document(DocumentSummary("2", "Detailed Valuation Document", now))
+        ))
     }
 
     "return a None upon a 404 from modernised" in new Setup {
@@ -102,7 +105,8 @@ class ExternalValuationManagementApiSpec extends BaseUnitSpec with ContentTypes 
       val propertyLinkId = "PL-123456789"
       val fileRef = "1L"
 
-      val dvrUrl = s"/external-valuation-management-api/properties/$uarn/valuations/$valuationId/files/$fileRef?propertyLinkId=$propertyLinkId"
+      val dvrUrl =
+        s"/external-valuation-management-api/properties/$uarn/valuations/$valuationId/files/$fileRef?propertyLinkId=$propertyLinkId"
 
       val mockWsResponse = {
         val m = new WSResponse {
@@ -146,4 +150,3 @@ class ExternalValuationManagementApiSpec extends BaseUnitSpec with ContentTypes 
     }
   }
 }
-

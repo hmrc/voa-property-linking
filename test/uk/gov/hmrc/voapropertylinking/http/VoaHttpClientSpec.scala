@@ -41,7 +41,7 @@ class VoaHttpClientSpec extends BaseUnitSpec {
     val mockUrl = "http://mock-url"
 
     val mockQueryParams = Seq("key" -> "value")
-    val mockHeaders = Seq("key" -> "value")
+    val mockHeaders = Seq("key"     -> "value")
     val mockHttpClient: DefaultHttpClient = mock[DefaultHttpClient]
     val headerCaptor: ArgumentCaptor[HeaderCarrier] = ArgumentCaptor.forClass(classOf[HeaderCarrier])
 
@@ -53,7 +53,7 @@ class VoaHttpClientSpec extends BaseUnitSpec {
     def checkGovernmentGatewayHeaders(headerCaptor: ArgumentCaptor[HeaderCarrier])(implicit principal: Principal) =
       headerCaptor.getValue.extraHeaders shouldBe Seq(
         "GG-EXTERNAL-ID" -> principal.externalId,
-        "GG-GROUP-ID" -> principal.groupId
+        "GG-GROUP-ID"    -> principal.groupId
       )
 
     "preserve the existing headers when adding the extra GG headers" in new Setup {
@@ -62,7 +62,7 @@ class VoaHttpClientSpec extends BaseUnitSpec {
       voaHc shouldBe hc.withExtraHeaders(
         Seq(
           "GG-EXTERNAL-ID" -> principal.externalId,
-          "GG-GROUP-ID" -> principal.groupId
+          "GG-GROUP-ID"    -> principal.groupId
         ): _*)
     }
 

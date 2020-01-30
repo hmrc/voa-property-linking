@@ -23,11 +23,11 @@ import play.api.mvc.Results
 import uk.gov.hmrc.voapropertylinking.utils.HttpStatusCodes
 
 case class ErrorResponse(
-                          httpStatusCode: Int,
-                          errorCode: String,
-                          message: String,
-                          errors: Option[Seq[NestedError]] = None,
-                          incidentId: String = UUID.randomUUID().toString) {
+      httpStatusCode: Int,
+      errorCode: String,
+      message: String,
+      errors: Option[Seq[NestedError]] = None,
+      incidentId: String = UUID.randomUUID().toString) {
 
   override def toString: String =
     s"[$incidentId] $httpStatusCode $errorCode - $message"
@@ -35,7 +35,6 @@ case class ErrorResponse(
   lazy val json = Json.toJson(this)(ErrorResponse.writes)
 
 }
-
 
 object ErrorResponse extends HttpStatusCodes with Results {
 

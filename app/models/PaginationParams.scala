@@ -19,31 +19,32 @@ package models
 import play.api.mvc.QueryStringBindable
 
 case class PaginationParams(
-                             startPoint: Int,
-                             pageSize: Int,
-                             requestTotalRowCount: Boolean
-                           ) {
+      startPoint: Int,
+      pageSize: Int,
+      requestTotalRowCount: Boolean
+) {
   override val toString = s"startPoint=$startPoint&pageSize=$pageSize&requestTotalRowCount=$requestTotalRowCount"
 }
 
 object DefaultPaginationParams extends PaginationParams(startPoint = 1, pageSize = 15, requestTotalRowCount = true)
 
 object PaginationParams {
-  implicit def queryStringBindable(implicit intBinder: QueryStringBindable[Int],
-                                   booleanBinder: QueryStringBindable[Boolean]): QueryStringBindable[PaginationParams] = {
+  implicit def queryStringBindable(
+        implicit intBinder: QueryStringBindable[Int],
+        booleanBinder: QueryStringBindable[Boolean]): QueryStringBindable[PaginationParams] =
     new QueryStringBindable[PaginationParams] {
-      override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, PaginationParams]] = for {
-        startPoint <- intBinder.bind("startPoint", params)
-        pageSize <- intBinder.bind("pageSize", params)
-        requestTotalRowCount <- booleanBinder.bind("requestTotalRowCount", params)
-      } yield {
-        (startPoint, pageSize, requestTotalRowCount) match {
-          case (Right(sp), Right(ps), Right(rtrc)) => Right(PaginationParams(sp, ps, rtrc))
-          case _ => Left("Unable to bind PaginationParams")
+      override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, PaginationParams]] =
+        for {
+          startPoint           <- intBinder.bind("startPoint", params)
+          pageSize             <- intBinder.bind("pageSize", params)
+          requestTotalRowCount <- booleanBinder.bind("requestTotalRowCount", params)
+        } yield {
+          (startPoint, pageSize, requestTotalRowCount) match {
+            case (Right(sp), Right(ps), Right(rtrc)) => Right(PaginationParams(sp, ps, rtrc))
+            case _                                   => Left("Unable to bind PaginationParams")
+          }
         }
-      }
 
       override def unbind(key: String, value: PaginationParams): String = s"$value"
     }
-  }
 }

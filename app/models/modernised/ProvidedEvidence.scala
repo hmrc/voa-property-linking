@@ -19,8 +19,6 @@ package models.modernised
 import play.api.libs.json.Format
 import uk.gov.hmrc.voapropertylinking.utils.JsonUtils.enumFormat
 
-
-
 object ProvidedEvidence extends Enumeration {
   type ProvidedEvidence = Value
 

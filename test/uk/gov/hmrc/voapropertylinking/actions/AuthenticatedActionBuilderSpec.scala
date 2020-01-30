@@ -38,8 +38,8 @@ class AuthenticatedActionBuilderSpec extends BaseControllerSpec {
 
     val authConnector: AuthConnector = new AuthConnector {
       def authorise[A](predicate: Predicate, retrieval: Retrieval[A])(
-        implicit hc: HeaderCarrier,
-        ec: ExecutionContext): Future[A] =
+            implicit hc: HeaderCarrier,
+            ec: ExecutionContext): Future[A] =
         exception.fold(Future.successful(success.asInstanceOf[A]))(Future.failed(_))
     }
 

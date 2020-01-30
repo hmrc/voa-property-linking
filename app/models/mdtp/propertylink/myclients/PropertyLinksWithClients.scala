@@ -20,12 +20,12 @@ import models.modernised.externalpropertylink.myclients.{PropertyLinksWithClient
 import play.api.libs.json.{Json, OFormat}
 
 case class PropertyLinksWithClients(
-                                     start: Int,
-                                     size: Int,
-                                     filterTotal: Int,
-                                     total: Int,
-                                     authorisations: Seq[PropertyLinkWithClient]
-                                   )
+      start: Int,
+      size: Int,
+      filterTotal: Int,
+      total: Int,
+      authorisations: Seq[PropertyLinkWithClient]
+)
 
 object PropertyLinksWithClients {
   implicit val format: OFormat[PropertyLinksWithClients] = Json.format

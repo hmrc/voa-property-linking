@@ -30,12 +30,13 @@ import uk.gov.hmrc.voapropertylinking.connectors.modernised.{CCACaseManagementAp
 import scala.concurrent.ExecutionContext
 
 class DVRCaseManagement @Inject()(
-                                   controllerComponents: ControllerComponents,
-                                   authenticated: AuthenticatedActionBuilder,
-                                   dvrCaseManagementV2: CCACaseManagementApi,
-                                   externalValuationManagementApi: ExternalValuationManagementApi,
-                                   dvrRecordRepository: DVRRecordRepository
-                                 )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController(controllerComponents) {
+      controllerComponents: ControllerComponents,
+      authenticated: AuthenticatedActionBuilder,
+      dvrCaseManagementV2: CCACaseManagementApi,
+      externalValuationManagementApi: ExternalValuationManagementApi,
+      dvrRecordRepository: DVRRecordRepository
+)(implicit executionContext: ExecutionContext)
+    extends PropertyLinkingBaseController(controllerComponents) {
 
   def requestDetailedValuationV2: Action[JsValue] = authenticated.async(parse.json) { implicit request =>
     withJsonBody[DetailedValuationRequest] { dvrRequest =>
@@ -48,46 +49,48 @@ class DVRCaseManagement @Inject()(
   }
 
   def getDvrDocuments(
-                       valuationId: Long,
-                       uarn: Long,
-                       propertyLinkId: String
-                     ): Action[AnyContent] = authenticated.async { implicit request =>
+        valuationId: Long,
+        uarn: Long,
+        propertyLinkId: String
+  ): Action[AnyContent] = authenticated.async { implicit request =>
     externalValuationManagementApi
       .getDvrDocuments(valuationId, uarn, propertyLinkId)
-      .map{
+      .map {
         case Some(response) =>
           logger.debug(s"dvr documents response: ${Json.prettyPrint(Json.toJson(response))}")
           Ok(Json.toJson(response))
-        case None           => NotFound
+        case None => NotFound
       }
   }
 
   def getDvrDocument(
-                      valuationId: Long,
-                      uarn: Long,
-                      propertyLinkId: String,
-                      fileRef: String
-                    ): Action[AnyContent] = authenticated.async { implicit request =>
+        valuationId: Long,
+        uarn: Long,
+        propertyLinkId: String,
+        fileRef: String
+  ): Action[AnyContent] = authenticated.async { implicit request =>
     externalValuationManagementApi
       .getDvrDocument(valuationId, uarn, propertyLinkId, fileRef)
       .map { document =>
+        val contentType =
+          document.headers.mapValues(_.mkString(",")).getOrElse(CONTENT_TYPE, "application/octet-stream")
 
-        val contentType = document.headers.mapValues(_.mkString(",")).getOrElse(CONTENT_TYPE, "application/octet-stream")
-
-        document.headers.mapValues(_.mkString(",")).get(CONTENT_LENGTH).map(_.toLong)
-          .fold(Ok.chunked(document.bodyAsSource).as(contentType))(
-            length => Ok.sendEntity(HttpEntity.Streamed(document.bodyAsSource, Some(length), Some(contentType))))
+        document.headers
+          .mapValues(_.mkString(","))
+          .get(CONTENT_LENGTH)
+          .map(_.toLong)
+          .fold(Ok.chunked(document.bodyAsSource).as(contentType))(length =>
+            Ok.sendEntity(HttpEntity.Streamed(document.bodyAsSource, Some(length), Some(contentType))))
       }
   }
 
   def dvrExists(
-                 organisationId: Long,
-                 assessmentRef: Long
-               ): Action[AnyContent] = authenticated.async { implicit request =>
+        organisationId: Long,
+        assessmentRef: Long
+  ): Action[AnyContent] = authenticated.async { implicit request =>
     dvrRecordRepository.exists(organisationId, assessmentRef).map {
-      case true   => Ok(Json.toJson(true))
-      case false  => Ok(Json.toJson(false))
+      case true  => Ok(Json.toJson(true))
+      case false => Ok(Json.toJson(false))
     }
   }
 }
-

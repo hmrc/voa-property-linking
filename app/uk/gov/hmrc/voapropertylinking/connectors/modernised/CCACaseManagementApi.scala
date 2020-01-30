@@ -24,16 +24,17 @@ import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
 
-
 class CCACaseManagementApi @Inject()(
-                                      http: DefaultHttpClient,
-                                      config: ServicesConfig
-                                    )(implicit executionContext: ExecutionContext) extends BaseVoaConnector{
+      http: DefaultHttpClient,
+      config: ServicesConfig
+)(implicit executionContext: ExecutionContext)
+    extends BaseVoaConnector {
   lazy val baseURL = config.baseUrl("external-business-rates-data-platform")
   lazy val url = baseURL + "/cca-case-management-api"
 
   def requestDetailedValuation(request: DetailedValuationRequest)(implicit hc: HeaderCarrier): Future[Unit] =
     http
-      .POST[DetailedValuationRequest, HttpResponse](url + "/cca_case/dvrSubmission", request) map { _ => () }
+      .POST[DetailedValuationRequest, HttpResponse](url + "/cca_case/dvrSubmission", request) map { _ =>
+      ()
+    }
 }
-

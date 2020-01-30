@@ -21,28 +21,27 @@ import java.time.LocalDate
 import play.api.libs.json.{Json, OFormat}
 
 case class ValuationHistory(
-                             asstRef: Long,
-                             listYear: String,
-                             uarn: Long,
-                             billingAuthorityReference: String,
-                             address: String,
-                             description: Option[String],
-                             specialCategoryCode: Option[String],
-                             compositeProperty: Option[String],
-                             effectiveDate: Option[LocalDate],
-                             listAlterationDate: Option[LocalDate],
-                             numberOfPreviousProposals: Option[Int],
-                             settlementCode: Option[String],
-                             totalAreaM2: Option[BigDecimal],
-                             costPerM2: Option[BigDecimal],
-                             rateableValue: Option[BigDecimal],
-                             transitionalCertificate: Option[Boolean],
-                             deletedIndicator: Option[Boolean],
-                             valuationDetailsAvailable: Option[Boolean],
-                             billingAuthorityCode: Option[String],
-                             currentFromDate: Option[LocalDate] = None,
-                             currentToDate: Option[LocalDate] = None)
-
+      asstRef: Long,
+      listYear: String,
+      uarn: Long,
+      billingAuthorityReference: String,
+      address: String,
+      description: Option[String],
+      specialCategoryCode: Option[String],
+      compositeProperty: Option[String],
+      effectiveDate: Option[LocalDate],
+      listAlterationDate: Option[LocalDate],
+      numberOfPreviousProposals: Option[Int],
+      settlementCode: Option[String],
+      totalAreaM2: Option[BigDecimal],
+      costPerM2: Option[BigDecimal],
+      rateableValue: Option[BigDecimal],
+      transitionalCertificate: Option[Boolean],
+      deletedIndicator: Option[Boolean],
+      valuationDetailsAvailable: Option[Boolean],
+      billingAuthorityCode: Option[String],
+      currentFromDate: Option[LocalDate] = None,
+      currentToDate: Option[LocalDate] = None)
 
 object ValuationHistory {
   implicit val valuationHistoryFormats: OFormat[ValuationHistory] = Json.format

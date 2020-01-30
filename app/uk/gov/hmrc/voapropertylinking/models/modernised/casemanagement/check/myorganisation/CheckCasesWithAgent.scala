@@ -19,12 +19,12 @@ package uk.gov.hmrc.voapropertylinking.models.modernised.casemanagement.check.my
 import play.api.libs.json.{Json, OFormat}
 
 case class CheckCasesWithAgent(
-                                start: Int,
-                                size: Int,
-                                filterTotal: Int,
-                                total: Int,
-                                checkCases: List[CheckCaseWithAgent]
-                              )
+      start: Int,
+      size: Int,
+      filterTotal: Int,
+      total: Int,
+      checkCases: List[CheckCaseWithAgent]
+)
 
 object CheckCasesWithAgent {
   implicit val format: OFormat[CheckCasesWithAgent] = Json.format

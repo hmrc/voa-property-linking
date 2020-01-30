@@ -22,19 +22,19 @@ import models.PropertyRepresentation
 import play.api.libs.json.Json
 
 case class AgentAuthorisation(
-                               authorisationId: Long,
-                               authorisedPartyId: Long,
-                               status: String,
-                               representationSubmissionId: String,
-                               submissionId: String,
-                               uarn: Long,
-                               address: String,
-                               localAuthorityRef: String,
-                               client: Client,
-                               representationStatus: String,
-                               checkPermission: String,
-                               challengePermission: String
-                             ) {
+      authorisationId: Long,
+      authorisedPartyId: Long,
+      status: String,
+      representationSubmissionId: String,
+      submissionId: String,
+      uarn: Long,
+      address: String,
+      localAuthorityRef: String,
+      client: Client,
+      representationStatus: String,
+      checkPermission: String,
+      challengePermission: String
+) {
 
   def capitalise() = this.copy(address = address.toUpperCase)
 
@@ -47,7 +47,8 @@ case class AgentAuthorisation(
     this.address,
     this.checkPermission,
     this.challengePermission,
-    LocalDate.now(), //TODO This is not being shown on the frontend for now, once the modernised API changes to return this correctly, we will display it again
+    LocalDate
+      .now(), //TODO This is not being shown on the frontend for now, once the modernised API changes to return this correctly, we will display it again
     this.status
   )
 }

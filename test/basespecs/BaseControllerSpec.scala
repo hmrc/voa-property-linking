@@ -29,11 +29,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 abstract class BaseControllerSpec
-  extends BaseUnitSpec
-    with ResultExtractors
-    with HeaderNames
-    with Status
-    with Results {
+    extends BaseUnitSpec with ResultExtractors with HeaderNames with Status with Results {
 
   implicit val request = FakeRequest()
 
@@ -43,13 +39,14 @@ abstract class BaseControllerSpec
   val baseUrl = "http://localhost:9999"
 
   def preAuthenticatedActionBuilders(
-                                      externalId: String = "gg_external_id",
-                                      groupId: String = "gg_group_id"
-                                    ): AuthenticatedActionBuilder =
+        externalId: String = "gg_external_id",
+        groupId: String = "gg_group_id"
+  ): AuthenticatedActionBuilder =
     new AuthenticatedActionBuilder(Helpers.stubControllerComponents(), mock[AuthConnector]) {
 
-      override def invokeBlock[A](request: Request[A], block: RequestWithPrincipal[A] => Future[Result]): Future[Result] = {
+      override def invokeBlock[A](
+            request: Request[A],
+            block: RequestWithPrincipal[A] => Future[Result]): Future[Result] =
         block(RequestWithPrincipal(request, Principal(externalId, groupId)))
-      }
     }
 }

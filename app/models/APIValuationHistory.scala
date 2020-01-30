@@ -22,20 +22,19 @@ import models.modernised.ValuationHistory
 import play.api.libs.json.{Json, OFormat}
 
 case class APIValuationHistory(
-                                asstRef: Long,
-                                listYear: String,
-                                uarn: Long,
-                                effectiveDate: Option[LocalDate],
-                                rateableValue: Option[Long],
-                                address: String,
-                                billingAuthorityReference: String,
-                                currentFromDate: Option[LocalDate],
-                                currentToDate: Option[LocalDate]
-                              ) {
+      asstRef: Long,
+      listYear: String,
+      uarn: Long,
+      effectiveDate: Option[LocalDate],
+      rateableValue: Option[Long],
+      address: String,
+      billingAuthorityReference: String,
+      currentFromDate: Option[LocalDate],
+      currentToDate: Option[LocalDate]
+) {
 
   def capatalise: APIValuationHistory = this.copy(address = address.toUpperCase)
 }
-
 
 object APIValuationHistory {
 
@@ -47,7 +46,9 @@ object APIValuationHistory {
       listYear = history.listYear,
       uarn = history.uarn,
       effectiveDate = history.effectiveDate,
-      rateableValue = history.rateableValue.map { d => d.longValue() },
+      rateableValue = history.rateableValue.map { d =>
+        d.longValue()
+      },
       address = history.address,
       billingAuthorityReference = history.billingAuthorityReference,
       currentFromDate = history.currentFromDate,

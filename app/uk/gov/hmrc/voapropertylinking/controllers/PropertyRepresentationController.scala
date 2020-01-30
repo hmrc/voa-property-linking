@@ -29,13 +29,14 @@ import uk.gov.hmrc.voapropertylinking.connectors.modernised._
 import scala.concurrent.{ExecutionContext, Future}
 
 class PropertyRepresentationController @Inject()(
-                                                  controllerComponents: ControllerComponents,
-                                                  authenticated: AuthenticatedActionBuilder,
-                                                  authorisationManagementApi: AuthorisationManagementApi,
-                                                  authorisationSearchApi: AuthorisationSearchApi,
-                                                  customerManagementApi: CustomerManagementApi,
-                                                  auditingService: AuditingService
-                                                )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController(controllerComponents) {
+      controllerComponents: ControllerComponents,
+      authenticated: AuthenticatedActionBuilder,
+      authorisationManagementApi: AuthorisationManagementApi,
+      authorisationSearchApi: AuthorisationSearchApi,
+      customerManagementApi: CustomerManagementApi,
+      auditingService: AuditingService
+)(implicit executionContext: ExecutionContext)
+    extends PropertyLinkingBaseController(controllerComponents) {
 
   def create(): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
     withJsonBody[RepresentationRequest] { reprRequest =>
@@ -46,23 +47,23 @@ class PropertyRepresentationController @Inject()(
   }
 
   def validateAgentCode(
-                         agentCode: Long,
-                         authorisationId: Long
-                       ): Action[AnyContent] = authenticated.async { implicit request =>
+        agentCode: Long,
+        authorisationId: Long
+  ): Action[AnyContent] = authenticated.async { implicit request =>
     authorisationManagementApi
       .validateAgentCode(agentCode, authorisationId)
       .map { errorOrOrganisationId =>
         errorOrOrganisationId.fold(
-          orgId => Ok(Json.obj("organisationId" -> orgId)),
+          orgId => Ok(Json.obj("organisationId"    -> orgId)),
           errorString => Ok(Json.obj("failureCode" -> errorString)))
       }
   }
 
   def forAgent(
-                status: String,
-                organisationId: Long,
-                pagination: PaginationParams
-              ): Action[AnyContent] = authenticated.async { implicit request =>
+        status: String,
+        organisationId: Long,
+        pagination: PaginationParams
+  ): Action[AnyContent] = authenticated.async { implicit request =>
     authorisationSearchApi
       .forAgent(status, organisationId, pagination)
       .map { propertyRepresentation =>
@@ -88,31 +89,32 @@ class PropertyRepresentationController @Inject()(
   }
 
   def appointableToAgent(
-                          ownerId: Long,
-                          agentCode: Long,
-                          checkPermission: Option[String],
-                          challengePermission: Option[String],
-                          paginationParams: PaginationParams,
-                          sortfield: Option[String],
-                          sortorder: Option[String],
-                          address: Option[String],
-                          agent: Option[String]
-                        ): Action[AnyContent] = authenticated.async { implicit request =>
+        ownerId: Long,
+        agentCode: Long,
+        checkPermission: Option[String],
+        challengePermission: Option[String],
+        paginationParams: PaginationParams,
+        sortfield: Option[String],
+        sortorder: Option[String],
+        address: Option[String],
+        agent: Option[String]
+  ): Action[AnyContent] = authenticated.async { implicit request =>
     customerManagementApi
       .withAgentCode(agentCode.toString)
       .flatMap {
         case Some(agentGroup) =>
-          authorisationSearchApi.appointableToAgent(
-            ownerId = ownerId,
-            agentId = agentGroup.id,
-            checkPermission = checkPermission,
-            challengePermission = challengePermission,
-            params = paginationParams,
-            sortfield = sortfield,
-            sortorder = sortorder,
-            address = address,
-            agent = agent
-          )
+          authorisationSearchApi
+            .appointableToAgent(
+              ownerId = ownerId,
+              agentId = agentGroup.id,
+              checkPermission = checkPermission,
+              challengePermission = challengePermission,
+              params = paginationParams,
+              sortfield = sortfield,
+              sortorder = sortorder,
+              address = address,
+              agent = agent
+            )
             .map(x => Ok(Json.toJson(OwnerAuthResult(x))))
         case None =>
           Logger.error(s"Agent details lookup failed for agentCode: $agentCode")

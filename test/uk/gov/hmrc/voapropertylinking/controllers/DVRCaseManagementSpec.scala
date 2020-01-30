@@ -90,32 +90,34 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
       val now = LocalDateTime.parse("2019-09-11T11:03:25.123")
 
       when(mockExternalValuationManagementapi.getDvrDocuments(any(), any(), any())(any()))
-        .thenReturn(Future.successful(Some(DvrDocumentFiles(
-          checkForm = Document(DocumentSummary("1L", "Check Document", now)),
-          detailedValuation = Document(DocumentSummary("2L", "Detailed Valuation Document", now))
-        ))))
+        .thenReturn(
+          Future.successful(
+            Some(
+              DvrDocumentFiles(
+                checkForm = Document(DocumentSummary("1L", "Check Document", now)),
+                detailedValuation = Document(DocumentSummary("2L", "Detailed Valuation Document", now))
+              ))))
 
       val result = testController.getDvrDocuments(1L, 3L, "PL-12345")(FakeRequest())
 
       status(result) shouldBe OK
-      contentAsJson(result) shouldBe Json.parse(
-        s"""
-           |{
-           | "checkForm": {
-           |   "documentSummary": {
-           |     "documentId": "1L",
-           |     "documentName": "Check Document",
-           |     "createDatetime": "$now"
-           |     }
-           | },
-           | "detailedValuation": {
-           |    "documentSummary": {
-           |       "documentId": "2L",
-           |       "documentName": "Detailed Valuation Document",
-           |       "createDatetime": "$now"
-           |    }
-           | }
-           |}
+      contentAsJson(result) shouldBe Json.parse(s"""
+                                                   |{
+                                                   | "checkForm": {
+                                                   |   "documentSummary": {
+                                                   |     "documentId": "1L",
+                                                   |     "documentName": "Check Document",
+                                                   |     "createDatetime": "$now"
+                                                   |     }
+                                                   | },
+                                                   | "detailedValuation": {
+                                                   |    "documentSummary": {
+                                                   |       "documentId": "2L",
+                                                   |       "documentName": "Detailed Valuation Document",
+                                                   |       "createDatetime": "$now"
+                                                   |    }
+                                                   | }
+                                                   |}
             """.stripMargin)
     }
 
@@ -188,9 +190,9 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
 
   lazy val mockCcaCaseManagementConnector = {
     val m = mock[CCACaseManagementApi]
-    when(m.requestDetailedValuation(any[DetailedValuationRequest])(any[HeaderCarrier])) thenReturn Future.successful(())
+    when(m.requestDetailedValuation(any[DetailedValuationRequest])(any[HeaderCarrier])) thenReturn Future.successful(
+      ())
     m
   }
 
 }
-

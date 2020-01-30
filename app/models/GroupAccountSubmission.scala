@@ -20,11 +20,25 @@ import java.time.Instant
 
 import play.api.libs.json.Json
 
-case class GroupAccountSubmission(id: String, companyName: String, addressId: Long, email: String, phone: String,
-                                  isAgent: Boolean, individualAccountSubmission: IndividualAccountSubmissionForOrganisation) {
+case class GroupAccountSubmission(
+      id: String,
+      companyName: String,
+      addressId: Long,
+      email: String,
+      phone: String,
+      isAgent: Boolean,
+      individualAccountSubmission: IndividualAccountSubmissionForOrganisation) {
 
-  def toApiAccount: APIGroupAccountSubmission = {
-    APIGroupAccountSubmission(id, companyName, addressId, email, phone, isAgent, None, Instant.now(),
+  def toApiAccount: APIGroupAccountSubmission =
+    APIGroupAccountSubmission(
+      id,
+      companyName,
+      addressId,
+      email,
+      phone,
+      isAgent,
+      None,
+      Instant.now(),
       APIIndividualAccountForOrganisation(
         individualAccountSubmission.trustId,
         individualAccountSubmission.details.firstName,
@@ -34,9 +48,9 @@ case class GroupAccountSubmission(id: String, companyName: String, addressId: Lo
         individualAccountSubmission.details.phone2,
         individualAccountSubmission.details.email,
         individualAccountSubmission.externalId,
-        Instant.now())
+        Instant.now()
+      )
     )
-  }
 }
 
 object GroupAccountSubmission {

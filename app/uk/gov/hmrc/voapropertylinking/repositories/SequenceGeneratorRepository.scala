@@ -40,12 +40,12 @@ trait SequenceGeneratorRepository extends ReactiveRepository[Sequence, String] {
 
 @Singleton
 class SequenceGeneratorMongoRepository @Inject()(mongo: ReactiveMongoComponent)
-  extends ReactiveRepository[Sequence, String](
-    collectionName = "sequences",
-    mongo = mongo.mongoConnector.db,
-    domainFormat = Sequence.format,
-    idFormat = implicitly[Format[String]]
-  ) with SequenceGeneratorRepository {
+    extends ReactiveRepository[Sequence, String](
+      collectionName = "sequences",
+      mongo = mongo.mongoConnector.db,
+      domainFormat = Sequence.format,
+      idFormat = implicitly[Format[String]]
+    ) with SequenceGeneratorRepository {
 
   def sequenceNo(in: FindAndModifyCommand.FindAndModifyResult): Long =
     in.result[Sequence].map(_.sequence).getOrElse(throw new RuntimeException("Unable to generate sequence number"))

@@ -19,14 +19,14 @@ package models.searchApi
 import play.api.libs.json.Json
 
 case class AgentAuthResultBE(
-                            start: Int,
-                            size: Int,
-                            filterTotal: Int,
-                            total: Int,
-                            authorisations: Seq[AgentAuthorisation]
-                          ){
+      start: Int,
+      size: Int,
+      filterTotal: Int,
+      total: Int,
+      authorisations: Seq[AgentAuthorisation]
+) {
 
-    def uppercase = this.copy(authorisations = authorisations.map(_.capitalise()))
+  def uppercase = this.copy(authorisations = authorisations.map(_.capitalise()))
 }
 
 object AgentAuthResultBE {

@@ -28,16 +28,16 @@ import uk.gov.hmrc.voapropertylinking.utils.PostcodeValidator
 import scala.concurrent.{ExecutionContext, Future}
 
 class AddressLookupController @Inject()(
-                                         controllerComponents: ControllerComponents,
-                                         authenticated: AuthenticatedActionBuilder,
-                                         addresses: AddressManagementApi
-                                       )(implicit executionContext: ExecutionContext)
-  extends PropertyLinkingBaseController(controllerComponents) {
+      controllerComponents: ControllerComponents,
+      authenticated: AuthenticatedActionBuilder,
+      addresses: AddressManagementApi
+)(implicit executionContext: ExecutionContext)
+    extends PropertyLinkingBaseController(controllerComponents) {
 
   def find(postcode: String): Action[AnyContent] = authenticated.async { implicit request =>
     PostcodeValidator.validateAndFormat(postcode) match {
       case Some(s) => addresses.find(s).map(r => Ok(Json.toJson(r)))
-      case None => Future.successful(BadRequest)
+      case None    => Future.successful(BadRequest)
     }
   }
 

@@ -17,17 +17,17 @@
 package uk.gov.hmrc.voapropertylinking.utils
 
 object PostcodeValidator {
-  val regexString = "(GIR 0AA)|((([A-Z-[QVX]][0-9][0-9]?)|(([A-Z-[QVX]][A-Z-[IJZ]][0-9][0-9]?)|(([A-Z-[QVX]][0-9][A-HJKPSTUW])|([A-Z-[QVX]][A-Z-[IJZ]][0-9][ABEHMNPRVWXY])))) *[0-9][A-Z-[CIKMOV]]{2})"
+  val regexString =
+    "(GIR 0AA)|((([A-Z-[QVX]][0-9][0-9]?)|(([A-Z-[QVX]][A-Z-[IJZ]][0-9][0-9]?)|(([A-Z-[QVX]][0-9][A-HJKPSTUW])|([A-Z-[QVX]][A-Z-[IJZ]][0-9][ABEHMNPRVWXY])))) *[0-9][A-Z-[CIKMOV]]{2})"
   private val postcodeRegex = regexString.r
 
-  def validate(candidate:String):Boolean = {
+  def validate(candidate: String): Boolean =
     candidate match {
-      case postcodeRegex(_*) => true
-      case _ => false
+      case postcodeRegex(_ *) => true
+      case _                  => false
     }
-  }
 
-  def validateAndFormat(candidate:String):Option[String] = {
+  def validateAndFormat(candidate: String): Option[String] =
     if (validate(candidate)) {
       val candidateNormalised = candidate.toUpperCase.replaceAll(" ", "")
       val (prefix, suffix) = candidateNormalised.splitAt(candidateNormalised.length - 3)
@@ -35,5 +35,4 @@ object PostcodeValidator {
     } else {
       None
     }
-  }
 }

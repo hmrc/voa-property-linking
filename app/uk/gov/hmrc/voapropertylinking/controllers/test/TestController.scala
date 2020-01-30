@@ -26,11 +26,12 @@ import uk.gov.hmrc.voapropertylinking.controllers.PropertyLinkingBaseController
 import scala.concurrent.ExecutionContext
 
 class TestController @Inject()(
-                                controllerComponents: ControllerComponents,
-                                authenticated: AuthenticatedActionBuilder,
-                                testConnector: TestConnector,
-                                dvrRecordRepository: DVRRecordRepository
-                              )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController(controllerComponents) {
+      controllerComponents: ControllerComponents,
+      authenticated: AuthenticatedActionBuilder,
+      testConnector: TestConnector,
+      dvrRecordRepository: DVRRecordRepository
+)(implicit executionContext: ExecutionContext)
+    extends PropertyLinkingBaseController(controllerComponents) {
 
   /*
   Move tests away from this method.
@@ -47,10 +48,11 @@ class TestController @Inject()(
       .map(_ => Ok)
   }
 
-  def deleteCheckCases(propertyLinkingSubmissionId: String): Action[AnyContent] = authenticated.async { implicit request =>
-    testConnector
-      .deleteCheckCases(propertyLinkingSubmissionId)
-      .map(_ => Ok)
+  def deleteCheckCases(propertyLinkingSubmissionId: String): Action[AnyContent] = authenticated.async {
+    implicit request =>
+      testConnector
+        .deleteCheckCases(propertyLinkingSubmissionId)
+        .map(_ => Ok)
   }
 
 }

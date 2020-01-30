@@ -19,13 +19,13 @@ package models
 import play.api.libs.json._
 
 case class APIDetailedIndividualAccount(
-                                         id: Long,
-                                         governmentGatewayExternalId: String,
-                                         personLatestDetail: APIIndividualDetails,
-                                         organisationId: Long,
-                                         organisationLatestDetail: GroupDetails) {
+      id: Long,
+      governmentGatewayExternalId: String,
+      personLatestDetail: APIIndividualDetails,
+      organisationId: Long,
+      organisationLatestDetail: GroupDetails) {
 
-  def toIndividualAccount = {
+  def toIndividualAccount =
     IndividualAccount(
       externalId = governmentGatewayExternalId,
       trustId = personLatestDetail.identifyVerificationId,
@@ -37,28 +37,29 @@ case class APIDetailedIndividualAccount(
         email = personLatestDetail.emailAddress,
         phone1 = personLatestDetail.telephoneNumber.getOrElse("not set"),
         phone2 = personLatestDetail.mobileNumber,
-        addressId = personLatestDetail.addressUnitId))
-  }
+        addressId = personLatestDetail.addressUnitId
+      )
+    )
 }
 
 case class APIIndividualDetails(
-                                 addressUnitId: Long,
-                                 firstName: String,
-                                 lastName: String,
-                                 emailAddress: String,
-                                 telephoneNumber: Option[String],
-                                 mobileNumber: Option[String],
-                                 identifyVerificationId: String)
+      addressUnitId: Long,
+      firstName: String,
+      lastName: String,
+      emailAddress: String,
+      telephoneNumber: Option[String],
+      mobileNumber: Option[String],
+      identifyVerificationId: String)
 
 object APIIndividualDetails {
-  private def withDefault[A](key: String, default: A)(implicit wrts: Writes[A]): Reads[JsObject] = {
+  private def withDefault[A](key: String, default: A)(implicit wrts: Writes[A]): Reads[JsObject] =
     __.json.update((__ \ key).json.copyFrom((__ \ key).json.pick orElse Reads.pure(Json.toJson(default))))
-  }
 
   implicit val format = new Format[APIIndividualDetails] {
     override def writes(o: APIIndividualDetails) = Json.writes[APIIndividualDetails].writes(o)
 
-    override def reads(json: JsValue) = Json.reads[APIIndividualDetails].compose(withDefault("identifyVerificationId", "")).reads(json)
+    override def reads(json: JsValue) =
+      Json.reads[APIIndividualDetails].compose(withDefault("identifyVerificationId", "")).reads(json)
   }
 }
 

@@ -26,11 +26,13 @@ import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import scala.concurrent.{ExecutionContext, Future}
 
 class CustomerManagementApi @Inject()(
-                                       http: DefaultHttpClient,
-                                       servicesConfig: ServicesConfig
-                                     )(implicit executionContext: ExecutionContext) extends BaseVoaConnector {
+      http: DefaultHttpClient,
+      servicesConfig: ServicesConfig
+)(implicit executionContext: ExecutionContext)
+    extends BaseVoaConnector {
 
-  lazy val baseUrl: String = servicesConfig.baseUrl("external-business-rates-data-platform") + "/customer-management-api"
+  lazy val baseUrl
+    : String = servicesConfig.baseUrl("external-business-rates-data-platform") + "/customer-management-api"
   lazy val organisationUrl: String = baseUrl + "/organisation"
   lazy val individualUrl: String = baseUrl + "/person"
 
@@ -38,27 +40,40 @@ class CustomerManagementApi @Inject()(
     http.POST[APIGroupAccountSubmission, GroupId](organisationUrl, account.toApiAccount)
 
   def updateGroupAccount(orgId: Long, account: UpdatedOrganisationAccount)(implicit hc: HeaderCarrier): Future[Unit] =
-    http.PUT[UpdatedOrganisationAccount, HttpResponse](s"$organisationUrl/$orgId", account) map { _ => () }
+    http.PUT[UpdatedOrganisationAccount, HttpResponse](s"$organisationUrl/$orgId", account) map { _ =>
+      ()
+    }
 
   def getDetailedGroupAccount(id: Long)(implicit hc: HeaderCarrier): Future[Option[GroupAccount]] =
     http.GET[Option[APIDetailedGroupAccount]](s"$organisationUrl?organisationId=$id").map(_.map(_.toGroupAccount))
 
   def findDetailedGroupAccountByGGID(ggId: String)(implicit hc: HeaderCarrier): Future[Option[GroupAccount]] =
-    http.GET[Option[APIDetailedGroupAccount]](s"$organisationUrl?governmentGatewayGroupId=$ggId").map(_.map(_.toGroupAccount))
+    http
+      .GET[Option[APIDetailedGroupAccount]](s"$organisationUrl?governmentGatewayGroupId=$ggId")
+      .map(_.map(_.toGroupAccount))
 
   def withAgentCode(agentCode: String)(implicit hc: HeaderCarrier): Future[Option[GroupAccount]] =
-    http.GET[Option[APIDetailedGroupAccount]](s"$organisationUrl?representativeCode=$agentCode").map(_.map(_.toGroupAccount))
+    http
+      .GET[Option[APIDetailedGroupAccount]](s"$organisationUrl?representativeCode=$agentCode")
+      .map(_.map(_.toGroupAccount))
 
-  def createIndividualAccount(account: IndividualAccountSubmission)(implicit hc: HeaderCarrier): Future[IndividualAccountId] =
+  def createIndividualAccount(account: IndividualAccountSubmission)(
+        implicit hc: HeaderCarrier): Future[IndividualAccountId] =
     http.POST[APIIndividualAccount, IndividualAccountId](individualUrl, account.toAPIIndividualAccount)
 
-  def updateIndividualAccount(personId: Long, account: IndividualAccountSubmission)(implicit hc: HeaderCarrier): Future[JsValue] =
+  def updateIndividualAccount(personId: Long, account: IndividualAccountSubmission)(
+        implicit hc: HeaderCarrier): Future[JsValue] =
     http.PUT[APIIndividualAccount, JsValue](individualUrl + s"/$personId", account.toAPIIndividualAccount)
 
   def getDetailedIndividual(id: Long)(implicit hc: HeaderCarrier): Future[Option[IndividualAccount]] =
-    http.GET[Option[APIDetailedIndividualAccount]](s"$individualUrl?personId=$id").map(_.map(a => a.toIndividualAccount))
+    http
+      .GET[Option[APIDetailedIndividualAccount]](s"$individualUrl?personId=$id")
+      .map(_.map(a => a.toIndividualAccount))
 
-  def findDetailedIndividualAccountByGGID(ggId: String)(implicit hc: HeaderCarrier): Future[Option[IndividualAccount]] =
-    http.GET[Option[APIDetailedIndividualAccount]](s"$individualUrl?governmentGatewayExternalId=$ggId").map(_.map(_.toIndividualAccount))
+  def findDetailedIndividualAccountByGGID(ggId: String)(
+        implicit hc: HeaderCarrier): Future[Option[IndividualAccount]] =
+    http
+      .GET[Option[APIDetailedIndividualAccount]](s"$individualUrl?governmentGatewayExternalId=$ggId")
+      .map(_.map(_.toIndividualAccount))
 
 }

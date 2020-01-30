@@ -29,12 +29,13 @@ import uk.gov.hmrc.voapropertylinking.connectors.modernised.CustomerManagementAp
 import scala.concurrent.ExecutionContext
 
 class IndividualAccountController @Inject()(
-                                             controllerComponents: ControllerComponents,
-                                             authenticated: AuthenticatedActionBuilder,
-                                             customerManagementApi: CustomerManagementApi,
-                                             auditingService: AuditingService,
-                                             brAuth: BusinessRatesAuthConnector
-                                           )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController(controllerComponents) {
+      controllerComponents: ControllerComponents,
+      authenticated: AuthenticatedActionBuilder,
+      customerManagementApi: CustomerManagementApi,
+      auditingService: AuditingService,
+      brAuth: BusinessRatesAuthConnector
+)(implicit executionContext: ExecutionContext)
+    extends PropertyLinkingBaseController(controllerComponents) {
 
   case class IndividualAccount(id: IndividualAccountId, submission: IndividualAccountSubmission)
 
@@ -68,8 +69,8 @@ class IndividualAccountController @Inject()(
     customerManagementApi
       .getDetailedIndividual(personId)
       .map {
-        case Some(x)  => Ok(Json.toJson(x))
-        case None     => NotFound
+        case Some(x) => Ok(Json.toJson(x))
+        case None    => NotFound
       }
   }
 
@@ -77,8 +78,8 @@ class IndividualAccountController @Inject()(
     customerManagementApi
       .findDetailedIndividualAccountByGGID(externalId)
       .map {
-        case Some(x)  => Ok(Json.toJson(x))
-        case None     => NotFound
+        case Some(x) => Ok(Json.toJson(x))
+        case None    => NotFound
       }
   }
 

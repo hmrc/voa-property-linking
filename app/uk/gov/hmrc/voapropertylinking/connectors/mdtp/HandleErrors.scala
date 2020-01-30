@@ -23,11 +23,14 @@ import scala.concurrent.{ExecutionContext, Future}
 
 trait HandleErrors {
 
-  def handleErrors(res: Future[WSResponse], request: String)(implicit ec: ExecutionContext): Future[WSResponse] = {
-    res.flatMap { r => r.status match {
-      case s if s >= 400 && s <= 499 => throw Upstream4xxResponse(s"$request failed with status $s. Response body: ${r.body}", s, s)
-      case s if s >= 500 && s <= 599 => throw Upstream5xxResponse(s"$request failed with status $s. Response body: ${r.body}", s, s)
-      case _ => res
-    }}
-  }
+  def handleErrors(res: Future[WSResponse], request: String)(implicit ec: ExecutionContext): Future[WSResponse] =
+    res.flatMap { r =>
+      r.status match {
+        case s if s >= 400 && s <= 499 =>
+          throw Upstream4xxResponse(s"$request failed with status $s. Response body: ${r.body}", s, s)
+        case s if s >= 500 && s <= 599 =>
+          throw Upstream5xxResponse(s"$request failed with status $s. Response body: ${r.body}", s, s)
+        case _ => res
+      }
+    }
 }

@@ -16,21 +16,21 @@
 
 package models.mdtp.propertylink.myclients
 
-import models.modernised.externalpropertylink.myclients.{ SummaryPropertyLinkWithClient => ModernisedSummaryPropertyLinkWithClient}
+import models.modernised.externalpropertylink.myclients.{SummaryPropertyLinkWithClient => ModernisedSummaryPropertyLinkWithClient}
 import models.searchApi.Client
 import play.api.libs.json.{Json, OFormat}
 
 case class PropertyLinkWithClient(
-                                   authorisationId: Long,
-                                   authorisedPartyId: Long,
-                                   status: String,
-                                   submissionId: String,
-                                   uarn: Long,
-                                   address: String,
-                                   localAuthorityRef: String,
-                                   client: Client,
-                                   representationStatus: String
-                                 )
+      authorisationId: Long,
+      authorisedPartyId: Long,
+      status: String,
+      submissionId: String,
+      uarn: Long,
+      address: String,
+      localAuthorityRef: String,
+      client: Client,
+      representationStatus: String
+)
 
 object PropertyLinkWithClient {
   implicit val format: OFormat[PropertyLinkWithClient] = Json.format
@@ -45,6 +45,7 @@ object PropertyLinkWithClient {
       uarn = propertyLink.uarn,
       address = propertyLink.address,
       localAuthorityRef = propertyLink.localAuthorityRef,
-      client = Client(propertyLink.client.organisationId, propertyLink.client.organisationName))
+      client = Client(propertyLink.client.organisationId, propertyLink.client.organisationName)
+    )
 
 }

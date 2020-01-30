@@ -19,12 +19,12 @@ package models.searchApi
 import play.api.libs.json.{Json, OFormat}
 
 case class OwnerAuthResult(
-                            start: Int,
-                            size: Int,
-                            filterTotal: Int,
-                            total: Int,
-                            authorisations: Seq[OwnerAuthorisation]
-                          ) {
+      start: Int,
+      size: Int,
+      filterTotal: Int,
+      total: Int,
+      authorisations: Seq[OwnerAuthorisation]
+) {
 
   def uppercase: OwnerAuthResult =
     this.copy(authorisations = authorisations.map(_.capatilise()))

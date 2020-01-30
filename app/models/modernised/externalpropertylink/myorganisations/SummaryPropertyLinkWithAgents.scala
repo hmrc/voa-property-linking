@@ -22,16 +22,16 @@ import models.modernised.PropertyLinkStatus.PropertyLinkStatus
 import play.api.libs.json.{Json, OFormat}
 
 case class SummaryPropertyLinkWithAgents(
-                                          authorisationId: Long,
-                                          status: PropertyLinkStatus,
-                                          startDate: LocalDate,
-                                          endDate: Option[LocalDate],
-                                          submissionId: String,
-                                          uarn: Long,
-                                          address: String,
-                                          localAuthorityRef: String,
-                                          agents: Seq[AgentDetails]
-                                        )
+      authorisationId: Long,
+      status: PropertyLinkStatus,
+      startDate: LocalDate,
+      endDate: Option[LocalDate],
+      submissionId: String,
+      uarn: Long,
+      address: String,
+      localAuthorityRef: String,
+      agents: Seq[AgentDetails]
+)
 
 object SummaryPropertyLinkWithAgents {
   implicit val format: OFormat[SummaryPropertyLinkWithAgents] = Json.format
