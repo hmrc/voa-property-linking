@@ -50,11 +50,11 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec {
     assessmentService = mockAssessmentService,
     customerManagementApi = mockCustomerManagementApi,
     auditingService = mock[AuditingService],
-    agentQueryParameterEnabledExternal = true)
+    agentQueryParameterEnabledExternal = true
+  )
 
   val clientOrgId: Long = 222L
   val agentOrgId: Long = 333L
-
 
   val propertyLinkWithClient = PropertyLinkWithClient(
     authorisationId = 11111L,
@@ -70,8 +70,8 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec {
     client = ClientDetails(123L, "Org Name"),
     representationStatus = "APPROVED",
     checkPermission = Some("START_AND_CONTINUE"),
-    challengePermission = Some("START_AND_CONTINUE"))
-
+    challengePermission = Some("START_AND_CONTINUE")
+  )
 
   val clientPropertyLink = ClientPropertyLink(propertyLinkWithClient)
 
@@ -83,27 +83,32 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec {
     startDate = date,
     endDate = Some(date),
     submissionId = "22222",
-    NDRListValuationHistoryItems = Seq(APIValuationHistory(
-      asstRef = 125689,
-      listYear = "2017",
-      uarn = 923411,
-      effectiveDate = Some(date),
-      rateableValue = Some(2599),
-      address = "1 HIGH STREET, BRIGHTON",
-      billingAuthorityReference = "VOA1",
-      currentFromDate = None,
-      currentToDate = None
-    )),
-    parties = Seq(APIParty(id = 24680,
-      authorisedPartyStatus = "APPROVED",
-      authorisedPartyOrganisationId = agentOrgId,
-      permissions = Seq(Permissions(
+    NDRListValuationHistoryItems = Seq(
+      APIValuationHistory(
+        asstRef = 125689,
+        listYear = "2017",
+        uarn = 923411,
+        effectiveDate = Some(date),
+        rateableValue = Some(2599),
+        address = "1 HIGH STREET, BRIGHTON",
+        billingAuthorityReference = "VOA1",
+        currentFromDate = None,
+        currentToDate = None
+      )),
+    parties = Seq(
+      APIParty(
         id = 24680,
-        checkPermission = AgentPermission.StartAndContinue,
-        challengePermission = AgentPermission.StartAndContinue,
-        endDate = None)))),
-    agents = Some(Nil))
-
+        authorisedPartyStatus = "APPROVED",
+        authorisedPartyOrganisationId = agentOrgId,
+        permissions = Seq(
+          Permissions(
+            id = 24680,
+            checkPermission = AgentPermission.StartAndContinue,
+            challengePermission = AgentPermission.StartAndContinue,
+            endDate = None))
+      )),
+    agents = Some(Nil)
+  )
 
   val ownerAuthorisation = OwnerAuthorisation(
     authorisationId = 1111,
@@ -206,7 +211,8 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec {
     "return owner property links" in {
       when(mockPropertyLinkingService.getMyOrganisationsPropertyLinks(any(), any())(any(), any()))
         .thenReturn(OptionT.some[Future](ownerAuthResult))
-      val res = testController.getMyOrganisationsPropertyLinks(GetMyOrganisationPropertyLinksParameters(), None, None)(FakeRequest())
+      val res = testController.getMyOrganisationsPropertyLinks(GetMyOrganisationPropertyLinksParameters(), None, None)(
+        FakeRequest())
 
       status(res) shouldBe OK
       contentAsJson(res) shouldBe Json.toJson(ownerAuthResult)
@@ -217,23 +223,32 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec {
       "organisationId is provided" in {
         when(mockPropertyLinkingService.getMyOrganisationsPropertyLinks(any(), any())(any(), any()))
           .thenReturn(OptionT.some[Future](ownerAuthResult))
-        val res = testController.getMyOrganisationsPropertyLinks(GetMyOrganisationPropertyLinksParameters(sortField = Some("AGENT")), None, None)(FakeRequest())
+        val res = testController.getMyOrganisationsPropertyLinks(
+          GetMyOrganisationPropertyLinksParameters(sortField = Some("AGENT")),
+          None,
+          None)(FakeRequest())
 
         status(res) shouldBe BAD_REQUEST
       }
 
       "organisationId is NOT provided" in {
         val orgId: Long = 123L
-        when(mockAuthorisationSearchApi.searchAndSort(mEq(orgId), any(), mEq(Some("AGENT")), any(), any(), any(), any(), any(), any())(any()))
+        when(
+          mockAuthorisationSearchApi
+            .searchAndSort(mEq(orgId), any(), mEq(Some("AGENT")), any(), any(), any(), any(), any(), any())(any()))
           .thenReturn(Future.successful(modernisedOwnerAuthResult))
-        val res = testController.getMyOrganisationsPropertyLinks(GetMyOrganisationPropertyLinksParameters(sortField = Some("AGENT")), None, Some(orgId))(FakeRequest())
+        val res = testController.getMyOrganisationsPropertyLinks(
+          GetMyOrganisationPropertyLinksParameters(sortField = Some("AGENT")),
+          None,
+          Some(orgId))(FakeRequest())
 
         status(res) shouldBe OK
       }
 
     }
     "return client property links" in {
-      when(mockPropertyLinkingService.getClientsPropertyLinks(any(), any())(any(), any())).thenReturn(OptionT.some[Future](propertyLinksWithClients))
+      when(mockPropertyLinkingService.getClientsPropertyLinks(any(), any())(any(), any()))
+        .thenReturn(OptionT.some[Future](propertyLinksWithClients))
       val res = testController.getClientsPropertyLinks(GetMyClientsPropertyLinkParameters(), None)(FakeRequest())
 
       status(res) shouldBe OK
@@ -275,7 +290,12 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec {
       submissionId = "PL12345",
       address = None,
       NDRListValuationHistoryItems = Seq.empty[APIValuationHistory],
-      parties = Seq(APIParty(1L, "APPROVED", agentOrgId, Seq(Permissions(1L, AgentPermission.StartAndContinue, AgentPermission.StartAndContinue, None)))),
+      parties = Seq(
+        APIParty(
+          1L,
+          "APPROVED",
+          agentOrgId,
+          Seq(Permissions(1L, AgentPermission.StartAndContinue, AgentPermission.StartAndContinue, None)))),
       agents = None
     )
 
@@ -304,7 +324,6 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec {
 
       status(res) shouldBe OK
     }
-
 
     "return 404 Not Found" when {
       "dashboard management api returns no properties" in {

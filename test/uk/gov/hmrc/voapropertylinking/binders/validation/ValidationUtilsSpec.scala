@@ -86,7 +86,6 @@ class ValidationUtilsSpec extends BaseUnitSpec {
     }
   }
 
-
   "validating an optional component" should {
     "be valid" when {
       "the component is present and considered VALID" in new Setup {

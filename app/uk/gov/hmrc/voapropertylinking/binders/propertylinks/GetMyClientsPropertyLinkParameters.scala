@@ -20,14 +20,14 @@ import binders.{Params, ValidationResult}
 import uk.gov.hmrc.voapropertylinking.binders.validation.ValidatingBinder
 
 case class GetMyClientsPropertyLinkParameters(
-                                               address: Option[String] = None,
-                                               baref: Option[String] = None,
-                                               client: Option[String] = None,
-                                               status: Option[String] = None,
-                                               sortField: Option[String] = None,
-                                               sortOrder: Option[String] = None,
-                                               representationStatus: Option[String] = None
-                                             )
+      address: Option[String] = None,
+      baref: Option[String] = None,
+      client: Option[String] = None,
+      status: Option[String] = None,
+      sortField: Option[String] = None,
+      sortOrder: Option[String] = None,
+      representationStatus: Option[String] = None
+)
 
 object GetMyClientsPropertyLinkParameters extends ValidatingBinder[GetMyClientsPropertyLinkParameters] {
 
@@ -40,7 +40,7 @@ object GetMyClientsPropertyLinkParameters extends ValidatingBinder[GetMyClientsP
       validateString("sortField", params),
       validateString("sortOrder", params),
       validateString("representationStatus", params)
-      ).mapN(GetMyClientsPropertyLinkParameters.apply)
+    ).mapN(GetMyClientsPropertyLinkParameters.apply)
 
   def validateString(implicit key: String, params: Params): ValidationResult[Option[String]] =
     readOption(key, params)

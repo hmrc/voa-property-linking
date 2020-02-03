@@ -23,9 +23,11 @@ import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.bootstrap.controller.BackendController
 import uk.gov.hmrc.voapropertylinking.utils.Cats
 
-abstract class PropertyLinkingBaseController(controllerComponents: ControllerComponents) extends BackendController(controllerComponents) with Cats {
+abstract class PropertyLinkingBaseController(controllerComponents: ControllerComponents)
+    extends BackendController(controllerComponents) with Cats {
 
   protected val logger = Logger(this.getClass.getName)
-  implicit def hc(implicit request: Request[_]): HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers)
+  implicit def hc(implicit request: Request[_]): HeaderCarrier =
+    HeaderCarrierConverter.fromHeadersAndSession(request.headers)
 
 }

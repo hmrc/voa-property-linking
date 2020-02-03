@@ -20,7 +20,6 @@ import play.api.Logger
 import uk.gov.hmrc.http.{HttpErrorFunctions, HttpResponse}
 import uk.gov.hmrc.voapropertylinking.utils.HttpStatusCodes.REQUEST_URI_TOO_LONG
 
-
 trait VoaModernisedHttpErrorFunctions extends HttpErrorFunctions {
 
   private val logger: Logger = play.api.Logger(this.getClass)

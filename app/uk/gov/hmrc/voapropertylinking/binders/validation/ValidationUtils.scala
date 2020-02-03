@@ -35,7 +35,7 @@ trait ValidationUtils extends Cats {
     Validated.fromOption(params.get(key).flatMap(_.headOption), MissingError(key)).toValidatedNel
 
   def readWithDefault(
-                       default: => String)(implicit key: String, params: Params): ValidatedNel[ValidationError, String] =
+        default: => String)(implicit key: String, params: Params): ValidatedNel[ValidationError, String] =
     params.get(key).fold(default)(_.headOption.getOrElse(default)).validNel
 
   def readOption(implicit key: String, params: Params): ValidatedNel[ValidationError, Option[String]] =
@@ -96,7 +96,7 @@ trait ValidationUtils extends Cats {
     def ifPresent[B](f: A => Validated[E, B]): Validated[E, Option[B]] =
       validated.andThen {
         case Some(value) => f(value).map(Option.apply)
-        case None => Valid(Option.empty[B])
+        case None        => Valid(Option.empty[B])
       }
   }
 

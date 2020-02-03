@@ -51,7 +51,8 @@ class MdtpDashboardManagementApiSpec extends BaseUnitSpec {
       transitionalCertificate = None,
       deletedIndicator = None,
       valuationDetailsAvailable = None,
-      billingAuthorityCode = None)
+      billingAuthorityCode = None
+    )
 
     val propertiesView = PropertiesView(
       authorisationId = authorisationId,

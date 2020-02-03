@@ -31,153 +31,155 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
 
-    trait Setup {
+  trait Setup {
 
-      val address = "mock address"
-      val baref = "mock baref"
-      val agent = "mock agent"
-      val status = "mock status"
-      val sortField = "mock sort field"
-      val sortOrder = "mock sort order"
+    val address = "mock address"
+    val baref = "mock baref"
+    val agent = "mock agent"
+    val status = "mock status"
+    val sortField = "mock sort field"
+    val sortOrder = "mock sort order"
 
-      val searchParams = GetMyOrganisationPropertyLinksParameters(
-        address = Some(address),
-        baref = Some(baref),
-        agent = Some(agent),
-        client = None,
-        status = Some(status),
-        Some(sortField),
-        Some(sortOrder))
+    val searchParams = GetMyOrganisationPropertyLinksParameters(
+      address = Some(address),
+      baref = Some(baref),
+      agent = Some(agent),
+      client = None,
+      status = Some(status),
+      Some(sortField),
+      Some(sortOrder))
 
-      val getMyClientsSearchParams = GetMyClientsPropertyLinkParameters(
-        address = Some(address),
-        baref = Some(baref),
-        client = Some(agent),
-        status = Some(status),
-        Some(sortField),
-        Some(sortOrder),
-        representationStatus = None)
+    val getMyClientsSearchParams = GetMyClientsPropertyLinkParameters(
+      address = Some(address),
+      baref = Some(baref),
+      client = Some(agent),
+      status = Some(status),
+      Some(sortField),
+      Some(sortOrder),
+      representationStatus = None)
 
-      val emptySearchParams = GetMyOrganisationPropertyLinksParameters()
+    val emptySearchParams = GetMyOrganisationPropertyLinksParameters()
 
-      val voaApiUrl = "http://voa-modernised-api/external-property-link-management-api"
+    val voaApiUrl = "http://voa-modernised-api/external-property-link-management-api"
 
-      val ownerAuthorisationUrl = s"$voaApiUrl/my-organisation/property-links/{propertyLinkId}"
-      val ownerAuthorisationsUrl = s"$voaApiUrl/my-organisation/property-links"
-      val clientAuthorisationUrl = s"$voaApiUrl/my-organisation/clients/all/property-links/{propertyLinkId}"
-      val clientAuthorisationsUrl = s"$voaApiUrl/my-organisation/clients/all/property-links"
-      val createPropertyLinkUrl = s"$voaApiUrl/my-organisation/property-links"
-      val httpstring = "VoaAuthedBackendHttp"
+    val ownerAuthorisationUrl = s"$voaApiUrl/my-organisation/property-links/{propertyLinkId}"
+    val ownerAuthorisationsUrl = s"$voaApiUrl/my-organisation/property-links"
+    val clientAuthorisationUrl = s"$voaApiUrl/my-organisation/clients/all/property-links/{propertyLinkId}"
+    val clientAuthorisationsUrl = s"$voaApiUrl/my-organisation/clients/all/property-links"
+    val createPropertyLinkUrl = s"$voaApiUrl/my-organisation/property-links"
+    val httpstring = "VoaAuthedBackendHttp"
 
-      val connector = new ExternalPropertyLinkApi(
-        http = mock[VoaHttpClient],
-        myOrganisationsPropertyLinksUrl = ownerAuthorisationsUrl,
-        myOrganisationsPropertyLinkUrl = ownerAuthorisationUrl,
-        myClientsPropertyLinkUrl = clientAuthorisationUrl,
-        myClientsPropertyLinksUrl = clientAuthorisationsUrl,
-        createPropertyLinkUrl = createPropertyLinkUrl
-      )
+    val connector = new ExternalPropertyLinkApi(
+      http = mock[VoaHttpClient],
+      myOrganisationsPropertyLinksUrl = ownerAuthorisationsUrl,
+      myOrganisationsPropertyLinkUrl = ownerAuthorisationUrl,
+      myClientsPropertyLinkUrl = clientAuthorisationUrl,
+      myClientsPropertyLinksUrl = clientAuthorisationsUrl,
+      createPropertyLinkUrl = createPropertyLinkUrl
+    )
 
-      val paginationParams = PaginationParams(1, 1, true)
-      val queryParams: Seq[(String, String)] = Seq(
-        ("start", paginationParams.startPoint.toString),
-        ("size", paginationParams.pageSize.toString),
-        ("requestTotalRowCount", "true"))
+    val paginationParams = PaginationParams(1, 1, true)
+    val queryParams: Seq[(String, String)] = Seq(
+      ("start", paginationParams.startPoint.toString),
+      ("size", paginationParams.pageSize.toString),
+      ("requestTotalRowCount", "true"))
+  }
+
+  "get my organisations property links" should {
+
+    "build the correct query params and call the modernised layer" in new Setup {
+
+      val mockReturnedPropertyLinks: PropertyLinksWithAgents = mock[PropertyLinksWithAgents]
+
+      when(connector.http.GET[PropertyLinksWithAgents](any(), any())(any(), any(), any(), any()))
+        .thenReturn(Future.successful(mockReturnedPropertyLinks))
+
+      connector
+        .getMyOrganisationsPropertyLinks(emptySearchParams, params = Some(paginationParams))
+        .futureValue shouldBe mockReturnedPropertyLinks
+
+      verify(connector.http)
+        .GET(mEq(ownerAuthorisationsUrl), mEq(queryParams))(any(), any(), any(), any())
     }
 
-    "get my organisations property links" should {
+  }
 
-      "build the correct query params and call the modernised layer" in new Setup {
+  "get my organisations single property link with submissionId" should {
 
-        val mockReturnedPropertyLinks: PropertyLinksWithAgents = mock[PropertyLinksWithAgents]
+    "build the correct url and calls the modernised layer" in new Setup {
 
-        when(connector.http.GET[PropertyLinksWithAgents](any(), any())(any(), any(), any(), any()))
-          .thenReturn(Future.successful(mockReturnedPropertyLinks))
+      val mockReturnedPropertyLink: PropertyLinkWithAgents = mock[PropertyLinkWithAgents]
 
-        connector
-          .getMyOrganisationsPropertyLinks(emptySearchParams, params = Some(paginationParams))
-          .futureValue shouldBe mockReturnedPropertyLinks
+      when(connector.http.GET[Option[PropertyLinkWithAgents]](any())(any(), any(), any(), any()))
+        .thenReturn(Future.successful(Some(mockReturnedPropertyLink)))
 
-        verify(connector.http)
-          .GET(mEq(ownerAuthorisationsUrl), mEq(queryParams))(any(), any(), any(), any())
-      }
+      connector.getMyOrganisationsPropertyLink("PL1").futureValue shouldBe Some(mockReturnedPropertyLink)
 
+      verify(connector.http)
+        .GET(mEq(ownerAuthorisationUrl.replace("{propertyLinkId}", "PL1")))(any(), any(), any(), any())
+    }
+  }
+
+  "get clients property links" should {
+
+    "build the correct query params and call the modernised layer" in new Setup {
+
+      val mockReturnedPropertyLinks: PropertyLinksWithClient = mock[PropertyLinksWithClient]
+
+      when(connector.http.GET[PropertyLinksWithClient](any(), any())(any(), any(), any(), any()))
+        .thenReturn(Future.successful(mockReturnedPropertyLinks))
+
+      connector
+        .getClientsPropertyLinks(getMyClientsSearchParams, Some(paginationParams))
+        .futureValue shouldBe mockReturnedPropertyLinks
+
+      val clientQueryParams = queryParams :+ ("address" -> address) :+ ("baref" -> baref) :+ ("client" -> agent) :+ ("status" -> status) :+ ("sortfield" -> sortField) :+ ("sortorder" -> sortOrder)
+      verify(connector.http).GET(mEq(clientAuthorisationsUrl), mEq(clientQueryParams))(any(), any(), any(), any())
     }
 
-    "get my organisations single property link with submissionId" should {
+  }
 
-      "build the correct url and calls the modernised layer" in new Setup {
+  "get clients single property link with submissionId" should {
 
-        val mockReturnedPropertyLink: PropertyLinkWithAgents = mock[PropertyLinkWithAgents]
+    "build the correct url and calls the modernised layer" in new Setup {
 
-        when(connector.http.GET[Option[PropertyLinkWithAgents]](any())(any(), any(), any(), any()))
-          .thenReturn(Future.successful(Some(mockReturnedPropertyLink)))
+      val mockReturnedPropertyLink: ClientPropertyLink = mock[ClientPropertyLink]
 
-        connector.getMyOrganisationsPropertyLink("PL1").futureValue shouldBe Some(mockReturnedPropertyLink)
+      when(connector.http.GET[ClientPropertyLink](any())(any(), any(), any(), any()))
+        .thenReturn(Future.successful(mockReturnedPropertyLink))
 
-        verify(connector.http)
-          .GET(mEq(ownerAuthorisationUrl.replace("{propertyLinkId}", "PL1")))(any(), any(), any(), any())
-      }
+      connector.getClientsPropertyLink("PL1").futureValue shouldBe mockReturnedPropertyLink
+
+      verify(connector.http)
+        .GET(mEq(clientAuthorisationUrl.replace("{propertyLinkId}", "PL1")))(any(), any(), any(), any())
+    }
+  }
+
+  "create property link" should {
+
+    "call modernised createPropertyLink endpoint" in new Setup {
+
+      val mockHttpResponse: HttpResponse = mock[HttpResponse]
+      val mockVoaCreatePropertyLink: CreatePropertyLink = mock[CreatePropertyLink]
+
+      when(mockVoaCreatePropertyLink.PLsubmissionId).thenReturn("PL123")
+
+      when(
+        connector.http
+          .POST[CreatePropertyLink, HttpResponse](any(), any(), any())(any(), any(), any(), any(), any()))
+        .thenReturn(Future.successful(mockHttpResponse))
+
+      connector.createPropertyLink(mockVoaCreatePropertyLink).futureValue shouldBe mockHttpResponse
+
+      verify(connector.http)
+        .POST(mEq(createPropertyLinkUrl), mEq(mockVoaCreatePropertyLink), mEq(Seq()))(
+          any(),
+          any(),
+          any(),
+          any(),
+          any())
     }
 
-    "get clients property links" should {
-
-      "build the correct query params and call the modernised layer" in new Setup {
-
-        val mockReturnedPropertyLinks: PropertyLinksWithClient = mock[PropertyLinksWithClient]
-
-        when(connector.http.GET[PropertyLinksWithClient](any(), any())(any(), any(), any(), any()))
-          .thenReturn(Future.successful(mockReturnedPropertyLinks))
-
-        connector.getClientsPropertyLinks(getMyClientsSearchParams, Some(paginationParams)).futureValue shouldBe mockReturnedPropertyLinks
-
-        val clientQueryParams = queryParams :+ ("address" -> address) :+ ("baref" -> baref):+ ("client" -> agent):+ ("status" -> status):+ ("sortfield" -> sortField):+ ("sortorder" -> sortOrder)
-        verify(connector.http).GET(mEq(clientAuthorisationsUrl), mEq(clientQueryParams))(any(), any(), any(), any())
-      }
-
-    }
-
-    "get clients single property link with submissionId" should {
-
-      "build the correct url and calls the modernised layer" in new Setup {
-
-        val mockReturnedPropertyLink: ClientPropertyLink = mock[ClientPropertyLink]
-
-        when(connector.http.GET[ClientPropertyLink](any())(any(), any(), any(), any()))
-          .thenReturn(Future.successful(mockReturnedPropertyLink))
-
-        connector.getClientsPropertyLink("PL1").futureValue shouldBe mockReturnedPropertyLink
-
-        verify(connector.http)
-          .GET(mEq(clientAuthorisationUrl.replace("{propertyLinkId}", "PL1")))(any(), any(), any(), any())
-      }
-    }
-
-    "create property link" should {
-
-      "call modernised createPropertyLink endpoint" in new Setup {
-
-        val mockHttpResponse: HttpResponse = mock[HttpResponse]
-        val mockVoaCreatePropertyLink: CreatePropertyLink = mock[CreatePropertyLink]
-
-        when(mockVoaCreatePropertyLink.PLsubmissionId).thenReturn("PL123")
-
-        when(
-          connector.http
-            .POST[CreatePropertyLink, HttpResponse](any(), any(), any())(any(), any(), any(), any(), any()))
-          .thenReturn(Future.successful(mockHttpResponse))
-
-        connector.createPropertyLink(mockVoaCreatePropertyLink).futureValue shouldBe mockHttpResponse
-
-        verify(connector.http)
-          .POST(mEq(createPropertyLinkUrl), mEq(mockVoaCreatePropertyLink), mEq(Seq()))(
-            any(),
-            any(),
-            any(),
-            any(),
-            any())
-      }
-
-    }
+  }
 
 }

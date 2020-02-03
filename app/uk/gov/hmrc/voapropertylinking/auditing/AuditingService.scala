@@ -26,20 +26,21 @@ import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
 import scala.concurrent.ExecutionContext
 
 class AuditingService @Inject()(
-                               auditConnector: AuditConnector
-                               )(implicit executionContext: ExecutionContext) {
+      auditConnector: AuditConnector
+)(implicit executionContext: ExecutionContext) {
 
   def sendEvent[A: Writes](auditType: String, obj: A)(implicit hc: HeaderCarrier, request: Request[_]): Unit = {
     val event = eventFor(auditType, obj)
     auditConnector.sendExtendedEvent(event)
   }
 
-  def eventFor[A: Writes](auditType: String, obj: A)(implicit hc: HeaderCarrier, request: Request[_]): ExtendedDataEvent = {
+  def eventFor[A: Writes](auditType: String, obj: A)(
+        implicit hc: HeaderCarrier,
+        request: Request[_]): ExtendedDataEvent =
     ExtendedDataEvent(
       auditSource = "voa-property-linking",
       auditType = auditType,
       tags = hc.headers.toMap ++ Map("Ip Address" -> request.remoteAddress),
       detail = Json.toJson(obj)
     )
-  }
 }

@@ -20,11 +20,16 @@ import java.time.Instant
 
 import play.api.libs.json.Json
 
-case class APIGroupAccountSubmission(governmentGatewayGroupId: String, organisationName: String, addressUnitId: Long,
-                                     organisationEmailAddress: String, organisationTelephoneNumber: String,
-                                     representativeFlag: Boolean,
-                                     representativeCode: Option[Int], effectiveFrom: Instant,
-                                     personData: APIIndividualAccountForOrganisation)
+case class APIGroupAccountSubmission(
+      governmentGatewayGroupId: String,
+      organisationName: String,
+      addressUnitId: Long,
+      organisationEmailAddress: String,
+      organisationTelephoneNumber: String,
+      representativeFlag: Boolean,
+      representativeCode: Option[Int],
+      effectiveFrom: Instant,
+      personData: APIIndividualAccountForOrganisation)
 
 object APIGroupAccountSubmission {
   implicit val format = Json.format[APIGroupAccountSubmission]

@@ -21,22 +21,24 @@ import models.modernised.externalpropertylink.myorganisations.AgentDetails
 import play.api.libs.json.Json
 
 case class Party(
-                  authorisedPartyId: Long,
-                  agentCode: Long,
-                  organisationName: String,
-                  organisationId: Long,
-                  checkPermission: AgentPermission,
-                  challengePermission: AgentPermission
-                )
+      authorisedPartyId: Long,
+      agentCode: Long,
+      organisationName: String,
+      organisationId: Long,
+      checkPermission: AgentPermission,
+      challengePermission: AgentPermission
+)
 
 object Party {
   implicit val format = Json.format[Party]
 
   def apply(agentDetails: AgentDetails): Party =
-    Party(agentDetails.authorisedPartyId,
+    Party(
+      agentDetails.authorisedPartyId,
       agentDetails.representativeCode,
       agentDetails.organisationName,
       agentDetails.organisationId,
       agentDetails.checkPermission,
-      agentDetails.challengePermission)
+      agentDetails.challengePermission
+    )
 }

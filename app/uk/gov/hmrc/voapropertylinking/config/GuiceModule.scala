@@ -42,9 +42,9 @@ import play.api.{Configuration, Environment}
 import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
 
 class GuiceModule(
-                   environment: Environment,
-                   configuration: Configuration
-                 ) extends AbstractModule {
+      environment: Environment,
+      configuration: Configuration
+) extends AbstractModule {
 
   val servicesConfig = new ServicesConfig(configuration, new RunMode(configuration, environment.mode))
 
@@ -53,8 +53,12 @@ class GuiceModule(
     bind(classOf[ServicesConfig]).toInstance(servicesConfig)
 
     bindConstant().annotatedWith(Names.named("dvrCollectionName")).to(configuration.get[String]("dvr.collection.name"))
-    bindConstant().annotatedWith(Names.named("agentQueryParameterEnabledExternal"))
-      .to(configuration.getAndValidate[String]("featureFlags.agentQueryParameterEnabledExternal", Set("true", "false")).toBoolean)
+    bindConstant()
+      .annotatedWith(Names.named("agentQueryParameterEnabledExternal"))
+      .to(
+        configuration
+          .getAndValidate[String]("featureFlags.agentQueryParameterEnabledExternal", Set("true", "false"))
+          .toBoolean)
 
     bind(classOf[Clock]).toInstance(Clock.systemUTC())
 

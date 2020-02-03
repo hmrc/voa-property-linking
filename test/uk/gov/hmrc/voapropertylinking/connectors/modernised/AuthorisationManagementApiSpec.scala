@@ -33,7 +33,8 @@ class AuthorisationManagementApiSpec extends BaseUnitSpec {
     http,
     mockServicesConfig,
     "http://localhost:9540/authorisation-management-api/agent/submit_agent_representation",
-  "http://localhost:9540authorisation-management-api/agent/submit_agent_rep_reponse") {
+    "http://localhost:9540authorisation-management-api/agent/submit_agent_rep_reponse"
+  ) {
     override lazy val baseUrl: String = "http://some-url"
   }
 
@@ -42,7 +43,8 @@ class AuthorisationManagementApiSpec extends BaseUnitSpec {
       val agentCode = 123
       val authId = 987
 
-      when(http.GET[JsValue](any())(any(), any(), any())).thenReturn(Future.successful(Json.parse(validAgentCodeResponse)))
+      when(http.GET[JsValue](any())(any(), any(), any()))
+        .thenReturn(Future.successful(Json.parse(validAgentCodeResponse)))
 
       inside(connector.validateAgentCode(agentCode, authId)(hc).futureValue) {
         case Left(v) => v shouldBe 1234567
@@ -56,7 +58,8 @@ class AuthorisationManagementApiSpec extends BaseUnitSpec {
       val agentCode = 123
       val authId = 987
 
-      when(http.GET[JsValue](any())(any(), any(), any())).thenReturn(Future.successful(Json.parse(noAgentFlagResponse)))
+      when(http.GET[JsValue](any())(any(), any(), any()))
+        .thenReturn(Future.successful(Json.parse(noAgentFlagResponse)))
 
       inside(connector.validateAgentCode(agentCode, authId)(hc).futureValue) {
         case Right(v) => v shouldBe "INVALID_CODE"
@@ -70,7 +73,8 @@ class AuthorisationManagementApiSpec extends BaseUnitSpec {
       val agentCode = 123
       val authId = 987
 
-      when(http.GET[JsValue](any())(any(), any(), any())).thenReturn(Future.successful(Json.parse(invalidAgentCodeResponse)))
+      when(http.GET[JsValue](any())(any(), any(), any()))
+        .thenReturn(Future.successful(Json.parse(invalidAgentCodeResponse)))
 
       inside(connector.validateAgentCode(agentCode, authId)(hc).futureValue) {
         case Right(v) => v shouldBe "OTHER_ERROR"

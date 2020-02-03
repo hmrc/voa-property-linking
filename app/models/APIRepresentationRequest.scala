@@ -21,14 +21,14 @@ import java.time.Instant
 import play.api.libs.json.{Json, OFormat, Reads}
 
 case class APIRepresentationRequest(
-                                     authorisationId: Long,
-                                     submissionId: String,
-                                     authorisedPartyOrganisationId: Long,
-                                     authorisationOwnerPersonId: Long,
-                                     checkPermission: String,
-                                     challengePermission: String,
-                                     createDatetime: Instant
-                                   )
+      authorisationId: Long,
+      submissionId: String,
+      authorisedPartyOrganisationId: Long,
+      authorisationOwnerPersonId: Long,
+      checkPermission: String,
+      challengePermission: String,
+      createDatetime: Instant
+)
 
 object APIRepresentationRequest {
   implicit val instantReads: Reads[Instant] = Reads.instantReads("yyyy-MM-dd'T'HH:mm:ss.SSS[XXX][X]")

@@ -28,55 +28,60 @@ import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
 
-
 class ExternalValuationManagementApi @Inject()(
-                                      wsClient: WSClient,
-                                      http: VoaHttpClient,
-                                      @Named("voa.authValuationHistoryUrl") valuationHistoryUrl: String,
-                                      config: ServicesConfig
-                                    )(implicit executionContext: ExecutionContext) extends BaseVoaConnector {
+      wsClient: WSClient,
+      http: VoaHttpClient,
+      @Named("voa.authValuationHistoryUrl") valuationHistoryUrl: String,
+      config: ServicesConfig
+)(implicit executionContext: ExecutionContext)
+    extends BaseVoaConnector {
 
   lazy val appName = config.getConfString("appName", "voa-property-linking")
 
   lazy val baseURL = config.baseUrl("external-business-rates-data-platform")
   lazy val url = baseURL + "/external-valuation-management-api"
 
-  def getDvrDocuments(valuationId: Long, uarn: Long, propertyLinkId: String)(implicit request: RequestWithPrincipal[_]): Future[Option[DvrDocumentFiles]] =
-    http.GET[DvrDocumentFiles](s"$url/properties/$uarn/valuations/$valuationId/files", Seq("propertyLinkId" -> propertyLinkId))
+  def getDvrDocuments(valuationId: Long, uarn: Long, propertyLinkId: String)(
+        implicit request: RequestWithPrincipal[_]): Future[Option[DvrDocumentFiles]] =
+    http
+      .GET[DvrDocumentFiles](
+        s"$url/properties/$uarn/valuations/$valuationId/files",
+        Seq("propertyLinkId" -> propertyLinkId))
       .map(Option.apply)
       .recover {
-        case _: NotFoundException  =>
+        case _: NotFoundException =>
           None
-        case e                     =>
+        case e =>
           throw e
       }
 
-  def getValuationHistory(uarn: Long, propertyLinkSubmissionId: String)(implicit request: RequestWithPrincipal[_]): Future[Option[ValuationHistoryResponse]] = {
+  def getValuationHistory(uarn: Long, propertyLinkSubmissionId: String)(
+        implicit request: RequestWithPrincipal[_]): Future[Option[ValuationHistoryResponse]] =
     http
       .GET[Option[ValuationHistoryResponse]](
-      valuationHistoryUrl.replace("{uarn}", uarn.toString),
+        valuationHistoryUrl.replace("{uarn}", uarn.toString),
         modernisedValuationHistoryQueryParameters(propertyLinkSubmissionId))
-  }
 
-  def getDvrDocument(
-                      valuationId: Long,
-                      uarn: Long,
-                      propertyLinkId: String,
-                      fileRef: String)(implicit request: RequestWithPrincipal[_]): Future[WSResponse] =
+  def getDvrDocument(valuationId: Long, uarn: Long, propertyLinkId: String, fileRef: String)(
+        implicit request: RequestWithPrincipal[_]): Future[WSResponse] =
     wsClient
       .url(s"$url/properties/$uarn/valuations/$valuationId/files/$fileRef?propertyLinkId=$propertyLinkId")
       .withMethod("GET")
-      .withHttpHeaders(List(
-        "GG-EXTERNAL-ID" -> request.principal.externalId,
-        USER_AGENT -> appName,
-        "GG-GROUP-ID"    -> request.principal.groupId): _*)
-      .stream().flatMap { response =>
-      response.status match {
-        case s if is4xx(s)  => Future.failed(Upstream4xxResponse(s"Upload failed with status ${response.status}.", s, s))
-        case s if is5xx(s)  => Future.failed(Upstream5xxResponse(s"Upload failed with status ${response.status}.", s, s))
-        case _              => Future.successful(response)
+      .withHttpHeaders(
+        List(
+          "GG-EXTERNAL-ID" -> request.principal.externalId,
+          USER_AGENT       -> appName,
+          "GG-GROUP-ID"    -> request.principal.groupId): _*)
+      .stream()
+      .flatMap { response =>
+        response.status match {
+          case s if is4xx(s) =>
+            Future.failed(Upstream4xxResponse(s"Upload failed with status ${response.status}.", s, s))
+          case s if is5xx(s) =>
+            Future.failed(Upstream5xxResponse(s"Upload failed with status ${response.status}.", s, s))
+          case _ => Future.successful(response)
+        }
       }
-    }
 
   private def modernisedValuationHistoryQueryParameters(propertyLinkSubmissionId: String) =
     Seq("propertyLinkId" -> propertyLinkSubmissionId)

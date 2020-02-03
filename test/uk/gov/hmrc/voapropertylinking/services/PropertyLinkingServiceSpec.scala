@@ -47,33 +47,40 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
     startDate = date,
     endDate = Some(date),
     submissionId = "22222",
-    NDRListValuationHistoryItems = Seq(APIValuationHistory(
-      asstRef = 125689,
-      listYear = "2017",
-      uarn = 923411,
-      effectiveDate = Some(date),
-      rateableValue = Some(2599),
-      address = "1 HIGH STREET, BRIGHTON",
-      billingAuthorityReference = "VOA1",
-      currentFromDate = None,
-      currentToDate = None
-    )),
-    parties = Seq(APIParty(id = 24680,
-      authorisedPartyStatus = "APPROVED",
-      authorisedPartyOrganisationId = 123456,
-      permissions = Seq(Permissions(
+    NDRListValuationHistoryItems = Seq(
+      APIValuationHistory(
+        asstRef = 125689,
+        listYear = "2017",
+        uarn = 923411,
+        effectiveDate = Some(date),
+        rateableValue = Some(2599),
+        address = "1 HIGH STREET, BRIGHTON",
+        billingAuthorityReference = "VOA1",
+        currentFromDate = None,
+        currentToDate = None
+      )),
+    parties = Seq(
+      APIParty(
         id = 24680,
+        authorisedPartyStatus = "APPROVED",
+        authorisedPartyOrganisationId = 123456,
+        permissions = Seq(
+          Permissions(
+            id = 24680,
+            checkPermission = AgentPermission.StartAndContinue,
+            challengePermission = AgentPermission.StartAndContinue,
+            endDate = None))
+      )),
+    agents = Some(
+      Seq(LegacyParty(
+        authorisedPartyId = 24680,
+        agentCode = 1111,
+        organisationName = "org name",
+        organisationId = 123456,
         checkPermission = AgentPermission.StartAndContinue,
-        challengePermission = AgentPermission.StartAndContinue,
-        endDate = None)))),
-    agents = Some(Seq(LegacyParty(
-      authorisedPartyId = 24680,
-      agentCode = 1111,
-      organisationName = "org name",
-      organisationId = 123456,
-      checkPermission = AgentPermission.StartAndContinue,
-      challengePermission = AgentPermission.StartAndContinue
-    ))))
+        challengePermission = AgentPermission.StartAndContinue
+      )))
+  )
 
   val clientValidPropertiesView = PropertiesView(
     authorisationId = 11111,
@@ -83,22 +90,24 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
     startDate = date,
     endDate = Some(date),
     submissionId = "22222",
-    NDRListValuationHistoryItems = Seq(APIValuationHistory(
-      asstRef = 125689,
-      listYear = "2017",
-      uarn = 923411,
-      effectiveDate = Some(date),
-      rateableValue = Some(2599),
-      address = "1 HIGH STREET, BRIGHTON",
-      billingAuthorityReference = "VOA1",
-      currentFromDate = None,
-      currentToDate = None
-    )),
+    NDRListValuationHistoryItems = Seq(
+      APIValuationHistory(
+        asstRef = 125689,
+        listYear = "2017",
+        uarn = 923411,
+        effectiveDate = Some(date),
+        rateableValue = Some(2599),
+        address = "1 HIGH STREET, BRIGHTON",
+        billingAuthorityReference = "VOA1",
+        currentFromDate = None,
+        currentToDate = None
+      )),
     parties = Seq(),
     agents = Some(Nil)
   )
 
-  val propertyLinkWithAgents: PropertyLinkWithAgents = PropertyLinkWithAgents(authorisationId = 11111,
+  val propertyLinkWithAgents: PropertyLinkWithAgents = PropertyLinkWithAgents(
+    authorisationId = 11111,
     status = PropertyLinkStatus.APPROVED,
     startDate = date,
     endDate = Some(date),
@@ -116,7 +125,8 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
         representationSubmissionId = "",
         representativeCode = 1111,
         checkPermission = AgentPermission.StartAndContinue,
-        challengePermission = AgentPermission.StartAndContinue))
+        challengePermission = AgentPermission.StartAndContinue
+      ))
   )
 
   val summaryPropertyLinkWithAgents: SummaryPropertyLinkWithAgents = SummaryPropertyLinkWithAgents(
@@ -137,7 +147,8 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
         representationSubmissionId = "",
         representativeCode = 1111,
         checkPermission = AgentPermission.StartAndContinue,
-        challengePermission = AgentPermission.StartAndContinue))
+        challengePermission = AgentPermission.StartAndContinue
+      ))
   )
   val ownerPropertyLink = OwnerPropertyLink(propertyLinkWithAgents)
 
@@ -153,7 +164,8 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
     address = "1 HIGH STREET, BRIGHTON",
     localAuthorityRef = "44444",
     client = ClientDetails(55555, "mock org"),
-    representationStatus = "APPROVED")
+    representationStatus = "APPROVED"
+  )
 
   val summaryPropertyLinkClient = SummaryPropertyLinkWithClient(
     authorisationId = 11111,
@@ -166,36 +178,41 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
     address = "1 HIGH STREET, BRIGHTON",
     localAuthorityRef = "44444",
     client = ClientDetails(55555, "mock org"),
-    representationStatus = "APPROVED")
+    representationStatus = "APPROVED"
+  )
 
   val clientPropertyLink = ClientPropertyLink(
     propertyLinkClient
   )
 
-  val valuationHistoryResponse = ValuationHistoryResponse(Seq(ValuationHistory(
-    asstRef = 125689,
-    listYear = "2017",
-    uarn = 923411,
-    billingAuthorityReference = "VOA1",
-    address = "1 HIGH STREET, BRIGHTON",
-    description = None,
-    specialCategoryCode = None,
-    compositeProperty = None,
-    effectiveDate = Some(date),
-    listAlterationDate = None,
-    numberOfPreviousProposals = None,
-    settlementCode = None,
-    totalAreaM2 = None,
-    costPerM2 = None,
-    rateableValue = Some(2599),
-    transitionalCertificate = None,
-    deletedIndicator = None,
-    valuationDetailsAvailable = None,
-    billingAuthorityCode = None)))
+  val valuationHistoryResponse = ValuationHistoryResponse(
+    Seq(
+      ValuationHistory(
+        asstRef = 125689,
+        listYear = "2017",
+        uarn = 923411,
+        billingAuthorityReference = "VOA1",
+        address = "1 HIGH STREET, BRIGHTON",
+        description = None,
+        specialCategoryCode = None,
+        compositeProperty = None,
+        effectiveDate = Some(date),
+        listAlterationDate = None,
+        numberOfPreviousProposals = None,
+        settlementCode = None,
+        totalAreaM2 = None,
+        costPerM2 = None,
+        rateableValue = Some(2599),
+        transitionalCertificate = None,
+        deletedIndicator = None,
+        valuationDetailsAvailable = None,
+        billingAuthorityCode = None
+      )))
 
   val agentAuthorisation: ModernisedPropertyLinkWithClient = propertyLinkClient
   val agentSummaryAuthorisation: ModernisedPropertyLinkWithClient = propertyLinkClient
-  val ownerAuthResultClient = PropertyLinksWithClients(1, 1, 1, 1, Seq(PropertyLinkWithClient.apply(summaryPropertyLinkClient)))
+  val ownerAuthResultClient =
+    PropertyLinksWithClients(1, 1, 1, 1, Seq(PropertyLinkWithClient.apply(summaryPropertyLinkClient)))
 
   val ownerAuthorisationAgent = OwnerAuthorisation(summaryPropertyLinkWithAgents)
   val ownerAuthResultAgent = OwnerAuthResult(1, 1, 1, 1, Seq(ownerAuthorisationAgent))
@@ -213,7 +230,8 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
       when(mockExternalPropertyLinkApi.getMyOrganisationsPropertyLink("11111"))
         .thenReturn(Future.successful(Some(ownerPropertyLink)))
 
-      service.getMyOrganisationsPropertyLink("11111").value.futureValue shouldBe Some(PropertiesView(ownerPropertyLink.authorisation, Nil))
+      service.getMyOrganisationsPropertyLink("11111").value.futureValue shouldBe Some(
+        PropertiesView(ownerPropertyLink.authorisation, Nil))
 
       verify(mockExternalPropertyLinkApi).getMyOrganisationsPropertyLink("11111")
 
@@ -289,30 +307,41 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
     }
   }
 
-
   "getMyOrganisationsPropertyLinks" should {
     "call connector and return a Owner Auth Result for a valid authorisation id" in {
 
-      when(mockExternalPropertyLinkApi.getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams)))
+      when(
+        mockExternalPropertyLinkApi
+          .getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams)))
         .thenReturn(Future.successful(Some(propertyLinksWithAgents)))
 
-      val result = service.getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams)).value.futureValue
+      val result = service
+        .getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams))
+        .value
+        .futureValue
 
       result.getOrElse("None returned") shouldBe ownerAuthResultAgent
 
-      verify(mockExternalPropertyLinkApi).getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams))
+      verify(mockExternalPropertyLinkApi)
+        .getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams))
     }
 
     "return none when nothing is returned from connector" in {
 
-      when(mockExternalPropertyLinkApi.getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams)))
+      when(
+        mockExternalPropertyLinkApi
+          .getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams)))
         .thenReturn(Future.successful(None))
 
-      val result = service.getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams)).value.futureValue
+      val result = service
+        .getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams))
+        .value
+        .futureValue
 
       result.getOrElse("None returned") shouldBe "None returned"
 
-      verify(mockExternalPropertyLinkApi).getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams))
+      verify(mockExternalPropertyLinkApi)
+        .getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams))
 
     }
   }

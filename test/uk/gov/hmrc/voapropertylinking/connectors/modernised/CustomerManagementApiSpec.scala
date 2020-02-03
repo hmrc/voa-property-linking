@@ -44,29 +44,31 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
       val id = 1234L
 
       when(defaultHttpClient.GET[Option[APIDetailedIndividualAccount]](any())(any(), any(), any()))
-        .thenReturn(Future.successful(Some(
-          APIDetailedIndividualAccount(
-            2,
-            "ggEId12",
-            APIIndividualDetails(
-              9876,
-              "anotherFirstName",
-              "anotherLastName",
-              "theFakeDonald@potus.com",
-              Some("24680"),
-              Some("13579"),
-              "idv1"
-            ),
-            13579,
-            GroupDetails(
-              345,
-              false,
-              "Fake News Inc",
-              "therealdonald@potus.com",
-              Some("9876541")
-            )
-          )
-        )))
+        .thenReturn(
+          Future.successful(
+            Some(
+              APIDetailedIndividualAccount(
+                2,
+                "ggEId12",
+                APIIndividualDetails(
+                  9876,
+                  "anotherFirstName",
+                  "anotherLastName",
+                  "theFakeDonald@potus.com",
+                  Some("24680"),
+                  Some("13579"),
+                  "idv1"
+                ),
+                13579,
+                GroupDetails(
+                  345,
+                  false,
+                  "Fake News Inc",
+                  "therealdonald@potus.com",
+                  Some("9876541")
+                )
+              )
+            )))
 
       testConnector.getDetailedIndividual(id)(hc).futureValue shouldBe expectedGetValidResponse
     }
@@ -86,29 +88,31 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
       val ggId = "1234"
 
       when(defaultHttpClient.GET[Option[APIDetailedIndividualAccount]](any())(any(), any(), any()))
-        .thenReturn(Future.successful(Some(
-          APIDetailedIndividualAccount(
-            2,
-            "ggEId12",
-            APIIndividualDetails(
-              9876,
-              "anotherFirstName",
-              "anotherLastName",
-              "theFakeDonald@potus.com",
-              Some("24680"),
-              Some("13579"),
-              "idv1"
-            ),
-            13579,
-            GroupDetails(
-              345,
-              false,
-              "Fake News Inc",
-              "therealdonald@potus.com",
-              Some("9876541")
-            )
-          )
-        )))
+        .thenReturn(
+          Future.successful(
+            Some(
+              APIDetailedIndividualAccount(
+                2,
+                "ggEId12",
+                APIIndividualDetails(
+                  9876,
+                  "anotherFirstName",
+                  "anotherLastName",
+                  "theFakeDonald@potus.com",
+                  Some("24680"),
+                  Some("13579"),
+                  "idv1"
+                ),
+                13579,
+                GroupDetails(
+                  345,
+                  false,
+                  "Fake News Inc",
+                  "therealdonald@potus.com",
+                  Some("9876541")
+                )
+              )
+            )))
 
       testConnector.findDetailedIndividualAccountByGGID(ggId)(hc).futureValue shouldBe expectedGetValidResponse
     }
@@ -125,10 +129,14 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
 
   "CustomerManagementApi.createIndividualAccount" should {
     "return an individual account id for the individual account submission" in {
-      when(defaultHttpClient.POST[APIIndividualAccount, IndividualAccountId](any(), any(), any())(any(), any(), any(), any()))
+      when(
+        defaultHttpClient
+          .POST[APIIndividualAccount, IndividualAccountId](any(), any(), any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(IndividualAccountId(12345)))
 
-      testConnector.createIndividualAccount(individualAccountSubmission)(hc).futureValue shouldBe expectedCreateResponseValid
+      testConnector
+        .createIndividualAccount(individualAccountSubmission)(hc)
+        .futureValue shouldBe expectedCreateResponseValid
     }
   }
 
@@ -138,31 +146,31 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
       val updateUrl = s"$url/$personId"
 
       when(defaultHttpClient.PUT[APIIndividualAccount, JsValue](any(), any(), any())(any(), any(), any(), any()))
-        .thenReturn(Future.successful(
-          Json.toJson(APIDetailedIndividualAccount(
-            2,
-            "ggEId12",
-            APIIndividualDetails(
-              9876,
-              "anotherFirstName",
-              "anotherLastName",
-              "theFakeDonald@potus.com",
-              Some("24680"),
-              Some("13579"),
-              "idv1"
-            ),
-            13579,
-            GroupDetails(
-              345,
-              false,
-              "Fake News Inc",
-              "therealdonald@potus.com",
-              Some("9876541")
-            )
+        .thenReturn(Future.successful(Json.toJson(APIDetailedIndividualAccount(
+          2,
+          "ggEId12",
+          APIIndividualDetails(
+            9876,
+            "anotherFirstName",
+            "anotherLastName",
+            "theFakeDonald@potus.com",
+            Some("24680"),
+            Some("13579"),
+            "idv1"
+          ),
+          13579,
+          GroupDetails(
+            345,
+            false,
+            "Fake News Inc",
+            "therealdonald@potus.com",
+            Some("9876541")
           )
-        )))
+        ))))
 
-      testConnector.updateIndividualAccount(personId, individualAccountSubmission)(hc).futureValue shouldBe expectedUpdateValidResponse
+      testConnector
+        .updateIndividualAccount(personId, individualAccountSubmission)(hc)
+        .futureValue shouldBe expectedUpdateValidResponse
     }
   }
 
@@ -171,21 +179,23 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
       val groupId = 1234L
 
       when(defaultHttpClient.GET[Option[APIDetailedGroupAccount]](any())(any(), any(), any()))
-        .thenReturn(Future.successful(Some(
-          APIDetailedGroupAccount(
-            2,
-            "gggId",
-            Some(234L),
-            GroupDetails(
-              345,
-              false,
-              "Fake News Inc",
-              "therealdonald@potus.com",
-              Some("9876541")
-            ),
-            Seq()
-          )
-        )))
+        .thenReturn(
+          Future.successful(
+            Some(
+              APIDetailedGroupAccount(
+                2,
+                "gggId",
+                Some(234L),
+                GroupDetails(
+                  345,
+                  false,
+                  "Fake News Inc",
+                  "therealdonald@potus.com",
+                  Some("9876541")
+                ),
+                Seq()
+              )
+            )))
 
       testConnector.getDetailedGroupAccount(groupId)(hc).futureValue shouldBe expectedGetValidResponse1
     }
@@ -205,24 +215,25 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
       val ggId = "1234"
 
       when(defaultHttpClient.GET[Option[APIDetailedGroupAccount]](any())(any(), any(), any()))
-        .thenReturn(Future.successful(Some(
-          APIDetailedGroupAccount(
-            2,
-            "gggId",
-            Some(234L),
-            GroupDetails(
-              345,
-              false,
-              "Fake News Inc",
-              "therealdonald@potus.com",
-              Some("9876541")
-            ),
-            Seq()
-          )
-        )))
+        .thenReturn(
+          Future.successful(
+            Some(
+              APIDetailedGroupAccount(
+                2,
+                "gggId",
+                Some(234L),
+                GroupDetails(
+                  345,
+                  false,
+                  "Fake News Inc",
+                  "therealdonald@potus.com",
+                  Some("9876541")
+                ),
+                Seq()
+              )
+            )))
 
-
-     testConnector.findDetailedGroupAccountByGGID(ggId)(hc).futureValue shouldBe expectedGetValidResponse1
+      testConnector.findDetailedGroupAccountByGGID(ggId)(hc).futureValue shouldBe expectedGetValidResponse1
     }
 
     "return an empty response if the provided GGID cannot be found" in {
@@ -240,21 +251,23 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
       val agentCode = "ac234"
 
       when(defaultHttpClient.GET[Option[APIDetailedGroupAccount]](any())(any(), any(), any()))
-        .thenReturn(Future.successful(Some(
-          APIDetailedGroupAccount(
-            2,
-            "gggId",
-            Some(234L),
-            GroupDetails(
-              345,
-              false,
-              "Fake News Inc",
-              "therealdonald@potus.com",
-              Some("9876541")
-            ),
-            Seq()
-          )
-        )))
+        .thenReturn(
+          Future.successful(
+            Some(
+              APIDetailedGroupAccount(
+                2,
+                "gggId",
+                Some(234L),
+                GroupDetails(
+                  345,
+                  false,
+                  "Fake News Inc",
+                  "therealdonald@potus.com",
+                  Some("9876541")
+                ),
+                Seq()
+              )
+            )))
 
       testConnector.withAgentCode(agentCode)(hc).futureValue shouldBe expectedGetValidResponse1
     }
@@ -264,7 +277,6 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
 
       when(defaultHttpClient.GET[Option[APIDetailedGroupAccount]](any())(any(), any(), any()))
         .thenReturn(Future.successful(None))
-
 
       testConnector.withAgentCode(agentCode)(hc).futureValue shouldBe expectedGetEmptyResponse
     }
@@ -283,7 +295,6 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
   "CustomerManagementApi.updateGroupAccount" should {
     "return unit after updating the account" in {
 
-
       val orgId = 123456789
       val updatedOrgAccount = UpdatedOrganisationAccount(
         governmentGatewayGroupId = "gggId1",
@@ -296,22 +307,24 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
         changedByGGExternalId = "tester1"
       )
 
-      when(defaultHttpClient.PUT[UpdatedOrganisationAccount, HttpResponse](any(), any(), any())(any(), any(), any(), any()))
+      when(
+        defaultHttpClient
+          .PUT[UpdatedOrganisationAccount, HttpResponse](any(), any(), any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(HttpResponse(200)))
 
       val result: Unit = testConnector.updateGroupAccount(orgId = orgId, updatedOrgAccount).futureValue
-      result should be (())
+      result should be(())
     }
   }
 
-  private lazy val expectedCreateResponseValid =  IndividualAccountId(12345)
+  private lazy val expectedCreateResponseValid = IndividualAccountId(12345)
 
   private lazy val individualAccountSubmission = IndividualAccountSubmission(
     externalId = "ggEId12",
     trustId = "idv1",
     organisationId = 13579,
     details = IndividualDetails(
-      firstName  = "Kim",
+      firstName = "Kim",
       lastName = "Yong Un",
       email = "thechosenone@nkorea.nk",
       phone1 = "24680",
@@ -320,33 +333,33 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
     )
   )
 
-  private lazy val expectedGetValidResponse = Some(IndividualAccount(
-    externalId = "ggEId12",
-    trustId = "idv1",
-    organisationId = 13579,
-    individualId = 2,
-    details = IndividualDetails(
-      firstName="anotherFirstName",
-      lastName="anotherLastName",
-      email= "theFakeDonald@potus.com",
-      phone1= "24680",
-      phone2= Some("13579"),
-      addressId= 9876
-    )
-  )
-  )
+  private lazy val expectedGetValidResponse = Some(
+    IndividualAccount(
+      externalId = "ggEId12",
+      trustId = "idv1",
+      organisationId = 13579,
+      individualId = 2,
+      details = IndividualDetails(
+        firstName = "anotherFirstName",
+        lastName = "anotherLastName",
+        email = "theFakeDonald@potus.com",
+        phone1 = "24680",
+        phone2 = Some("13579"),
+        addressId = 9876
+      )
+    ))
 
   private val expectedUpdateValidResponse = Json.parse("""{
     "id": 2,
     "governmentGatewayExternalId": "ggEId12",
     "personLatestDetail": {
-      |"addressUnitId": 9876,
-      |"firstName": "anotherFirstName",
-      |"lastName": "anotherLastName",
-      |"emailAddress": "theFakeDonald@potus.com",
-      |"telephoneNumber": "24680",
-      |"mobileNumber": "13579",
-      |"identifyVerificationId": "idv1"
+                                                         |"addressUnitId": 9876,
+                                                         |"firstName": "anotherFirstName",
+                                                         |"lastName": "anotherLastName",
+                                                         |"emailAddress": "theFakeDonald@potus.com",
+                                                         |"telephoneNumber": "24680",
+                                                         |"mobileNumber": "13579",
+                                                         |"identifyVerificationId": "idv1"
     },
     "organisationId": 13579,
     "organisationLatestDetail": {
@@ -357,7 +370,6 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
       "organisationTelephoneNumber": "9876541"
       }
   }""".stripMargin)
-
 
   private lazy val expectedGetEmptyResponse = None
 
@@ -372,32 +384,30 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
     isAgent = false,
     individualAccountSubmission = IndividualAccountSubmissionForOrganisation(
       externalId = "Ext123",
-      trustId= "trust234",
+      trustId = "trust234",
       details = IndividualDetails(
         firstName = "Donald",
         lastName = "Trump",
         email = "therealdonald@potus.com",
-        phone1= "123456789",
-        phone2= Some("987654321"),
-        addressId= 24680L
+        phone1 = "123456789",
+        phone2 = Some("987654321"),
+        addressId = 24680L
       )
     )
   )
 
-  private lazy val expectedCreateValidResponse = GroupId(
-    id = 654321L,
-    message="valid group id",
-    responseTime = 45678)
+  private lazy val expectedCreateValidResponse =
+    GroupId(id = 654321L, message = "valid group id", responseTime = 45678)
 
-  private lazy val expectedGetValidResponse1 = Some(GroupAccount(
-    id = 2,
-    groupId = "gggId",
-    companyName = "Fake News Inc",
-    addressId=345,
-    email="therealdonald@potus.com",
-    phone = "9876541",
-    isAgent = false,
-    agentCode = None)
-  )
+  private lazy val expectedGetValidResponse1 = Some(
+    GroupAccount(
+      id = 2,
+      groupId = "gggId",
+      companyName = "Fake News Inc",
+      addressId = 345,
+      email = "therealdonald@potus.com",
+      phone = "9876541",
+      isAgent = false,
+      agentCode = None))
 
 }

@@ -32,21 +32,9 @@ import utils.FakeObjects
 import scala.concurrent.ExecutionContext
 
 abstract class BaseUnitSpec
-  extends WordSpec
-    with Matchers
-    with BeforeAndAfterEach
-    with BeforeAndAfterAll
-    with AllMocks
-    with Inspectors
-    with Inside
-    with EitherValues
-    with LoneElement
-    with ScalaFutures
-    with FakeObjects
-    with MockitoSugar
-    with PatienceConfiguration
-    with DefaultAwaitTimeout
-    with Cats {
+    extends WordSpec with Matchers with BeforeAndAfterEach with BeforeAndAfterAll with AllMocks with Inspectors
+    with Inside with EitherValues with LoneElement with ScalaFutures with FakeObjects with MockitoSugar
+    with PatienceConfiguration with DefaultAwaitTimeout with Cats {
 
   implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
   implicit val hc: HeaderCarrier = HeaderCarrier()

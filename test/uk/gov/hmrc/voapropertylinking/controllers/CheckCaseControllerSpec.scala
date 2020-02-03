@@ -34,7 +34,10 @@ import scala.concurrent.Future
 class CheckCaseControllerSpec extends BaseControllerSpec with AllMocks {
 
   trait Setup {
-    val controller = new CheckCaseController(Helpers.stubControllerComponents(), preAuthenticatedActionBuilders(), mockExternalCaseManagementApi)
+    val controller = new CheckCaseController(
+      Helpers.stubControllerComponents(),
+      preAuthenticatedActionBuilders(),
+      mockExternalCaseManagementApi)
   }
 
   "retrieving check cases" when {
@@ -57,7 +60,9 @@ class CheckCaseControllerSpec extends BaseControllerSpec with AllMocks {
               createdDateTime = LocalDateTime.now,
               settledDate = None,
               client = Client(1L, "test acne"),
-              submittedBy = "test user")))
+              submittedBy = "test user"
+            ))
+        )
 
         when(mockExternalCaseManagementApi.getMyClientsCheckCases(any())(any()))
           .thenReturn(Future.successful(checkCasesWithClient))
@@ -93,7 +98,9 @@ class CheckCaseControllerSpec extends BaseControllerSpec with AllMocks {
               createdDateTime = LocalDateTime.now,
               settledDate = None,
               agent = None,
-              submittedBy = "test user")))
+              submittedBy = "test user"
+            ))
+        )
 
         when(mockExternalCaseManagementApi.getMyOrganisationCheckCases(any())(any()))
           .thenReturn(Future.successful(checkCasesWithAgent))

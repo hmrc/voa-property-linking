@@ -19,9 +19,9 @@ package models.searchApi
 import play.api.libs.json.Json
 
 case class Agent(
-                  name: String,
-                  ref: Long
-                )
+      name: String,
+      ref: Long
+)
 
 object Agent {
   implicit val format = Json.format[Agent]
@@ -32,4 +32,3 @@ case class Agents(agents: Seq[Agent])
 object Agents {
   implicit val format = Json.format[Agents]
 }
-

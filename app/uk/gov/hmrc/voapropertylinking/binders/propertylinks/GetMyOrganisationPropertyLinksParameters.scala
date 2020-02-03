@@ -20,14 +20,14 @@ import binders.{Params, ValidationResult}
 import uk.gov.hmrc.voapropertylinking.binders.validation.ValidatingBinder
 
 case class GetMyOrganisationPropertyLinksParameters(
-                                                     address: Option[String] = None,
-                                                     baref: Option[String] = None,
-                                                     agent: Option[String] = None,
-                                                     client: Option[String] = None,
-                                                     status: Option[String] = None,
-                                                     sortField: Option[String] = None,
-                                                     sortOrder: Option[String] = None
-                                                   )
+      address: Option[String] = None,
+      baref: Option[String] = None,
+      agent: Option[String] = None,
+      client: Option[String] = None,
+      status: Option[String] = None,
+      sortField: Option[String] = None,
+      sortOrder: Option[String] = None
+)
 
 object GetMyOrganisationPropertyLinksParameters extends ValidatingBinder[GetMyOrganisationPropertyLinksParameters] {
 

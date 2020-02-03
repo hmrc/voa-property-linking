@@ -23,24 +23,27 @@ import models.modernised.PropertyLink
 import play.api.libs.json.{Json, OFormat}
 
 case class PropertyLinkWithAgents(
-                                   authorisationId: Long,
-                                   status: PropertyLinkStatus,
-                                   startDate: LocalDate,
-                                   endDate: Option[LocalDate],
-                                   submissionId: String,
-                                   capacity: String,
-                                   uarn: Long,
-                                   address: String,
-                                   localAuthorityRef: String,
-                                   agents: Seq[AgentDetails]) extends PropertyLink(authorisationId: Long,
-                                                                                  status: PropertyLinkStatus,
-                                                                                  startDate: LocalDate,
-                                                                                  endDate: Option[LocalDate],
-                                                                                  submissionId: String,
-                                                                                  capacity,
-                                                                                  uarn: Long,
-                                                                                  address: String,
-                                                                                  localAuthorityRef: String)
+      authorisationId: Long,
+      status: PropertyLinkStatus,
+      startDate: LocalDate,
+      endDate: Option[LocalDate],
+      submissionId: String,
+      capacity: String,
+      uarn: Long,
+      address: String,
+      localAuthorityRef: String,
+      agents: Seq[AgentDetails])
+    extends PropertyLink(
+      authorisationId: Long,
+      status: PropertyLinkStatus,
+      startDate: LocalDate,
+      endDate: Option[LocalDate],
+      submissionId: String,
+      capacity,
+      uarn: Long,
+      address: String,
+      localAuthorityRef: String
+    )
 
 object PropertyLinkWithAgents {
   implicit val format: OFormat[PropertyLinkWithAgents] = Json.format[PropertyLinkWithAgents]

@@ -16,24 +16,24 @@
 
 package models.mdtp.propertylink.projections
 
-import models.searchApi.{ OwnerAuthAgent => ModernisedOwnerAuthAgent }
+import models.searchApi.{OwnerAuthAgent => ModernisedOwnerAuthAgent}
 import models.AgentPermission.AgentPermission
 import play.api.libs.json.Json
 
 case class OwnerAuthAgent(
-                           authorisedPartyId: Long,
-                           organisationId: Long,
-                           organisationName: String,
-                           status: String,
-                           checkPermission: AgentPermission,
-                           challengePermission: AgentPermission,
-                           agentCode: Long
-                         )
+      authorisedPartyId: Long,
+      organisationId: Long,
+      organisationName: String,
+      status: String,
+      checkPermission: AgentPermission,
+      challengePermission: AgentPermission,
+      agentCode: Long
+)
 
 object OwnerAuthAgent {
   implicit val format = Json.format[OwnerAuthAgent]
 
-  def apply(agent: ModernisedOwnerAuthAgent): OwnerAuthAgent = {
+  def apply(agent: ModernisedOwnerAuthAgent): OwnerAuthAgent =
     OwnerAuthAgent(
       agent.authorisedPartyId,
       agent.organisationId,
@@ -43,6 +43,4 @@ object OwnerAuthAgent {
       agent.challengePermission,
       agent.representativeCode
     )
-  }
 }
-

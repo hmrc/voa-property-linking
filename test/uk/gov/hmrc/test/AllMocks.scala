@@ -31,8 +31,7 @@ import uk.gov.hmrc.voapropertylinking.connectors.modernised._
 import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
 import uk.gov.hmrc.voapropertylinking.services.{AssessmentService, PropertyLinkingService}
 
-trait AllMocks extends MockitoSugar {
-  me: BeforeAndAfterEach =>
+trait AllMocks extends MockitoSugar { me: BeforeAndAfterEach =>
 
   val mockAddressManagementApi: AddressManagementApi = mock[AddressManagementApi]
   val mockAssessmentService: AssessmentService = mock[AssessmentService]

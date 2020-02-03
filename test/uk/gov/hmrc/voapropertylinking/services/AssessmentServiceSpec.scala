@@ -58,7 +58,8 @@ class AssessmentServiceSpec extends BaseUnitSpec {
           representationSubmissionId = "",
           representativeCode = 1111,
           checkPermission = AgentPermission.StartAndContinue,
-          challengePermission = AgentPermission.StartAndContinue)),
+          challengePermission = AgentPermission.StartAndContinue
+        )),
       capacity = "OWNER"
     )
 
@@ -74,7 +75,8 @@ class AssessmentServiceSpec extends BaseUnitSpec {
       address = "1 HIGH STREET, BRIGHTON",
       localAuthorityRef = "44444",
       client = ClientDetails(55555, "mock org"),
-      representationStatus = "APPROVED")
+      representationStatus = "APPROVED"
+    )
 
     val ownerPropertyLink = OwnerPropertyLink(propertyLinkWithAgents)
     val clientPropertyLink = ClientPropertyLink(propertyLinkWithClient)
@@ -98,7 +100,8 @@ class AssessmentServiceSpec extends BaseUnitSpec {
       transitionalCertificate = None,
       deletedIndicator = None,
       valuationDetailsAvailable = None,
-      billingAuthorityCode = None)
+      billingAuthorityCode = None
+    )
 
     val assessmentService = new AssessmentService(mockExternalPropertyLinkApi, mockExternalValuationManagementApi)
   }
@@ -113,7 +116,9 @@ class AssessmentServiceSpec extends BaseUnitSpec {
       val res: OptionT[Future, Assessments] = assessmentService.getMyOrganisationsAssessments(submissionId)
 
       val expectedAssessments: Assessments = Assessments(
-        propertyLink = propertyLinkWithAgents, history = Seq(valuationHistory), capacity = Some("OWNER")
+        propertyLink = propertyLinkWithAgents,
+        history = Seq(valuationHistory),
+        capacity = Some("OWNER")
       )
 
       res.value.futureValue shouldBe Some(expectedAssessments)
@@ -130,7 +135,9 @@ class AssessmentServiceSpec extends BaseUnitSpec {
       val res: OptionT[Future, Assessments] = assessmentService.getClientsAssessments(submissionId)
 
       val expectedAssessments: Assessments = Assessments(
-        propertyLink = propertyLinkWithClient, history = Seq(valuationHistory), capacity = Some("OWNER")
+        propertyLink = propertyLinkWithClient,
+        history = Seq(valuationHistory),
+        capacity = Some("OWNER")
       )
 
       res.value.futureValue shouldBe Some(expectedAssessments)

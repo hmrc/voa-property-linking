@@ -19,7 +19,7 @@ package uk.gov.hmrc.voapropertylinking.connectors.modernised
 import basespecs.BaseUnitSpec
 import models.mdtp.propertylink.projections.OwnerAuthResult
 import models.searchApi._
-import models.searchApi.{ OwnerAuthResult => ModernisedAuthResult }
+import models.searchApi.{OwnerAuthResult => ModernisedAuthResult}
 import models.{PaginationParams, PropertyRepresentation, PropertyRepresentations}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
@@ -60,13 +60,15 @@ class AuthorisationSearchApiSpec extends BaseUnitSpec {
         when(mockDefaultHttpClient.GET[ModernisedAuthResult](any())(any(), any(), any()))
           .thenReturn(Future.successful(ownerAuthResult))
 
-        val res: ModernisedAuthResult = connector.appointableToAgent(
-          ownerId = orgId,
-          agentId = agentId,
-          checkPermission = None,
-          challengePermission = None,
-          params = paginationParams
-        ).futureValue
+        val res: ModernisedAuthResult = connector
+          .appointableToAgent(
+            ownerId = orgId,
+            agentId = agentId,
+            checkPermission = None,
+            challengePermission = None,
+            params = paginationParams
+          )
+          .futureValue
 
         res shouldBe ownerAuthResult
       }
@@ -77,9 +79,10 @@ class AuthorisationSearchApiSpec extends BaseUnitSpec {
     "find owner agents" in {
       val organisationId = 123
 
-      when(mockDefaultHttpClient.GET[Agents](any())(any(), any(), any())).thenReturn(Future.successful(
-        Agents(Seq(Agent("Test name 1", 123), Agent("Test name 2", 123)))
-      ))
+      when(mockDefaultHttpClient.GET[Agents](any())(any(), any(), any())).thenReturn(
+        Future.successful(
+          Agents(Seq(Agent("Test name 1", 123), Agent("Test name 2", 123)))
+        ))
 
       connector.manageAgents(organisationId)(hc).futureValue.agents.size shouldBe 2
     }
@@ -89,24 +92,29 @@ class AuthorisationSearchApiSpec extends BaseUnitSpec {
     "return the invalid code which is not a no Agent Flag code" in {
 
       when(mockDefaultHttpClient.GET[AgentAuthResultBE](any(), any())(any(), any(), any()))
-        .thenReturn(Future.successful(
-          AgentAuthResultBE(
-            1, 10, 30, 50, Seq(AgentAuthorisation(
-              authorisationId = 987654,
-              authorisedPartyId = 34567890,
-              status = "APPROVED",
-              representationSubmissionId = "xyz123",
-              submissionId = "123xyz",
-              uarn = 123456,
-              address = "The White House",
-              localAuthorityRef = "VOA1",
-              client = Client(123456, "Fake News Inc"),
-              representationStatus = "APPROVED",
-              checkPermission = "START_AND_CONTINUE",
-              challengePermission = "START_AND_CONTINUE"
-            ))
-          )
-        ))
+        .thenReturn(
+          Future.successful(
+            AgentAuthResultBE(
+              1,
+              10,
+              30,
+              50,
+              Seq(AgentAuthorisation(
+                authorisationId = 987654,
+                authorisedPartyId = 34567890,
+                status = "APPROVED",
+                representationSubmissionId = "xyz123",
+                submissionId = "123xyz",
+                uarn = 123456,
+                address = "The White House",
+                localAuthorityRef = "VOA1",
+                client = Client(123456, "Fake News Inc"),
+                representationStatus = "APPROVED",
+                checkPermission = "START_AND_CONTINUE",
+                challengePermission = "START_AND_CONTINUE"
+              ))
+            )
+          ))
 
       val pageParams = PaginationParams(0, 10, false)
       val organisationId = 98765
@@ -129,7 +137,8 @@ class AuthorisationSearchApiSpec extends BaseUnitSpec {
         propertyRepresentations = Seq(validPropertyRepresentation)
       )
 
-      val result: PropertyRepresentations = connector.forAgent(status = "APPROVED", organisationId, pageParams)(hc).futureValue
+      val result: PropertyRepresentations =
+        connector.forAgent(status = "APPROVED", organisationId, pageParams)(hc).futureValue
       result shouldBe validPropertyRepresentations
     }
   }

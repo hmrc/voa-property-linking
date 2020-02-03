@@ -28,29 +28,33 @@ import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import scala.concurrent.{ExecutionContext, Future}
 
 class AuthorisationManagementApi @Inject()(
-                                            http: DefaultHttpClient,
-                                            servicesConfig: ServicesConfig,
-                                            @Named("voa.createRepresentationRequest") createRepresentationRequestUrl: String,
-                                            @Named("voa.representationRequestResponse") representationRequestResponseUrl: String
-                                          )(implicit executionContext: ExecutionContext) extends BaseVoaConnector {
+      http: DefaultHttpClient,
+      servicesConfig: ServicesConfig,
+      @Named("voa.createRepresentationRequest") createRepresentationRequestUrl: String,
+      @Named("voa.representationRequestResponse") representationRequestResponseUrl: String
+)(implicit executionContext: ExecutionContext)
+    extends BaseVoaConnector {
 
-  lazy val baseUrl: String = servicesConfig.baseUrl("external-business-rates-data-platform") + "/authorisation-management-api"
+  lazy val baseUrl
+    : String = servicesConfig.baseUrl("external-business-rates-data-platform") + "/authorisation-management-api"
 
-  def validateAgentCode(agentCode: Long, authorisationId: Long)(implicit hc: HeaderCarrier): Future[Either[Long, String]] = {
+  def validateAgentCode(agentCode: Long, authorisationId: Long)(
+        implicit hc: HeaderCarrier): Future[Either[Long, String]] = {
     val url = baseUrl + s"/agent/validate_agent_code?agentCode=$agentCode&authorisationId=$authorisationId"
-    http.GET[JsValue](url).map(js => {
-      val valid = (js \ "isValid").as[Boolean]
-      if (valid)
-        Left((js \ "organisationId").as[Long])
-      else {
-        val code = (js \ "failureCode").as[String]
-        Right(
-          code match {
+    http
+      .GET[JsValue](url)
+      .map(js => {
+        val valid = (js \ "isValid").as[Boolean]
+        if (valid)
+          Left((js \ "organisationId").as[Long])
+        else {
+          val code = (js \ "failureCode").as[String]
+          Right(code match {
             case "NO_AGENT_FLAG" => "INVALID_CODE"
-            case _ => code
+            case _               => code
           })
-      }
-    })
+        }
+      })
   }
 
   def create(reprRequest: APIRepresentationRequest)(implicit hc: HeaderCarrier): Future[HttpResponse] =
@@ -63,9 +67,10 @@ class AuthorisationManagementApi @Inject()(
 
   def revoke(authorisedPartyId: Long)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     val url = baseUrl + s"/authorisedParty/$authorisedPartyId"
-    http.PATCH[JsValue, HttpResponse](url,
+    http.PATCH[JsValue, HttpResponse](
+      url,
       Json.obj(
-        "endDate" -> LocalDate.now.toString,
+        "endDate"               -> LocalDate.now.toString,
         "authorisedPartyStatus" -> "REVOKED"
       ))
   }

@@ -28,64 +28,69 @@ import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
 
-
 class ExternalPropertyLinkApi @Inject()(
-                                               val http: VoaHttpClient,
-                                               @Named("voa.myOrganisationsPropertyLinks") myOrganisationsPropertyLinksUrl: String,
-                                               @Named("voa.myOrganisationsPropertyLink") myOrganisationsPropertyLinkUrl: String,
-                                               @Named("voa.myClientsPropertyLinks") myClientsPropertyLinksUrl: String,
-                                               @Named("voa.myClientsPropertyLink") myClientsPropertyLinkUrl: String,
-                                               @Named("voa.createPropertyLink") createPropertyLinkUrl: String
-                                             )(implicit executionContext: ExecutionContext) extends BaseVoaConnector {
+      val http: VoaHttpClient,
+      @Named("voa.myOrganisationsPropertyLinks") myOrganisationsPropertyLinksUrl: String,
+      @Named("voa.myOrganisationsPropertyLink") myOrganisationsPropertyLinkUrl: String,
+      @Named("voa.myClientsPropertyLinks") myClientsPropertyLinksUrl: String,
+      @Named("voa.myClientsPropertyLink") myClientsPropertyLinkUrl: String,
+      @Named("voa.createPropertyLink") createPropertyLinkUrl: String
+)(implicit executionContext: ExecutionContext)
+    extends BaseVoaConnector {
 
-
-  def getMyOrganisationsPropertyLinks(searchParams: GetMyOrganisationPropertyLinksParameters, params: Option[PaginationParams])
-                                     (implicit request: RequestWithPrincipal[_]): Future[Option[PropertyLinksWithAgents]] = {
-
+  def getMyOrganisationsPropertyLinks(
+        searchParams: GetMyOrganisationPropertyLinksParameters,
+        params: Option[PaginationParams])(
+        implicit request: RequestWithPrincipal[_]): Future[Option[PropertyLinksWithAgents]] =
     http.GET[Option[PropertyLinksWithAgents]](
       myOrganisationsPropertyLinksUrl,
       modernisedPaginationParams(params) ++
-        List(searchParams.address.map("address" -> _),
-          searchParams.baref.map("baref" -> _),
-          searchParams.agent.map("agent" -> _),
-          searchParams.status.map("status" -> _),
+        List(
+          searchParams.address.map("address"     -> _),
+          searchParams.baref.map("baref"         -> _),
+          searchParams.agent.map("agent"         -> _),
+          searchParams.status.map("status"       -> _),
           searchParams.sortField.map("sortfield" -> _),
-          searchParams.sortOrder.map("sortorder" -> _)).flatten)
-  }
+          searchParams.sortOrder.map("sortorder" -> _)
+        ).flatten
+    )
 
-  def getMyOrganisationsPropertyLink(submissionId: String)
-                                    (implicit request: RequestWithPrincipal[_]): Future[Option[OwnerPropertyLink]] =
+  def getMyOrganisationsPropertyLink(submissionId: String)(
+        implicit request: RequestWithPrincipal[_]): Future[Option[OwnerPropertyLink]] =
     http.GET[Option[OwnerPropertyLink]](myOrganisationsPropertyLinkUrl.replace("{propertyLinkId}", submissionId))
 
-  def getClientsPropertyLinks(searchParams: GetMyClientsPropertyLinkParameters, params: Option[PaginationParams])
-                             (implicit request: RequestWithPrincipal[_]): Future[Option[PropertyLinksWithClient]] =
+  def getClientsPropertyLinks(searchParams: GetMyClientsPropertyLinkParameters, params: Option[PaginationParams])(
+        implicit request: RequestWithPrincipal[_]): Future[Option[PropertyLinksWithClient]] =
     http
       .GET[Option[PropertyLinksWithClient]](
-      myClientsPropertyLinksUrl,
-      modernisedPaginationParams(params) ++
-        List(
-          searchParams.address.map("address" -> _),
-          searchParams.baref.map("baref" -> _),
-          searchParams.client.map("client" -> _),
-          searchParams.status.map("status" -> _),
-          searchParams.sortField.map("sortfield" -> _),
-          searchParams.sortOrder.map("sortorder" -> _),
-          searchParams.representationStatus.map("representationStatus" -> _)
-        ).flatten)
+        myClientsPropertyLinksUrl,
+        modernisedPaginationParams(params) ++
+          List(
+            searchParams.address.map("address"                           -> _),
+            searchParams.baref.map("baref"                               -> _),
+            searchParams.client.map("client"                             -> _),
+            searchParams.status.map("status"                             -> _),
+            searchParams.sortField.map("sortfield"                       -> _),
+            searchParams.sortOrder.map("sortorder"                       -> _),
+            searchParams.representationStatus.map("representationStatus" -> _)
+          ).flatten
+      )
 
-  def getClientsPropertyLink(submissionId: String)
-                            (implicit request: RequestWithPrincipal[_]): Future[Option[ClientPropertyLink]] =
+  def getClientsPropertyLink(submissionId: String)(
+        implicit request: RequestWithPrincipal[_]): Future[Option[ClientPropertyLink]] =
     http.GET[Option[ClientPropertyLink]](myClientsPropertyLinkUrl.replace("{propertyLinkId}", submissionId))
 
-  def createPropertyLink(propertyLink: CreatePropertyLink)(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[HttpResponse] =
+  def createPropertyLink(propertyLink: CreatePropertyLink)(
+        implicit hc: HeaderCarrier,
+        request: RequestWithPrincipal[_]): Future[HttpResponse] =
     http
       .POST[CreatePropertyLink, HttpResponse](createPropertyLinkUrl, propertyLink, Seq())
 
   private def modernisedPaginationParams(params: Option[PaginationParams]): Seq[(String, String)] =
-    params.fold(Seq.empty[(String, String)]){ p =>
+    params.fold(Seq.empty[(String, String)]) { p =>
       Seq(
-        "start" -> p.startPoint.toString,
-        "size"  -> p.pageSize.toString,
+        "start"                -> p.startPoint.toString,
+        "size"                 -> p.pageSize.toString,
         "requestTotalRowCount" -> "true"
       )
     }

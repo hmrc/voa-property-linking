@@ -20,18 +20,18 @@ import models.AgentPermission.AgentPermission
 import play.api.libs.json.{Json, OFormat}
 
 case class ClientProperty(
-                           ownerOrganisationId: Long,
-                           ownerOrganisationName: String,
-                           uarn: Long,
-                           billingAuthorityReference: String,
-                           authorisedPartyId: Long,
-                           authorisationId: Long,
-                           authorisationStatus: Boolean,
-                           authorisedPartyStatus: String,
-                           permissionId: Long,
-                           checkPermission: AgentPermission,
-                           challengePermission: AgentPermission,
-                           address: String)
+      ownerOrganisationId: Long,
+      ownerOrganisationName: String,
+      uarn: Long,
+      billingAuthorityReference: String,
+      authorisedPartyId: Long,
+      authorisationId: Long,
+      authorisationStatus: Boolean,
+      authorisedPartyStatus: String,
+      permissionId: Long,
+      checkPermission: AgentPermission,
+      challengePermission: AgentPermission,
+      address: String)
 
 object ClientProperty {
 

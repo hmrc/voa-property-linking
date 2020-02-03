@@ -19,8 +19,8 @@ package models.modernised.externalvaluationmanagement.documents
 import play.api.libs.json.{Json, OFormat}
 
 case class Document(
-                   documentSummary: DocumentSummary
-                   )
+      documentSummary: DocumentSummary
+)
 
 object Document {
   implicit val format: OFormat[Document] = Json.format

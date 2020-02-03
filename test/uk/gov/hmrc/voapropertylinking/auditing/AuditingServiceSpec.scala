@@ -26,9 +26,7 @@ import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class AuditingServiceSpec
-  extends BaseUnitSpec
-    with ContentTypes {
+class AuditingServiceSpec extends BaseUnitSpec with ContentTypes {
 
   implicit val request = FakeRequest()
 
@@ -58,7 +56,8 @@ class AuditingServiceSpec
 
       "auditing fails" should {
         "return unit" in new Setup {
-          when(mockAuditingConnector.sendEvent(any())(any(), any())).thenReturn(Future.successful(AuditResult.Failure("failure")))
+          when(mockAuditingConnector.sendEvent(any())(any(), any()))
+            .thenReturn(Future.successful(AuditResult.Failure("failure")))
           val result = auditingService.sendEvent("test", 999)
 
           result shouldBe ()

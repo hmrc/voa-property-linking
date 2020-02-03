@@ -25,10 +25,11 @@ import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
 import scala.concurrent.ExecutionContext
 
 class SubmissionIdController @Inject()(
-                                        controllerComponents: ControllerComponents,
-                                        authenticated: AuthenticatedActionBuilder,
-                                        val sequenceGenerator: SequenceGeneratorMongoRepository
-                                      )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController(controllerComponents) {
+      controllerComponents: ControllerComponents,
+      authenticated: AuthenticatedActionBuilder,
+      val sequenceGenerator: SequenceGeneratorMongoRepository
+)(implicit executionContext: ExecutionContext)
+    extends PropertyLinkingBaseController(controllerComponents) {
 
   val charMapping: Map[Char, Char] = Map(
     // we have 26 alpha numeric character as input, i.e. 0-9, A-P

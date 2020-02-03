@@ -19,7 +19,6 @@ package uk.gov.hmrc.voapropertylinking.binders.validation
 import cats.Show
 import org.apache.commons.lang3.text.WordUtils
 
-
 sealed trait ValidationError extends Product with Serializable
 
 object ValidationError {

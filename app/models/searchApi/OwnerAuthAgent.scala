@@ -20,14 +20,14 @@ import models.AgentPermission.AgentPermission
 import play.api.libs.json.Json
 
 case class OwnerAuthAgent(
-                           authorisedPartyId: Long,
-                           organisationId: Long,
-                           organisationName: String,
-                           status: String,
-                           checkPermission: AgentPermission,
-                           challengePermission: AgentPermission,
-                           representativeCode: Long
-                         )
+      authorisedPartyId: Long,
+      organisationId: Long,
+      organisationName: String,
+      status: String,
+      checkPermission: AgentPermission,
+      challengePermission: AgentPermission,
+      representativeCode: Long
+)
 
 object OwnerAuthAgent {
   implicit val ownerAuthAgent = Json.format[OwnerAuthAgent]

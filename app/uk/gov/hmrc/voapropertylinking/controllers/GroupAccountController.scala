@@ -27,13 +27,14 @@ import uk.gov.hmrc.voapropertylinking.connectors.modernised.CustomerManagementAp
 
 import scala.concurrent.ExecutionContext
 
-class GroupAccountController @Inject() (
-                                         controllerComponents: ControllerComponents,
-                                         authenticated: AuthenticatedActionBuilder,
-                                         auditingService: AuditingService,
-                                         customerManagementApi: CustomerManagementApi,
-                                         brAuth: BusinessRatesAuthConnector
-                                       )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController(controllerComponents) {
+class GroupAccountController @Inject()(
+      controllerComponents: ControllerComponents,
+      authenticated: AuthenticatedActionBuilder,
+      auditingService: AuditingService,
+      customerManagementApi: CustomerManagementApi,
+      brAuth: BusinessRatesAuthConnector
+)(implicit executionContext: ExecutionContext)
+    extends PropertyLinkingBaseController(controllerComponents) {
 
   case class GroupAccount(groupId: GroupId, submission: GroupAccountSubmission)
 
@@ -45,17 +46,17 @@ class GroupAccountController @Inject() (
     customerManagementApi
       .getDetailedGroupAccount(organisationId)
       .map {
-        case Some(x)  => Ok(Json.toJson(x))
-        case None     => NotFound
-    }
+        case Some(x) => Ok(Json.toJson(x))
+        case None    => NotFound
+      }
   }
 
   def withGroupId(groupId: String): Action[AnyContent] = authenticated.async { implicit request =>
     customerManagementApi
       .findDetailedGroupAccountByGGID(groupId)
       .map {
-        case Some(x)  => Ok(Json.toJson(x))
-        case None     => NotFound
+        case Some(x) => Ok(Json.toJson(x))
+        case None    => NotFound
       }
   }
 
@@ -63,8 +64,8 @@ class GroupAccountController @Inject() (
     customerManagementApi
       .withAgentCode(agentCode)
       .map {
-        case Some(a)  => Ok(Json.toJson(a))
-        case None     => NotFound
+        case Some(a) => Ok(Json.toJson(a))
+        case None    => NotFound
       }
   }
 

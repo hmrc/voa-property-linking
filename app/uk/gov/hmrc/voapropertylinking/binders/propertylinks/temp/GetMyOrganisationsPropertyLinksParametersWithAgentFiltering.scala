@@ -20,24 +20,25 @@ import binders.{Params, ValidationResult}
 import uk.gov.hmrc.voapropertylinking.binders.validation.ValidatingBinder
 
 case class GetMyOrganisationsPropertyLinksParametersWithAgentFiltering(
-                                                                        address: Option[String],
-                                                                        baref: Option[String],
-                                                                        agent: Option[String],
-                                                                        client: Option[String],
-                                                                        status: Option[String],
-                                                                        sortField: Option[String],
-                                                                        sortOrder: Option[String],
-                                                                        agentAppointed: Option[String],
-                                                                        organisationId: Long,
-                                                                        agentOrganisationId: Long,
-                                                                        checkPermission: Option[String],
-                                                                        challengePermission: Option[String]
-                                                                      )
+      address: Option[String],
+      baref: Option[String],
+      agent: Option[String],
+      client: Option[String],
+      status: Option[String],
+      sortField: Option[String],
+      sortOrder: Option[String],
+      agentAppointed: Option[String],
+      organisationId: Long,
+      agentOrganisationId: Long,
+      checkPermission: Option[String],
+      challengePermission: Option[String]
+)
 
 object GetMyOrganisationsPropertyLinksParametersWithAgentFiltering
-  extends ValidatingBinder[GetMyOrganisationsPropertyLinksParametersWithAgentFiltering] {
+    extends ValidatingBinder[GetMyOrganisationsPropertyLinksParametersWithAgentFiltering] {
 
-  override def validate(params: Params): ValidationResult[GetMyOrganisationsPropertyLinksParametersWithAgentFiltering] =
+  override def validate(
+        params: Params): ValidationResult[GetMyOrganisationsPropertyLinksParametersWithAgentFiltering] =
     (
       readStringOption("address", params),
       readStringOption("baref", params),
@@ -51,7 +52,7 @@ object GetMyOrganisationsPropertyLinksParametersWithAgentFiltering
       validateLongId("agentOrganisationId", params),
       readStringOption("checkPermission", params),
       readStringOption("challengePermission", params)
-      ).mapN(GetMyOrganisationsPropertyLinksParametersWithAgentFiltering.apply)
+    ).mapN(GetMyOrganisationsPropertyLinksParametersWithAgentFiltering.apply)
 
   private def readStringOption(implicit key: String, params: Params): ValidationResult[Option[String]] =
     readOption(key, params)

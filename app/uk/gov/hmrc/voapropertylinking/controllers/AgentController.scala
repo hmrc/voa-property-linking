@@ -25,10 +25,11 @@ import uk.gov.hmrc.voapropertylinking.connectors.modernised.AuthorisationSearchA
 import scala.concurrent.ExecutionContext
 
 class AgentController @Inject()(
-                                 controllerComponents: ControllerComponents,
-                                 authenticated: AuthenticatedActionBuilder,
-                                 authorisationSearchApi: AuthorisationSearchApi
-                               )(implicit executionContext: ExecutionContext) extends PropertyLinkingBaseController(controllerComponents)  {
+      controllerComponents: ControllerComponents,
+      authenticated: AuthenticatedActionBuilder,
+      authorisationSearchApi: AuthorisationSearchApi
+)(implicit executionContext: ExecutionContext)
+    extends PropertyLinkingBaseController(controllerComponents) {
 
   def manageAgents(organisationId: Long): Action[AnyContent] = authenticated.async { implicit request =>
     authorisationSearchApi

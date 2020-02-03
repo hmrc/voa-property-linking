@@ -19,7 +19,6 @@ package uk.gov.hmrc.voapropertylinking.binders.propertylinks
 import basespecs.BaseUnitSpec
 import cats.data.Validated.Valid
 
-
 class GetMyClientsPropertyLinkParametersSpec extends BaseUnitSpec {
 
   import GetMyClientsPropertyLinkParameters._

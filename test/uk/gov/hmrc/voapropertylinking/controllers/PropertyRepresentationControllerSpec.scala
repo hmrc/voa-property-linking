@@ -66,16 +66,16 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
         when(mockAuthorisationManagementApi.create(any())(any()))
           .thenReturn(Future.successful(HttpResponse(OK)))
 
-        val result: Future[Result] = testController.create()(FakeRequest().withBody(Json.parse(
-          """{
-            |  "authorisationId" : 1,
-            |  "agentOrganisationId" : 2,
-            |  "individualId" : 3,
-            |  "submissionId" : "A1",
-            |  "checkPermission" : "START",
-            |  "challengePermission" : "START",
-            |  "createDatetime" : "2019-09-12T15:36:47.125Z"
-            |}""".stripMargin)))
+        val result: Future[Result] =
+          testController.create()(FakeRequest().withBody(Json.parse("""{
+                                                                      |  "authorisationId" : 1,
+                                                                      |  "agentOrganisationId" : 2,
+                                                                      |  "individualId" : 3,
+                                                                      |  "submissionId" : "A1",
+                                                                      |  "checkPermission" : "START",
+                                                                      |  "challengePermission" : "START",
+                                                                      |  "createDatetime" : "2019-09-12T15:36:47.125Z"
+                                                                      |}""".stripMargin)))
 
         status(result) shouldBe OK
       }
@@ -158,11 +158,14 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
       "customer management API returns an agent group for specified agent code" in new Setup {
         when(mockCustomerManagementApi.withAgentCode(mEq(agentCode.toString))(any()))
           .thenReturn(Future.successful(Some(groupAccount)))
-        when(mockAuthorisationSearchApi.appointableToAgent(any(), any(), any(), any(), any(), any(), any(), any(), any())(any()))
+        when(
+          mockAuthorisationSearchApi.appointableToAgent(any(), any(), any(), any(), any(), any(), any(), any(), any())(
+            any()))
           .thenReturn(Future.successful(ownerAuthResult))
 
         val result: Future[Result] =
-          testController.appointableToAgent(1L, agentCode, None, None, paginationParams, None, None, None, None)(FakeRequest())
+          testController.appointableToAgent(1L, agentCode, None, None, paginationParams, None, None, None, None)(
+            FakeRequest())
 
         status(result) shouldBe OK
       }
@@ -174,7 +177,8 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
           .thenReturn(Future.successful(Option.empty[GroupAccount]))
 
         val result: Future[Result] =
-          testController.appointableToAgent(1L, agentCode, None, None, paginationParams, None, None, None, None)(FakeRequest())
+          testController.appointableToAgent(1L, agentCode, None, None, paginationParams, None, None, None, None)(
+            FakeRequest())
 
         status(result) shouldBe NOT_FOUND
 

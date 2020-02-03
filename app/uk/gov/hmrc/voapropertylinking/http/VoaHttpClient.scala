@@ -34,7 +34,6 @@ class VoaHttpClient @Inject()(httpClient: DefaultHttpClient) {
         "GG-GROUP-ID"    -> principal.groupId
       )
 
-  // scalastyle:off method.name
   def GET[A](url: String)(
         implicit rds: HttpReads[A],
         hc: HeaderCarrier,
@@ -47,7 +46,8 @@ class VoaHttpClient @Inject()(httpClient: DefaultHttpClient) {
         hc: HeaderCarrier,
         ec: ExecutionContext,
         requestWithPrincipal: RequestWithPrincipal[_]): Future[A] =
-    httpClient.GET[A](url, queryParams)(implicitly, hc = buildHeaderCarrier(hc, requestWithPrincipal.principal), implicitly)
+    httpClient
+      .GET[A](url, queryParams)(implicitly, hc = buildHeaderCarrier(hc, requestWithPrincipal.principal), implicitly)
 
   def DELETE[O](url: String)(
         implicit rds: HttpReads[O],
@@ -62,7 +62,11 @@ class VoaHttpClient @Inject()(httpClient: DefaultHttpClient) {
         hc: HeaderCarrier,
         ec: ExecutionContext,
         requestWithPrincipal: RequestWithPrincipal[_]): Future[O] =
-    httpClient.PUT[I, O](url, body)(implicitly, implicitly, hc = buildHeaderCarrier(hc, requestWithPrincipal.principal), implicitly)
+    httpClient.PUT[I, O](url, body)(
+      implicitly,
+      implicitly,
+      hc = buildHeaderCarrier(hc, requestWithPrincipal.principal),
+      implicitly)
 
   def POST[I, O](url: String, body: I, headers: Seq[(String, String)])(
         implicit wts: Writes[I],
@@ -71,7 +75,11 @@ class VoaHttpClient @Inject()(httpClient: DefaultHttpClient) {
         ec: ExecutionContext,
         requestWithPrincipal: RequestWithPrincipal[_]): Future[O] =
     httpClient
-      .POST[I, O](url, body, headers)(implicitly, implicitly, hc = buildHeaderCarrier(hc, requestWithPrincipal.principal), implicitly)
+      .POST[I, O](url, body, headers)(
+        implicitly,
+        implicitly,
+        hc = buildHeaderCarrier(hc, requestWithPrincipal.principal),
+        implicitly)
 
   def PATCH[I, O](url: String, body: I)(
         implicit wts: Writes[I],
@@ -80,5 +88,9 @@ class VoaHttpClient @Inject()(httpClient: DefaultHttpClient) {
         ec: ExecutionContext,
         requestWithPrincipal: RequestWithPrincipal[_]): Future[O] =
     httpClient
-      .PATCH[I, O](url, body)(implicitly, implicitly, hc = buildHeaderCarrier(hc, requestWithPrincipal.principal), implicitly)
+      .PATCH[I, O](url, body)(
+        implicitly,
+        implicitly,
+        hc = buildHeaderCarrier(hc, requestWithPrincipal.principal),
+        implicitly)
 }

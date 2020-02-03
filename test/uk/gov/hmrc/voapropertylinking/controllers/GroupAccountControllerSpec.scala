@@ -32,18 +32,26 @@ import uk.gov.hmrc.voapropertylinking.connectors.modernised.CustomerManagementAp
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-
 class GroupAccountControllerSpec extends BaseControllerSpec {
 
   "create" should {
     "create a new individual user in modernised" in {
       val testIndividualDetails = IndividualDetails("Test", "Name", "test@test.com", "01234556676", None, 1)
-      val testIndividualOrg = IndividualAccountSubmissionForOrganisation("test-external-id", "test-trust-id", testIndividualDetails)
-      val testGroupAccountSubmission = GroupAccountSubmission("test-group-id", "test-group-id", 1, "test@test.com", "012312321321", false, testIndividualOrg)
+      val testIndividualOrg =
+        IndividualAccountSubmissionForOrganisation("test-external-id", "test-trust-id", testIndividualDetails)
+      val testGroupAccountSubmission = GroupAccountSubmission(
+        "test-group-id",
+        "test-group-id",
+        1,
+        "test@test.com",
+        "012312321321",
+        false,
+        testIndividualOrg)
 
       val groupJson = Json.toJson(testGroupAccountSubmission)
 
-      when(mockGroupAccountConnector.createGroupAccount(any())(any[HeaderCarrier])).thenReturn(Future.successful(GroupId(1, "test", 23)))
+      when(mockGroupAccountConnector.createGroupAccount(any())(any[HeaderCarrier]))
+        .thenReturn(Future.successful(GroupId(1, "test", 23)))
 
       val res = testController.create()(FakeRequest().withBody(groupJson))
 
@@ -54,9 +62,11 @@ class GroupAccountControllerSpec extends BaseControllerSpec {
 
   "get" should {
     "return group account json from modernised if it exists" in {
-      val testGroupAccount = GroupAccount(1, "test-group-id", "Test Company", 1, "test@test.com", "01233421342", false, Some(1))
+      val testGroupAccount =
+        GroupAccount(1, "test-group-id", "Test Company", 1, "test@test.com", "01233421342", false, Some(1))
 
-      when(mockGroupAccountConnector.getDetailedGroupAccount(any())(any[HeaderCarrier])).thenReturn(Future.successful(Some(testGroupAccount)))
+      when(mockGroupAccountConnector.getDetailedGroupAccount(any())(any[HeaderCarrier]))
+        .thenReturn(Future.successful(Some(testGroupAccount)))
 
       val res = testController.get(1)(FakeRequest())
 
@@ -65,7 +75,8 @@ class GroupAccountControllerSpec extends BaseControllerSpec {
     }
 
     "return NotFound if the account does not exist in modernised" in {
-      when(mockGroupAccountConnector.getDetailedGroupAccount(any())(any[HeaderCarrier])).thenReturn(Future.successful(None))
+      when(mockGroupAccountConnector.getDetailedGroupAccount(any())(any[HeaderCarrier]))
+        .thenReturn(Future.successful(None))
 
       val res = testController.get(1)(FakeRequest())
 
@@ -75,9 +86,11 @@ class GroupAccountControllerSpec extends BaseControllerSpec {
 
   "withGroupId" should {
     "return group account json from modernised if it exists using the group ID" in {
-      val testGroupAccount = GroupAccount(1, "test-group-id", "Test Company", 1, "test@test.com", "01233421342", false, Some(1))
+      val testGroupAccount =
+        GroupAccount(1, "test-group-id", "Test Company", 1, "test@test.com", "01233421342", false, Some(1))
 
-      when(mockGroupAccountConnector.findDetailedGroupAccountByGGID(any())(any[HeaderCarrier])).thenReturn(Future.successful(Some(testGroupAccount)))
+      when(mockGroupAccountConnector.findDetailedGroupAccountByGGID(any())(any[HeaderCarrier]))
+        .thenReturn(Future.successful(Some(testGroupAccount)))
 
       val res = testController.withGroupId("test-group-id")(FakeRequest())
 
@@ -86,7 +99,8 @@ class GroupAccountControllerSpec extends BaseControllerSpec {
     }
 
     "return NotFound if the account does not exist in modernised" in {
-      when(mockGroupAccountConnector.findDetailedGroupAccountByGGID(any())(any[HeaderCarrier])).thenReturn(Future.successful(None))
+      when(mockGroupAccountConnector.findDetailedGroupAccountByGGID(any())(any[HeaderCarrier]))
+        .thenReturn(Future.successful(None))
 
       val res = testController.withGroupId("test-group-id")(FakeRequest())
 
@@ -96,9 +110,11 @@ class GroupAccountControllerSpec extends BaseControllerSpec {
 
   "withAgentCode" should {
     "return group account json from modernised if it exists using the agent code" in {
-      val testGroupAccount = GroupAccount(1, "test-group-id", "Test Company", 1, "test@test.com", "01233421342", true, Some(1))
+      val testGroupAccount =
+        GroupAccount(1, "test-group-id", "Test Company", 1, "test@test.com", "01233421342", true, Some(1))
 
-      when(mockGroupAccountConnector.withAgentCode(any())(any[HeaderCarrier])).thenReturn(Future.successful(Some(testGroupAccount)))
+      when(mockGroupAccountConnector.withAgentCode(any())(any[HeaderCarrier]))
+        .thenReturn(Future.successful(Some(testGroupAccount)))
 
       val res = testController.withAgentCode("test-agent-code")(FakeRequest())
 
@@ -117,11 +133,20 @@ class GroupAccountControllerSpec extends BaseControllerSpec {
 
   "update" should {
     "update an existing group in modernised" in {
-      val testUpdatedOrgAccount = UpdatedOrganisationAccount("test-group-id", 1, false, "Test Company", "test@test.com", "0123456778", Instant.now(), "test-external-id")
+      val testUpdatedOrgAccount = UpdatedOrganisationAccount(
+        "test-group-id",
+        1,
+        false,
+        "Test Company",
+        "test@test.com",
+        "0123456778",
+        Instant.now(),
+        "test-external-id")
 
       val testUpdatedOrgAccountJson = Json.toJson(testUpdatedOrgAccount)
 
-      when(mockGroupAccountConnector.updateGroupAccount(any(), any())(any[HeaderCarrier])).thenReturn(Future.successful(()))
+      when(mockGroupAccountConnector.updateGroupAccount(any(), any())(any[HeaderCarrier]))
+        .thenReturn(Future.successful(()))
       when(mockBrAuth.clearCache()(any[HeaderCarrier])).thenReturn(Future.successful(()))
 
       val res = testController.update(1)(FakeRequest().withBody(testUpdatedOrgAccountJson))
@@ -134,7 +159,11 @@ class GroupAccountControllerSpec extends BaseControllerSpec {
 
   lazy val mockBrAuth = mock[BusinessRatesAuthConnector]
 
-  lazy val testController = new GroupAccountController(Helpers.stubControllerComponents(), preAuthenticatedActionBuilders(), mock[AuditingService], mockGroupAccountConnector, mockBrAuth)
+  lazy val testController = new GroupAccountController(
+    Helpers.stubControllerComponents(),
+    preAuthenticatedActionBuilders(),
+    mock[AuditingService],
+    mockGroupAccountConnector,
+    mockBrAuth)
 
 }
-

@@ -27,11 +27,13 @@ import play.api.test.Helpers
 
 import scala.concurrent.Future
 
-
 class AddressLookupControllerSpec extends BaseControllerSpec {
 
   trait Setup {
-    val controller = new AddressLookupController(Helpers.stubControllerComponents(), preAuthenticatedActionBuilders(), mockAddressManagementApi)
+    val controller = new AddressLookupController(
+      Helpers.stubControllerComponents(),
+      preAuthenticatedActionBuilders(),
+      mockAddressManagementApi)
     val validPostcode = "BN1 1NB"
     val addressUnitId = 1L
     val detailedAddress = DetailedAddress(

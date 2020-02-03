@@ -41,9 +41,9 @@ class CreatePropertyLinkSpec extends BaseUnitSpec {
 
       val targetRequest: CreatePropertyLink = CreatePropertyLink(apiRequest)
 
-      targetRequest.uploadedFiles  shouldBe  expectedRequest.uploadedFiles
-      targetRequest.method  shouldBe  expectedRequest.method
-      targetRequest.capacity  shouldBe  expectedRequest.capacity
+      targetRequest.uploadedFiles shouldBe expectedRequest.uploadedFiles
+      targetRequest.method shouldBe expectedRequest.method
+      targetRequest.capacity shouldBe expectedRequest.capacity
     }
   }
 }

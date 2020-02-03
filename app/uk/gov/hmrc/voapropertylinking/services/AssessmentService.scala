@@ -27,26 +27,34 @@ import uk.gov.hmrc.voapropertylinking.utils.Cats
 import scala.concurrent.{ExecutionContext, Future}
 
 class AssessmentService @Inject()(
-                                   val propertyLinksConnector: ExternalPropertyLinkApi,
-                                   val externalValuationManagementApi: ExternalValuationManagementApi
-                                 )(implicit executionContext: ExecutionContext) extends Cats {
-
+      val propertyLinksConnector: ExternalPropertyLinkApi,
+      val externalValuationManagementApi: ExternalValuationManagementApi
+)(implicit executionContext: ExecutionContext)
+    extends Cats {
 
   def getMyOrganisationsAssessments(
-                                     submissionId: String
-                                   )(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): OptionT[Future, Assessments] = {
+        submissionId: String
+  )(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): OptionT[Future, Assessments] =
     for {
       propertyLink <- OptionT(propertyLinksConnector.getMyOrganisationsPropertyLink(submissionId))
-      history  <- OptionT(externalValuationManagementApi.getValuationHistory(propertyLink.authorisation.uarn, submissionId))
-    } yield Assessments(propertyLink.authorisation, history.NDRListValuationHistoryItems, Some(propertyLink.authorisation.capacity))
-  }
+      history <- OptionT(
+                  externalValuationManagementApi.getValuationHistory(propertyLink.authorisation.uarn, submissionId))
+    } yield
+      Assessments(
+        propertyLink.authorisation,
+        history.NDRListValuationHistoryItems,
+        Some(propertyLink.authorisation.capacity))
 
   def getClientsAssessments(
-                             submissionId: String
-                           )(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): OptionT[Future, Assessments] = {
+        submissionId: String
+  )(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): OptionT[Future, Assessments] =
     for {
       propertyLink <- OptionT(propertyLinksConnector.getClientsPropertyLink(submissionId))
-      history <- OptionT(externalValuationManagementApi.getValuationHistory(propertyLink.authorisation.uarn, submissionId))
-    } yield Assessments(propertyLink.authorisation, history.NDRListValuationHistoryItems, Some(propertyLink.authorisation.capacity))
-  }
+      history <- OptionT(
+                  externalValuationManagementApi.getValuationHistory(propertyLink.authorisation.uarn, submissionId))
+    } yield
+      Assessments(
+        propertyLink.authorisation,
+        history.NDRListValuationHistoryItems,
+        Some(propertyLink.authorisation.capacity))
 }

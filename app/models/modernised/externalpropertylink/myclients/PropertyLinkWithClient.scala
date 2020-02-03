@@ -22,32 +22,34 @@ import models.modernised.PropertyLink
 import models.modernised.PropertyLinkStatus.PropertyLinkStatus
 import play.api.libs.json.{Json, OFormat}
 
-
 case class PropertyLinkWithClient(
-                                   authorisationId: Long,
-                                   authorisedPartyId: Long,
-                                   status: PropertyLinkStatus,
-                                   startDate: LocalDate,
-                                   endDate: Option[LocalDate],
-                                   submissionId: String,
-                                   capacity: String,
-                                   uarn: Long,
-                                   address: String,
-                                   localAuthorityRef: String,
-                                   client: ClientDetails,
-                                   representationStatus: String,
-                                   checkPermission: Option[String] = None,
-                                   challengePermission: Option[String] = None) extends PropertyLink(authorisationId: Long,
-                                                                                      status: PropertyLinkStatus,
-                                                                                      startDate: LocalDate,
-                                                                                      endDate: Option[LocalDate],
-                                                                                      submissionId: String,
-                                                                                      capacity,
-                                                                                      uarn: Long,
-                                                                                      address: String,
-                                                                                      localAuthorityRef: String,
-                                                                                      checkPermission: Option[String],
-                                                                                      challengePermission: Option[String])
+      authorisationId: Long,
+      authorisedPartyId: Long,
+      status: PropertyLinkStatus,
+      startDate: LocalDate,
+      endDate: Option[LocalDate],
+      submissionId: String,
+      capacity: String,
+      uarn: Long,
+      address: String,
+      localAuthorityRef: String,
+      client: ClientDetails,
+      representationStatus: String,
+      checkPermission: Option[String] = None,
+      challengePermission: Option[String] = None)
+    extends PropertyLink(
+      authorisationId: Long,
+      status: PropertyLinkStatus,
+      startDate: LocalDate,
+      endDate: Option[LocalDate],
+      submissionId: String,
+      capacity,
+      uarn: Long,
+      address: String,
+      localAuthorityRef: String,
+      checkPermission: Option[String],
+      challengePermission: Option[String]
+    )
 
 object PropertyLinkWithClient {
   implicit val format: OFormat[PropertyLinkWithClient] = Json.format

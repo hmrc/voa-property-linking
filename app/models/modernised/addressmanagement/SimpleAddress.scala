@@ -18,12 +18,25 @@ package models.modernised.addressmanagement
 
 import play.api.libs.json.Json
 
-case class SimpleAddress(addressUnitId: Option[Long], line1: String, line2: String, line3: String, line4: String, postcode: String) {
+case class SimpleAddress(
+      addressUnitId: Option[Long],
+      line1: String,
+      line2: String,
+      line3: String,
+      line4: String,
+      postcode: String) {
 
   def toDetailedAddress = (line1, line2, line3, line4) match {
     case (l1, l2, "", "") => DetailedAddress(buildingNumber = Some(l1), postTown = l2, postcode = postcode)
-    case (l1, l2, l3, "") => DetailedAddress(buildingNumber = Some(l1), thoroughfareName = Some(l2), postTown = l3, postcode = postcode)
-    case (l1, l2, l3, l4) => DetailedAddress(buildingNumber = Some(l1), thoroughfareName = Some(l2), dependentLocality = Some(l3), postTown = l4, postcode = postcode)
+    case (l1, l2, l3, "") =>
+      DetailedAddress(buildingNumber = Some(l1), thoroughfareName = Some(l2), postTown = l3, postcode = postcode)
+    case (l1, l2, l3, l4) =>
+      DetailedAddress(
+        buildingNumber = Some(l1),
+        thoroughfareName = Some(l2),
+        dependentLocality = Some(l3),
+        postTown = l4,
+        postcode = postcode)
   }
 }
 

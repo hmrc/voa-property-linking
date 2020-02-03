@@ -24,38 +24,32 @@ import models.modernised.{PropertyLinkStatus, ValuationHistory}
 import play.api.libs.json.Json
 
 case class Assessment(
-                       authorisationId: Long,
-                       assessmentRef: Long,
-                       listYear: String,
-                       uarn: Long,
-                       effectiveDate: Option[LocalDate],
-                       rateableValue: Option[Long],
-                       address: PropertyAddress,
-                       billingAuthorityReference: String,
-                       currentFromDate: Option[LocalDate],
-                       currentToDate: Option[LocalDate]
-
-                     )
-
+      authorisationId: Long,
+      assessmentRef: Long,
+      listYear: String,
+      uarn: Long,
+      effectiveDate: Option[LocalDate],
+      rateableValue: Option[Long],
+      address: PropertyAddress,
+      billingAuthorityReference: String,
+      currentFromDate: Option[LocalDate],
+      currentToDate: Option[LocalDate]
+)
 
 case class Assessments(
-                        authorisationId: Long,
-                        submissionId: String,
-                        uarn: Long,
-                        address: String,
-                        pending: Boolean,
-                        capacity: Option[String],
-                        assessments: Seq[Assessment],
-                        agents: Seq[Party])
-
-
+      authorisationId: Long,
+      submissionId: String,
+      uarn: Long,
+      address: String,
+      pending: Boolean,
+      capacity: Option[String],
+      assessments: Seq[Assessment],
+      agents: Seq[Party])
 
 object Assessment {
   implicit val formats = Json.format[Assessment]
 
-  def fromAPIValuationHistory(
-                               valuationHistory: APIValuationHistory,
-                               authorisationId: Long) = {
+  def fromAPIValuationHistory(valuationHistory: APIValuationHistory, authorisationId: Long) =
     Assessment(
       authorisationId,
       valuationHistory.asstRef,
@@ -68,30 +62,32 @@ object Assessment {
       valuationHistory.currentFromDate,
       valuationHistory.currentToDate
     )
-  }
 
-  def fromValuationHistory(valuationHistory: ValuationHistory, authorisationId: Long) = {
+  def fromValuationHistory(valuationHistory: ValuationHistory, authorisationId: Long) =
     Assessment(
       authorisationId,
       valuationHistory.asstRef,
       valuationHistory.listYear,
       valuationHistory.uarn,
       valuationHistory.effectiveDate,
-      valuationHistory.rateableValue.map {d => d.longValue()},
+      valuationHistory.rateableValue.map { d =>
+        d.longValue()
+      },
       PropertyAddress.fromString(valuationHistory.address),
       valuationHistory.billingAuthorityReference,
       valuationHistory.currentFromDate,
       valuationHistory.currentToDate
     )
-  }
 
 }
 
 object Assessments {
   implicit val formats = Json.format[Assessments]
 
-  def apply(propertyLink: PropertyLinkWithAgents, history: Seq[ValuationHistory], capacity: Option[String])
-    :Assessments =
+  def apply(
+        propertyLink: PropertyLinkWithAgents,
+        history: Seq[ValuationHistory],
+        capacity: Option[String]): Assessments =
     Assessments(
       propertyLink.authorisationId,
       propertyLink.submissionId,
@@ -100,16 +96,21 @@ object Assessments {
       propertyLink.status != PropertyLinkStatus.APPROVED,
       capacity = capacity,
       assessments = history.map(x => Assessment.fromValuationHistory(x, propertyLink.authorisationId)),
-      agents = propertyLink.agents.map(agent => Party(agent.authorisedPartyId,
-        agent.representativeCode,
-        agent.organisationName,
-        agent.organisationId,
-        agent.checkPermission,
-        agent.challengePermission))
+      agents = propertyLink.agents.map(
+        agent =>
+          Party(
+            agent.authorisedPartyId,
+            agent.representativeCode,
+            agent.organisationName,
+            agent.organisationId,
+            agent.checkPermission,
+            agent.challengePermission))
     )
 
-  def apply(propertyLink: PropertyLinkWithClient, history: Seq[ValuationHistory], capacity: Option[String])
-  :Assessments =
+  def apply(
+        propertyLink: PropertyLinkWithClient,
+        history: Seq[ValuationHistory],
+        capacity: Option[String]): Assessments =
     Assessments(
       propertyLink.authorisationId,
       propertyLink.submissionId,

@@ -16,20 +16,20 @@
 
 package models.mdtp.propertylink.projections
 
-import models.searchApi.{ OwnerAuthorisation => ModerniedOwnerAuthorisaton }
+import models.searchApi.{OwnerAuthorisation => ModerniedOwnerAuthorisaton}
 import models.AgentPermission
 import models.modernised.externalpropertylink.myorganisations.SummaryPropertyLinkWithAgents
 import play.api.libs.json.Json
 
 case class OwnerAuthorisation(
-                               authorisationId: Long,
-                               status: String,
-                               submissionId: String,
-                               uarn: Long,
-                               address: String,
-                               localAuthorityRef: String,
-                               agents: Seq[OwnerAuthAgent]
-                             ){
+      authorisationId: Long,
+      status: String,
+      submissionId: String,
+      uarn: Long,
+      address: String,
+      localAuthorityRef: String,
+      agents: Seq[OwnerAuthAgent]
+) {
 
   def capatilise() = this.copy(address = address.toUpperCase)
 }
@@ -37,7 +37,7 @@ case class OwnerAuthorisation(
 object OwnerAuthorisation {
   implicit val ownerAuthorisation = Json.format[OwnerAuthorisation]
 
-  def apply(authorisation: ModerniedOwnerAuthorisaton): OwnerAuthorisation = {
+  def apply(authorisation: ModerniedOwnerAuthorisaton): OwnerAuthorisation =
     OwnerAuthorisation(
       authorisation.authorisationId,
       authorisation.status,
@@ -47,9 +47,8 @@ object OwnerAuthorisation {
       authorisation.localAuthorityRef,
       authorisation.agents.map(OwnerAuthAgent.apply)
     )
-  }
 
-  def apply(propertyLink: SummaryPropertyLinkWithAgents):OwnerAuthorisation =
+  def apply(propertyLink: SummaryPropertyLinkWithAgents): OwnerAuthorisation =
     OwnerAuthorisation(
       authorisationId = propertyLink.authorisationId,
       status = propertyLink.status.toString,
@@ -57,15 +56,16 @@ object OwnerAuthorisation {
       uarn = propertyLink.uarn,
       address = propertyLink.address,
       localAuthorityRef = propertyLink.localAuthorityRef,
-      agents = propertyLink.agents.map(agent =>
-        OwnerAuthAgent(
-          authorisedPartyId = agent.authorisedPartyId,
-          organisationId = agent.organisationId,
-          organisationName = agent.organisationName,
-          status = agent.status,
-          checkPermission = agent.checkPermission,
-          challengePermission = agent.challengePermission,
-          agentCode = agent.representativeCode)
-      )
+      agents = propertyLink.agents.map(
+        agent =>
+          OwnerAuthAgent(
+            authorisedPartyId = agent.authorisedPartyId,
+            organisationId = agent.organisationId,
+            organisationName = agent.organisationName,
+            status = agent.status,
+            checkPermission = agent.checkPermission,
+            challengePermission = agent.challengePermission,
+            agentCode = agent.representativeCode
+        ))
     )
 }

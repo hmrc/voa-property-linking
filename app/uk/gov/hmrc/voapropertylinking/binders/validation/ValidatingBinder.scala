@@ -24,7 +24,7 @@ import scala.reflect.ClassTag
 import scala.reflect.runtime.universe._
 import uk.gov.hmrc.voapropertylinking.utils.QueryParamUtils.toQueryString
 
-abstract class ValidatingBinder[T: TypeTag : ClassTag] extends ValidationUtils {
+abstract class ValidatingBinder[T: TypeTag: ClassTag] extends ValidationUtils {
 
   def validate(params: Params): ValidationResult[T]
 
@@ -38,4 +38,3 @@ abstract class ValidatingBinder[T: TypeTag : ClassTag] extends ValidationUtils {
   }
 
 }
-

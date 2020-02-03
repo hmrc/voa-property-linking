@@ -22,14 +22,14 @@ import models.{CapacityDeclaration, FileInfo}
 import play.api.libs.json.Json
 
 case class PropertyLinkRequest(
-                                uarn: Long,
-                                organisationId: Long,
-                                individualId: Long,
-                                capacityDeclaration: CapacityDeclaration,
-                                linkedDate: Instant,
-                                linkBasis: String,
-                                fileInfo: Seq[FileInfo],
-                                submissionId: String)
+      uarn: Long,
+      organisationId: Long,
+      individualId: Long,
+      capacityDeclaration: CapacityDeclaration,
+      linkedDate: Instant,
+      linkBasis: String,
+      fileInfo: Seq[FileInfo],
+      submissionId: String)
 
 object PropertyLinkRequest {
   implicit val propertyLinkRequest = Json.format[PropertyLinkRequest]

@@ -19,14 +19,14 @@ package models.searchApi
 import play.api.libs.json.Json
 
 case class OwnerAuthorisation(
-                               authorisationId: Long,
-                               status: String,
-                               submissionId: String,
-                               uarn: Long,
-                               address: String,
-                               localAuthorityRef: String,
-                               agents: Seq[OwnerAuthAgent]
-                             ){
+      authorisationId: Long,
+      status: String,
+      submissionId: String,
+      uarn: Long,
+      address: String,
+      localAuthorityRef: String,
+      agents: Seq[OwnerAuthAgent]
+) {
 
   def capatilise() = this.copy(address = address.toUpperCase)
 }
@@ -34,4 +34,3 @@ case class OwnerAuthorisation(
 object OwnerAuthorisation {
   implicit val ownerAuthorisation = Json.format[OwnerAuthorisation]
 }
-
