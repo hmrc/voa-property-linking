@@ -16,25 +16,28 @@
 
 package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
-import javax.inject.Inject
+import javax.inject.{Inject, Named}
 import models._
 import play.api.libs.json.JsValue
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, NotFoundException}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
+import uk.gov.hmrc.voapropertylinking.models.modernoised.agentrepresentation.AgentOrganisation
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class CustomerManagementApi @Inject()(
-      http: DefaultHttpClient,
-      servicesConfig: ServicesConfig
-)(implicit executionContext: ExecutionContext)
-    extends BaseVoaConnector {
+                                       http: DefaultHttpClient,
+                                       servicesConfig: ServicesConfig,
+                                       @Named("voa.agentByRepresentationCode") agentByRepresentationCodeUrl: String
+                                     )(implicit executionContext: ExecutionContext) extends BaseVoaConnector {
 
   lazy val baseUrl
     : String = servicesConfig.baseUrl("external-business-rates-data-platform") + "/customer-management-api"
   lazy val organisationUrl: String = baseUrl + "/organisation"
   lazy val individualUrl: String = baseUrl + "/person"
+
+  lazy val voaModernisedApiStubBaseUrl: String = servicesConfig.baseUrl("voa-modernised-api")
 
   def createGroupAccount(account: GroupAccountSubmission)(implicit hc: HeaderCarrier): Future[GroupId] =
     http.POST[APIGroupAccountSubmission, GroupId](organisationUrl, account.toApiAccount)
@@ -75,5 +78,13 @@ class CustomerManagementApi @Inject()(
     http
       .GET[Option[APIDetailedIndividualAccount]](s"$individualUrl?governmentGatewayExternalId=$ggId")
       .map(_.map(_.toIndividualAccount))
+
+  def getAgentByRepresentationCode(agentCode: Long)(implicit hc: HeaderCarrier): Future[Option[AgentOrganisation]] = {
+    http.GET[Option[AgentOrganisation]](agentByRepresentationCodeUrl.templated("agentCode" -> agentCode)) recover {
+      case _: NotFoundException => {
+        None
+      }
+    }
+  }
 
 }
