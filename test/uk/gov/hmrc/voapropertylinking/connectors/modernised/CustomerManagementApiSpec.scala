@@ -25,15 +25,17 @@ import org.mockito.Mockito.when
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
+import uk.gov.hmrc.voapropertylinking.models.modernoised.agentrepresentation.{AgentOrganisation, OrganisationLatestDetail, Person}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import uk.gov.hmrc.http.NotFoundException
 
 class CustomerManagementApiSpec extends BaseUnitSpec {
 
   val defaultHttpClient = mock[DefaultHttpClient]
   val config = mockServicesConfig
-  val testConnector = new CustomerManagementApi(defaultHttpClient, config) {
+  val testConnector = new CustomerManagementApi(defaultHttpClient, config, "agentByRepresentationCodeUrl") {
     override lazy val baseUrl = "http://some-uri"
   }
 
@@ -304,6 +306,26 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
     }
   }
 
+  "CustomerManagementApi.getAgentByRepresentationCode" should {
+    "return AgentOrganisation with the provided agentCode" in {
+      val agentCode = 123432L
+
+      when(defaultHttpClient.GET[Option[AgentOrganisation]](any())(any(), any(), any()))
+        .thenReturn(Future.successful(Some(expectedAgentOrganisation)))
+
+      testConnector.getAgentByRepresentationCode(agentCode)(hc).futureValue shouldBe Some(expectedAgentOrganisation)
+    }
+
+    "return an None if no AgentOrgaisation can be found for the provided agentCode" in {
+      val agentCode = 123432L
+
+      when(defaultHttpClient.GET[Option[AgentOrganisation]](any())(any(), any(), any()))
+        .thenReturn(Future.successful(None))
+
+      testConnector.getAgentByRepresentationCode(agentCode)(hc).futureValue shouldBe None
+    }
+  }
+
   private lazy val expectedCreateResponseValid =  IndividualAccountId(12345)
 
   private lazy val individualAccountSubmission = IndividualAccountSubmission(
@@ -398,6 +420,21 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
     phone = "9876541",
     isAgent = false,
     agentCode = None)
+  )
+
+  private lazy val expectedAgentOrganisation = AgentOrganisation(
+    id = 12L,
+    governmentGatewayGroupId = "some-gg-group-id",
+    representativeCode = Some(123432L),
+    organisationLatestDetail =  OrganisationLatestDetail(
+      id = 1L,
+      addressUnitId = 1L,
+      organisationName = "An Org",
+      organisationEmailAddress = "some@email.com",
+      organisationTelephoneNumber = "0456273893232",
+      representativeFlag = true
+    ),
+    persons = List()
   )
 
 }

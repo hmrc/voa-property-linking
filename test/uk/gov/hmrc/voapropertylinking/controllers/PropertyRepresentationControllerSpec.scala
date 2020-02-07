@@ -25,6 +25,7 @@ import play.api.libs.json.Json
 import play.api.mvc.Result
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.http.HttpResponse
+import uk.gov.hmrc.voapropertylinking.models.modernoised.agentrepresentation.{AgentOrganisation, OrganisationLatestDetail}
 
 import scala.concurrent.Future
 
@@ -56,6 +57,21 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
       agentCode = Some(234)
     )
     protected val ownerAuthResult = ModernisedOwnerAuthResult(1, 1, 1, 1, Seq())
+
+    val agentOrganisation = AgentOrganisation(
+      id = 12L,
+      governmentGatewayGroupId = "some-gg-group-id",
+      representativeCode = Some(agentCode),
+      organisationLatestDetail =  OrganisationLatestDetail(
+        id = 1L,
+        addressUnitId = 1L,
+        organisationName = "An Org",
+        organisationEmailAddress = "some@email.com",
+        organisationTelephoneNumber = "0456273893232",
+        representativeFlag = true
+      ),
+      persons = List()
+    )
 
   }
 
@@ -180,6 +196,34 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
 
         verify(mockAuthorisationSearchApi, never())
           .appointableToAgent(any(), any(), any(), any(), any(), any(), any(), any(), any())(any())
+      }
+    }
+
+  }
+
+  "getAgent" should {
+    "return OK 200" when {
+      "customer management API returns an AgentOrganisation for a provided agent code" in new Setup {
+        when(mockCustomerManagementApi.getAgentByRepresentationCode(mEq(agentCode))(any()))
+          .thenReturn(Future.successful(Some(agentOrganisation)))
+
+        val result: Future[Result] =
+          testController.getAgent(agentCode)(FakeRequest())
+
+        status(result) shouldBe OK
+        contentAsJson(result) shouldBe Json.toJson(agentOrganisation)
+      }
+    }
+
+    "return NOT FOUND 404" when {
+      "customer management API returns nothing for given agent code" in new Setup {
+        when(mockCustomerManagementApi.getAgentByRepresentationCode(mEq(agentCode))(any()))
+          .thenReturn(Future.successful(Option.empty[AgentOrganisation]))
+
+        val result: Future[Result] =
+          testController.getAgent(agentCode)(FakeRequest())
+
+        status(result) shouldBe NOT_FOUND
       }
     }
 

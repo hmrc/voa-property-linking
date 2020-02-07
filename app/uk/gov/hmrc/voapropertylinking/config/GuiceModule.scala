@@ -76,7 +76,8 @@ class GuiceModule(
         "voa.myClientsPropertyLinks"        -> "voa.resources.externalPropertyLink.myClientsPropertyLinks.path",
         "voa.createPropertyLink"            -> "voa.resources.externalPropertyLink.createPropertyLink.path",
         "voa.createRepresentationRequest"   -> "voa.resources.authorisationManagementApi.createRepresentationRequest.path",
-        "voa.representationRequestResponse" -> "voa.resources.authorisationManagementApi.representationRequestResponse.path"
+        "voa.representationRequestResponse" -> "voa.resources.authorisationManagementApi.representationRequestResponse.path",
+        "voa.agentByRepresentationCode"     -> "voa.resources.customerManagementApi.getAgentByRepresentationCode.path"
       ),
       servicesConfig.baseUrl("voa-modernised-api")
     )

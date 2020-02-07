@@ -25,6 +25,7 @@ private object AppDependencies {
     "uk.gov.hmrc"         %% "domain"                 % "5.6.0-play-26",
     "org.typelevel"       %% "cats-core"              % "1.6.1",
     "com.typesafe.play"   %% "play-json"              % "2.6.13",
+    "uk.gov.hmrc"         %% "uri-template"           % "1.3.0",
     "org.scalacheck"      %% "scalacheck"             % "1.13.5"
   )
 
