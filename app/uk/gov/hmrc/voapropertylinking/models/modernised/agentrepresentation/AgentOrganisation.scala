@@ -14,22 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.voapropertylinking.models.modernoised.agentrepresentation
-
-import java.time.LocalDateTime
+package uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation
 
 import play.api.libs.json.{Json, OFormat}
 
-case class OrganisationLatestDetail(
-                              id: Long,
-                              addressUnitId: Long,
-                              organisationName: String,
-                              organisationEmailAddress: String,
-                              organisationTelephoneNumber: String,
-                              representativeFlag: Boolean
-                            )
+case class AgentOrganisation(
+                         id: Long,
+                         representativeCode: Option[Long],
+                         organisationLatestDetail: OrganisationLatestDetail,
+                         persons: List[Person]
+                       )
 
-object OrganisationLatestDetail {
-  implicit val format: OFormat[OrganisationLatestDetail] = Json.format[OrganisationLatestDetail]
+object AgentOrganisation {
+  implicit val format: OFormat[AgentOrganisation] = Json.format[AgentOrganisation]
 
 }

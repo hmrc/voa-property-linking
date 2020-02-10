@@ -25,11 +25,12 @@ import org.mockito.Mockito.when
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
-import uk.gov.hmrc.voapropertylinking.models.modernoised.agentrepresentation.{AgentOrganisation, OrganisationLatestDetail, Person}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import uk.gov.hmrc.http.NotFoundException
+import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation.{AgentOrganisation, OrganisationLatestDetail}
+
 
 class CustomerManagementApiSpec extends BaseUnitSpec {
 
@@ -339,111 +340,4 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
       testConnector.getAgentByRepresentationCode(agentCode)(hc).futureValue shouldBe None
     }
   }
-
-  private lazy val individualAccountSubmission = IndividualAccountSubmission(
-    externalId = "ggEId12",
-    trustId = "idv1",
-    organisationId = 13579,
-    details = IndividualDetails(
-      firstName = "Kim",
-      lastName = "Yong Un",
-      email = "thechosenone@nkorea.nk",
-      phone1 = "24680",
-      phone2 = Some("13579"),
-      addressId = 9876
-    )
-  )
-
-  private lazy val expectedGetValidResponse = Some(
-    IndividualAccount(
-      externalId = "ggEId12",
-      trustId = "idv1",
-      organisationId = 13579,
-      individualId = 2,
-      details = IndividualDetails(
-        firstName = "anotherFirstName",
-        lastName = "anotherLastName",
-        email = "theFakeDonald@potus.com",
-        phone1 = "24680",
-        phone2 = Some("13579"),
-        addressId = 9876
-      )
-    ))
-
-  private val expectedUpdateValidResponse = Json.parse("""{
-    "id": 2,
-    "governmentGatewayExternalId": "ggEId12",
-    "personLatestDetail": {
-                                                         |"addressUnitId": 9876,
-                                                         |"firstName": "anotherFirstName",
-                                                         |"lastName": "anotherLastName",
-                                                         |"emailAddress": "theFakeDonald@potus.com",
-                                                         |"telephoneNumber": "24680",
-                                                         |"mobileNumber": "13579",
-                                                         |"identifyVerificationId": "idv1"
-    },
-    "organisationId": 13579,
-    "organisationLatestDetail": {
-      "addressUnitId": 345,
-      "representativeFlag": false,
-      "organisationName": "Fake News Inc",
-      "organisationEmailAddress": "therealdonald@potus.com",
-      "organisationTelephoneNumber": "9876541"
-      }
-  }""".stripMargin)
-
-  private lazy val expectedGetEmptyResponse = None
-
-  implicit lazy val fixedClock: Clock = Clock.fixed(Instant.now, ZoneId.systemDefault())
-
-  private lazy val createValidRequest: GroupAccountSubmission = GroupAccountSubmission(
-    id = "acc123",
-    companyName = "Real news Inc",
-    addressId = 9876543L,
-    email = "thewhitehouse@potus.com",
-    phone = "01987654",
-    isAgent = false,
-    individualAccountSubmission = IndividualAccountSubmissionForOrganisation(
-      externalId = "Ext123",
-      trustId = "trust234",
-      details = IndividualDetails(
-        firstName = "Donald",
-        lastName = "Trump",
-        email = "therealdonald@potus.com",
-        phone1 = "123456789",
-        phone2 = Some("987654321"),
-        addressId = 24680L
-      )
-    )
-  )
-
-  private lazy val expectedCreateValidResponse =
-    GroupId(id = 654321L, message = "valid group id", responseTime = 45678)
-
-  private lazy val expectedGetValidResponse1 = Some(
-    GroupAccount(
-      id = 2,
-      groupId = "gggId",
-      companyName = "Fake News Inc",
-      addressId = 345,
-      email = "therealdonald@potus.com",
-      phone = "9876541",
-      isAgent = false,
-      agentCode = None))
-
-  private lazy val expectedAgentOrganisation = AgentOrganisation(
-    id = 12L,
-    governmentGatewayGroupId = "some-gg-group-id",
-    representativeCode = Some(123432L),
-    organisationLatestDetail =  OrganisationLatestDetail(
-      id = 1L,
-      addressUnitId = 1L,
-      organisationName = "An Org",
-      organisationEmailAddress = "some@email.com",
-      organisationTelephoneNumber = "0456273893232",
-      representativeFlag = true
-    ),
-    persons = List()
-  )
-
 }

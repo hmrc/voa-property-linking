@@ -14,19 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.voapropertylinking.models.modernoised.agentrepresentation
+package uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation
 
 import play.api.libs.json.{Json, OFormat}
 
-case class AgentOrganisation(
-                         id: Long,
-                         governmentGatewayGroupId: String,
-                         representativeCode: Option[Long],
-                         organisationLatestDetail: OrganisationLatestDetail,
-                         persons: List[Person]
-                       )
+case class Person(
+                   id: Long,
+                   personLatestDetail: PersonLatestDetail)
 
-object AgentOrganisation {
-  implicit val format: OFormat[AgentOrganisation] = Json.format[AgentOrganisation]
-
+object Person {
+  implicit val format: OFormat[Person] = Json.format[Person]
 }

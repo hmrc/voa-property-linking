@@ -25,7 +25,7 @@ import play.api.libs.json.Json
 import play.api.mvc.Result
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.http.HttpResponse
-import uk.gov.hmrc.voapropertylinking.models.modernoised.agentrepresentation.{AgentOrganisation, OrganisationLatestDetail}
+import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation.{AgentOrganisation, OrganisationLatestDetail}
 
 import scala.concurrent.Future
 

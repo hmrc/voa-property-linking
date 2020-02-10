@@ -22,7 +22,7 @@ import play.api.libs.json.JsValue
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, NotFoundException}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
-import uk.gov.hmrc.voapropertylinking.models.modernoised.agentrepresentation.AgentOrganisation
+import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation.AgentOrganisation
 
 import scala.concurrent.{ExecutionContext, Future}
 
