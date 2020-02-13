@@ -60,7 +60,6 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
 
     val agentOrganisation = AgentOrganisation(
       id = 12L,
-      governmentGatewayGroupId = "some-gg-group-id",
       representativeCode = Some(agentCode),
       organisationLatestDetail =  OrganisationLatestDetail(
         id = 1L,
