@@ -46,31 +46,7 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
     protected val authorisationId = 54321L
     protected val orgId = 1L
     protected val paginationParams = PaginationParams(startPoint = 1, pageSize = 1, requestTotalRowCount = false)
-    protected val groupAccount = GroupAccount(
-      id = 2,
-      groupId = "gggId",
-      companyName = "Fake News Inc",
-      addressId = 345,
-      email = "therealdonald@potus.com",
-      phone = "9876541",
-      isAgent = false,
-      agentCode = Some(234)
-    )
     protected val ownerAuthResult = ModernisedOwnerAuthResult(1, 1, 1, 1, Seq())
-
-    val agentOrganisation = AgentOrganisation(
-      id = 12L,
-      representativeCode = Some(agentCode),
-      organisationLatestDetail =  OrganisationLatestDetail(
-        id = 1L,
-        addressUnitId = 1L,
-        organisationName = "An Org",
-        organisationEmailAddress = "some@email.com",
-        organisationTelephoneNumber = "0456273893232",
-        representativeFlag = true
-      ),
-      persons = List()
-    )
 
   }
 

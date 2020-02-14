@@ -19,13 +19,13 @@ package uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation
 import play.api.libs.json.{Json, OFormat}
 
 case class PersonLatestDetail(
-                   identifyVerificationId: String,
-                   firstName: String,
-                   lastName: String,
-                   addressUnitId: Long,
-                   telephoneNumber: Option[String],
-                   emailAddress: String
-                  ) {
+      identifyVerificationId: String,
+      firstName: String,
+      lastName: String,
+      addressUnitId: Long,
+      telephoneNumber: Option[String],
+      emailAddress: String
+) {
 
   val fullName: String = s"$firstName $lastName"
 }

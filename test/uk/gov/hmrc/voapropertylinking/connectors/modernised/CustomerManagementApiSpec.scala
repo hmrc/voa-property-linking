@@ -31,7 +31,6 @@ import scala.concurrent.Future
 import uk.gov.hmrc.http.NotFoundException
 import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation.{AgentOrganisation, OrganisationLatestDetail}
 
-
 class CustomerManagementApiSpec extends BaseUnitSpec {
 
   val defaultHttpClient = mock[DefaultHttpClient]
@@ -200,7 +199,7 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
               )
             )))
 
-      testConnector.getDetailedGroupAccount(groupId)(hc).futureValue shouldBe expectedGetValidResponse1
+      testConnector.getDetailedGroupAccount(groupId)(hc).futureValue shouldBe someGroupAccount
     }
 
     "return an empty response if the provided id cannot be found" in {
@@ -236,7 +235,7 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
               )
             )))
 
-      testConnector.findDetailedGroupAccountByGGID(ggId)(hc).futureValue shouldBe expectedGetValidResponse1
+      testConnector.findDetailedGroupAccountByGGID(ggId)(hc).futureValue shouldBe someGroupAccount
     }
 
     "return an empty response if the provided GGID cannot be found" in {
@@ -272,7 +271,7 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
               )
             )))
 
-      testConnector.withAgentCode(agentCode)(hc).futureValue shouldBe expectedGetValidResponse1
+      testConnector.withAgentCode(agentCode)(hc).futureValue shouldBe someGroupAccount
     }
 
     "return an empty response if the provided agent code cannot be found" in {
@@ -291,7 +290,7 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
       when(defaultHttpClient.POST[APIGroupAccountSubmission, GroupId](any(), any(), any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(models.GroupId(654321, "valid group id", 45678)))
 
-      testConnector.createGroupAccount(createValidRequest)(hc).futureValue shouldBe expectedCreateValidResponse
+      testConnector.createGroupAccount(groupAccountSubmission)(hc).futureValue shouldBe groupId
     }
   }
 
@@ -325,16 +324,16 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
     "return AgentOrganisation with the provided agentCode" in {
       val agentCode = 123432L
 
-      when(defaultHttpClient.GET[Option[AgentOrganisation]](any())(any(), any(), any()))
-        .thenReturn(Future.successful(Some(expectedAgentOrganisation)))
+      when(defaultHttpClient.GET[Option[AgentOrganisation]](any(), any())(any(), any(), any()))
+        .thenReturn(Future.successful(Some(agentOrganisation)))
 
-      testConnector.getAgentByRepresentationCode(agentCode)(hc).futureValue shouldBe Some(expectedAgentOrganisation)
+      testConnector.getAgentByRepresentationCode(agentCode)(hc).futureValue shouldBe Some(agentOrganisation)
     }
 
     "return an None if no AgentOrgaisation can be found for the provided agentCode" in {
       val agentCode = 123432L
 
-      when(defaultHttpClient.GET[Option[AgentOrganisation]](any())(any(), any(), any()))
+      when(defaultHttpClient.GET[Option[AgentOrganisation]](any(), any())(any(), any(), any()))
         .thenReturn(Future.successful(None))
 
       testConnector.getAgentByRepresentationCode(agentCode)(hc).futureValue shouldBe None

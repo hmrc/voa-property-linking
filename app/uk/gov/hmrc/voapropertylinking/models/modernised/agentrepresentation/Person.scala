@@ -18,9 +18,7 @@ package uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation
 
 import play.api.libs.json.{Json, OFormat}
 
-case class Person(
-                   id: Long,
-                   personLatestDetail: PersonLatestDetail)
+case class Person(id: Long, personLatestDetail: PersonLatestDetail)
 
 object Person {
   implicit val format: OFormat[Person] = Json.format[Person]

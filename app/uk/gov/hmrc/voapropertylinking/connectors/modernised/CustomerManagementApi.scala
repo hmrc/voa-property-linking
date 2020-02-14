@@ -27,10 +27,11 @@ import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation.Agen
 import scala.concurrent.{ExecutionContext, Future}
 
 class CustomerManagementApi @Inject()(
-                                       http: DefaultHttpClient,
-                                       servicesConfig: ServicesConfig,
-                                       @Named("voa.agentByRepresentationCode") agentByRepresentationCodeUrl: String
-                                     )(implicit executionContext: ExecutionContext) extends BaseVoaConnector {
+      http: DefaultHttpClient,
+      servicesConfig: ServicesConfig,
+      @Named("voa.agentByRepresentationCode") agentByRepresentationCodeUrl: String
+)(implicit executionContext: ExecutionContext)
+    extends BaseVoaConnector {
 
   lazy val baseUrl
     : String = servicesConfig.baseUrl("external-business-rates-data-platform") + "/customer-management-api"
@@ -79,12 +80,13 @@ class CustomerManagementApi @Inject()(
       .GET[Option[APIDetailedIndividualAccount]](s"$individualUrl?governmentGatewayExternalId=$ggId")
       .map(_.map(_.toIndividualAccount))
 
-  def getAgentByRepresentationCode(agentCode: Long)(implicit hc: HeaderCarrier): Future[Option[AgentOrganisation]] = {
-    http.GET[Option[AgentOrganisation]](agentByRepresentationCodeUrl.templated("agentCode" -> agentCode)) recover {
+  def getAgentByRepresentationCode(agentCode: Long)(implicit hc: HeaderCarrier): Future[Option[AgentOrganisation]] =
+    http.GET[Option[AgentOrganisation]](
+      url = agentByRepresentationCodeUrl,
+      queryParams = Seq("representativeCode" -> s"$agentCode")) recover {
       case _: NotFoundException => {
         None
       }
     }
-  }
 
 }

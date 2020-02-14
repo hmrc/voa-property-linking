@@ -125,7 +125,7 @@ class PropertyRepresentationController @Inject()(
 
   def getAgent(agentCode: Long): Action[AnyContent] = authenticated.async { implicit request =>
     customerManagementApi.getAgentByRepresentationCode(agentCode) map {
-      case None => ErrorResponse.notFoundJsonResult("Agent does not exist")
+      case None        => ErrorResponse.notFoundJsonResult("Agent does not exist")
       case Some(agent) => Ok(Json.toJson(agent))
     }
   }

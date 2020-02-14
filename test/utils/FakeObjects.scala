@@ -60,8 +60,7 @@ trait FakeObjects {
     submissionSource = "DFE_UI"
   )
 
-
-  val createValidRequest: GroupAccountSubmission = GroupAccountSubmission(
+  val groupAccountSubmission: GroupAccountSubmission = GroupAccountSubmission(
     id = "acc123",
     companyName = "Real news Inc",
     addressId = 9876543L,
@@ -82,10 +81,10 @@ trait FakeObjects {
     )
   )
 
-  val expectedCreateValidResponse =
+  val groupId =
     GroupId(id = 654321L, message = "valid group id", responseTime = 45678)
 
-  val expectedGetValidResponse1 = Some(
+  val someGroupAccount = Some(
     GroupAccount(
       id = 2,
       groupId = "gggId",
@@ -95,21 +94,6 @@ trait FakeObjects {
       phone = "9876541",
       isAgent = false,
       agentCode = None))
-
-  val expectedAgentOrganisation = AgentOrganisation(
-    id = 12L,
-    representativeCode = Some(123432L),
-    organisationLatestDetail =  OrganisationLatestDetail(
-      id = 1L,
-      addressUnitId = 1L,
-      organisationName = "An Org",
-      organisationEmailAddress = "some@email.com",
-      organisationTelephoneNumber = "0456273893232",
-      representativeFlag = true
-    ),
-    persons = List()
-  )
-
 
   val individualAccountSubmission = IndividualAccountSubmission(
     externalId = "ggEId12",
@@ -149,13 +133,13 @@ trait FakeObjects {
     "id": 2,
     "governmentGatewayExternalId": "ggEId12",
     "personLatestDetail": {
-                                                         |"addressUnitId": 9876,
-                                                         |"firstName": "anotherFirstName",
-                                                         |"lastName": "anotherLastName",
-                                                         |"emailAddress": "theFakeDonald@potus.com",
-                                                         |"telephoneNumber": "24680",
-                                                         |"mobileNumber": "13579",
-                                                         |"identifyVerificationId": "idv1"
+                                                 |"addressUnitId": 9876,
+                                                 |"firstName": "anotherFirstName",
+                                                 |"lastName": "anotherLastName",
+                                                 |"emailAddress": "theFakeDonald@potus.com",
+                                                 |"telephoneNumber": "24680",
+                                                 |"mobileNumber": "13579",
+                                                 |"identifyVerificationId": "idv1"
     },
     "organisationId": 13579,
     "organisationLatestDetail": {
@@ -166,5 +150,32 @@ trait FakeObjects {
       "organisationTelephoneNumber": "9876541"
       }
   }""".stripMargin)
+
+  val agentCode = 12345L
+
+  val agentOrganisation = AgentOrganisation(
+    id = 12L,
+    representativeCode = Some(agentCode),
+    organisationLatestDetail = OrganisationLatestDetail(
+      id = 1L,
+      addressUnitId = 1L,
+      organisationName = "An Org",
+      organisationEmailAddress = "some@email.com",
+      organisationTelephoneNumber = "0456273893232",
+      representativeFlag = true
+    ),
+    persons = List()
+  )
+
+  val groupAccount = GroupAccount(
+    id = 2,
+    groupId = "gggId",
+    companyName = "Fake News Inc",
+    addressId = 345,
+    email = "therealdonald@potus.com",
+    phone = "9876541",
+    isAgent = false,
+    agentCode = Some(234)
+  )
 
 }
