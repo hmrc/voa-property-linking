@@ -29,7 +29,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class CustomerManagementApi @Inject()(
       http: DefaultHttpClient,
       servicesConfig: ServicesConfig,
-      @Named("voa.agentByRepresentationCode") agentByRepresentationCodeUrl: String
+      @Named("voa.organisationByRepresentationCode") agentByRepresentationCodeUrl: String
 )(implicit executionContext: ExecutionContext)
     extends BaseVoaConnector {
 
@@ -83,10 +83,6 @@ class CustomerManagementApi @Inject()(
   def getAgentByRepresentationCode(agentCode: Long)(implicit hc: HeaderCarrier): Future[Option[AgentOrganisation]] =
     http.GET[Option[AgentOrganisation]](
       url = agentByRepresentationCodeUrl,
-      queryParams = Seq("representativeCode" -> s"$agentCode")) recover {
-      case _: NotFoundException => {
-        None
-      }
-    }
+      queryParams = Seq("representativeCode" -> s"$agentCode"))
 
 }
