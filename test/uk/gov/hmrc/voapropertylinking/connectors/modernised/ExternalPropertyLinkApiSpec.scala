@@ -21,7 +21,7 @@ import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetMyClientsPropert
 import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
 import models.PaginationParams
 import models.modernised.externalpropertylink.myclients.{ClientPropertyLink, PropertyLinksWithClient}
-import models.modernised.externalpropertylink.myorganisations.{PropertyLinkWithAgents, PropertyLinksWithAgents}
+import models.modernised.externalpropertylink.myorganisations.{AgentList, PropertyLinkWithAgents, PropertyLinksWithAgents}
 import models.modernised.externalpropertylink.requests.CreatePropertyLink
 import org.mockito.ArgumentMatchers.{any, eq => mEq}
 import org.mockito.Mockito._
@@ -67,6 +67,7 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
     val clientAuthorisationUrl = s"$voaApiUrl/my-organisation/clients/all/property-links/{propertyLinkId}"
     val clientAuthorisationsUrl = s"$voaApiUrl/my-organisation/clients/all/property-links"
     val createPropertyLinkUrl = s"$voaApiUrl/my-organisation/property-links"
+    val myOrganisationsAgentsUrl = s"$voaApiUrl/my-organisation/agents"
     val httpstring = "VoaAuthedBackendHttp"
 
     val connector = new ExternalPropertyLinkApi(
@@ -75,7 +76,8 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
       myOrganisationsPropertyLinkUrl = ownerAuthorisationUrl,
       myClientsPropertyLinkUrl = clientAuthorisationUrl,
       myClientsPropertyLinksUrl = clientAuthorisationsUrl,
-      createPropertyLinkUrl = createPropertyLinkUrl
+      createPropertyLinkUrl = createPropertyLinkUrl,
+      myOrganisationsAgentsUrl = myOrganisationsAgentsUrl
     )
 
     val paginationParams = PaginationParams(1, 1, true)
@@ -178,6 +180,25 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
           any(),
           any(),
           any())
+    }
+
+  }
+
+  "get my organisations agents" should {
+
+    "return the agents list for the given organisation" in new Setup {
+
+      val mockReturnedAgentList: AgentList = mock[AgentList]
+
+      when(connector.http.GET[AgentList](any())(any(), any(), any(), any()))
+        .thenReturn(Future.successful(mockReturnedAgentList))
+
+      connector
+        .getMyOrganisationsAgents()
+        .futureValue shouldBe mockReturnedAgentList
+
+      verify(connector.http)
+        .GET(mEq(myOrganisationsAgentsUrl))(any(), any(), any(), any())
     }
 
   }

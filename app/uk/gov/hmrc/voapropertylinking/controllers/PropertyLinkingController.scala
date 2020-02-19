@@ -209,6 +209,14 @@ class PropertyLinkingController @Inject()(
         }
     }
 
+  def getMyOrganisationsAgents(): Action[AnyContent] = authenticated.async { implicit request =>
+    propertyLinkService
+      .getMyOrganisationsAgents()
+      .map { agentsList =>
+        Ok(Json.toJson(agentsList))
+      }
+  }
+
   private def authorisedFor(authorisation: PropertiesView, agentOrgId: Long): Boolean =
     authorisation.parties.exists(_.authorisedPartyOrganisationId == agentOrgId)
 

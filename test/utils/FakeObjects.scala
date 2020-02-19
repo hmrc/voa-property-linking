@@ -22,6 +22,7 @@ import models.mdtp.propertylink.requests.APIPropertyLinkRequest
 import models.modernised.Capacity.{Capacity => _, _}
 import models.modernised.{Capacity, Evidence, EvidenceType, ProvidedEvidence}
 import models.modernised.ProvidedEvidence.{apply => _, _}
+import models.modernised.externalpropertylink.myorganisations.{AgentList, AgentSummary}
 import models.{FileInfo, GroupAccount, GroupAccountSubmission, GroupId, IndividualAccount, IndividualAccountSubmission, IndividualAccountSubmissionForOrganisation, IndividualDetails}
 import models.modernised.externalpropertylink.requests.CreatePropertyLink
 import play.api.libs.json.Json
@@ -177,5 +178,15 @@ trait FakeObjects {
     isAgent = false,
     agentCode = Some(234)
   )
+
+  val agentSummary = AgentSummary(
+    organisationId = 1L,
+    representativeCode = 987L,
+    name = "Some Agent Org",
+    appointedDate = LocalDate.now().minusDays(1),
+    propertyCount = 2
+  )
+  val organisationsAgentsList = AgentList(resultCount = 1, agents = List(agentSummary))
+  val emptyOrganisationsAgentsList = AgentList(resultCount = 0, agents = List.empty)
 
 }

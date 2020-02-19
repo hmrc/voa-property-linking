@@ -35,11 +35,12 @@ import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.http.{HttpResponse, Upstream5xxResponse}
 import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
+import utils.FakeObjects
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class PropertyLinkingControllerSpec extends BaseControllerSpec {
+class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects {
 
   lazy val testController = new PropertyLinkingController(
     controllerComponents = Helpers.stubControllerComponents(),
@@ -277,6 +278,27 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec {
       val res = testController.getClientsAssessments(submissionId)(FakeRequest())
 
       status(res) shouldBe OK
+    }
+  }
+
+  "getMyOrganisationsAgents" should {
+    "return agents list for the organisation" in {
+      when(mockPropertyLinkingService.getMyOrganisationsAgents()(any(), any()))
+        .thenReturn(Future.successful(organisationsAgentsList))
+
+      val res = testController.getMyOrganisationsAgents()(FakeRequest())
+
+      status(res) shouldBe OK
+      contentAsJson(res) shouldBe Json.toJson(organisationsAgentsList)
+    }
+
+    "return empty agents list for the organisation if the organisation have no agents" in {
+      when(mockPropertyLinkingService.getMyOrganisationsAgents()(any(), any()))
+        .thenReturn(Future.successful(emptyOrganisationsAgentsList))
+      val res = testController.getMyOrganisationsAgents()(FakeRequest())
+
+      status(res) shouldBe OK
+      contentAsJson(res) shouldBe Json.toJson(emptyOrganisationsAgentsList)
     }
   }
 

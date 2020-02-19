@@ -20,7 +20,7 @@ import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetMyClientsPropert
 import javax.inject.{Inject, Named}
 import models.PaginationParams
 import models.modernised.externalpropertylink.myclients.{ClientPropertyLink, PropertyLinksWithClient}
-import models.modernised.externalpropertylink.myorganisations.{OwnerPropertyLink, PropertyLinksWithAgents}
+import models.modernised.externalpropertylink.myorganisations.{AgentList, OwnerPropertyLink, PropertyLinksWithAgents}
 import models.modernised.externalpropertylink.requests.CreatePropertyLink
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
@@ -34,7 +34,8 @@ class ExternalPropertyLinkApi @Inject()(
       @Named("voa.myOrganisationsPropertyLink") myOrganisationsPropertyLinkUrl: String,
       @Named("voa.myClientsPropertyLinks") myClientsPropertyLinksUrl: String,
       @Named("voa.myClientsPropertyLink") myClientsPropertyLinkUrl: String,
-      @Named("voa.createPropertyLink") createPropertyLinkUrl: String
+      @Named("voa.createPropertyLink") createPropertyLinkUrl: String,
+      @Named("voa.myOrganisationsAgents") myOrganisationsAgentsUrl: String
 )(implicit executionContext: ExecutionContext)
     extends BaseVoaConnector {
 
@@ -85,6 +86,9 @@ class ExternalPropertyLinkApi @Inject()(
         request: RequestWithPrincipal[_]): Future[HttpResponse] =
     http
       .POST[CreatePropertyLink, HttpResponse](createPropertyLinkUrl, propertyLink, Seq())
+
+  def getMyOrganisationsAgents()(implicit request: RequestWithPrincipal[_]): Future[AgentList] =
+    http.GET[AgentList](myOrganisationsAgentsUrl)
 
   private def modernisedPaginationParams(params: Option[PaginationParams]): Seq[(String, String)] =
     params.fold(Seq.empty[(String, String)]) { p =>
