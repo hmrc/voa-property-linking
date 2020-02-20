@@ -38,8 +38,6 @@ class CustomerManagementApi @Inject()(
   lazy val organisationUrl: String = baseUrl + "/organisation"
   lazy val individualUrl: String = baseUrl + "/person"
 
-  lazy val voaModernisedApiStubBaseUrl: String = servicesConfig.baseUrl("voa-modernised-api")
-
   def createGroupAccount(account: GroupAccountSubmission)(implicit hc: HeaderCarrier): Future[GroupId] =
     http.POST[APIGroupAccountSubmission, GroupId](organisationUrl, account.toApiAccount)
 
