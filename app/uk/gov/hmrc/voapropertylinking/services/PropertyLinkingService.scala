@@ -24,6 +24,7 @@ import models.mdtp.propertylink.myclients.PropertyLinksWithClients
 import models.mdtp.propertylink.projections.OwnerAuthResult
 import models.mdtp.propertylink.requests.APIPropertyLinkRequest
 import models.modernised.externalpropertylink.myclients.ClientPropertyLink
+import models.modernised.externalpropertylink.myorganisations.AgentList
 import models.modernised.externalpropertylink.requests.CreatePropertyLink
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
@@ -68,5 +69,8 @@ class PropertyLinkingService @Inject()(
         request: RequestWithPrincipal[_]): OptionT[Future, OwnerAuthResult] =
     OptionT(propertyLinksConnector.getMyOrganisationsPropertyLinks(searchParams, paginationParams))
       .map(OwnerAuthResult.apply)
+
+  def getMyOrganisationsAgents()(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[AgentList] =
+    propertyLinksConnector.getMyOrganisationsAgents()
 
 }

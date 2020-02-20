@@ -28,12 +28,14 @@ import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import uk.gov.hmrc.http.NotFoundException
+import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation.{AgentOrganisation, OrganisationLatestDetail}
 
 class CustomerManagementApiSpec extends BaseUnitSpec {
 
   val defaultHttpClient = mock[DefaultHttpClient]
   val config = mockServicesConfig
-  val testConnector = new CustomerManagementApi(defaultHttpClient, config) {
+  val testConnector = new CustomerManagementApi(defaultHttpClient, config, "agentByRepresentationCodeUrl") {
     override lazy val baseUrl = "http://some-uri"
   }
 
@@ -197,7 +199,7 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
               )
             )))
 
-      testConnector.getDetailedGroupAccount(groupId)(hc).futureValue shouldBe expectedGetValidResponse1
+      testConnector.getDetailedGroupAccount(groupId)(hc).futureValue shouldBe someGroupAccount
     }
 
     "return an empty response if the provided id cannot be found" in {
@@ -233,7 +235,7 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
               )
             )))
 
-      testConnector.findDetailedGroupAccountByGGID(ggId)(hc).futureValue shouldBe expectedGetValidResponse1
+      testConnector.findDetailedGroupAccountByGGID(ggId)(hc).futureValue shouldBe someGroupAccount
     }
 
     "return an empty response if the provided GGID cannot be found" in {
@@ -269,7 +271,7 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
               )
             )))
 
-      testConnector.withAgentCode(agentCode)(hc).futureValue shouldBe expectedGetValidResponse1
+      testConnector.withAgentCode(agentCode)(hc).futureValue shouldBe someGroupAccount
     }
 
     "return an empty response if the provided agent code cannot be found" in {
@@ -288,7 +290,7 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
       when(defaultHttpClient.POST[APIGroupAccountSubmission, GroupId](any(), any(), any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(models.GroupId(654321, "valid group id", 45678)))
 
-      testConnector.createGroupAccount(createValidRequest)(hc).futureValue shouldBe expectedCreateValidResponse
+      testConnector.createGroupAccount(groupAccountSubmission)(hc).futureValue shouldBe groupId
     }
   }
 
@@ -318,96 +320,23 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
   }
 
   private lazy val expectedCreateResponseValid = IndividualAccountId(12345)
+  "CustomerManagementApi.getAgentByRepresentationCode" should {
+    "return AgentOrganisation with the provided agentCode" in {
+      val agentCode = 123432L
 
-  private lazy val individualAccountSubmission = IndividualAccountSubmission(
-    externalId = "ggEId12",
-    trustId = "idv1",
-    organisationId = 13579,
-    details = IndividualDetails(
-      firstName = "Kim",
-      lastName = "Yong Un",
-      email = "thechosenone@nkorea.nk",
-      phone1 = "24680",
-      phone2 = Some("13579"),
-      addressId = 9876
-    )
-  )
+      when(defaultHttpClient.GET[Option[AgentOrganisation]](any(), any())(any(), any(), any()))
+        .thenReturn(Future.successful(Some(agentOrganisation)))
 
-  private lazy val expectedGetValidResponse = Some(
-    IndividualAccount(
-      externalId = "ggEId12",
-      trustId = "idv1",
-      organisationId = 13579,
-      individualId = 2,
-      details = IndividualDetails(
-        firstName = "anotherFirstName",
-        lastName = "anotherLastName",
-        email = "theFakeDonald@potus.com",
-        phone1 = "24680",
-        phone2 = Some("13579"),
-        addressId = 9876
-      )
-    ))
+      testConnector.getAgentByRepresentationCode(agentCode)(hc).futureValue shouldBe Some(agentOrganisation)
+    }
 
-  private val expectedUpdateValidResponse = Json.parse("""{
-    "id": 2,
-    "governmentGatewayExternalId": "ggEId12",
-    "personLatestDetail": {
-                                                         |"addressUnitId": 9876,
-                                                         |"firstName": "anotherFirstName",
-                                                         |"lastName": "anotherLastName",
-                                                         |"emailAddress": "theFakeDonald@potus.com",
-                                                         |"telephoneNumber": "24680",
-                                                         |"mobileNumber": "13579",
-                                                         |"identifyVerificationId": "idv1"
-    },
-    "organisationId": 13579,
-    "organisationLatestDetail": {
-      "addressUnitId": 345,
-      "representativeFlag": false,
-      "organisationName": "Fake News Inc",
-      "organisationEmailAddress": "therealdonald@potus.com",
-      "organisationTelephoneNumber": "9876541"
-      }
-  }""".stripMargin)
+    "return an None if no AgentOrgaisation can be found for the provided agentCode" in {
+      val agentCode = 123432L
 
-  private lazy val expectedGetEmptyResponse = None
+      when(defaultHttpClient.GET[Option[AgentOrganisation]](any(), any())(any(), any(), any()))
+        .thenReturn(Future.successful(None))
 
-  implicit lazy val fixedClock: Clock = Clock.fixed(Instant.now, ZoneId.systemDefault())
-
-  private lazy val createValidRequest: GroupAccountSubmission = GroupAccountSubmission(
-    id = "acc123",
-    companyName = "Real news Inc",
-    addressId = 9876543L,
-    email = "thewhitehouse@potus.com",
-    phone = "01987654",
-    isAgent = false,
-    individualAccountSubmission = IndividualAccountSubmissionForOrganisation(
-      externalId = "Ext123",
-      trustId = "trust234",
-      details = IndividualDetails(
-        firstName = "Donald",
-        lastName = "Trump",
-        email = "therealdonald@potus.com",
-        phone1 = "123456789",
-        phone2 = Some("987654321"),
-        addressId = 24680L
-      )
-    )
-  )
-
-  private lazy val expectedCreateValidResponse =
-    GroupId(id = 654321L, message = "valid group id", responseTime = 45678)
-
-  private lazy val expectedGetValidResponse1 = Some(
-    GroupAccount(
-      id = 2,
-      groupId = "gggId",
-      companyName = "Fake News Inc",
-      addressId = 345,
-      email = "therealdonald@potus.com",
-      phone = "9876541",
-      isAgent = false,
-      agentCode = None))
-
+      testConnector.getAgentByRepresentationCode(agentCode)(hc).futureValue shouldBe None
+    }
+  }
 }

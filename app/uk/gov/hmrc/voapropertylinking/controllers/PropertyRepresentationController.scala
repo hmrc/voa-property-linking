@@ -25,6 +25,7 @@ import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
 import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import uk.gov.hmrc.voapropertylinking.connectors.modernised._
+import uk.gov.hmrc.voapropertylinking.errorhandler.models.ErrorResponse
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -120,5 +121,12 @@ class PropertyRepresentationController @Inject()(
           Logger.error(s"Agent details lookup failed for agentCode: $agentCode")
           Future.successful(NotFound)
       }
+  }
+
+  def getAgent(agentCode: Long): Action[AnyContent] = authenticated.async { implicit request =>
+    customerManagementApi.getAgentByRepresentationCode(agentCode) map {
+      case None        => ErrorResponse.notFoundJsonResult("Agent does not exist")
+      case Some(agent) => Ok(Json.toJson(agent))
+    }
   }
 }

@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.voapropertylinking.services
 
+import java.time.LocalDate
+
 import basespecs.BaseUnitSpec
 import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import models._
@@ -342,6 +344,41 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
 
       verify(mockExternalPropertyLinkApi)
         .getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams))
+
+    }
+  }
+
+  "getMyOrganisationsAgents" should {
+    "call connector and return the list of agents belonging to that organisation" in {
+      when(
+        mockExternalPropertyLinkApi
+          .getMyOrganisationsAgents())
+        .thenReturn(Future.successful(organisationsAgentsList))
+
+      val result = service
+        .getMyOrganisationsAgents()
+        .futureValue
+
+      result shouldBe organisationsAgentsList
+
+      verify(mockExternalPropertyLinkApi)
+        .getMyOrganisationsAgents()
+    }
+
+    "return none when nothing is returned from connector" in {
+      when(
+        mockExternalPropertyLinkApi
+          .getMyOrganisationsAgents())
+        .thenReturn(Future.successful(emptyOrganisationsAgentsList))
+
+      val result = service
+        .getMyOrganisationsAgents()
+        .futureValue
+
+      result shouldBe emptyOrganisationsAgentsList
+
+      verify(mockExternalPropertyLinkApi)
+        .getMyOrganisationsAgents()
 
     }
   }

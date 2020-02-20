@@ -14,16 +14,26 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.voapropertylinking.connectors.modernised
+package models.modernised.externalpropertylink.myorganisations
 
-import uk.gov.hmrc.uritemplate.syntax.UriTemplateSyntax
-import uk.gov.hmrc.voapropertylinking.connectors.BaseConnector
-import uk.gov.hmrc.voapropertylinking.connectors.modernised.errorhandler.VoaModernisedHttpErrorFunctions
+import java.time.LocalDate
 
-abstract class BaseVoaConnector extends BaseConnector with VoaModernisedHttpErrorFunctions with UriTemplateSyntax {
+import play.api.libs.json.{Json, OFormat}
 
-  def toNone[T]: PartialFunction[T, None.type] = {
-    case _ => None
-  }
+case class AgentSummary(
+      organisationId: Long,
+      representativeCode: Long,
+      name: String,
+      appointedDate: LocalDate,
+      propertyCount: Int
+)
 
+object AgentSummary {
+  implicit val format: OFormat[AgentSummary] = Json.format
+}
+
+case class AgentList(resultCount: Int, agents: List[AgentSummary])
+
+object AgentList {
+  implicit val format: OFormat[AgentList] = Json.format
 }

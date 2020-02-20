@@ -16,18 +16,20 @@
 
 package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
-import javax.inject.Inject
+import javax.inject.{Inject, Named}
 import models._
 import play.api.libs.json.JsValue
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, NotFoundException}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
+import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation.AgentOrganisation
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class CustomerManagementApi @Inject()(
       http: DefaultHttpClient,
-      servicesConfig: ServicesConfig
+      servicesConfig: ServicesConfig,
+      @Named("voa.organisationByRepresentationCode") agentByRepresentationCodeUrl: String
 )(implicit executionContext: ExecutionContext)
     extends BaseVoaConnector {
 
@@ -75,5 +77,10 @@ class CustomerManagementApi @Inject()(
     http
       .GET[Option[APIDetailedIndividualAccount]](s"$individualUrl?governmentGatewayExternalId=$ggId")
       .map(_.map(_.toIndividualAccount))
+
+  def getAgentByRepresentationCode(agentCode: Long)(implicit hc: HeaderCarrier): Future[Option[AgentOrganisation]] =
+    http.GET[Option[AgentOrganisation]](
+      url = agentByRepresentationCodeUrl,
+      queryParams = Seq("representativeCode" -> s"$agentCode"))
 
 }
