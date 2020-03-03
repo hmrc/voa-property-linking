@@ -22,11 +22,12 @@ import models.mdtp.propertylink.requests.APIPropertyLinkRequest
 import models.modernised.Capacity.{Capacity => _, _}
 import models.modernised.{Capacity, Evidence, EvidenceType, ProvidedEvidence}
 import models.modernised.ProvidedEvidence.{apply => _, _}
-import models.modernised.externalpropertylink.myorganisations.{AgentList, AgentSummary}
+import models.modernised.externalpropertylink.myorganisations.{AgentDetails, AgentList, AgentSummary}
 import models.{FileInfo, GroupAccount, GroupAccountSubmission, GroupId, IndividualAccount, IndividualAccountSubmission, IndividualAccountSubmissionForOrganisation, IndividualDetails}
 import models.modernised.externalpropertylink.requests.CreatePropertyLink
 import play.api.libs.json.Json
-import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation.{AgentOrganisation, OrganisationLatestDetail}
+import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation
+import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation.{AgentOrganisation, AppointmentChangeResponse, OrganisationLatestDetail}
 
 trait FakeObjects {
 
@@ -168,6 +169,9 @@ trait FakeObjects {
     persons = List()
   )
 
+  val agentDetails =
+    agentrepresentation.AgentDetails(name = "Super Agent", address = "123 Super Agent Street, AA1 1AA")
+
   val groupAccount = GroupAccount(
     id = 2,
     groupId = "gggId",
@@ -188,5 +192,6 @@ trait FakeObjects {
   )
   val organisationsAgentsList = AgentList(resultCount = 1, agents = List(agentSummary))
   val emptyOrganisationsAgentsList = AgentList(resultCount = 0, agents = List.empty)
+  val appointmentChangeResponse = AppointmentChangeResponse(appointmentChangeId = "appointment change id")
 
 }

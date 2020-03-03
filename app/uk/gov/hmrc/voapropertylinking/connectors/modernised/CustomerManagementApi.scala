@@ -28,8 +28,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class CustomerManagementApi @Inject()(
       http: DefaultHttpClient,
-      servicesConfig: ServicesConfig,
-      @Named("voa.organisationByRepresentationCode") agentByRepresentationCodeUrl: String
+      servicesConfig: ServicesConfig
 )(implicit executionContext: ExecutionContext)
     extends BaseVoaConnector {
 
@@ -77,10 +76,4 @@ class CustomerManagementApi @Inject()(
     http
       .GET[Option[APIDetailedIndividualAccount]](s"$individualUrl?governmentGatewayExternalId=$ggId")
       .map(_.map(_.toIndividualAccount))
-
-  def getAgentByRepresentationCode(agentCode: Long)(implicit hc: HeaderCarrier): Future[Option[AgentOrganisation]] =
-    http.GET[Option[AgentOrganisation]](
-      url = agentByRepresentationCodeUrl,
-      queryParams = Seq("representativeCode" -> s"$agentCode"))
-
 }

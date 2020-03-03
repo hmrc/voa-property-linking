@@ -25,7 +25,7 @@ import play.api.libs.json.Json
 import play.api.mvc.Result
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.http.HttpResponse
-import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation.{AgentOrganisation, OrganisationLatestDetail}
+import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation.{AgentDetails, AgentOrganisation, OrganisationLatestDetail}
 
 import scala.concurrent.Future
 
@@ -39,6 +39,7 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
         authorisationManagementApi = mockAuthorisationManagementApi,
         authorisationSearchApi = mockAuthorisationSearchApi,
         customerManagementApi = mockCustomerManagementApi,
+        organisationManagementApi = mockOrganisationManagementApi,
         auditingService = mockAuditingService
       )
     protected val submissionId = "PL123"
@@ -180,32 +181,51 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
 
   }
 
-  "getAgent" should {
+  "getAgentDetails" should {
     "return OK 200" when {
-      "customer management API returns an AgentOrganisation for a provided agent code" in new Setup {
-        when(mockCustomerManagementApi.getAgentByRepresentationCode(mEq(agentCode))(any()))
-          .thenReturn(Future.successful(Some(agentOrganisation)))
+      "organisation management API returns AgentDetails for a provided agent code" in new Setup {
+        when(mockOrganisationManagementApi.getAgentDetails(mEq(agentCode))(any(), any()))
+          .thenReturn(Future.successful(Some(agentDetails)))
 
         val result: Future[Result] =
-          testController.getAgent(agentCode)(FakeRequest())
+          testController.getAgentDetails(agentCode)(FakeRequest())
 
         status(result) shouldBe OK
-        contentAsJson(result) shouldBe Json.toJson(agentOrganisation)
+        contentAsJson(result) shouldBe Json.toJson(agentDetails)
       }
     }
 
     "return NOT FOUND 404" when {
-      "customer management API returns nothing for given agent code" in new Setup {
-        when(mockCustomerManagementApi.getAgentByRepresentationCode(mEq(agentCode))(any()))
-          .thenReturn(Future.successful(Option.empty[AgentOrganisation]))
+      "organisation management API returns nothing for given agent code" in new Setup {
+        when(mockOrganisationManagementApi.getAgentDetails(mEq(agentCode))(any(), any()))
+          .thenReturn(Future.successful(Option.empty[AgentDetails]))
 
         val result: Future[Result] =
-          testController.getAgent(agentCode)(FakeRequest())
+          testController.getAgentDetails(agentCode)(FakeRequest())
 
         status(result) shouldBe NOT_FOUND
       }
     }
 
+  }
+
+  "agentAppointmentChanges" should {
+    "return 202 Accepted" when {
+      "valid JSON payload is POSTed" in new Setup {
+
+        when(mockOrganisationManagementApi.agentAppointmentChanges(any())(any(), any()))
+          .thenReturn(Future.successful(appointmentChangeResponse))
+
+        val result: Future[Result] =
+          testController.agentAppointmentChanges()(FakeRequest().withBody(Json.parse("""{
+                                                                                       |  "agentRepresentativeCode" : 1,
+                                                                                       |  "action" : "APPOINT",
+                                                                                       |  "scope"  : "RELATIONSHIP"
+                                                                                       |}""".stripMargin)))
+
+        status(result) shouldBe ACCEPTED
+      }
+    }
   }
 
 }

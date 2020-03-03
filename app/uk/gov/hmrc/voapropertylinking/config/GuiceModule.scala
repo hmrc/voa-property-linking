@@ -73,16 +73,17 @@ class GuiceModule(
   private def bindModernisedEndpoints(): Unit =
     bindEndpoints(
       Map(
-        "voa.authValuationHistoryUrl"          -> "voa.resources.externalValuationManagement.valuationHistory.path",
-        "voa.myOrganisationsPropertyLinks"     -> "voa.resources.externalPropertyLink.myOrganisationsPropertyLinks.path",
-        "voa.myOrganisationsPropertyLink"      -> "voa.resources.externalPropertyLink.myOrganisationsPropertyLink.path",
-        "voa.myOrganisationsAgents"            -> "voa.resources.externalPropertyLink.myOrganisationsAgents.path",
-        "voa.myClientsPropertyLink"            -> "voa.resources.externalPropertyLink.myClientsPropertyLink.path",
-        "voa.myClientsPropertyLinks"           -> "voa.resources.externalPropertyLink.myClientsPropertyLinks.path",
-        "voa.createPropertyLink"               -> "voa.resources.externalPropertyLink.createPropertyLink.path",
-        "voa.createRepresentationRequest"      -> "voa.resources.authorisationManagementApi.createRepresentationRequest.path",
-        "voa.representationRequestResponse"    -> "voa.resources.authorisationManagementApi.representationRequestResponse.path",
-        "voa.organisationByRepresentationCode" -> "voa.resources.customerManagementApi.getOrganisationByAgentCode.path"
+        "voa.authValuationHistoryUrl"       -> "voa.resources.externalValuationManagement.valuationHistory.path",
+        "voa.myOrganisationsPropertyLinks"  -> "voa.resources.externalPropertyLink.myOrganisationsPropertyLinks.path",
+        "voa.myOrganisationsPropertyLink"   -> "voa.resources.externalPropertyLink.myOrganisationsPropertyLink.path",
+        "voa.myOrganisationsAgents"         -> "voa.resources.externalPropertyLink.myOrganisationsAgents.path",
+        "voa.myClientsPropertyLink"         -> "voa.resources.externalPropertyLink.myClientsPropertyLink.path",
+        "voa.myClientsPropertyLinks"        -> "voa.resources.externalPropertyLink.myClientsPropertyLinks.path",
+        "voa.createPropertyLink"            -> "voa.resources.externalPropertyLink.createPropertyLink.path",
+        "voa.createRepresentationRequest"   -> "voa.resources.authorisationManagementApi.createRepresentationRequest.path",
+        "voa.representationRequestResponse" -> "voa.resources.authorisationManagementApi.representationRequestResponse.path",
+        "voa.agentAppointmentChanges"       -> "voa.resources.organisationManagementApi.agentAppointmentChanges.path",
+        "voa.getAgentDetails"               -> "voa.resources.organisationManagementApi.getAgentDetails.path"
       ),
       servicesConfig.baseUrl("voa-modernised-api")
     )
