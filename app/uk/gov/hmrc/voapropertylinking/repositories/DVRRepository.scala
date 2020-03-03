@@ -19,6 +19,7 @@ package uk.gov.hmrc.voapropertylinking.repositories
 import com.google.inject.name.Named
 import com.google.inject.{ImplementedBy, Singleton}
 import javax.inject.Inject
+
 import models.modernised.ccacasemanagement.requests.DetailedValuationRequest
 import play.api.Logger
 import play.api.libs.json._
@@ -28,6 +29,7 @@ import reactivemongo.bson.BSONDocument
 import reactivemongo.core.errors.DatabaseException
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import uk.gov.hmrc.play.http.logging.Mdc
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
@@ -54,22 +56,28 @@ class DVRRepository @Inject()(
   )
 
   override def create(request: DetailedValuationRequest): Future[Unit] =
-    insert(DVRRecord(request.organisationId, request.assessmentRef, request.agents, System.currentTimeMillis()))
-      .map(_ => ())
-      .recover {
-        case e: DatabaseException => Logger.debug(e.getMessage())
-      }
+    Mdc.preservingMdc {
+      insert(DVRRecord(request.organisationId, request.assessmentRef, request.agents, System.currentTimeMillis()))
+        .map(_ => ())
+        .recover {
+          case e: DatabaseException => Logger.debug(e.getMessage())
+        }
+    }
 
   override def exists(organisationId: Long, assessmentRef: Long): Future[Boolean] =
-    find(query(organisationId))
-      .map(_.exists(_.assessmentRef == assessmentRef))
+    Mdc.preservingMdc {
+      find(query(organisationId))
+        .map(_.exists(_.assessmentRef == assessmentRef))
+    }
 
   override def clear(organisationId: Long): Future[Unit] =
-    remove(query(organisationId))
-      .map(_ => ())
-      .recover {
-        case e: DatabaseException => Logger.debug(e.getMessage())
-      }
+    Mdc.preservingMdc {
+      remove(query(organisationId))
+        .map(_ => ())
+        .recover {
+          case e: DatabaseException => Logger.debug(e.getMessage())
+        }
+    }
 
   private def query(organisationId: Long): (String, Json.JsValueWrapper) =
     "$or" -> Json.arr(Json.obj("organisationId" -> organisationId), Json.obj("agents" -> organisationId))
