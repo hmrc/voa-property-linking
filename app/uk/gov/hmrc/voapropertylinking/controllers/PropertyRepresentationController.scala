@@ -36,7 +36,7 @@ class PropertyRepresentationController @Inject()(
       authorisationManagementApi: AuthorisationManagementApi,
       authorisationSearchApi: AuthorisationSearchApi,
       customerManagementApi: CustomerManagementApi,
-      organisationManagementApi: OrganisationManagementApi,
+      organisationManagementApi: ExternalOrganisationManagementApi,
       auditingService: AuditingService
 )(implicit executionContext: ExecutionContext)
     extends PropertyLinkingBaseController(controllerComponents) {
@@ -137,7 +137,7 @@ class PropertyRepresentationController @Inject()(
       organisationManagementApi
         .agentAppointmentChanges(appointmentChangesRequest)
         .map { response =>
-          Accepted(s"change id: ${response.appointmentChangeId}")
+          Accepted(Json.toJson(response))
         }
     }
   }

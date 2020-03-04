@@ -53,7 +53,7 @@ trait AllMocks extends MockitoSugar { me: BeforeAndAfterEach =>
   val mockServicesConfig: ServicesConfig = mock[ServicesConfig]
   val mockVoaHttpClient: VoaHttpClient = mock[VoaHttpClient]
   val mockWSRequest: WSRequest = mock[WSRequest]
-  val mockOrganisationManagementApi: OrganisationManagementApi = mock[OrganisationManagementApi]
+  val mockOrganisationManagementApi: ExternalOrganisationManagementApi = mock[ExternalOrganisationManagementApi]
 
   override protected def beforeEach(): Unit =
     Seq(

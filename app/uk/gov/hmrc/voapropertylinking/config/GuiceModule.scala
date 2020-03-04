@@ -83,7 +83,7 @@ class GuiceModule(
         "voa.createRepresentationRequest"   -> "voa.resources.authorisationManagementApi.createRepresentationRequest.path",
         "voa.representationRequestResponse" -> "voa.resources.authorisationManagementApi.representationRequestResponse.path",
         "voa.agentAppointmentChanges"       -> "voa.resources.organisationManagementApi.agentAppointmentChanges.path",
-        "voa.getAgentDetails"               -> "voa.resources.organisationManagementApi.getAgentDetails.path"
+        "voa.myAgentDetails"                -> "voa.resources.organisationManagementApi.myAgentDetails.path"
       ),
       servicesConfig.baseUrl("voa-modernised-api")
     )

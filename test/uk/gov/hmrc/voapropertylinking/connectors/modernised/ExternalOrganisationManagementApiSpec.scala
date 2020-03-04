@@ -24,10 +24,10 @@ import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation.{Age
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class OrganisationManagementApiSpec extends BaseUnitSpec {
+class ExternalOrganisationManagementApiSpec extends BaseUnitSpec {
 
   val config = mockServicesConfig
-  val testConnector = new OrganisationManagementApi(
+  val testConnector = new ExternalOrganisationManagementApi(
     http = mockVoaHttpClient,
     config = config,
     agentAppointmentChangesUrl = "agentAppointmentChangesUrl",

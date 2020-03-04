@@ -25,11 +25,11 @@ import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation.{Age
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class OrganisationManagementApi @Inject()(
+class ExternalOrganisationManagementApi @Inject()(
       http: VoaHttpClient,
       config: ServicesConfig,
       @Named("voa.agentAppointmentChanges") agentAppointmentChangesUrl: String,
-      @Named("voa.getAgentDetails") getAgentDetailsUrl: String
+      @Named("voa.myAgentDetails") getAgentDetailsUrl: String
 )(implicit executionContext: ExecutionContext)
     extends BaseVoaConnector {
 
