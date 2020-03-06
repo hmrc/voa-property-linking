@@ -71,8 +71,8 @@ class AuthorisationSearchApi @Inject()(
     val url = baseUrl +
       s"/authorisation-search-api/owners/$ownerId/agents/$agentId/availableAuthorisations" +
       s"?start=${params.startPoint}&size=${params.pageSize}" +
-      buildQueryParams("check", checkPermission) +
-      buildQueryParams("challenge", challengePermission) +
+      buildQueryParams("check", Some(checkPermission.getOrElse("START_AND_CONTINUE"))) +
+      buildQueryParams("challenge", Some(challengePermission.getOrElse("START_AND_CONTINUE"))) +
       buildQueryParams("sortfield", sortfield) +
       buildQueryParams("sortorder", sortorder) +
       buildQueryParams("address", address) +

@@ -102,9 +102,8 @@ object Assessments {
             agent.authorisedPartyId,
             agent.representativeCode,
             agent.organisationName,
-            agent.organisationId,
-            agent.checkPermission,
-            agent.challengePermission))
+            agent.organisationId
+          ))
     )
 
   def apply(

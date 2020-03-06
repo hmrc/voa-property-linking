@@ -28,8 +28,7 @@ case class PropertyLinkWithClient(
       uarn: Long,
       address: String,
       localAuthorityRef: String,
-      client: Client,
-      representationStatus: String
+      client: Client
 )
 
 object PropertyLinkWithClient {
@@ -39,7 +38,6 @@ object PropertyLinkWithClient {
     PropertyLinkWithClient(
       authorisationId = propertyLink.authorisationId,
       authorisedPartyId = propertyLink.authorisedPartyId,
-      representationStatus = propertyLink.representationStatus,
       status = propertyLink.status.toString,
       submissionId = propertyLink.submissionId,
       uarn = propertyLink.uarn,
