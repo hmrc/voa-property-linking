@@ -209,7 +209,7 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
 
   }
 
-  "agentAppointmentChanges" should {
+  "appointAgent" should {
     "return 202 Accepted" when {
       "valid JSON payload is POSTed" in new Setup {
 
@@ -217,13 +217,26 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
           .thenReturn(Future.successful(appointmentChangeResponse))
 
         val result: Future[Result] =
-          testController.agentAppointmentChanges()(FakeRequest().withBody(Json.parse("""{
-                                                                                       |  "agentRepresentativeCode" : 1,
-                                                                                       |  "action" : "APPOINT",
-                                                                                       |  "scope"  : "RELATIONSHIP"
-                                                                                       |}""".stripMargin)))
+          testController.appointAgent()(FakeRequest().withBody(Json.parse("""{
+                                                                            |  "agentRepresentativeCode" : 1,
+                                                                            |  "scope"  : "RELATIONSHIP"
+                                                                            |}""".stripMargin)))
 
         status(result) shouldBe ACCEPTED
+      }
+    }
+    "return 400 Bad Request" when {
+      "invalid appoint agent request is POSTed" in new Setup {
+
+        when(mockOrganisationManagementApi.agentAppointmentChanges(any())(any(), any()))
+          .thenReturn(Future.successful(appointmentChangeResponse))
+
+        val result: Future[Result] =
+          testController.appointAgent()(FakeRequest().withBody(Json.parse("""{
+                                                                            |  "agentRepresentativeCode" : 1
+                                                                            |}""".stripMargin)))
+
+        status(result) shouldBe BAD_REQUEST
       }
     }
   }

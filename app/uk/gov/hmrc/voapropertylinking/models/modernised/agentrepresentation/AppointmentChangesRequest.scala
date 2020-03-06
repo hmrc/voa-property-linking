@@ -29,4 +29,12 @@ case class AppointmentChangesRequest(
 
 object AppointmentChangesRequest {
   implicit val format: OFormat[AppointmentChangesRequest] = Json.format
+
+  def apply(appointAgent: AppointAgent): AppointmentChangesRequest =
+    AppointmentChangesRequest(
+      agentRepresentativeCode = appointAgent.agentRepresentativeCode,
+      action = AppointmentAction.APPOINT,
+      scope = AppointmentScope.withName(appointAgent.scope),
+      propertyLinks = None
+    )
 }
