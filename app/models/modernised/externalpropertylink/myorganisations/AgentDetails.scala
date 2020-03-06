@@ -23,7 +23,7 @@ case class AgentDetails(
       organisationId: Long,
       organisationName: String,
       representativeCode: Long
-                       )
+)
 
 object AgentDetails {
   implicit val format: OFormat[AgentDetails] = Json.format

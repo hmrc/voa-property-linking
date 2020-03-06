@@ -22,22 +22,13 @@ import models.modernised.PropertyLinkStatus.PropertyLinkStatus
 
 trait PropertyLink {
 
-  def  authorisationId: Long
-  def  status: PropertyLinkStatus
-  def  startDate: LocalDate
-  def  endDate: Option[LocalDate]
-  def  submissionId: String
-  def  capacity: String
-  def  uarn: Long
-  def  address: String
-  def  localAuthorityRef: String
+  def authorisationId: Long
+  def status: PropertyLinkStatus
+  def startDate: LocalDate
+  def endDate: Option[LocalDate]
+  def submissionId: String
+  def capacity: String
+  def uarn: Long
+  def address: String
+  def localAuthorityRef: String
 }
-
-
-
-
-
-
-
-
-

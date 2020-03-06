@@ -32,7 +32,7 @@ case class SummaryPropertyLinkWithClient(
       address: String,
       localAuthorityRef: String,
       client: ClientDetails
-                                        )
+)
 
 object SummaryPropertyLinkWithClient {
   implicit val format: OFormat[SummaryPropertyLinkWithClient] = Json.format

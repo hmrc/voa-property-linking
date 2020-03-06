@@ -67,12 +67,13 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
         authorisedPartyOrganisationId = 123456
       )),
     agents = Some(
-      Seq(LegacyParty(
-        authorisedPartyId = 24680,
-        agentCode = 1111,
-        organisationName = "org name",
-        organisationId = 123456
-      )))
+      Seq(
+        LegacyParty(
+          authorisedPartyId = 24680,
+          agentCode = 1111,
+          organisationName = "org name",
+          organisationId = 123456
+        )))
   )
 
   val clientValidPropertiesView = PropertiesView(

@@ -103,7 +103,7 @@ object Assessments {
             agent.representativeCode,
             agent.organisationName,
             agent.organisationId
-          ))
+        ))
     )
 
   def apply(

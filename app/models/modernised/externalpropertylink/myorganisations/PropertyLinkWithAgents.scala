@@ -33,7 +33,7 @@ case class PropertyLinkWithAgents(
       address: String,
       localAuthorityRef: String,
       agents: Seq[AgentDetails]
-                                 ) extends PropertyLink
+) extends PropertyLink
 
 object PropertyLinkWithAgents {
   implicit val format: OFormat[PropertyLinkWithAgents] = Json.format
