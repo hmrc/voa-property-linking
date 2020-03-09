@@ -60,6 +60,7 @@ class PropertyRepresentationController @Inject()(
       }
   }
 
+  //This endpoint is used to get the pending agent representations, can be deleted.
   def forAgent(
         status: String,
         organisationId: Long,

@@ -68,10 +68,7 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
     status = PropertyLinkStatus.APPROVED,
     capacity = "someCapacity",
     localAuthorityRef = "21323",
-    client = ClientDetails(123L, "Org Name"),
-    representationStatus = "APPROVED",
-    checkPermission = Some("START_AND_CONTINUE"),
-    challengePermission = Some("START_AND_CONTINUE")
+    client = ClientDetails(123L, "Org Name")
   )
 
   val clientPropertyLink = ClientPropertyLink(propertyLinkWithClient)
@@ -99,14 +96,7 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
     parties = Seq(
       APIParty(
         id = 24680,
-        authorisedPartyStatus = "APPROVED",
-        authorisedPartyOrganisationId = agentOrgId,
-        permissions = Seq(
-          Permissions(
-            id = 24680,
-            checkPermission = AgentPermission.StartAndContinue,
-            challengePermission = AgentPermission.StartAndContinue,
-            endDate = None))
+        authorisedPartyOrganisationId = agentOrgId
       )),
     agents = Some(Nil)
   )
@@ -315,9 +305,8 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
       parties = Seq(
         APIParty(
           1L,
-          "APPROVED",
-          agentOrgId,
-          Seq(Permissions(1L, AgentPermission.StartAndContinue, AgentPermission.StartAndContinue, None)))),
+          agentOrgId
+        )),
       agents = None
     )
 
@@ -331,32 +320,5 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
       isAgent = false,
       agentCode = Some(54321L)
     )
-  }
-
-  "clientProperty" should {
-    "return 200 OK with client property" in new ClientPropertySetup {
-      val authorisationId: Long = 1234L
-      when(mockMdtpDashboardManagementApi.get(mEq(authorisationId))(any()))
-        .thenReturn(Future.successful(Some(propertiesView(authorisationId))))
-      when(mockCustomerManagementApi.getDetailedGroupAccount(any())(any()))
-        .thenReturn(Future.successful(Some(groupAccount)))
-
-      val res: Future[Result] =
-        testController.clientProperty(authorisationId, clientOrgId, agentOrgId)(FakeRequest())
-
-      status(res) shouldBe OK
-    }
-
-    "return 404 Not Found" when {
-      "dashboard management api returns no properties" in {
-        val authorisationId: Long = 1234L
-        when(mockMdtpDashboardManagementApi.get(mEq(authorisationId))(any()))
-          .thenReturn(Future.successful(None))
-
-        val res = testController.clientProperty(authorisationId, 1L, 1L)(FakeRequest())
-
-        status(res) shouldBe NOT_FOUND
-      }
-    }
   }
 }

@@ -74,10 +74,7 @@ object PropertiesView {
         agent =>
           APIParty(
             id = agent.authorisedPartyId,
-            authorisedPartyStatus = agent.status,
-            authorisedPartyOrganisationId = agent.organisationId,
-            permissions =
-              Seq(Permissions(agent.authorisedPartyId, agent.checkPermission, agent.challengePermission, None))
+            authorisedPartyOrganisationId = agent.organisationId
         )),
       agents = Some(
         propertyLink.agents.map(agent =>
@@ -85,9 +82,7 @@ object PropertiesView {
             authorisedPartyId = agent.authorisedPartyId,
             agentCode = agent.representativeCode,
             organisationName = agent.organisationName,
-            organisationId = agent.organisationId,
-            checkPermission = agent.checkPermission,
-            challengePermission = agent.challengePermission
+            organisationId = agent.organisationId
         )))
     )
 

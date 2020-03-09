@@ -20,15 +20,15 @@ import java.time.LocalDate
 
 import models.modernised.PropertyLinkStatus.PropertyLinkStatus
 
-abstract class PropertyLink(
-      authorisationId: Long,
-      status: PropertyLinkStatus,
-      startDate: LocalDate,
-      endDate: Option[LocalDate],
-      submissionId: String,
-      capacity: String,
-      uarn: Long,
-      address: String,
-      localAuthorityRef: String,
-      checkPermission: Option[String] = None,
-      challengePermission: Option[String] = None)
+trait PropertyLink {
+
+  def authorisationId: Long
+  def status: PropertyLinkStatus
+  def startDate: LocalDate
+  def endDate: Option[LocalDate]
+  def submissionId: String
+  def capacity: String
+  def uarn: Long
+  def address: String
+  def localAuthorityRef: String
+}

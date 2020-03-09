@@ -32,19 +32,9 @@ case class PropertyLinkWithAgents(
       uarn: Long,
       address: String,
       localAuthorityRef: String,
-      agents: Seq[AgentDetails])
-    extends PropertyLink(
-      authorisationId: Long,
-      status: PropertyLinkStatus,
-      startDate: LocalDate,
-      endDate: Option[LocalDate],
-      submissionId: String,
-      capacity,
-      uarn: Long,
-      address: String,
-      localAuthorityRef: String
-    )
+      agents: Seq[AgentDetails]
+) extends PropertyLink
 
 object PropertyLinkWithAgents {
-  implicit val format: OFormat[PropertyLinkWithAgents] = Json.format[PropertyLinkWithAgents]
+  implicit val format: OFormat[PropertyLinkWithAgents] = Json.format
 }

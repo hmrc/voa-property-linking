@@ -24,9 +24,6 @@ case class OwnerAuthAgent(
       authorisedPartyId: Long,
       organisationId: Long,
       organisationName: String,
-      status: String,
-      checkPermission: AgentPermission,
-      challengePermission: AgentPermission,
       agentCode: Long
 )
 
@@ -38,9 +35,6 @@ object OwnerAuthAgent {
       agent.authorisedPartyId,
       agent.organisationId,
       agent.organisationName,
-      agent.status,
-      agent.checkPermission,
-      agent.challengePermission,
       agent.representativeCode
     )
 }

@@ -64,24 +64,16 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
     parties = Seq(
       APIParty(
         id = 24680,
-        authorisedPartyStatus = "APPROVED",
-        authorisedPartyOrganisationId = 123456,
-        permissions = Seq(
-          Permissions(
-            id = 24680,
-            checkPermission = AgentPermission.StartAndContinue,
-            challengePermission = AgentPermission.StartAndContinue,
-            endDate = None))
+        authorisedPartyOrganisationId = 123456
       )),
     agents = Some(
-      Seq(LegacyParty(
-        authorisedPartyId = 24680,
-        agentCode = 1111,
-        organisationName = "org name",
-        organisationId = 123456,
-        checkPermission = AgentPermission.StartAndContinue,
-        challengePermission = AgentPermission.StartAndContinue
-      )))
+      Seq(
+        LegacyParty(
+          authorisedPartyId = 24680,
+          agentCode = 1111,
+          organisationName = "org name",
+          organisationId = 123456
+        )))
   )
 
   val clientValidPropertiesView = PropertiesView(
@@ -123,11 +115,7 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
         authorisedPartyId = 24680,
         organisationId = 123456,
         organisationName = "org name",
-        status = "APPROVED",
-        representationSubmissionId = "",
-        representativeCode = 1111,
-        checkPermission = AgentPermission.StartAndContinue,
-        challengePermission = AgentPermission.StartAndContinue
+        representativeCode = 1111
       ))
   )
 
@@ -145,11 +133,7 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
         authorisedPartyId = 24680,
         organisationId = 123456,
         organisationName = "org name",
-        status = "APPROVED",
-        representationSubmissionId = "",
-        representativeCode = 1111,
-        checkPermission = AgentPermission.StartAndContinue,
-        challengePermission = AgentPermission.StartAndContinue
+        representativeCode = 1111
       ))
   )
   val ownerPropertyLink = OwnerPropertyLink(propertyLinkWithAgents)
@@ -165,8 +149,7 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
     uarn = 33333,
     address = "1 HIGH STREET, BRIGHTON",
     localAuthorityRef = "44444",
-    client = ClientDetails(55555, "mock org"),
-    representationStatus = "APPROVED"
+    client = ClientDetails(55555, "mock org")
   )
 
   val summaryPropertyLinkClient = SummaryPropertyLinkWithClient(
@@ -179,8 +162,7 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
     uarn = 33333,
     address = "1 HIGH STREET, BRIGHTON",
     localAuthorityRef = "44444",
-    client = ClientDetails(55555, "mock org"),
-    representationStatus = "APPROVED"
+    client = ClientDetails(55555, "mock org")
   )
 
   val clientPropertyLink = ClientPropertyLink(

@@ -16,7 +16,6 @@
 
 package models
 
-import models.AgentPermission.AgentPermission
 import models.modernised.externalpropertylink.myorganisations.AgentDetails
 import play.api.libs.json.Json
 
@@ -24,9 +23,7 @@ case class Party(
       authorisedPartyId: Long,
       agentCode: Long,
       organisationName: String,
-      organisationId: Long,
-      checkPermission: AgentPermission,
-      challengePermission: AgentPermission
+      organisationId: Long
 )
 
 object Party {
@@ -37,8 +34,6 @@ object Party {
       agentDetails.authorisedPartyId,
       agentDetails.representativeCode,
       agentDetails.organisationName,
-      agentDetails.organisationId,
-      agentDetails.checkPermission,
-      agentDetails.challengePermission
+      agentDetails.organisationId
     )
 }

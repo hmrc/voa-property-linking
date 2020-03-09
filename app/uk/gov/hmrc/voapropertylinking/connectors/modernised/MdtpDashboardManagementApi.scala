@@ -34,27 +34,8 @@ class MdtpDashboardManagementApi @Inject()(
 
   val listYear = 2017
 
-  //TODO remove this as it is not an authed endpoint
-  def get(authorisationId: Long)(implicit hc: HeaderCarrier): Future[Option[PropertiesView]] = {
-    val url = baseUrl + s"/mdtp-dashboard-management-api/mdtp_dashboard/view_assessment"
-
-    http
-      .GET[Option[PropertiesView]](url, Seq("listYear" -> s"$listYear", "authorisationId" -> s"$authorisationId"))
-      .map(_.collect {
-        case view if view.hasValidStatus => view.copy(parties = filterInvalidParties(view.parties)).upperCase
-      })
-  }
-
   def getAssessment(authorisationId: Long)(implicit hc: HeaderCarrier): Future[Option[PropertiesView]] = {
     val url = baseUrl + s"/mdtp-dashboard-management-api/mdtp_dashboard/view_assessment?listYear=$listYear&authorisationId=$authorisationId"
     http.GET[Option[PropertiesView]](url).map(_.map(_.upperCase)) recover { case _: NotFoundException => None }
-  }
-
-  private val withValidPermissions: APIParty => Boolean = { party =>
-    List("APPROVED", "PENDING").contains(party.authorisedPartyStatus) && party.permissions.exists(_.endDate.isEmpty)
-  }
-
-  private val filterInvalidParties: Seq[APIParty] => Seq[APIParty] = { parties =>
-    parties.withFilter(withValidPermissions).map(p => p.copy(permissions = p.permissions.filter(_.endDate.isEmpty)))
   }
 }
