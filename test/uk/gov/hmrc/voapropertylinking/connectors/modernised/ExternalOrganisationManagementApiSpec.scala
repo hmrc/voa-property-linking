@@ -18,7 +18,9 @@ package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
 import basespecs.BaseUnitSpec
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
+import org.mockito.Mockito
+import org.mockito.Mockito.{times, verify, when}
+import org.mockito.ArgumentMatchers.{eq => matching}
 import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation.{AgentDetails, AppointmentAction, AppointmentChangeResponse, AppointmentChangesRequest, AppointmentScope}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -31,7 +33,8 @@ class ExternalOrganisationManagementApiSpec extends BaseUnitSpec {
     http = mockVoaHttpClient,
     config = config,
     agentAppointmentChangesUrl = "agentAppointmentChangesUrl",
-    getAgentDetailsUrl = "getAgentDetailsUrl")
+    getAgentDetailsUrl = "getAgentDetailsUrl/{representativeCode}"
+  )
 
   "OrganisationManagementApi.agentAppointmentChanges" should {
     "return appointmentChangeResponse for a valid appointment change request" in {
@@ -65,6 +68,9 @@ class ExternalOrganisationManagementApiSpec extends BaseUnitSpec {
         .thenReturn(Future.successful(Some(agentDetails)))
 
       testConnector.getAgentDetails(agentCode)(hc, requestWithPrincipal).futureValue shouldBe Some(agentDetails)
+
+      verify(mockVoaHttpClient, times(1))
+        .GET[Option[AgentDetails]](matching("getAgentDetailsUrl/123432"))(any(), any(), any(), any())
     }
 
     "return an None if no AgentDetails can be found for the provided agentCode" in {
@@ -74,6 +80,9 @@ class ExternalOrganisationManagementApiSpec extends BaseUnitSpec {
         .thenReturn(Future.successful(None))
 
       testConnector.getAgentDetails(agentCode)(hc, requestWithPrincipal).futureValue shouldBe None
+
+      verify(mockVoaHttpClient, times(1))
+        .GET[Option[AgentDetails]](matching("getAgentDetailsUrl/123432"))(any(), any(), any(), any())
     }
   }
 
