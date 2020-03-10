@@ -35,7 +35,7 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
 
   val defaultHttpClient = mock[DefaultHttpClient]
   val config = mockServicesConfig
-  val testConnector = new CustomerManagementApi(defaultHttpClient, config, "agentByRepresentationCodeUrl") {
+  val testConnector = new CustomerManagementApi(defaultHttpClient, config) {
     override lazy val baseUrl = "http://some-uri"
   }
 
@@ -320,23 +320,4 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
   }
 
   private lazy val expectedCreateResponseValid = IndividualAccountId(12345)
-  "CustomerManagementApi.getAgentByRepresentationCode" should {
-    "return AgentOrganisation with the provided agentCode" in {
-      val agentCode = 123432L
-
-      when(defaultHttpClient.GET[Option[AgentOrganisation]](any(), any())(any(), any(), any()))
-        .thenReturn(Future.successful(Some(agentOrganisation)))
-
-      testConnector.getAgentByRepresentationCode(agentCode)(hc).futureValue shouldBe Some(agentOrganisation)
-    }
-
-    "return an None if no AgentOrgaisation can be found for the provided agentCode" in {
-      val agentCode = 123432L
-
-      when(defaultHttpClient.GET[Option[AgentOrganisation]](any(), any())(any(), any(), any()))
-        .thenReturn(Future.successful(None))
-
-      testConnector.getAgentByRepresentationCode(agentCode)(hc).futureValue shouldBe None
-    }
-  }
 }
