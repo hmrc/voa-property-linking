@@ -62,9 +62,6 @@ object OwnerAuthorisation {
             authorisedPartyId = agent.authorisedPartyId,
             organisationId = agent.organisationId,
             organisationName = agent.organisationName,
-            status = agent.status,
-            checkPermission = agent.checkPermission,
-            challengePermission = agent.challengePermission,
             agentCode = agent.representativeCode
         ))
     )

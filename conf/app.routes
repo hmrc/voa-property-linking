@@ -13,8 +13,6 @@ GET          /property-links-appointable                                        
 GET          /my-organisation/agent/:agentCode                                                @uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.getAgentDetails(agentCode: Long)
 POST         /my-organisation/agent/appoint                                                   @uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.appointAgent()
 
-GET          /property-links/client-property/:authorisationId                                 @uk.gov.hmrc.voapropertylinking.controllers.PropertyLinkingController.clientProperty(authorisationId: Long, clientOrganisationId: Long, agentOrganisationId: Long)
-
 # Manage Agents
 GET          /manage-agents/:id/agents                                                        @uk.gov.hmrc.voapropertylinking.controllers.AgentController.manageAgents(id: Long)
 

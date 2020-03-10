@@ -196,19 +196,6 @@ class PropertyLinkingController @Inject()(
       .fold(Ok(Json.toJson(submissionId)))(propertyLinkWithAssessments => Ok(Json.toJson(propertyLinkWithAssessments)))
   }
 
-  def clientProperty(authorisationId: Long, clientOrgId: Long, agentOrgId: Long): Action[AnyContent] =
-    authenticated.async { implicit request =>
-      mdtpDashboardManagementApi
-        .get(authorisationId)
-        .flatMap {
-          case Some(authorisation) if authorisedFor(authorisation, agentOrgId) =>
-            toClientProperty(clientOrgId, authorisation).fold(NotFound("organisation not found"))(p =>
-              Ok(Json.toJson(p)))
-          case _ =>
-            Future.successful(NotFound("property link not found"))
-        }
-    }
-
   def getMyOrganisationsAgents(): Action[AnyContent] = authenticated.async { implicit request =>
     propertyLinkService
       .getMyOrganisationsAgents()
@@ -216,12 +203,4 @@ class PropertyLinkingController @Inject()(
         Ok(Json.toJson(agentsList))
       }
   }
-
-  private def authorisedFor(authorisation: PropertiesView, agentOrgId: Long): Boolean =
-    authorisation.parties.exists(_.authorisedPartyOrganisationId == agentOrgId)
-
-  private def toClientProperty(clientOrgId: Long, authorisation: PropertiesView)(
-        implicit hc: HeaderCarrier): OptionT[Future, ClientProperty] =
-    OptionT(customerManagementApi.getDetailedGroupAccount(clientOrgId)).map(ClientProperty.build(authorisation, _))
-
 }

@@ -27,10 +27,6 @@ case class ClientProperty(
       authorisedPartyId: Long,
       authorisationId: Long,
       authorisationStatus: Boolean,
-      authorisedPartyStatus: String,
-      permissionId: Long,
-      checkPermission: AgentPermission,
-      challengePermission: AgentPermission,
       address: String)
 
 object ClientProperty {
@@ -46,10 +42,6 @@ object ClientProperty {
       prop.parties.head.id,
       prop.authorisationId,
       prop.authorisationStatus != "APPROVED",
-      prop.parties.head.authorisedPartyStatus,
-      prop.parties.head.permissions.head.id,
-      prop.parties.head.permissions.head.checkPermission,
-      prop.parties.head.permissions.head.challengePermission,
       prop.NDRListValuationHistoryItems.headOption.map(_.address).getOrElse("Address not found")
     )
 

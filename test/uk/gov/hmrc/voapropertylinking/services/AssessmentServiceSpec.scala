@@ -54,11 +54,7 @@ class AssessmentServiceSpec extends BaseUnitSpec {
           authorisedPartyId = 24680,
           organisationId = 123456,
           organisationName = "org name",
-          status = "APPROVED",
-          representationSubmissionId = "",
-          representativeCode = 1111,
-          checkPermission = AgentPermission.StartAndContinue,
-          challengePermission = AgentPermission.StartAndContinue
+          representativeCode = 1111
         )),
       capacity = "OWNER"
     )
@@ -74,8 +70,7 @@ class AssessmentServiceSpec extends BaseUnitSpec {
       uarn = uarn,
       address = "1 HIGH STREET, BRIGHTON",
       localAuthorityRef = "44444",
-      client = ClientDetails(55555, "mock org"),
-      representationStatus = "APPROVED"
+      client = ClientDetails(55555, "mock org")
     )
 
     val ownerPropertyLink = OwnerPropertyLink(propertyLinkWithAgents)
