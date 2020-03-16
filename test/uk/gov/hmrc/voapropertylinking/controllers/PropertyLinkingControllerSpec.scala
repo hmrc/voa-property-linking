@@ -113,6 +113,7 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
   val propertyLinksWithClients = PropertyLinksWithClients(1, 1, 1, 1, Seq())
   val modernisedOwnerAuthResult = ModernisedOwnerAuthResult(1, 1, 1, 1, Seq())
   val ownerAuthResult = OwnerAuthResult(1, 1, 1, 1, Seq())
+  val propertyLinksCount = 5
 
   val assessments = Assessments(
     authorisationId = 1L,
@@ -244,6 +245,18 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
 
       status(res) shouldBe OK
       contentAsJson(res) shouldBe Json.toJson(ownerAuthResult)
+    }
+  }
+
+  "getMyPropertyLinksCount" should {
+
+    "return owner property links count" in {
+      when(mockPropertyLinkingService.getMyOrganisationsPropertyLinksCount()(any(), any()))
+        .thenReturn(OptionT.some[Future](propertyLinksCount))
+      val res = testController.getMyOrganisationsPropertyLinksCount()(FakeRequest())
+
+      status(res) shouldBe OK
+      contentAsJson(res) shouldBe Json.toJson(propertyLinksCount)
     }
   }
 
