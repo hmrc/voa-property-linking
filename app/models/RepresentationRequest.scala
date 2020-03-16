@@ -25,8 +25,6 @@ case class RepresentationRequest(
       agentOrganisationId: Long,
       individualId: Long,
       submissionId: String,
-      checkPermission: String,
-      challengePermission: String,
       createDatetime: Instant
 )
 

@@ -16,7 +16,6 @@
 
 package models.searchApi
 
-import models.AgentPermission.AgentPermission
 import play.api.libs.json.Json
 
 case class OwnerAuthAgent(
@@ -24,8 +23,6 @@ case class OwnerAuthAgent(
       organisationId: Long,
       organisationName: String,
       status: String,
-      checkPermission: AgentPermission,
-      challengePermission: AgentPermission,
       representativeCode: Long
 )
 

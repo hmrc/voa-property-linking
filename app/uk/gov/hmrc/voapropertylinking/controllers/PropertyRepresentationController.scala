@@ -62,19 +62,6 @@ class PropertyRepresentationController @Inject()(
       }
   }
 
-  //This endpoint is used to get the pending agent representations, can be deleted.
-  def forAgent(
-        status: String,
-        organisationId: Long,
-        pagination: PaginationParams
-  ): Action[AnyContent] = authenticated.async { implicit request =>
-    authorisationSearchApi
-      .forAgent(status, organisationId, pagination)
-      .map { propertyRepresentation =>
-        Ok(Json.toJson(propertyRepresentation))
-      }
-  }
-
   def response(): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
     withJsonBody[APIRepresentationResponse] { representationResponse =>
       authorisationManagementApi
@@ -95,8 +82,6 @@ class PropertyRepresentationController @Inject()(
   def appointableToAgent(
         ownerId: Long,
         agentCode: Long,
-        checkPermission: Option[String],
-        challengePermission: Option[String],
         paginationParams: PaginationParams,
         sortfield: Option[String],
         sortorder: Option[String],
@@ -111,8 +96,6 @@ class PropertyRepresentationController @Inject()(
             .appointableToAgent(
               ownerId = ownerId,
               agentId = agentGroup.id,
-              checkPermission = checkPermission,
-              challengePermission = challengePermission,
               params = paginationParams,
               sortfield = sortfield,
               sortorder = sortorder,

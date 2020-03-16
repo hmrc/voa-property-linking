@@ -90,8 +90,6 @@ class AuthorisationManagementApiSpec extends BaseUnitSpec {
         submissionId = "abc123",
         authorisationOwnerPersonId = 98765,
         authorisedPartyOrganisationId = 24680,
-        checkPermission = "ok",
-        challengePermission = "notOk",
         createDatetime = instant
       )
 
