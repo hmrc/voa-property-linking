@@ -56,13 +56,9 @@ class ExternalPropertyLinkApi @Inject()(
         ).flatten
     )
 
-  def getMyOrganisationsPropertyLinksCount()(implicit request: RequestWithPrincipal[_]): Future[Option[Int]] = {
-   (http.GET[Option[PropertyLinksWithAgents]](myOrganisationsPropertyLinksUrl))
-      .map(
-        y => y.collect {
-          case z => z.filterTotal
-        })
-  }
+  def getMyOrganisationsPropertyLinksCount()(
+        implicit request: RequestWithPrincipal[_]): Future[PropertyLinksWithAgents] =
+    http.GET[PropertyLinksWithAgents](myOrganisationsPropertyLinksUrl)
 
   def getMyOrganisationsPropertyLink(submissionId: String)(
         implicit request: RequestWithPrincipal[_]): Future[Option[OwnerPropertyLink]] =

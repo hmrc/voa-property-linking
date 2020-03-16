@@ -118,12 +118,12 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
         authorisations = Seq()
       )
 
-      when(connector.http.GET[Option[PropertyLinksWithAgents]](any())(any(), any(), any(), any()))
-        .thenReturn(Future.successful(Some(returnedPropertyLinks)))
+      when(connector.http.GET[PropertyLinksWithAgents](any())(any(), any(), any(), any()))
+        .thenReturn(Future.successful(returnedPropertyLinks))
 
       connector
         .getMyOrganisationsPropertyLinksCount()
-        .futureValue shouldBe Some(returnedPropertyLinks.filterTotal)
+        .futureValue shouldBe returnedPropertyLinks
 
       verify(connector.http)
         .GET(mEq(ownerAuthorisationsUrl))(any(), any(), any(), any())

@@ -252,7 +252,7 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
 
     "return owner property links count" in {
       when(mockPropertyLinkingService.getMyOrganisationsPropertyLinksCount()(any(), any()))
-        .thenReturn(OptionT.some[Future](propertyLinksCount))
+        .thenReturn(Future.successful(propertyLinksCount))
       val res = testController.getMyOrganisationsPropertyLinksCount()(FakeRequest())
 
       status(res) shouldBe OK
