@@ -17,7 +17,6 @@
 package models.mdtp.propertylink.projections
 
 import models.searchApi.{OwnerAuthorisation => ModerniedOwnerAuthorisaton}
-import models.AgentPermission
 import models.modernised.externalpropertylink.myorganisations.SummaryPropertyLinkWithAgents
 import play.api.libs.json.Json
 

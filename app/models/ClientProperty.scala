@@ -16,7 +16,6 @@
 
 package models
 
-import models.AgentPermission.AgentPermission
 import play.api.libs.json.{Json, OFormat}
 
 case class ClientProperty(

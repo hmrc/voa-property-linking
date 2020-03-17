@@ -25,8 +25,6 @@ case class APIRepresentationRequest(
       submissionId: String,
       authorisedPartyOrganisationId: Long,
       authorisationOwnerPersonId: Long,
-      checkPermission: String,
-      challengePermission: String,
       createDatetime: Instant
 )
 
@@ -39,8 +37,6 @@ object APIRepresentationRequest {
     reprRequest.submissionId,
     reprRequest.agentOrganisationId,
     reprRequest.individualId,
-    reprRequest.checkPermission,
-    reprRequest.challengePermission,
     reprRequest.createDatetime
   )
 }

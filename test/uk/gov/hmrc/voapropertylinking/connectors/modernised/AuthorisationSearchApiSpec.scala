@@ -17,10 +17,8 @@
 package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
 import basespecs.BaseUnitSpec
-import models.mdtp.propertylink.projections.OwnerAuthResult
-import models.searchApi._
-import models.searchApi.{OwnerAuthResult => ModernisedAuthResult}
-import models.{PaginationParams, PropertyRepresentation, PropertyRepresentations}
+import models.PaginationParams
+import models.searchApi.{OwnerAuthResult => ModernisedAuthResult, _}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 
@@ -64,8 +62,6 @@ class AuthorisationSearchApiSpec extends BaseUnitSpec {
           .appointableToAgent(
             ownerId = orgId,
             agentId = agentId,
-            checkPermission = None,
-            challengePermission = None,
             params = paginationParams
           )
           .futureValue
@@ -88,58 +84,4 @@ class AuthorisationSearchApiSpec extends BaseUnitSpec {
     }
   }
 
-  "AuthorisationManagementApi.forAgent" should {
-    "return the invalid code which is not a no Agent Flag code" in {
-
-      when(mockDefaultHttpClient.GET[AgentAuthResultBE](any(), any())(any(), any(), any()))
-        .thenReturn(
-          Future.successful(
-            AgentAuthResultBE(
-              1,
-              10,
-              30,
-              50,
-              Seq(AgentAuthorisation(
-                authorisationId = 987654,
-                authorisedPartyId = 34567890,
-                status = "APPROVED",
-                representationSubmissionId = "xyz123",
-                submissionId = "123xyz",
-                uarn = 123456,
-                address = "The White House",
-                localAuthorityRef = "VOA1",
-                client = Client(123456, "Fake News Inc"),
-                representationStatus = "APPROVED",
-                checkPermission = "START_AND_CONTINUE",
-                challengePermission = "START_AND_CONTINUE"
-              ))
-            )
-          ))
-
-      val pageParams = PaginationParams(0, 10, false)
-      val organisationId = 98765
-
-      val validPropertyRepresentation = PropertyRepresentation(
-        authorisationId = 987654,
-        billingAuthorityReference = "VOA1",
-        submissionId = "xyz123",
-        organisationId = 123456,
-        organisationName = "Fake News Inc",
-        address = "The White House",
-        checkPermission = "START_AND_CONTINUE",
-        challengePermission = "START_AND_CONTINUE",
-        createDatetime = today,
-        status = "APPROVED"
-      )
-
-      val validPropertyRepresentations = PropertyRepresentations(
-        totalPendingRequests = 30,
-        propertyRepresentations = Seq(validPropertyRepresentation)
-      )
-
-      val result: PropertyRepresentations =
-        connector.forAgent(status = "APPROVED", organisationId, pageParams)(hc).futureValue
-      result shouldBe validPropertyRepresentations
-    }
-  }
 }

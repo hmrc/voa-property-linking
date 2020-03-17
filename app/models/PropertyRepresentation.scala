@@ -27,8 +27,6 @@ case class PropertyRepresentation(
       organisationId: Long,
       organisationName: String,
       address: String,
-      checkPermission: String,
-      challengePermission: String,
       createDatetime: LocalDate,
       status: String) {}
 

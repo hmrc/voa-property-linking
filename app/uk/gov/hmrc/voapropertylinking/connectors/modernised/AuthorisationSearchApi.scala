@@ -17,8 +17,9 @@
 package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
 import javax.inject.Inject
-import models.searchApi.{AgentAuthResultBE, Agents, OwnerAuthResult}
-import models.{PaginationParams, PropertyRepresentations}
+import models.AgentPermission.StartAndContinue
+import models.PaginationParams
+import models.searchApi.{Agents, OwnerAuthResult}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
@@ -61,8 +62,6 @@ class AuthorisationSearchApi @Inject()(
   def appointableToAgent(
         ownerId: Long,
         agentId: Long,
-        checkPermission: Option[String],
-        challengePermission: Option[String],
         params: PaginationParams,
         sortfield: Option[String] = None,
         sortorder: Option[String] = None,
@@ -71,30 +70,14 @@ class AuthorisationSearchApi @Inject()(
     val url = baseUrl +
       s"/authorisation-search-api/owners/$ownerId/agents/$agentId/availableAuthorisations" +
       s"?start=${params.startPoint}&size=${params.pageSize}" +
-      buildQueryParams("check", Some(checkPermission.getOrElse("START_AND_CONTINUE"))) +
-      buildQueryParams("challenge", Some(challengePermission.getOrElse("START_AND_CONTINUE"))) +
+      buildQueryParams("check", Some(StartAndContinue.toString)) +
+      buildQueryParams("challenge", Some(StartAndContinue.toString)) +
       buildQueryParams("sortfield", sortfield) +
       buildQueryParams("sortorder", sortorder) +
       buildQueryParams("address", address) +
       buildQueryParams("agent", agent)
 
     http.GET[OwnerAuthResult](url).map(_.uppercase)
-  }
-
-  def forAgent(status: String, organisationId: Long, params: PaginationParams)(
-        implicit hc: HeaderCarrier): Future[PropertyRepresentations] = {
-    val url = s"$baseUrl/authorisation-search-api/agents/$organisationId/authorisations"
-
-    http
-      .GET[AgentAuthResultBE](
-        url,
-        Seq(
-          "start"                -> params.startPoint.toString,
-          "size"                 -> params.pageSize.toString,
-          "representationStatus" -> "PENDING"))
-      .map(x => {
-        PropertyRepresentations(x.filterTotal, x.authorisations.map(_.toPropertyRepresentation))
-      })
   }
 
   def manageAgents(organisationId: Long)(implicit hc: HeaderCarrier): Future[Agents] = {

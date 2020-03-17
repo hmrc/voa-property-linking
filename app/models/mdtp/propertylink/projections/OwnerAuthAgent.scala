@@ -17,7 +17,6 @@
 package models.mdtp.propertylink.projections
 
 import models.searchApi.{OwnerAuthAgent => ModernisedOwnerAuthAgent}
-import models.AgentPermission.AgentPermission
 import play.api.libs.json.Json
 
 case class OwnerAuthAgent(

@@ -20,7 +20,7 @@ import java.time.LocalDate
 
 import basespecs.BaseUnitSpec
 import cats.data.OptionT
-import models.{AgentPermission, Assessments}
+import models.Assessments
 import models.modernised._
 import models.modernised.externalpropertylink.myclients.{ClientDetails, ClientPropertyLink, PropertyLinkWithClient}
 import models.modernised.externalpropertylink.myorganisations._

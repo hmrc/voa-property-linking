@@ -18,14 +18,14 @@ package uk.gov.hmrc.voapropertylinking.controllers
 
 import basespecs.BaseControllerSpec
 import models.searchApi.{OwnerAuthResult => ModernisedOwnerAuthResult}
-import models.{APIRepresentationResponse, GroupAccount, PaginationParams, PropertyRepresentations}
+import models.{APIRepresentationResponse, GroupAccount, PaginationParams}
 import org.mockito.ArgumentMatchers.{any, eq => mEq}
 import org.mockito.Mockito._
 import play.api.libs.json.Json
 import play.api.mvc.Result
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.http.HttpResponse
-import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation.{AgentDetails, AgentOrganisation, OrganisationLatestDetail}
+import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation.AgentDetails
 
 import scala.concurrent.Future
 
@@ -64,8 +64,6 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
                                                                       |  "agentOrganisationId" : 2,
                                                                       |  "individualId" : 3,
                                                                       |  "submissionId" : "A1",
-                                                                      |  "checkPermission" : "START",
-                                                                      |  "challengePermission" : "START",
                                                                       |  "createDatetime" : "2019-09-12T15:36:47.125Z"
                                                                       |}""".stripMargin)))
 
@@ -96,19 +94,6 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
         contentAsJson(result) shouldBe Json.obj("failureCode" -> "ERROR")
       }
 
-    }
-  }
-
-  "forAgent" should {
-    "return OK 200" when {
-      "there is a property representation" in new Setup {
-        when(mockAuthorisationSearchApi.forAgent(any(), any(), any())(any()))
-          .thenReturn(Future.successful(PropertyRepresentations(1, Seq.empty)))
-
-        val result: Future[Result] = testController.forAgent("OPEN", orgId, paginationParams)(FakeRequest())
-
-        status(result) shouldBe OK
-      }
     }
   }
 
@@ -150,14 +135,18 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
       "customer management API returns an agent group for specified agent code" in new Setup {
         when(mockCustomerManagementApi.withAgentCode(mEq(agentCode.toString))(any()))
           .thenReturn(Future.successful(Some(groupAccount)))
-        when(
-          mockAuthorisationSearchApi.appointableToAgent(any(), any(), any(), any(), any(), any(), any(), any(), any())(
-            any()))
+        when(mockAuthorisationSearchApi.appointableToAgent(any(), any(), any(), any(), any(), any(), any())(any()))
           .thenReturn(Future.successful(ownerAuthResult))
 
         val result: Future[Result] =
-          testController.appointableToAgent(1L, agentCode, None, None, paginationParams, None, None, None, None)(
-            FakeRequest())
+          testController.appointableToAgent(
+            ownerId = 1L,
+            agentCode = agentCode,
+            paginationParams = paginationParams,
+            sortfield = None,
+            sortorder = None,
+            address = None,
+            agent = None)(FakeRequest())
 
         status(result) shouldBe OK
       }
@@ -169,13 +158,19 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
           .thenReturn(Future.successful(Option.empty[GroupAccount]))
 
         val result: Future[Result] =
-          testController.appointableToAgent(1L, agentCode, None, None, paginationParams, None, None, None, None)(
-            FakeRequest())
+          testController.appointableToAgent(
+            ownerId = 1L,
+            agentCode = agentCode,
+            paginationParams = paginationParams,
+            sortfield = None,
+            sortorder = None,
+            address = None,
+            agent = None)(FakeRequest())
 
         status(result) shouldBe NOT_FOUND
 
         verify(mockAuthorisationSearchApi, never())
-          .appointableToAgent(any(), any(), any(), any(), any(), any(), any(), any(), any())(any())
+          .appointableToAgent(any(), any(), any(), any(), any(), any(), any())(any())
       }
     }
 

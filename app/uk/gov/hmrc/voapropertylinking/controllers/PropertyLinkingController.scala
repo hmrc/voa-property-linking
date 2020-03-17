@@ -16,9 +16,6 @@
 
 package uk.gov.hmrc.voapropertylinking.controllers
 
-import uk.gov.hmrc.voapropertylinking.binders.propertylinks.temp.GetMyOrganisationsPropertyLinksParametersWithAgentFiltering
-import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
-import cats.data.OptionT
 import javax.inject.{Inject, Named}
 import models._
 import models.mdtp.propertylink.projections.OwnerAuthResult
@@ -26,12 +23,14 @@ import models.mdtp.propertylink.requests.{APIPropertyLinkRequest, PropertyLinkRe
 import play.api.Logger
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
-import uk.gov.hmrc.voapropertylinking.services.{AssessmentService, PropertyLinkingService}
-import uk.gov.hmrc.http.{HeaderCarrier, Upstream5xxResponse}
+import uk.gov.hmrc.http.Upstream5xxResponse
 import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
 import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
+import uk.gov.hmrc.voapropertylinking.binders.propertylinks.temp.GetMyOrganisationsPropertyLinksParametersWithAgentFiltering
+import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import uk.gov.hmrc.voapropertylinking.connectors.modernised._
 import uk.gov.hmrc.voapropertylinking.errorhandler.models.ErrorResponse
+import uk.gov.hmrc.voapropertylinking.services.{AssessmentService, PropertyLinkingService}
 import uk.gov.hmrc.voapropertylinking.utils.Cats
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -166,8 +165,6 @@ class PropertyLinkingController @Inject()(
           .appointableToAgent(
             searchParams.organisationId,
             searchParams.agentOrganisationId,
-            searchParams.checkPermission,
-            searchParams.challengePermission,
             paginationParams.getOrElse(DefaultPaginationParams),
             searchParams.sortField,
             searchParams.sortOrder,
@@ -196,11 +193,8 @@ class PropertyLinkingController @Inject()(
       .fold(Ok(Json.toJson(submissionId)))(propertyLinkWithAssessments => Ok(Json.toJson(propertyLinkWithAssessments)))
   }
 
-  def getMyOrganisationsAgents(): Action[AnyContent] = authenticated.async { implicit request =>
-    propertyLinkService
-      .getMyOrganisationsAgents()
-      .map { agentsList =>
-        Ok(Json.toJson(agentsList))
-      }
+  def getMyOrganisationsAgents: Action[AnyContent] = authenticated.async { implicit request =>
+    propertyLinkService.getMyOrganisationsAgents().map(agentsList => Ok(Json.toJson(agentsList)))
   }
+
 }

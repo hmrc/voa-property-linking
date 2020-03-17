@@ -29,9 +29,7 @@ case class GetMyOrganisationsPropertyLinksParametersWithAgentFiltering(
       sortOrder: Option[String],
       agentAppointed: Option[String],
       organisationId: Long,
-      agentOrganisationId: Long,
-      checkPermission: Option[String],
-      challengePermission: Option[String]
+      agentOrganisationId: Long
 )
 
 object GetMyOrganisationsPropertyLinksParametersWithAgentFiltering
@@ -49,9 +47,7 @@ object GetMyOrganisationsPropertyLinksParametersWithAgentFiltering
       readStringOption("sortorder", params),
       readStringOption("agentAppointed", params),
       validateLongId("organisationId", params),
-      validateLongId("agentOrganisationId", params),
-      readStringOption("checkPermission", params),
-      readStringOption("challengePermission", params)
+      validateLongId("agentOrganisationId", params)
     ).mapN(GetMyOrganisationsPropertyLinksParametersWithAgentFiltering.apply)
 
   private def readStringOption(implicit key: String, params: Params): ValidationResult[Option[String]] =
