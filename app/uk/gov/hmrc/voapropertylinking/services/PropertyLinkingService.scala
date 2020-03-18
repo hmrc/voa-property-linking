@@ -19,12 +19,13 @@ package uk.gov.hmrc.voapropertylinking.services
 import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import cats.data.OptionT
 import javax.inject.Inject
+
 import models._
 import models.mdtp.propertylink.myclients.PropertyLinksWithClients
 import models.mdtp.propertylink.projections.OwnerAuthResult
 import models.mdtp.propertylink.requests.APIPropertyLinkRequest
 import models.modernised.externalpropertylink.myclients.ClientPropertyLink
-import models.modernised.externalpropertylink.myorganisations.AgentList
+import models.modernised.externalpropertylink.myorganisations.{AgentList, PropertyLinksWithAgents}
 import models.modernised.externalpropertylink.requests.CreatePropertyLink
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
@@ -66,9 +67,16 @@ class PropertyLinkingService @Inject()(
         searchParams: GetMyOrganisationPropertyLinksParameters,
         paginationParams: Option[PaginationParams])(
         implicit hc: HeaderCarrier,
-        request: RequestWithPrincipal[_]): OptionT[Future, OwnerAuthResult] =
-    OptionT(propertyLinksConnector.getMyOrganisationsPropertyLinks(searchParams, paginationParams))
+        request: RequestWithPrincipal[_]): Future[OwnerAuthResult] =
+    propertyLinksConnector.getMyOrganisationsPropertyLinks(searchParams, paginationParams)
       .map(OwnerAuthResult.apply)
+
+  def getMyOrganisationsPropertyLinksCount()(
+        implicit hc: HeaderCarrier,
+        request: RequestWithPrincipal[_]): Future[Int] =
+    propertyLinksConnector
+      .getMyOrganisationsPropertyLinks(GetMyOrganisationPropertyLinksParameters(), None)
+      .map(propertyLinks => propertyLinks.filterTotal)
 
   def getMyOrganisationsAgents()(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[AgentList] =
     propertyLinksConnector.getMyOrganisationsAgents()

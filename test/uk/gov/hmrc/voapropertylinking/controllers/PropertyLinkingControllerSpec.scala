@@ -113,6 +113,7 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
   val propertyLinksWithClients = PropertyLinksWithClients(1, 1, 1, 1, Seq())
   val modernisedOwnerAuthResult = ModernisedOwnerAuthResult(1, 1, 1, 1, Seq())
   val ownerAuthResult = OwnerAuthResult(1, 1, 1, 1, Seq())
+  val propertyLinksCount = 5
 
   val assessments = Assessments(
     authorisationId = 1L,
@@ -201,7 +202,7 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
   "getMyPropertyLinks" should {
     "return owner property links" in {
       when(mockPropertyLinkingService.getMyOrganisationsPropertyLinks(any(), any())(any(), any()))
-        .thenReturn(OptionT.some[Future](ownerAuthResult))
+        .thenReturn(Future.successful(ownerAuthResult))
       val res = testController.getMyOrganisationsPropertyLinks(GetMyOrganisationPropertyLinksParameters(), None, None)(
         FakeRequest())
 
@@ -213,7 +214,7 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
 
       "organisationId is provided" in {
         when(mockPropertyLinkingService.getMyOrganisationsPropertyLinks(any(), any())(any(), any()))
-          .thenReturn(OptionT.some[Future](ownerAuthResult))
+          .thenReturn(Future.successful(ownerAuthResult))
         val res = testController.getMyOrganisationsPropertyLinks(
           GetMyOrganisationPropertyLinksParameters(sortField = Some("AGENT")),
           None,
@@ -244,6 +245,18 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
 
       status(res) shouldBe OK
       contentAsJson(res) shouldBe Json.toJson(ownerAuthResult)
+    }
+  }
+
+  "getMyPropertyLinksCount" should {
+
+    "return owner property links count" in {
+      when(mockPropertyLinkingService.getMyOrganisationsPropertyLinksCount()(any(), any()))
+        .thenReturn(Future.successful(propertyLinksCount))
+      val res = testController.getMyOrganisationsPropertyLinksCount()(FakeRequest())
+
+      status(res) shouldBe OK
+      contentAsJson(res) shouldBe Json.toJson(propertyLinksCount)
     }
   }
 

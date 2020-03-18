@@ -75,6 +75,12 @@ class PropertyLinkingController @Inject()(
         }
   }
 
+  def getMyOrganisationsPropertyLinksCount(): Action[AnyContent] = authenticated.async { implicit request =>
+    propertyLinkService
+      .getMyOrganisationsPropertyLinksCount()
+      .map(propertyLinksCount => Ok(Json.toJson(propertyLinksCount)))
+  }
+
   def getMyOrganisationsPropertyLinks(
         searchParams: GetMyOrganisationPropertyLinksParameters,
         paginationParams: Option[PaginationParams],
@@ -99,8 +105,7 @@ class PropertyLinkingController @Inject()(
             .map(response => Ok(Json.toJson(OwnerAuthResult(response)))))
     } else {
       propertyLinkService
-        .getMyOrganisationsPropertyLinks(searchParams, paginationParams)
-        .fold(NotFound("my organisation property links not found"))(propertyLinks => Ok(Json.toJson(propertyLinks)))
+        .getMyOrganisationsPropertyLinks(searchParams, paginationParams).map(propertyLinks => Ok(Json.toJson(propertyLinks)))
     }
   }
 
