@@ -67,8 +67,8 @@ class PropertyLinkingService @Inject()(
         searchParams: GetMyOrganisationPropertyLinksParameters,
         paginationParams: Option[PaginationParams])(
         implicit hc: HeaderCarrier,
-        request: RequestWithPrincipal[_]): OptionT[Future, OwnerAuthResult] =
-    OptionT(propertyLinksConnector.getMyOrganisationsPropertyLinks(searchParams, paginationParams))
+        request: RequestWithPrincipal[_]): Future[OwnerAuthResult] =
+    propertyLinksConnector.getMyOrganisationsPropertyLinks(searchParams, paginationParams)
       .map(OwnerAuthResult.apply)
 
   def getMyOrganisationsPropertyLinksCount()(
@@ -76,10 +76,7 @@ class PropertyLinkingService @Inject()(
         request: RequestWithPrincipal[_]): Future[Int] =
     propertyLinksConnector
       .getMyOrganisationsPropertyLinks(GetMyOrganisationPropertyLinksParameters(), None)
-      .map(
-        propertyLinksWithAgents => propertyLinksWithAgents.collect {
-          case propertyLinks => propertyLinks.filterTotal
-        }.getOrElse(0))
+      .map(propertyLinks => propertyLinks.filterTotal)
 
   def getMyOrganisationsAgents()(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[AgentList] =
     propertyLinksConnector.getMyOrganisationsAgents()

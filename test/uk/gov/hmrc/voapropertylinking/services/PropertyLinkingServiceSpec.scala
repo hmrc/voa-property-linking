@@ -298,7 +298,7 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
       when(
         mockExternalPropertyLinkApi
           .getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, None))
-        .thenReturn(Future.successful(Some(propertyLinksWithAgents)))
+        .thenReturn(Future.successful(propertyLinksWithAgents))
 
 
       val result = service
@@ -317,37 +317,18 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
       when(
         mockExternalPropertyLinkApi
           .getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams)))
-        .thenReturn(Future.successful(Some(propertyLinksWithAgents)))
+        .thenReturn(Future.successful(propertyLinksWithAgents))
 
       val result = service
         .getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams))
-        .value
         .futureValue
 
-      result.getOrElse("None returned") shouldBe ownerAuthResultAgent
+      result shouldBe ownerAuthResultAgent
 
       verify(mockExternalPropertyLinkApi)
         .getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams))
     }
 
-    "return none when nothing is returned from connector" in {
-
-      when(
-        mockExternalPropertyLinkApi
-          .getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams)))
-        .thenReturn(Future.successful(None))
-
-      val result = service
-        .getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams))
-        .value
-        .futureValue
-
-      result.getOrElse("None returned") shouldBe "None returned"
-
-      verify(mockExternalPropertyLinkApi)
-        .getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams))
-
-    }
   }
 
   "getMyOrganisationsAgents" should {
