@@ -19,12 +19,13 @@ package uk.gov.hmrc.voapropertylinking.services
 import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import cats.data.OptionT
 import javax.inject.Inject
+
 import models._
 import models.mdtp.propertylink.myclients.PropertyLinksWithClients
 import models.mdtp.propertylink.projections.OwnerAuthResult
 import models.mdtp.propertylink.requests.APIPropertyLinkRequest
 import models.modernised.externalpropertylink.myclients.ClientPropertyLink
-import models.modernised.externalpropertylink.myorganisations.AgentList
+import models.modernised.externalpropertylink.myorganisations.{AgentList, PropertyLinksWithAgents}
 import models.modernised.externalpropertylink.requests.CreatePropertyLink
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
@@ -76,8 +77,8 @@ class PropertyLinkingService @Inject()(
     propertyLinksConnector
       .getMyOrganisationsPropertyLinks(GetMyOrganisationPropertyLinksParameters(), None)
       .map(
-        y => y.collect {
-          case z => z.filterTotal
+        propertyLinksWithAgents => propertyLinksWithAgents.collect {
+          case propertyLinks => propertyLinks.filterTotal
         }.getOrElse(0))
 
   def getMyOrganisationsAgents()(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[AgentList] =
