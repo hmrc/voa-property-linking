@@ -297,8 +297,9 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
 
       when(
         mockExternalPropertyLinkApi
-          .getMyOrganisationsPropertyLinksCount())
-        .thenReturn(Future.successful(propertyLinksWithAgents))
+          .getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, None))
+        .thenReturn(Future.successful(Some(propertyLinksWithAgents)))
+
 
       val result = service
         .getMyOrganisationsPropertyLinksCount()
@@ -306,8 +307,6 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
 
       result shouldBe propertyLinksCount
 
-      verify(mockExternalPropertyLinkApi)
-        .getMyOrganisationsPropertyLinksCount()
     }
 
   }

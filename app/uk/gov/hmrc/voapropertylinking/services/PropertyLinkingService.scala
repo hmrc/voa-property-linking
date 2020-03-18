@@ -73,7 +73,12 @@ class PropertyLinkingService @Inject()(
   def getMyOrganisationsPropertyLinksCount()(
         implicit hc: HeaderCarrier,
         request: RequestWithPrincipal[_]): Future[Int] =
-    propertyLinksConnector.getMyOrganisationsPropertyLinksCount().map(x => x.filterTotal)
+    propertyLinksConnector
+      .getMyOrganisationsPropertyLinks(GetMyOrganisationPropertyLinksParameters(), None)
+      .map(
+        y => y.collect {
+          case z => z.filterTotal
+        }.getOrElse(0))
 
   def getMyOrganisationsAgents()(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[AgentList] =
     propertyLinksConnector.getMyOrganisationsAgents()

@@ -106,31 +106,6 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
 
   }
 
-  "get my organisations property links count" should {
-
-    "call the modernised layer" in new Setup {
-
-      val returnedPropertyLinks: PropertyLinksWithAgents = PropertyLinksWithAgents(
-        start = 1,
-        size = 1,
-        filterTotal = 1,
-        total = 1,
-        authorisations = Seq()
-      )
-
-      when(connector.http.GET[PropertyLinksWithAgents](any())(any(), any(), any(), any()))
-        .thenReturn(Future.successful(returnedPropertyLinks))
-
-      connector
-        .getMyOrganisationsPropertyLinksCount()
-        .futureValue shouldBe returnedPropertyLinks
-
-      verify(connector.http)
-        .GET(mEq(ownerAuthorisationsUrl))(any(), any(), any(), any())
-    }
-
-  }
-
   "get my organisations single property link with submissionId" should {
 
     "build the correct url and calls the modernised layer" in new Setup {

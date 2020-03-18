@@ -78,7 +78,8 @@ class PropertyLinkingController @Inject()(
 
   def getMyOrganisationsPropertyLinksCount(): Action[AnyContent] = authenticated.async { implicit request =>
     propertyLinkService
-      .getMyOrganisationsPropertyLinksCount().map(propertyLinksCount => Ok(Json.toJson(propertyLinksCount)))
+      .getMyOrganisationsPropertyLinksCount()
+      .map(propertyLinksCount => Ok(Json.toJson(propertyLinksCount)))
   }
 
   def getMyOrganisationsPropertyLinks(
