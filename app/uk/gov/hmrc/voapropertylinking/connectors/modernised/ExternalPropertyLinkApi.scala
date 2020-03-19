@@ -41,8 +41,7 @@ class ExternalPropertyLinkApi @Inject()(
 
   def getMyOrganisationsPropertyLinks(
         searchParams: GetMyOrganisationPropertyLinksParameters,
-        params: Option[PaginationParams])(
-        implicit request: RequestWithPrincipal[_]): Future[PropertyLinksWithAgents] =
+        params: Option[PaginationParams])(implicit request: RequestWithPrincipal[_]): Future[PropertyLinksWithAgents] =
     http.GET[PropertyLinksWithAgents](
       myOrganisationsPropertyLinksUrl,
       modernisedPaginationParams(params) ++

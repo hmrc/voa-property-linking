@@ -236,4 +236,36 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
     }
   }
 
+  "unassignAgent" should {
+    "return 202 Accepted" when {
+      "valid JSON payload is POSTed" in new Setup {
+
+        when(mockOrganisationManagementApi.agentAppointmentChanges(any())(any(), any()))
+          .thenReturn(Future.successful(appointmentChangeResponse))
+
+        val result: Future[Result] =
+          testController.unassignAgent()(FakeRequest().withBody(Json.parse("""{
+                                                                             |  "agentRepresentativeCode" : 123,
+                                                                             |  "scope"  : "ALL_PROPERTIES"
+                                                                             |}""".stripMargin)))
+
+        status(result) shouldBe ACCEPTED
+      }
+    }
+    "return 400 Bad Request" when {
+      "invalid unassign agent request is POSTed" in new Setup {
+
+        when(mockOrganisationManagementApi.agentAppointmentChanges(any())(any(), any()))
+          .thenReturn(Future.successful(appointmentChangeResponse))
+
+        val result: Future[Result] =
+          testController.unassignAgent()(FakeRequest().withBody(Json.parse("""{
+                                                                             |  "agentRepresentativeCode" : 1
+                                                                             |}""".stripMargin)))
+
+        status(result) shouldBe BAD_REQUEST
+      }
+    }
+  }
+
 }

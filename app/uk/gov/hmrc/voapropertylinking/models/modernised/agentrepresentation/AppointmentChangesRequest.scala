@@ -37,4 +37,12 @@ object AppointmentChangesRequest {
       scope = AppointmentScope.withName(appointAgent.scope),
       propertyLinks = None
     )
+
+  def apply(unassignAgent: UnassignAgent): AppointmentChangesRequest =
+    AppointmentChangesRequest(
+      agentRepresentativeCode = unassignAgent.agentRepresentativeCode,
+      action = AppointmentAction.REVOKE,
+      scope = AppointmentScope.withName(unassignAgent.scope),
+      propertyLinks = None
+    )
 }
