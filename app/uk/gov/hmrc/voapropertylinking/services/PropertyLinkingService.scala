@@ -68,7 +68,8 @@ class PropertyLinkingService @Inject()(
         paginationParams: Option[PaginationParams])(
         implicit hc: HeaderCarrier,
         request: RequestWithPrincipal[_]): Future[OwnerAuthResult] =
-    propertyLinksConnector.getMyOrganisationsPropertyLinks(searchParams, paginationParams)
+    propertyLinksConnector
+      .getMyOrganisationsPropertyLinks(searchParams, paginationParams)
       .map(OwnerAuthResult.apply)
 
   def getMyOrganisationsPropertyLinksCount()(

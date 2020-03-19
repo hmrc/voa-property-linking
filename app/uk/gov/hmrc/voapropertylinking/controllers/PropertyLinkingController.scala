@@ -105,7 +105,8 @@ class PropertyLinkingController @Inject()(
             .map(response => Ok(Json.toJson(OwnerAuthResult(response)))))
     } else {
       propertyLinkService
-        .getMyOrganisationsPropertyLinks(searchParams, paginationParams).map(propertyLinks => Ok(Json.toJson(propertyLinks)))
+        .getMyOrganisationsPropertyLinks(searchParams, paginationParams)
+        .map(propertyLinks => Ok(Json.toJson(propertyLinks)))
     }
   }
 

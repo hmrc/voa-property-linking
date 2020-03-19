@@ -300,7 +300,6 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
           .getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, None))
         .thenReturn(Future.successful(propertyLinksWithAgents))
 
-
       val result = service
         .getMyOrganisationsPropertyLinksCount()
         .futureValue

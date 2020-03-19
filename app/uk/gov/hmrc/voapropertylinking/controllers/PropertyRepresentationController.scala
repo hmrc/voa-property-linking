@@ -26,7 +26,7 @@ import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
 import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import uk.gov.hmrc.voapropertylinking.connectors.modernised._
 import uk.gov.hmrc.voapropertylinking.errorhandler.models.ErrorResponse
-import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation.{AppointAgent, AppointmentChangesRequest}
+import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation.{AppointAgent, AppointmentChangesRequest, UnassignAgent}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -118,6 +118,16 @@ class PropertyRepresentationController @Inject()(
 
   def appointAgent(): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
     withJsonBody[AppointAgent] { appointAgent =>
+      organisationManagementApi
+        .agentAppointmentChanges(AppointmentChangesRequest(appointAgent))
+        .map { response =>
+          Accepted(Json.toJson(response))
+        }
+    }
+  }
+
+  def unassignAgent(): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
+    withJsonBody[UnassignAgent] { appointAgent =>
       organisationManagementApi
         .agentAppointmentChanges(AppointmentChangesRequest(appointAgent))
         .map { response =>
