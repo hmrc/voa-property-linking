@@ -10,8 +10,10 @@ PUT          /property-representations/response                                 
 GET          /property-links-appointable                                                      @uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.appointableToAgent(ownerId: Long, agentCode: Long, params: models.PaginationParams, sortfield: Option[String], sortorder: Option[String], address: Option[String], agent: Option[String])
 
 GET          /my-organisation/agent/:agentCode                                                @uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.getAgentDetails(agentCode: Long)
-POST         /my-organisation/agent/appoint                                                   @uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.appointAgent()
+POST         /my-organisation/agent/assign                                                    @uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.assignAgent()
+POST         /my-organisation/agent/assign-to-some-properties                                 @uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.assignAgentToSomeProperties()
 POST         /my-organisation/agent/unassign                                                  @uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.unassignAgent()
+POST         /my-organisation/agent/unassign-from-some-properties                             @uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.unassignAgentFromSomeProperties()
 
 # Manage Agents
 GET          /manage-agents/:id/agents                                                        @uk.gov.hmrc.voapropertylinking.controllers.AgentController.manageAgents(id: Long)

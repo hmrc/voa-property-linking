@@ -18,8 +18,8 @@ package uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation
 
 import play.api.libs.json.{Json, OFormat}
 
-case class AppointAgent(agentRepresentativeCode: Long, scope: String)
+case class UnassignAgentFromSomeProperties(agentCode: Long, propertyLinkIds: List[String])
 
-object AppointAgent {
-  implicit val format: OFormat[AppointAgent] = Json.format
+object UnassignAgentFromSomeProperties {
+  implicit val format: OFormat[UnassignAgentFromSomeProperties] = Json.format
 }
