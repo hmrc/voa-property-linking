@@ -30,12 +30,20 @@ case class AppointmentChangesRequest(
 object AppointmentChangesRequest {
   implicit val format: OFormat[AppointmentChangesRequest] = Json.format
 
-  def apply(appointAgent: AppointAgent): AppointmentChangesRequest =
+  def apply(appointAgent: AssignAgent): AppointmentChangesRequest =
     AppointmentChangesRequest(
       agentRepresentativeCode = appointAgent.agentRepresentativeCode,
       action = AppointmentAction.APPOINT,
       scope = AppointmentScope.withName(appointAgent.scope),
       propertyLinks = None
+    )
+
+  def apply(appointAgent: AssignAgentToSomeProperties): AppointmentChangesRequest =
+    AppointmentChangesRequest(
+      agentRepresentativeCode = appointAgent.agentCode,
+      action = AppointmentAction.APPOINT,
+      scope = AppointmentScope.PROPERTY_LIST,
+      propertyLinks = Some(appointAgent.propertyLinkIds)
     )
 
   def apply(unassignAgent: UnassignAgent): AppointmentChangesRequest =
@@ -44,5 +52,13 @@ object AppointmentChangesRequest {
       action = AppointmentAction.REVOKE,
       scope = AppointmentScope.withName(unassignAgent.scope),
       propertyLinks = None
+    )
+
+  def apply(unassignAgent: UnassignAgentFromSomeProperties): AppointmentChangesRequest =
+    AppointmentChangesRequest(
+      agentRepresentativeCode = unassignAgent.agentCode,
+      action = AppointmentAction.REVOKE,
+      scope = AppointmentScope.PROPERTY_LIST,
+      propertyLinks = Some(unassignAgent.propertyLinkIds)
     )
 }

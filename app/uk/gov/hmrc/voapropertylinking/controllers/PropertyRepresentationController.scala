@@ -26,7 +26,7 @@ import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
 import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import uk.gov.hmrc.voapropertylinking.connectors.modernised._
 import uk.gov.hmrc.voapropertylinking.errorhandler.models.ErrorResponse
-import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation.{AppointAgent, AppointmentChangesRequest, UnassignAgent}
+import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation.{AppointmentChangesRequest, AssignAgent, AssignAgentToSomeProperties, UnassignAgent, UnassignAgentFromSomeProperties}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -116,8 +116,18 @@ class PropertyRepresentationController @Inject()(
     }
   }
 
-  def appointAgent(): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
-    withJsonBody[AppointAgent] { appointAgent =>
+  def assignAgent(): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
+    withJsonBody[AssignAgent] { appointAgent =>
+      organisationManagementApi
+        .agentAppointmentChanges(AppointmentChangesRequest(appointAgent))
+        .map { response =>
+          Accepted(Json.toJson(response))
+        }
+    }
+  }
+
+  def assignAgentToSomeProperties(): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
+    withJsonBody[AssignAgentToSomeProperties] { appointAgent =>
       organisationManagementApi
         .agentAppointmentChanges(AppointmentChangesRequest(appointAgent))
         .map { response =>
@@ -127,9 +137,19 @@ class PropertyRepresentationController @Inject()(
   }
 
   def unassignAgent(): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
-    withJsonBody[UnassignAgent] { appointAgent =>
+    withJsonBody[UnassignAgent] { unassignAgent =>
       organisationManagementApi
-        .agentAppointmentChanges(AppointmentChangesRequest(appointAgent))
+        .agentAppointmentChanges(AppointmentChangesRequest(unassignAgent))
+        .map { response =>
+          Accepted(Json.toJson(response))
+        }
+    }
+  }
+
+  def unassignAgentFromSomeProperties(): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
+    withJsonBody[UnassignAgentFromSomeProperties] { unassignAgent =>
+      organisationManagementApi
+        .agentAppointmentChanges(AppointmentChangesRequest(unassignAgent))
         .map { response =>
           Accepted(Json.toJson(response))
         }
