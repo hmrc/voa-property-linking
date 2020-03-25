@@ -61,4 +61,12 @@ object AppointmentChangesRequest {
       scope = AppointmentScope.PROPERTY_LIST,
       propertyLinks = Some(unassignAgent.propertyLinkIds)
     )
+
+  def apply(removeAgent: RemoveAgentFromIpOrganisation): AppointmentChangesRequest =
+    AppointmentChangesRequest(
+      agentRepresentativeCode = removeAgent.agentRepresentativeCode,
+      action = AppointmentAction.REVOKE,
+      scope = AppointmentScope.RELATIONSHIP,
+      propertyLinks = None
+    )
 }

@@ -244,10 +244,11 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
           .thenReturn(Future.successful(appointmentChangeResponse))
 
         val result: Future[Result] =
-          testController.assignAgentToSomeProperties()(FakeRequest().withBody(Json.parse("""{
-                                                                           |  "agentCode" : 1,
-                                                                           |  "propertyLinkIds"  : ["PL123BLAH", "PL654BLUH"]
-                                                                           |}""".stripMargin)))
+          testController.assignAgentToSomeProperties()(
+            FakeRequest().withBody(Json.parse("""{
+                                                |  "agentCode" : 1,
+                                                |  "propertyLinkIds"  : ["PL123BLAH", "PL654BLUH"]
+                                                |}""".stripMargin)))
 
         status(result) shouldBe ACCEPTED
       }
@@ -260,8 +261,8 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
 
         val result: Future[Result] =
           testController.assignAgentToSomeProperties()(FakeRequest().withBody(Json.parse("""{
-                                                                           |  "agentCode" : 1
-                                                                           |}""".stripMargin)))
+                                                                                           |  "agentCode" : 1
+                                                                                           |}""".stripMargin)))
 
         status(result) shouldBe BAD_REQUEST
       }
@@ -308,10 +309,11 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
           .thenReturn(Future.successful(appointmentChangeResponse))
 
         val result: Future[Result] =
-          testController.unassignAgentFromSomeProperties()(FakeRequest().withBody(Json.parse("""{
-                                                                                           |  "agentCode" : 1,
-                                                                                           |  "propertyLinkIds"  : ["PL123BLAH", "PL654BLUH"]
-                                                                                           |}""".stripMargin)))
+          testController.unassignAgentFromSomeProperties()(
+            FakeRequest().withBody(Json.parse("""{
+                                                |  "agentCode" : 1,
+                                                |  "propertyLinkIds"  : ["PL123BLAH", "PL654BLUH"]
+                                                |}""".stripMargin)))
 
         status(result) shouldBe ACCEPTED
       }
@@ -323,9 +325,41 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
           .thenReturn(Future.successful(appointmentChangeResponse))
 
         val result: Future[Result] =
-          testController.unassignAgentFromSomeProperties()(FakeRequest().withBody(Json.parse("""{
-                                                                                           |  "propertyLinkIds"  : ["PL123BLAH", "PL654BLUH"]
-                                                                                           |}""".stripMargin)))
+          testController.unassignAgentFromSomeProperties()(
+            FakeRequest().withBody(Json.parse("""{
+                                                |  "propertyLinkIds"  : ["PL123BLAH", "PL654BLUH"]
+                                                |}""".stripMargin)))
+
+        status(result) shouldBe BAD_REQUEST
+      }
+    }
+  }
+
+  "removeAgentFromOrganisation" should {
+    "return 202 Accepted" when {
+      "valid JSON payload is POSTed" in new Setup {
+
+        when(mockOrganisationManagementApi.agentAppointmentChanges(any())(any(), any()))
+          .thenReturn(Future.successful(appointmentChangeResponse))
+
+        val result: Future[Result] =
+          testController.removeAgentFromOrganisation()(
+            FakeRequest().withBody(Json.parse("""{
+                                                |  "agentRepresentativeCode" : 123,
+                                                |  "scope"  : "RELATIONSHIP"
+                                                |}""".stripMargin)))
+
+        status(result) shouldBe ACCEPTED
+      }
+    }
+    "return 400 Bad Request" when {
+      "invalid removeAgentFromOrganisation agent request is POSTed" in new Setup {
+
+        val result: Future[Result] =
+          testController.removeAgentFromOrganisation()(
+            FakeRequest().withBody(Json.parse("""{
+                                                |  "agentRepresentativeCode" : 1
+                                                |}""".stripMargin)))
 
         status(result) shouldBe BAD_REQUEST
       }

@@ -12,6 +12,7 @@ GET          /property-links-appointable                                        
 GET          /my-organisation/agent/:agentCode                                                @uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.getAgentDetails(agentCode: Long)
 POST         /my-organisation/agent/assign                                                    @uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.assignAgent()
 POST         /my-organisation/agent/assign-to-some-properties                                 @uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.assignAgentToSomeProperties()
+POST         /my-organisation/agent/remove-from-organisation                                  @uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.removeAgentFromOrganisation()
 POST         /my-organisation/agent/unassign                                                  @uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.unassignAgent()
 POST         /my-organisation/agent/unassign-from-some-properties                             @uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.unassignAgentFromSomeProperties()
 
