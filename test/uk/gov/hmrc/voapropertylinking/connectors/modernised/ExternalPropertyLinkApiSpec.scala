@@ -190,7 +190,7 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
 
       val mockReturnedAgentList: AgentList = mock[AgentList]
 
-      when(connector.http.GET[AgentList](any())(any(), any(), any(), any()))
+      when(connector.http.GET[AgentList](any(), any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(mockReturnedAgentList))
 
       connector
@@ -198,7 +198,7 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
         .futureValue shouldBe mockReturnedAgentList
 
       verify(connector.http)
-        .GET(mEq(myOrganisationsAgentsUrl))(any(), any(), any(), any())
+        .GET(mEq(myOrganisationsAgentsUrl), mEq(List("requestTotalRowCount" -> "true")))(any(), any(), any(), any())
     }
 
   }

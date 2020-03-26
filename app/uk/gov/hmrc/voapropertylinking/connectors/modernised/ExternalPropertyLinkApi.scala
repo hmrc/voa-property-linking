@@ -105,7 +105,7 @@ class ExternalPropertyLinkApi @Inject()(
       .POST[CreatePropertyLink, HttpResponse](createPropertyLinkUrl, propertyLink, Seq())
 
   def getMyOrganisationsAgents()(implicit request: RequestWithPrincipal[_]): Future[AgentList] =
-    http.GET[AgentList](myOrganisationsAgentsUrl)
+    http.GET[AgentList](myOrganisationsAgentsUrl, List("requestTotalRowCount" -> "true"))
 
   private def modernisedPaginationParams(params: Option[PaginationParams]): Seq[(String, String)] =
     params.fold(Seq.empty[(String, String)]) { p =>
