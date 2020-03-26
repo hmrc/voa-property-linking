@@ -53,7 +53,7 @@ class PropertyLinkingService @Inject()(
   def getMyAgentPropertyLinks(
         agentCode: Long,
         searchParams: GetMyOrganisationPropertyLinksParameters,
-        paginationParams: Option[PaginationParams])(
+        paginationParams: PaginationParams)(
         implicit hc: HeaderCarrier,
         request: RequestWithPrincipal[_]): Future[OwnerAuthResult] =
     propertyLinksConnector

@@ -43,10 +43,10 @@ class ExternalPropertyLinkApi @Inject()(
   def getMyAgentPropertyLinks(
         agentCode: Long,
         searchParams: GetMyOrganisationPropertyLinksParameters,
-        params: Option[PaginationParams])(implicit request: RequestWithPrincipal[_]): Future[PropertyLinksWithAgents] =
+        params: PaginationParams)(implicit request: RequestWithPrincipal[_]): Future[PropertyLinksWithAgents] =
     http.GET[PropertyLinksWithAgents](
       myAgentPropertyLinksUrl.replace("{agentCode}", agentCode.toString),
-      modernisedPaginationParams(params) ++
+      modernisedPaginationParams(Some(params)) ++
         List(
           searchParams.address.map("address"     -> _),
           searchParams.baref.map("baref"         -> _),

@@ -253,7 +253,7 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
     "return owner property links by agent code" in {
       when(mockPropertyLinkingService.getMyAgentPropertyLinks(any(), any(), any())(any(), any()))
         .thenReturn(Future.successful(ownerAuthResult))
-      val res = testController.getMyAgentPropertyLinks(agentCode, GetMyOrganisationPropertyLinksParameters(), None)(
+      val res = testController.getMyAgentPropertyLinks(agentCode, GetMyOrganisationPropertyLinksParameters(), PaginationParams(1, 10, true))(
         FakeRequest())
 
       status(res) shouldBe OK

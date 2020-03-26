@@ -335,17 +335,17 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
       val agentCode = 1
       when(
         mockExternalPropertyLinkApi
-          .getMyAgentPropertyLinks(agentCode, getMyOrganisationSearchParams, Some(paginationParams)))
+          .getMyAgentPropertyLinks(agentCode, getMyOrganisationSearchParams, paginationParams))
         .thenReturn(Future.successful(propertyLinksWithAgents))
 
       val result = service
-        .getMyAgentPropertyLinks(agentCode, getMyOrganisationSearchParams, Some(paginationParams))
+        .getMyAgentPropertyLinks(agentCode, getMyOrganisationSearchParams, paginationParams)
         .futureValue
 
       result shouldBe ownerAuthResultAgent
 
       verify(mockExternalPropertyLinkApi)
-        .getMyAgentPropertyLinks(agentCode, getMyOrganisationSearchParams, Some(paginationParams))
+        .getMyAgentPropertyLinks(agentCode, getMyOrganisationSearchParams, paginationParams)
     }
 
   }

@@ -117,7 +117,7 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
         .thenReturn(Future.successful(mockReturnedPropertyLinks))
 
       connector
-        .getMyAgentPropertyLinks(agentCode, emptySearchParams, params = Some(paginationParams))
+        .getMyAgentPropertyLinks(agentCode, emptySearchParams, params = paginationParams)
         .futureValue shouldBe mockReturnedPropertyLinks
 
       verify(connector.http)
