@@ -30,6 +30,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class ExternalPropertyLinkApi @Inject()(
       val http: VoaHttpClient,
+      @Named("voa.myAgentPropertyLinks") myAgentPropertyLinksUrl: String,
       @Named("voa.myOrganisationsPropertyLinks") myOrganisationsPropertyLinksUrl: String,
       @Named("voa.myOrganisationsPropertyLink") myOrganisationsPropertyLinkUrl: String,
       @Named("voa.myClientsPropertyLinks") myClientsPropertyLinksUrl: String,
@@ -38,6 +39,23 @@ class ExternalPropertyLinkApi @Inject()(
       @Named("voa.myOrganisationsAgents") myOrganisationsAgentsUrl: String
 )(implicit executionContext: ExecutionContext)
     extends BaseVoaConnector {
+
+  def getMyAgentPropertyLinks(
+                               agentCode: Long,
+                               searchParams: GetMyOrganisationPropertyLinksParameters,
+                               params: Option[PaginationParams])(implicit request: RequestWithPrincipal[_]): Future[PropertyLinksWithAgents] =
+    http.GET[PropertyLinksWithAgents](
+      myAgentPropertyLinksUrl.replace("{agentCode}", agentCode),
+      modernisedPaginationParams(params) ++
+        List(
+          searchParams.address.map("address"     -> _),
+          searchParams.baref.map("baref"         -> _),
+          searchParams.agent.map("agent"         -> _),
+          searchParams.status.map("status"       -> _),
+          searchParams.sortField.map("sortfield" -> _),
+          searchParams.sortOrder.map("sortorder" -> _)
+        ).flatten
+    )
 
   def getMyOrganisationsPropertyLinks(
         searchParams: GetMyOrganisationPropertyLinksParameters,
