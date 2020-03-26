@@ -330,6 +330,26 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
 
   }
 
+  "getMyAgentPropertyLinks" should {
+    "call connector and return a Owner Auth Result for a valid authorisation id" in {
+      val agentCode = 1
+      when(
+        mockExternalPropertyLinkApi
+          .getMyAgentPropertyLinks(agentCode, getMyOrganisationSearchParams, Some(paginationParams)))
+        .thenReturn(Future.successful(propertyLinksWithAgents))
+
+      val result = service
+        .getMyAgentPropertyLinks(agentCode, getMyOrganisationSearchParams, Some(paginationParams))
+        .futureValue
+
+      result shouldBe ownerAuthResultAgent
+
+      verify(mockExternalPropertyLinkApi)
+        .getMyAgentPropertyLinks(agentCode, getMyOrganisationSearchParams, Some(paginationParams))
+    }
+
+  }
+
   "getMyOrganisationsAgents" should {
     "call connector and return the list of agents belonging to that organisation" in {
       when(

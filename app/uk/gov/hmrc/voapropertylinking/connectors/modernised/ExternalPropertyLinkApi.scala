@@ -41,11 +41,11 @@ class ExternalPropertyLinkApi @Inject()(
     extends BaseVoaConnector {
 
   def getMyAgentPropertyLinks(
-                               agentCode: Long,
-                               searchParams: GetMyOrganisationPropertyLinksParameters,
-                               params: Option[PaginationParams])(implicit request: RequestWithPrincipal[_]): Future[PropertyLinksWithAgents] =
+        agentCode: Long,
+        searchParams: GetMyOrganisationPropertyLinksParameters,
+        params: Option[PaginationParams])(implicit request: RequestWithPrincipal[_]): Future[PropertyLinksWithAgents] =
     http.GET[PropertyLinksWithAgents](
-      myAgentPropertyLinksUrl.replace("{agentCode}", agentCode),
+      myAgentPropertyLinksUrl.replace("{agentCode}", agentCode.toString),
       modernisedPaginationParams(params) ++
         List(
           searchParams.address.map("address"     -> _),

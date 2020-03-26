@@ -82,13 +82,13 @@ class PropertyLinkingController @Inject()(
   }
 
   def getMyAgentPropertyLinks(
-                                       agentCode: Long,
-                                       searchParams: GetMyOrganisationPropertyLinksParameters,
-                                       paginationParams: Option[PaginationParams]
-                                     ): Action[AnyContent] = authenticated.async { implicit request =>
-      propertyLinkService
-        .getMyAgentPropertyLinks(agentCode, searchParams, paginationParams)
-        .map(propertyLinks => Ok(Json.toJson(propertyLinks)))
+        agentCode: Long,
+        searchParams: GetMyOrganisationPropertyLinksParameters,
+        paginationParams: Option[PaginationParams]
+  ): Action[AnyContent] = authenticated.async { implicit request =>
+    propertyLinkService
+      .getMyAgentPropertyLinks(agentCode, searchParams, paginationParams)
+      .map(propertyLinks => Ok(Json.toJson(propertyLinks)))
 
   }
 

@@ -61,7 +61,7 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
     val emptySearchParams = GetMyOrganisationPropertyLinksParameters()
 
     val voaApiUrl = "http://voa-modernised-api/external-property-link-management-api"
-
+    val agentAuthorisationsUrl = s"$voaApiUrl/my-organisation/agents/{agentCode}/property-links"
     val ownerAuthorisationUrl = s"$voaApiUrl/my-organisation/property-links/{propertyLinkId}"
     val ownerAuthorisationsUrl = s"$voaApiUrl/my-organisation/property-links"
     val clientAuthorisationUrl = s"$voaApiUrl/my-organisation/clients/all/property-links/{propertyLinkId}"
@@ -72,6 +72,7 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
 
     val connector = new ExternalPropertyLinkApi(
       http = mock[VoaHttpClient],
+      myAgentPropertyLinksUrl = agentAuthorisationsUrl,
       myOrganisationsPropertyLinksUrl = ownerAuthorisationsUrl,
       myOrganisationsPropertyLinkUrl = ownerAuthorisationUrl,
       myClientsPropertyLinkUrl = clientAuthorisationUrl,
@@ -102,6 +103,25 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
 
       verify(connector.http)
         .GET(mEq(ownerAuthorisationsUrl), mEq(queryParams))(any(), any(), any(), any())
+    }
+
+  }
+
+  "get my agent property links" should {
+
+    "build the correct query params and call the modernised layer" in new Setup {
+      val agentCode = 1
+      val mockReturnedPropertyLinks: PropertyLinksWithAgents = mock[PropertyLinksWithAgents]
+
+      when(connector.http.GET[PropertyLinksWithAgents](any(), any())(any(), any(), any(), any()))
+        .thenReturn(Future.successful(mockReturnedPropertyLinks))
+
+      connector
+        .getMyAgentPropertyLinks(agentCode, emptySearchParams, params = Some(paginationParams))
+        .futureValue shouldBe mockReturnedPropertyLinks
+
+      verify(connector.http)
+        .GET(mEq(agentAuthorisationsUrl.replace("{agentCode}", agentCode.toString)), mEq(queryParams))(any(), any(), any(), any())
     }
 
   }
