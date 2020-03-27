@@ -15,6 +15,7 @@ POST         /my-organisation/agent/assign-to-some-properties                   
 POST         /my-organisation/agent/remove-from-organisation                                  @uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.removeAgentFromOrganisation()
 POST         /my-organisation/agent/unassign                                                  @uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.unassignAgent()
 POST         /my-organisation/agent/unassign-from-some-properties                             @uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.unassignAgentFromSomeProperties()
+GET          /my-organisation/agents/:agentCode/property-links                                @uk.gov.hmrc.voapropertylinking.controllers.PropertyLinkingController.getMyAgentPropertyLinks(agentCode: Long, searchParams: GetMyOrganisationPropertyLinksParameters, params: models.PaginationParams)
 
 # Manage Agents
 GET          /manage-agents/:id/agents                                                        @uk.gov.hmrc.voapropertylinking.controllers.AgentController.manageAgents(id: Long)

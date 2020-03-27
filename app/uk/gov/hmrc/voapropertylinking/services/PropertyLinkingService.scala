@@ -50,6 +50,16 @@ class PropertyLinkingService @Inject()(
         request: RequestWithPrincipal[_]): OptionT[Future, ClientPropertyLink] =
     OptionT(propertyLinksConnector.getClientsPropertyLink(submissionId))
 
+  def getMyAgentPropertyLinks(
+        agentCode: Long,
+        searchParams: GetMyOrganisationPropertyLinksParameters,
+        paginationParams: PaginationParams)(
+        implicit hc: HeaderCarrier,
+        request: RequestWithPrincipal[_]): Future[OwnerAuthResult] =
+    propertyLinksConnector
+      .getMyAgentPropertyLinks(agentCode, searchParams, paginationParams)
+      .map(OwnerAuthResult.apply)
+
   def getMyOrganisationsPropertyLink(submissionId: String)(
         implicit hc: HeaderCarrier,
         request: RequestWithPrincipal[_]): OptionT[Future, PropertiesView] =
