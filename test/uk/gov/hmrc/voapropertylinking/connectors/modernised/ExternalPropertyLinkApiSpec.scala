@@ -121,7 +121,11 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
         .futureValue shouldBe mockReturnedPropertyLinks
 
       verify(connector.http)
-        .GET(mEq(agentAuthorisationsUrl.replace("{agentCode}", agentCode.toString)), mEq(queryParams))(any(), any(), any(), any())
+        .GET(mEq(agentAuthorisationsUrl.replace("{agentCode}", agentCode.toString)), mEq(queryParams))(
+          any(),
+          any(),
+          any(),
+          any())
     }
 
   }
