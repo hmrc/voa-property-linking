@@ -20,14 +20,12 @@ import play.api.libs.json.Json
 
 case class OwnerAuthorisation(
       authorisationId: Long,
-      status: String,
       submissionId: String,
       uarn: Long,
       address: String,
       localAuthorityRef: String,
-      agents: Seq[OwnerAuthAgent]
-) {
-
+      agents: Seq[OwnerAuthAgent]) {
+  val status = "APPROVED"
   def capatilise() = this.copy(address = address.toUpperCase)
 }
 
