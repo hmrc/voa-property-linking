@@ -22,9 +22,7 @@ case class OwnerAuthAgent(
       authorisedPartyId: Long,
       organisationId: Long,
       organisationName: String,
-      status: String,
-      representativeCode: Long
-)
+      representativeCode: Long)
 
 object OwnerAuthAgent {
   implicit val ownerAuthAgent = Json.format[OwnerAuthAgent]
