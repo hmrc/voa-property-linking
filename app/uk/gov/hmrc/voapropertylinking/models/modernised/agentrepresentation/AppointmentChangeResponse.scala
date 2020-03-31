@@ -16,10 +16,16 @@
 
 package uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json._
 
 case class AppointmentChangeResponse(appointmentChangeId: String)
 
 object AppointmentChangeResponse {
-  implicit val format: OFormat[AppointmentChangeResponse] = Json.format
+  implicit val reads: Reads[AppointmentChangeResponse] =
+    (__ \ "agentAppointmentChangeId")
+      .read[String]
+      .map(agentAppointmentChangeId => AppointmentChangeResponse(agentAppointmentChangeId))
+
+  implicit val writes = Json.writes[AppointmentChangeResponse]
+
 }

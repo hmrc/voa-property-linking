@@ -27,6 +27,7 @@ import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import uk.gov.hmrc.voapropertylinking.connectors.modernised._
 import uk.gov.hmrc.voapropertylinking.errorhandler.models.ErrorResponse
 import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation.{AppointmentChangesRequest, AssignAgent, AssignAgentToSomeProperties, RemoveAgentFromIpOrganisation, UnassignAgent, UnassignAgentFromSomeProperties}
+import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation.AppointmentChangeResponse._
 
 import scala.concurrent.{ExecutionContext, Future}
 
