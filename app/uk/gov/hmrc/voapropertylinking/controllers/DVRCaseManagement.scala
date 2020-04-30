@@ -20,12 +20,11 @@ import javax.inject.Inject
 import models.modernised.ccacasemanagement.requests.DetailedValuationRequest
 import play.api.Logger
 import play.api.http.HttpEntity
-import play.api.http.HttpEntity.Streamed
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
-import uk.gov.hmrc.voapropertylinking.repositories.DVRRecordRepository
 import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
 import uk.gov.hmrc.voapropertylinking.connectors.modernised.{CCACaseManagementApi, ExternalValuationManagementApi}
+import uk.gov.hmrc.voapropertylinking.repositories.DVRRecordRepository
 
 import scala.concurrent.ExecutionContext
 
@@ -75,12 +74,11 @@ class DVRCaseManagement @Inject()(
         val contentType =
           document.headers.mapValues(_.mkString(",")).getOrElse(CONTENT_TYPE, "application/octet-stream")
 
-        document.headers
-          .mapValues(_.mkString(","))
-          .get(CONTENT_LENGTH)
-          .map(_.toLong)
-          .fold(Ok.chunked(document.bodyAsSource).as(contentType))(length =>
-            Ok.sendEntity(HttpEntity.Streamed(document.bodyAsSource, Some(length), Some(contentType))))
+        Ok.sendEntity(
+          HttpEntity.Streamed(
+            document.bodyAsSource,
+            document.headers.mapValues(_.mkString(",")).get(CONTENT_LENGTH).map(_.toLong),
+            Some(contentType)))
       }
   }
 
