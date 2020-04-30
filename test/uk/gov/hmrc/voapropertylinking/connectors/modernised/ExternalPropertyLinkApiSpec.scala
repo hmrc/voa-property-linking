@@ -68,6 +68,8 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
     val clientAuthorisationsUrl = s"$voaApiUrl/my-organisation/clients/all/property-links"
     val createPropertyLinkUrl = s"$voaApiUrl/my-organisation/property-links"
     val myOrganisationsAgentsUrl = s"$voaApiUrl/my-organisation/agents"
+    val revokeClientsPropertyLinkUrl =
+      s"$voaApiUrl/my-organisation/clients/all/property-links/{submissionId}/appointment"
     val httpstring = "VoaAuthedBackendHttp"
 
     val connector = new ExternalPropertyLinkApi(
@@ -78,7 +80,8 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
       myClientsPropertyLinkUrl = clientAuthorisationUrl,
       myClientsPropertyLinksUrl = clientAuthorisationsUrl,
       createPropertyLinkUrl = createPropertyLinkUrl,
-      myOrganisationsAgentsUrl = myOrganisationsAgentsUrl
+      myOrganisationsAgentsUrl = myOrganisationsAgentsUrl,
+      revokeClientsPropertyLinkUrl = revokeClientsPropertyLinkUrl
     )
 
     val paginationParams = PaginationParams(1, 1, true)
@@ -223,6 +226,25 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
 
       verify(connector.http)
         .GET(mEq(myOrganisationsAgentsUrl), mEq(List("requestTotalRowCount" -> "true")))(any(), any(), any(), any())
+    }
+
+  }
+
+  "revoke client property" should {
+
+    "revoke a client property" in new Setup {
+
+      val mockHttpResponse: HttpResponse = mock[HttpResponse]
+
+      when(connector.http.DELETE[HttpResponse](any())(any(), any(), any(), any()))
+        .thenReturn(Future.successful(mockHttpResponse))
+
+      connector
+        .revokeClientProperty("some-submissionId")
+        .futureValue shouldBe ()
+
+      verify(connector.http)
+        .DELETE(any())(any(), any(), any(), any())
     }
 
   }
