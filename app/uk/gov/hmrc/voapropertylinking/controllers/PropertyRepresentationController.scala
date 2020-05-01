@@ -38,6 +38,7 @@ class PropertyRepresentationController @Inject()(
       authorisationSearchApi: AuthorisationSearchApi,
       customerManagementApi: CustomerManagementApi,
       organisationManagementApi: ExternalOrganisationManagementApi,
+      externalPropertyLinkApi: ExternalPropertyLinkApi,
       auditingService: AuditingService
 )(implicit executionContext: ExecutionContext)
     extends PropertyLinkingBaseController(controllerComponents) {
@@ -78,6 +79,10 @@ class PropertyRepresentationController @Inject()(
     authorisationManagementApi
       .revoke(authorisedPartyId)
       .map(_ => Ok(""))
+  }
+
+  def revokeClientProperty(submissionId: String): Action[AnyContent] = authenticated.async { implicit request =>
+    externalPropertyLinkApi.revokeClientProperty(submissionId).map(_ => NoContent)
   }
 
   def appointableToAgent(

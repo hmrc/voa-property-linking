@@ -36,7 +36,8 @@ class ExternalPropertyLinkApi @Inject()(
       @Named("voa.myClientsPropertyLinks") myClientsPropertyLinksUrl: String,
       @Named("voa.myClientsPropertyLink") myClientsPropertyLinkUrl: String,
       @Named("voa.createPropertyLink") createPropertyLinkUrl: String,
-      @Named("voa.myOrganisationsAgents") myOrganisationsAgentsUrl: String
+      @Named("voa.myOrganisationsAgents") myOrganisationsAgentsUrl: String,
+      @Named("voa.revokeClientsPropertyLink") revokeClientsPropertyLinkUrl: String
 )(implicit executionContext: ExecutionContext)
     extends BaseVoaConnector {
 
@@ -106,6 +107,9 @@ class ExternalPropertyLinkApi @Inject()(
 
   def getMyOrganisationsAgents()(implicit request: RequestWithPrincipal[_]): Future[AgentList] =
     http.GET[AgentList](myOrganisationsAgentsUrl, List("requestTotalRowCount" -> "true"))
+
+  def revokeClientProperty(plSubmissionId: String)(implicit request: RequestWithPrincipal[_]): Future[Unit] =
+    http.DELETE[HttpResponse](revokeClientsPropertyLinkUrl.templated("submissionId" -> plSubmissionId)).map(_ => ())
 
   private def modernisedPaginationParams(params: Option[PaginationParams]): Seq[(String, String)] =
     params.fold(Seq.empty[(String, String)]) { p =>

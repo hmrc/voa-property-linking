@@ -25,6 +25,7 @@ import play.api.libs.json.Json
 import play.api.mvc.Result
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.http.HttpResponse
+import uk.gov.hmrc.voapropertylinking.connectors.modernised.ExternalPropertyLinkApi
 import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation.AgentDetails
 
 import scala.concurrent.Future
@@ -40,7 +41,8 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
         authorisationSearchApi = mockAuthorisationSearchApi,
         customerManagementApi = mockCustomerManagementApi,
         organisationManagementApi = mockOrganisationManagementApi,
-        auditingService = mockAuditingService
+        auditingService = mockAuditingService,
+        externalPropertyLinkApi = mockExternalPropertyLinkApi
       )
     protected val submissionId = "PL123"
     protected val agentCode = 12345L
@@ -126,6 +128,22 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
 
         status(result) shouldBe OK
         verify(mockAuthorisationManagementApi).revoke(mEq(authorisedPartyId))(any())
+      }
+    }
+  }
+
+  "revoke client property" should {
+    "return 204 NoContent" when {
+      "property link submission id is provided" in new Setup {
+        val authorisedPartyId = 123L
+        when(mockExternalPropertyLinkApi.revokeClientProperty(any())(any()))
+          .thenReturn(Future.successful(()))
+
+        val result: Future[Result] =
+          testController.revokeClientProperty("some-sumissionId")(FakeRequest())
+
+        status(result) shouldBe NO_CONTENT
+        verify(mockExternalPropertyLinkApi).revokeClientProperty(any())(any())
       }
     }
   }
