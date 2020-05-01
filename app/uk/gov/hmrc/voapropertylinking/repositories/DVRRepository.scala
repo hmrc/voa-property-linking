@@ -19,12 +19,13 @@ package uk.gov.hmrc.voapropertylinking.repositories
 import com.google.inject.name.Named
 import com.google.inject.{ImplementedBy, Singleton}
 import javax.inject.Inject
+
 import models.modernised.ccacasemanagement.requests.DetailedValuationRequest
 import play.api.Logger
 import play.api.libs.json._
 import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.indexes.{Index, IndexType}
-import reactivemongo.bson.{BSONDateTime, BSONDocument}
+import reactivemongo.bson.BSONDocument
 import reactivemongo.core.errors.DatabaseException
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
@@ -35,15 +36,15 @@ import scala.language.postfixOps
 
 @Singleton
 class DVRRepository @Inject()(
-      mongo: ReactiveMongoComponent,
-      @Named("dvrCollectionName") val dvrCollectionName: String,
-      config: ServicesConfig
-)(implicit executionContext: ExecutionContext)
-    extends ReactiveRepository[DVRRecord, String](
-      dvrCollectionName,
-      mongo.mongoConnector.db,
-      DVRRecord.mongoFormat,
-      implicitly[Format[String]]) with DVRRecordRepository {
+                               mongo: ReactiveMongoComponent,
+                               @Named("dvrCollectionName") val dvrCollectionName: String,
+                               config: ServicesConfig
+                             )(implicit executionContext: ExecutionContext)
+  extends ReactiveRepository[DVRRecord, String](
+    dvrCollectionName,
+    mongo.mongoConnector.db,
+    DVRRecord.mongoFormat,
+    implicitly[Format[String]]) with DVRRecordRepository {
 
   lazy val ttlDuration = config.getDuration("dvr.record.ttl.duration")
 
@@ -56,12 +57,7 @@ class DVRRepository @Inject()(
 
   override def create(request: DetailedValuationRequest): Future[Unit] =
     Mdc.preservingMdc {
-      insert(
-        DVRRecord(
-          organisationId = request.organisationId,
-          assessmentRef = request.assessmentRef,
-          agents = request.agents,
-          createdAt = now))
+      insert(DVRRecord(request.organisationId, request.assessmentRef, request.agents, System.currentTimeMillis()))
         .map(_ => ())
         .recover {
           case e: DatabaseException => Logger.debug(e.getMessage())
@@ -83,21 +79,18 @@ class DVRRepository @Inject()(
         }
     }
 
-  private def now = Some(BSONDateTime(System.currentTimeMillis))
-
   private def query(organisationId: Long): (String, Json.JsValueWrapper) =
     "$or" -> Json.arr(Json.obj("organisationId" -> organisationId), Json.obj("agents" -> organisationId))
 }
 
 case class DVRRecord(
-      organisationId: Long,
-      assessmentRef: Long,
-      agents: Option[List[Long]],
-      createdAt: Option[BSONDateTime]
-)
+                      organisationId: Long,
+                      assessmentRef: Long,
+                      agents: Option[List[Long]],
+                      createdAt: Long
+                    )
 
 object DVRRecord {
-  import reactivemongo.play.json.BSONFormats.BSONDateTimeFormat
   val mongoFormat: OFormat[DVRRecord] = Json.format
 }
 
