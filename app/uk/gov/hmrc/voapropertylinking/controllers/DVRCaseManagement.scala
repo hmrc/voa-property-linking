@@ -19,7 +19,7 @@ package uk.gov.hmrc.voapropertylinking.controllers
 import javax.inject.Inject
 import models.modernised.ccacasemanagement.requests.DetailedValuationRequest
 import play.api.Logger
-import play.api.http.HttpEntity
+import play.api.http.HttpEntity.Streamed
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
 import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
@@ -70,16 +70,12 @@ class DVRCaseManagement @Inject()(
   ): Action[AnyContent] = authenticated.async { implicit request =>
     externalValuationManagementApi
       .getDvrDocument(valuationId, uarn, propertyLinkId, fileRef)
-      .map { document =>
-        val contentType =
-          document.headers.mapValues(_.mkString(",")).getOrElse(CONTENT_TYPE, "application/octet-stream")
-
-        Ok.sendEntity(
-          HttpEntity.Streamed(
-            document.bodyAsSource,
-            document.headers.mapValues(_.mkString(",")).get(CONTENT_LENGTH).map(_.toLong),
-            Some(contentType)))
-      }
+      .map(response =>
+        Ok.sendEntity(Streamed(
+          response.bodyAsSource,
+          response.headers.get(CONTENT_LENGTH).flatMap(_.headOption.map(_.toLong)),
+          response.headers.get(CONTENT_TYPE).flatMap(_.headOption).orElse(Some("application/octet-stream"))
+        )))
   }
 
   def dvrExists(
