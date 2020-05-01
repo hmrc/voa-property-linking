@@ -71,17 +71,4 @@ class AuthorisationSearchApiSpec extends BaseUnitSpec {
     }
   }
 
-  "A manage agents" should {
-    "find owner agents" in {
-      val organisationId = 123
-
-      when(mockDefaultHttpClient.GET[Agents](any())(any(), any(), any())).thenReturn(
-        Future.successful(
-          Agents(Seq(Agent("Test name 1", 123), Agent("Test name 2", 123)))
-        ))
-
-      connector.manageAgents(organisationId)(hc).futureValue.agents.size shouldBe 2
-    }
-  }
-
 }

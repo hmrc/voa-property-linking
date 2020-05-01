@@ -17,25 +17,26 @@
 package uk.gov.hmrc.voapropertylinking.controllers
 
 import javax.inject.Inject
+import models.searchApi.{Agent, Agents}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
-import uk.gov.hmrc.voapropertylinking.connectors.modernised.AuthorisationSearchApi
+import uk.gov.hmrc.voapropertylinking.connectors.modernised.{AuthorisationSearchApi, ExternalPropertyLinkApi}
 
 import scala.concurrent.ExecutionContext
 
 class AgentController @Inject()(
       controllerComponents: ControllerComponents,
       authenticated: AuthenticatedActionBuilder,
-      authorisationSearchApi: AuthorisationSearchApi
+      externalPropertyLinkApi: ExternalPropertyLinkApi
 )(implicit executionContext: ExecutionContext)
     extends PropertyLinkingBaseController(controllerComponents) {
 
+  // organisationId parameter is not needed as we're calling
+  // a new authed endpoint which will pick up current user from HeaderCarrier gg headers
   def manageAgents(organisationId: Long): Action[AnyContent] = authenticated.async { implicit request =>
-    authorisationSearchApi
-      .manageAgents(organisationId)
-      .map { agents =>
-        Ok(Json.toJson(agents))
-      }
+    externalPropertyLinkApi.getMyOrganisationsAgents().map { agentList =>
+      Ok(Json.toJson(Agents(agentList.agents.map(a => Agent(a.name, a.representativeCode)))))
+    }
   }
 }

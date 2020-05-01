@@ -16,23 +16,26 @@
 
 package uk.gov.hmrc.voapropertylinking.controllers
 
+import java.time.LocalDate
+
 import basespecs.BaseControllerSpec
+import models.modernised.externalpropertylink.myorganisations.{AgentList, AgentSummary}
 import models.searchApi.{Agent, Agents}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{reset, when}
 import play.api.libs.json.Json
 import play.api.test.{FakeRequest, Helpers}
-import uk.gov.hmrc.voapropertylinking.connectors.modernised.AuthorisationSearchApi
 
 import scala.concurrent.Future
 
 class AgentControllerSpec extends BaseControllerSpec {
 
   trait Setup {
-    val mockAgentConnector = mock[AuthorisationSearchApi]
-
     val agentController =
-      new AgentController(Helpers.stubControllerComponents(), preAuthenticatedActionBuilders(), mockAgentConnector)
+      new AgentController(
+        Helpers.stubControllerComponents(),
+        preAuthenticatedActionBuilders(),
+        mockExternalPropertyLinkApi)
   }
 
   "given authorised access, manage agents" should {
@@ -43,10 +46,26 @@ class AgentControllerSpec extends BaseControllerSpec {
 
       val organisationId = 111
 
-      val manageAgentUrl = s"$baseUrl/authorisation-search-api/owners/$organisationId/agents"
+      val yesterday = LocalDate.now().minusDays(1)
 
-      val expected = Agents(agents = Seq(Agent("Name1", 1), Agent("Name2", 2)))
-      when(mockAgentConnector.manageAgents(any())(any())).thenReturn(Future(expected))
+      val expected = AgentList(
+        agents = List(
+          AgentSummary(
+            organisationId = 1L,
+            name = "Name1",
+            representativeCode = 1L,
+            appointedDate = yesterday,
+            propertyCount = 1),
+          AgentSummary(
+            organisationId = 2L,
+            name = "Name2",
+            representativeCode = 2L,
+            appointedDate = yesterday,
+            propertyCount = 1)
+        ),
+        resultCount = 2
+      )
+      when(mockExternalPropertyLinkApi.getMyOrganisationsAgents()(any())).thenReturn(Future(expected))
 
       val res = agentController.manageAgents(organisationId)(FakeRequest())
 
