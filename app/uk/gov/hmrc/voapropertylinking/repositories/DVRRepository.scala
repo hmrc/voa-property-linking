@@ -50,7 +50,7 @@ class DVRRepository @Inject()(
     DVRRecord.mongoFormat,
     implicitly[Format[BSONObjectID]]) with DVRRecordRepository {
 
-  lazy val ttlDuration = config.getDuration("dvr.record.ttl.duration")
+  val ttlDuration = config.getDuration("dvr.record.ttl.duration")
 
   import reactivemongo.play.json._
 
@@ -100,11 +100,13 @@ class DVRRepository @Inject()(
     "$or" -> Json.arr(Json.obj("organisationId" -> organisationId), Json.obj("agents" -> organisationId))
 
   {
+    val logger = Logger(this.getClass.getName)
     // on startup
-    logger.info("*****  START UP CODE HERE - start *****")
+    logger.info("** DVR-conv - start *****")
+    logger.info(s"** DVR-conv - ttlDuration: ${ttlDuration.toSeconds}")
 
     def log(dvr: DVRRecord) = {
-      logger.info(s"$dvr : ${Instant.ofEpochMilli(dvr.createdAt.value)}")
+      logger.info(s"** DVR-conv ** $dvr : ${Instant.ofEpochMilli(dvr.createdAt.value)}")
     }
 
     Await.result(for {
@@ -114,7 +116,7 @@ class DVRRepository @Inject()(
       _ = updated.foreach(log)
     } yield (), Duration.Inf)
 
-    logger.info("*****  START UP CODE HERE - end *****")
+    logger.info("** DVR-conv - end *****")
   }
 }
 
