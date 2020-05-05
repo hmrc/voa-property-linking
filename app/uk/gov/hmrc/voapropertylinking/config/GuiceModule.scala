@@ -65,8 +65,6 @@ class GuiceModule(
 
     bindModernisedEndpoints()
 
-    bind(classOf[DVRRepository]).asEagerSingleton() // TODO remove after conversion
-
   }
 
   private def bindEndpoints(endpoints: Map[String, String], baseUrl: String): Unit =

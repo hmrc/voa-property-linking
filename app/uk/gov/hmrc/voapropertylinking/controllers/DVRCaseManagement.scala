@@ -91,4 +91,10 @@ class DVRCaseManagement @Inject()(
       case false => Ok(Json.toJson(false))
     }
   }
+
+  def dvrConvert(): Action[AnyContent] = authenticated.async { implicit request =>
+    dvrRecordRepository.convert().map { i =>
+      Ok(Json.toJson(i))
+    }
+  }
 }

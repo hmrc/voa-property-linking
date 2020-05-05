@@ -40,15 +40,17 @@ import scala.language.postfixOps
 
 @Singleton
 class DVRRepository @Inject()(
-                               mongo: ReactiveMongoComponent,
-                               @Named("dvrCollectionName") val dvrCollectionName: String,
-                               config: ServicesConfig
-                             )(implicit executionContext: ExecutionContext)
-  extends ReactiveRepository[DVRRecord, BSONObjectID](
-    dvrCollectionName,
-    mongo.mongoConnector.db,
-    DVRRecord.mongoFormat,
-    implicitly[Format[BSONObjectID]]) with DVRRecordRepository {
+      mongo: ReactiveMongoComponent,
+      @Named("dvrCollectionName") val dvrCollectionName: String,
+      config: ServicesConfig
+)(implicit executionContext: ExecutionContext)
+    extends ReactiveRepository[DVRRecord, BSONObjectID](
+      dvrCollectionName,
+      mongo.mongoConnector.db,
+      DVRRecord.mongoFormat,
+      implicitly[Format[BSONObjectID]]) with DVRRecordRepository {
+
+  private val loggur = Logger(this.getClass.getName)
 
   val ttlDuration = config.getDuration("dvr.record.ttl.duration")
 
@@ -76,7 +78,8 @@ class DVRRepository @Inject()(
 
   // TODO remove after conversion
   override def update(dvrRecord: DVRRecord) = {
-    Mdc.preservingMdc(collection.update(ordered = true).one(BSONDocument("_id" -> dvrRecord._id.get), dvrRecord, upsert = false))
+    Mdc.preservingMdc(
+      collection.update(ordered = true).one(BSONDocument("_id" -> dvrRecord._id.get), dvrRecord, upsert = false))
 
     Future.successful(dvrRecord)
   }
@@ -99,34 +102,31 @@ class DVRRepository @Inject()(
   private def query(organisationId: Long): (String, Json.JsValueWrapper) =
     "$or" -> Json.arr(Json.obj("organisationId" -> organisationId), Json.obj("agents" -> organisationId))
 
-  {
-    val logger = Logger(this.getClass.getName)
-    // on startup
-    logger.info("** DVR-conv - start *****")
-    logger.info(s"** DVR-conv - ttlDuration: ${ttlDuration.toSeconds}")
+  def convert(): Future[Int] = {
+    loggur.info("** DVR-conv - start *****")
+    loggur.info(s"** DVR-conv - ttlDuration: ${ttlDuration.toSeconds}")
 
-    def log(dvr: DVRRecord) = {
-      logger.info(s"** DVR-conv ** $dvr : ${Instant.ofEpochMilli(dvr.createdAt.value)}")
-    }
+    def log(dvr: DVRRecord) =
+      loggur.info(s"** DVR-conv ** $dvr : ${Instant.ofEpochMilli(dvr.createdAt.value)}")
 
-    Await.result(for {
+    for {
       before <- findAll
       _ = before.foreach(log)
       updated <- Future.traverse(before)(update)
       _ = updated.foreach(log)
-    } yield (), Duration.Inf)
+      _ = loggur.info("** DVR-conv - end *****")
+    } yield (updated.size)
 
-    logger.info("** DVR-conv - end *****")
   }
 }
 
 case class DVRRecord(
-                      organisationId: Long,
-                      assessmentRef: Long,
-                      agents: Option[List[Long]],
-                      _id: Option[BSONObjectID] = None, // TODO remove later
-                      createdAt: BSONDateTime = BSONDateTime(System.currentTimeMillis()) // TODO remove after conversion
-                    )
+      organisationId: Long,
+      assessmentRef: Long,
+      agents: Option[List[Long]],
+      _id: Option[BSONObjectID] = None, // TODO remove later
+      createdAt: BSONDateTime = BSONDateTime(System.currentTimeMillis()) // TODO remove after conversion
+)
 
 object DVRRecord {
   import reactivemongo.play.json.BSONFormats.BSONDateTimeFormat
@@ -136,40 +136,41 @@ object DVRRecord {
       Json.writes[DVRRecord].writes(o) //TODO ++ Json.obj("createdAt" -> System.currentTimeMillis())
 
     def readsCreatedAt: Reads[BSONDateTime] = new Reads[BSONDateTime] {
-      override def reads(json: JsValue): JsResult[BSONDateTime] = {
+      override def reads(json: JsValue): JsResult[BSONDateTime] =
         json.validate[BSONDateTime] match {
-          case value@JsSuccess(_, _) => value
-          case JsError(errors) => json.validate[Long] match {
-            case JsSuccess(value, path) => JsSuccess(BSONDateTime(value))
-            case JsError(errors) => JsSuccess(BSONDateTime(System.currentTimeMillis()))
-          }
+          case value @ JsSuccess(_, _) => value
+          case JsError(errors) =>
+            json.validate[Long] match {
+              case JsSuccess(value, path) => JsSuccess(BSONDateTime(value))
+              case JsError(errors)        => JsSuccess(BSONDateTime(System.currentTimeMillis()))
+            }
         }
-      }
     }
 
     // TODO override def reads(json: JsValue): JsResult[DVRRecord] = Json.reads[DVRRecord].reads(json)
     // TODO remove after conversion
-    override def reads(json: JsValue): JsResult[DVRRecord] = (
-      (__ \ "_id").read[BSONObjectID] and
-        (__ \ "organisationId").read[Long] and
-        (__ \ "assessmentRef").read[Long] and
-        (__ \ "agents").readNullable[List[Long]] and
-        (__ \ "createdAt").read[BSONDateTime](readsCreatedAt)
-      ) (mkDvrRecord _).reads(json)
+    override def reads(json: JsValue): JsResult[DVRRecord] =
+      (
+        (__ \ "_id").read[BSONObjectID] and
+          (__ \ "organisationId").read[Long] and
+          (__ \ "assessmentRef").read[Long] and
+          (__ \ "agents").readNullable[List[Long]] and
+          (__ \ "createdAt").read[BSONDateTime](readsCreatedAt)
+      )(mkDvrRecord _).reads(json)
 
     private def mkDvrRecord(
-                             _id: BSONObjectID,
-                             organisationId: Long,
-                             assessmentRef: Long,
-                             agents: Option[List[Long]],
-                             createdAt: BSONDateTime
-                           ) =
-        DVRRecord(
-          _id = Some(_id),
-          organisationId = organisationId,
-          assessmentRef = assessmentRef,
-          agents = agents,
-          createdAt = createdAt)
+          _id: BSONObjectID,
+          organisationId: Long,
+          assessmentRef: Long,
+          agents: Option[List[Long]],
+          createdAt: BSONDateTime
+    ) =
+      DVRRecord(
+        _id = Some(_id),
+        organisationId = organisationId,
+        assessmentRef = assessmentRef,
+        agents = agents,
+        createdAt = createdAt)
   }
 
 }
@@ -184,6 +185,6 @@ trait DVRRecordRepository {
 
   // TODO remove after conversion
   def findAll(): Future[List[DVRRecord]]
-
   def update(dvr: DVRRecord): Future[DVRRecord]
+  def convert(): Future[Int]
 }
