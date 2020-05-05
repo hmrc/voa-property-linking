@@ -80,12 +80,6 @@ class AuthorisationSearchApi @Inject()(
     http.GET[OwnerAuthResult](url).map(_.uppercase)
   }
 
-  def manageAgents(organisationId: Long)(implicit hc: HeaderCarrier): Future[Agents] = {
-    val url = baseUrl +
-      s"/authorisation-search-api/owners/$organisationId/agents"
-    http.GET[Agents](url)
-  }
-
   private def buildQueryParams(name: String, value: Option[String]): String =
     value match {
       case Some(paramValue) if paramValue != "" => s"&$name=$paramValue";

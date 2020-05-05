@@ -23,7 +23,6 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.play.http.ws.WSHttp
 import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
 import uk.gov.hmrc.voapropertylinking.auth.{Principal, RequestWithPrincipal}
-import uk.gov.hmrc.voapropertylinking.controllers.AgentController
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -35,7 +34,6 @@ abstract class BaseControllerSpec
 
   val mockWS = mock[WSHttp]
   val mockConf = mockServicesConfig
-  val mockAgentConnector = mock[AgentController]
   val baseUrl = "http://localhost:9999"
 
   def preAuthenticatedActionBuilders(

@@ -1,10 +1,6 @@
 # microservice specific routes
 
 GET          /property-representations/validate-agent-code/:agentCode/:authorisationId        @uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.validateAgentCode(agentCode:Long, authorisationId: Long)
-
-POST         /property-representations/create                                                 @uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.create()
-
-PATCH        /property-representations/revoke/:authorisedPartyId                              @uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.revoke(authorisedPartyId: Long)
 PUT          /property-representations/response                                               @uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.response()
 
 GET          /property-links-appointable                                                      @uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.appointableToAgent(ownerId: Long, agentCode: Long, params: models.PaginationParams, sortfield: Option[String], sortorder: Option[String], address: Option[String], agent: Option[String])
@@ -17,9 +13,6 @@ POST         /my-organisation/agent/unassign                                    
 POST         /my-organisation/agent/unassign-from-some-properties                             @uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.unassignAgentFromSomeProperties()
 
 DELETE       /property-representations/revoke-client-property/:submissionId                    @uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.revokeClientProperty(submissionId: String)
-
-# Manage Agents
-GET          /manage-agents/:id/agents                                                        @uk.gov.hmrc.voapropertylinking.controllers.AgentController.manageAgents(id: Long)
 
 GET          /individuals/:personId                                                           @uk.gov.hmrc.voapropertylinking.controllers.IndividualAccountController.get(personId: Long)
 GET          /individuals                                                                     @uk.gov.hmrc.voapropertylinking.controllers.IndividualAccountController.withExternalId(externalId)
