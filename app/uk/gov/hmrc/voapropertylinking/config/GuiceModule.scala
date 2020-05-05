@@ -40,6 +40,7 @@ import com.google.inject.name.Names.named
 import com.typesafe.config.ConfigException
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
+import uk.gov.hmrc.voapropertylinking.repositories.DVRRepository
 
 class GuiceModule(
       environment: Environment,
@@ -63,6 +64,9 @@ class GuiceModule(
     bind(classOf[Clock]).toInstance(Clock.systemUTC())
 
     bindModernisedEndpoints()
+
+    bind(classOf[DVRRepository]).asEagerSingleton() // TODO remove after conversion
+
   }
 
   private def bindEndpoints(endpoints: Map[String, String], baseUrl: String): Unit =
