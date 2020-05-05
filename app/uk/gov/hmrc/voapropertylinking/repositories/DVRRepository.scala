@@ -36,15 +36,15 @@ import scala.language.postfixOps
 
 @Singleton
 class DVRRepository @Inject()(
-                               mongo: ReactiveMongoComponent,
-                               @Named("dvrCollectionName") val dvrCollectionName: String,
-                               config: ServicesConfig
-                             )(implicit executionContext: ExecutionContext)
-  extends ReactiveRepository[DVRRecord, String](
-    dvrCollectionName,
-    mongo.mongoConnector.db,
-    DVRRecord.mongoFormat,
-    implicitly[Format[String]]) with DVRRecordRepository {
+      mongo: ReactiveMongoComponent,
+      @Named("dvrCollectionName") val dvrCollectionName: String,
+      config: ServicesConfig
+)(implicit executionContext: ExecutionContext)
+    extends ReactiveRepository[DVRRecord, String](
+      dvrCollectionName,
+      mongo.mongoConnector.db,
+      DVRRecord.mongoFormat,
+      implicitly[Format[String]]) with DVRRecordRepository {
 
   lazy val ttlDuration = config.getDuration("dvr.record.ttl.duration")
 
@@ -84,11 +84,11 @@ class DVRRepository @Inject()(
 }
 
 case class DVRRecord(
-                      organisationId: Long,
-                      assessmentRef: Long,
-                      agents: Option[List[Long]],
-                      createdAt: Long
-                    )
+      organisationId: Long,
+      assessmentRef: Long,
+      agents: Option[List[Long]],
+      createdAt: Long
+)
 
 object DVRRecord {
   val mongoFormat: OFormat[DVRRecord] = Json.format

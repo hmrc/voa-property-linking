@@ -53,27 +53,6 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
 
   }
 
-  "create" should {
-    "return 200 OK" when {
-      "valid JSON payload is POSTed" in new Setup {
-
-        when(mockAuthorisationManagementApi.create(any())(any()))
-          .thenReturn(Future.successful(HttpResponse(OK)))
-
-        val result: Future[Result] =
-          testController.create()(FakeRequest().withBody(Json.parse("""{
-                                                                      |  "authorisationId" : 1,
-                                                                      |  "agentOrganisationId" : 2,
-                                                                      |  "individualId" : 3,
-                                                                      |  "submissionId" : "A1",
-                                                                      |  "createDatetime" : "2019-09-12T15:36:47.125Z"
-                                                                      |}""".stripMargin)))
-
-        status(result) shouldBe OK
-      }
-    }
-  }
-
   "validateAgentCode" should {
     "return OK 200" when {
       "the agent code is valid" in new Setup {
@@ -112,22 +91,6 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
         status(result) shouldBe OK
 
         verify(mockAuditingService).sendEvent(mEq("agent representation response"), mEq(repResp))(any(), any(), any())
-      }
-    }
-  }
-
-  "revoke" should {
-    "return OK 200" when {
-      "valid PATCH request is made with authorisedPartyId" in new Setup {
-        val authorisedPartyId = 123L
-        when(mockAuthorisationManagementApi.revoke(mEq(authorisedPartyId))(any()))
-          .thenReturn(Future.successful(mock[HttpResponse]))
-
-        val result: Future[Result] =
-          testController.revoke(authorisedPartyId)(FakeRequest().withBody(Json.obj()))
-
-        status(result) shouldBe OK
-        verify(mockAuthorisationManagementApi).revoke(mEq(authorisedPartyId))(any())
       }
     }
   }

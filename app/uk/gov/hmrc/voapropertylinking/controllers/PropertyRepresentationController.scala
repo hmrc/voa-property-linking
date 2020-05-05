@@ -43,14 +43,6 @@ class PropertyRepresentationController @Inject()(
 )(implicit executionContext: ExecutionContext)
     extends PropertyLinkingBaseController(controllerComponents) {
 
-  def create(): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
-    withJsonBody[RepresentationRequest] { reprRequest =>
-      authorisationManagementApi
-        .create(APIRepresentationRequest.fromRepresentationRequest(reprRequest))
-        .map(_ => Ok(""))
-    }
-  }
-
   def validateAgentCode(
         agentCode: Long,
         authorisationId: Long
@@ -73,12 +65,6 @@ class PropertyRepresentationController @Inject()(
           Ok("")
         }
     }
-  }
-
-  def revoke(authorisedPartyId: Long): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
-    authorisationManagementApi
-      .revoke(authorisedPartyId)
-      .map(_ => Ok(""))
   }
 
   def revokeClientProperty(submissionId: String): Action[AnyContent] = authenticated.async { implicit request =>

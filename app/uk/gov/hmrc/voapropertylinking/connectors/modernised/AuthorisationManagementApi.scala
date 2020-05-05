@@ -57,21 +57,8 @@ class AuthorisationManagementApi @Inject()(
       })
   }
 
-  def create(reprRequest: APIRepresentationRequest)(implicit hc: HeaderCarrier): Future[HttpResponse] =
-    http
-      .POST[APIRepresentationRequest, HttpResponse](createRepresentationRequestUrl, reprRequest)
-
   def response(representationResponse: APIRepresentationResponse)(implicit hc: HeaderCarrier): Future[HttpResponse] =
     http
       .PUT[APIRepresentationResponse, HttpResponse](representationRequestResponseUrl, representationResponse)
 
-  def revoke(authorisedPartyId: Long)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
-    val url = baseUrl + s"/authorisedParty/$authorisedPartyId"
-    http.PATCH[JsValue, HttpResponse](
-      url,
-      Json.obj(
-        "endDate"               -> LocalDate.now.toString,
-        "authorisedPartyStatus" -> "REVOKED"
-      ))
-  }
 }
