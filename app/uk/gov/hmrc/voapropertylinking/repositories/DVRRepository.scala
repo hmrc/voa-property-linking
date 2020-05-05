@@ -57,7 +57,7 @@ class DVRRepository @Inject()(
 
   override def create(request: DetailedValuationRequest): Future[Unit] =
     Mdc.preservingMdc {
-      insert(DVRRecord(request.organisationId, request.assessmentRef, request.agents, System.currentTimeMillis()))
+      insert(DVRRecord(request.organisationId, request.assessmentRef, request.agents))
         .map(_ => ())
         .recover {
           case e: DatabaseException => Logger.debug(e.getMessage())
@@ -86,12 +86,15 @@ class DVRRepository @Inject()(
 case class DVRRecord(
       organisationId: Long,
       assessmentRef: Long,
-      agents: Option[List[Long]],
-      createdAt: Long
+      agents: Option[List[Long]]
 )
 
 object DVRRecord {
-  val mongoFormat: OFormat[DVRRecord] = Json.format
+  val mongoFormat: OFormat[DVRRecord] = new OFormat[DVRRecord] {
+    override def writes(o: DVRRecord): JsObject =
+      Json.writes[DVRRecord].writes(o) ++ Json.obj("createdAt" -> System.currentTimeMillis())
+    override def reads(json: JsValue): JsResult[DVRRecord] = Json.reads[DVRRecord].reads(json)
+  }
 }
 
 @ImplementedBy(classOf[DVRRepository])
