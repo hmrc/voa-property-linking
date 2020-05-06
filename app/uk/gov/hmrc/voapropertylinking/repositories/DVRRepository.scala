@@ -50,8 +50,6 @@ class DVRRepository @Inject()(
     DVRRecord.mongoFormat,
     implicitly[Format[BSONObjectID]]) with DVRRecordRepository {
 
-  private val loggur = Logger(this.getClass.getName)
-
   lazy val ttlDuration = config.getDuration("dvr.record.ttl.duration")
 
   import reactivemongo.play.json._
@@ -102,22 +100,23 @@ class DVRRepository @Inject()(
   private def query(organisationId: Long): (String, Json.JsValueWrapper) =
     "$or" -> Json.arr(Json.obj("organisationId" -> organisationId), Json.obj("agents" -> organisationId))
 
+  // TODO on startup
   {
-    loggur.info("** DVR-conv - start *****")
-    loggur.info(s"** DVR-conv - ttlDuration: ${ttlDuration.toSeconds}")
+    Logger.warn("** DVR-conv - start *****")
+    Logger.warn(s"** DVR-conv - ttlDuration: ${ttlDuration.toSeconds}")
 
     def log(dvr: DVRRecord) =
-      loggur.info(s"** DVR-conv ** $dvr : ${Instant.ofEpochMilli(dvr.createdAt.value)}")
+      Logger.warn(s"** DVR-conv ** $dvr : ${Instant.ofEpochMilli(dvr.createdAt.value)}")
 
     Await.result( for {
       before <- findAll
       _ = before.foreach(log)
       updated <- Future.traverse(before)(update)
-      _ = loggur.info("** DVR-conv converted")
+      _ = Logger.warn("** DVR-conv converted")
       _ = updated.foreach(log)
     } yield (updated.size), Duration.Inf)
 
-    loggur.info("** DVR-conv - end *****")
+    Logger.warn("** DVR-conv - end *****")
   }
 }
 
