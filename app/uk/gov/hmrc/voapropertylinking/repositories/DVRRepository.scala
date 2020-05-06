@@ -19,13 +19,12 @@ package uk.gov.hmrc.voapropertylinking.repositories
 import com.google.inject.name.Named
 import com.google.inject.{ImplementedBy, Singleton}
 import javax.inject.Inject
-
 import models.modernised.ccacasemanagement.requests.DetailedValuationRequest
 import play.api.Logger
 import play.api.libs.json._
 import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.indexes.{Index, IndexType}
-import reactivemongo.bson.BSONDocument
+import reactivemongo.bson.{BSONDateTime, BSONDocument}
 import reactivemongo.core.errors.DatabaseException
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
@@ -57,7 +56,7 @@ class DVRRepository @Inject()(
 
   override def create(request: DetailedValuationRequest): Future[Unit] =
     Mdc.preservingMdc {
-      insert(DVRRecord(request.organisationId, request.assessmentRef, request.agents, System.currentTimeMillis()))
+      insert(DVRRecord(request.organisationId, request.assessmentRef, request.agents))
         .map(_ => ())
         .recover {
           case e: DatabaseException => Logger.debug(e.getMessage())
@@ -86,12 +85,19 @@ class DVRRepository @Inject()(
 case class DVRRecord(
       organisationId: Long,
       assessmentRef: Long,
-      agents: Option[List[Long]],
-      createdAt: Long
+      agents: Option[List[Long]]
 )
 
 object DVRRecord {
-  val mongoFormat: OFormat[DVRRecord] = Json.format
+
+  import reactivemongo.play.json.BSONFormats.BSONDateTimeFormat
+
+  val mongoFormat: OFormat[DVRRecord] = new OFormat[DVRRecord] {
+    override def writes(o: DVRRecord): JsObject =
+      Json.writes[DVRRecord].writes(o) ++ Json.obj("createdAt" -> BSONDateTime(System.currentTimeMillis))
+
+    override def reads(json: JsValue): JsResult[DVRRecord] = Json.reads[DVRRecord].reads(json)
+  }
 }
 
 @ImplementedBy(classOf[DVRRepository])
