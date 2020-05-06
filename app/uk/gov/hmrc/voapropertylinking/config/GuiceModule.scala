@@ -64,8 +64,6 @@ class GuiceModule(
     bind(classOf[Clock]).toInstance(Clock.systemUTC())
 
     bindModernisedEndpoints()
-
-    bind(classOf[DVRRepository]).asEagerSingleton() // TODO remove after conversion
   }
 
   private def bindEndpoints(endpoints: Map[String, String], baseUrl: String): Unit =
