@@ -22,12 +22,15 @@ import models.mdtp.propertylink.requests.APIPropertyLinkRequest
 import models.modernised.Capacity.{Capacity => _, _}
 import models.modernised.{Capacity, Evidence, EvidenceType, ProvidedEvidence}
 import models.modernised.ProvidedEvidence.{apply => _, _}
+import models.modernised.externalpropertylink.myclients
+import models.modernised.externalpropertylink.myclients.ClientsResponse
 import models.modernised.externalpropertylink.myorganisations.{AgentDetails, AgentList, AgentSummary}
 import models.{FileInfo, GroupAccount, GroupAccountSubmission, GroupId, IndividualAccount, IndividualAccountSubmission, IndividualAccountSubmissionForOrganisation, IndividualDetails}
 import models.modernised.externalpropertylink.requests.CreatePropertyLink
 import play.api.libs.json.Json
 import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation
 import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation.{AgentOrganisation, AppointmentChangeResponse, OrganisationLatestDetail}
+import uk.gov.hmrc.voapropertylinking.models.modernised.casemanagement.check.myclients.Client
 
 trait FakeObjects {
 
@@ -193,5 +196,27 @@ trait FakeObjects {
   val organisationsAgentsList = AgentList(resultCount = 1, agents = List(agentSummary))
   val emptyOrganisationsAgentsList = AgentList(resultCount = 0, agents = List.empty)
   val appointmentChangeResponse = AppointmentChangeResponse(appointmentChangeId = "appointment change id")
+
+  val client1 =
+    myclients.Client(
+      organisationId = 12L,
+      name = "Client Org One",
+      appointedDate = LocalDate.now().minusDays(4L),
+      propertyCount = 1
+    )
+  val client2 =
+    myclients.Client(
+      organisationId = 22L,
+      name = "Client Org Two",
+      appointedDate = LocalDate.now().minusDays(3L),
+      propertyCount = 1
+    )
+
+  val clientsList =
+    ClientsResponse(
+      resultCount = Some(2),
+      clients = List(client1, client2)
+    )
+  val emptyClientsList = ClientsResponse(resultCount = None, clients = List.empty)
 
 }

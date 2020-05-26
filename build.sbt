@@ -15,6 +15,7 @@ lazy val appName = "voa-property-linking"
 lazy val playSettings: Seq[Setting[_]] = Seq(
   RoutesKeys.routesImport ++= Seq(
     "uk.gov.hmrc.voapropertylinking.binders.propertylinks._",
+    "uk.gov.hmrc.voapropertylinking.binders.clients._",
     "uk.gov.hmrc.voapropertylinking.binders.propertylinks.temp._",
     "scala.language.reflectiveCalls",
     "models._"

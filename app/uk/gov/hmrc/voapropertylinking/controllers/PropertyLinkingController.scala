@@ -26,6 +26,7 @@ import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.http.Upstream5xxResponse
 import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
 import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
+import uk.gov.hmrc.voapropertylinking.binders.clients.GetClientsParameters
 import uk.gov.hmrc.voapropertylinking.binders.propertylinks.temp.GetMyOrganisationsPropertyLinksParametersWithAgentFiltering
 import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import uk.gov.hmrc.voapropertylinking.connectors.modernised._
@@ -151,6 +152,13 @@ class PropertyLinkingController @Inject()(
       }
 
     }
+
+  def getMyClients(clientsParameters: Option[GetClientsParameters]): Action[AnyContent] = authenticated.async {
+    implicit request =>
+      propertyLinkService
+        .getMyClients(clientsParameters.getOrElse(GetClientsParameters()), None)
+        .map(clients => Ok(Json.toJson(clients)))
+  }
 
   // $COVERAGE-OFF$
   /*

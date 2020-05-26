@@ -19,11 +19,12 @@ package uk.gov.hmrc.voapropertylinking.connectors.modernised
 import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import javax.inject.{Inject, Named}
 import models.PaginationParams
-import models.modernised.externalpropertylink.myclients.{ClientPropertyLink, PropertyLinksWithClient}
+import models.modernised.externalpropertylink.myclients.{ClientPropertyLink, ClientsResponse, PropertyLinksWithClient}
 import models.modernised.externalpropertylink.myorganisations.{AgentList, OwnerPropertyLink, PropertyLinksWithAgents}
 import models.modernised.externalpropertylink.requests.CreatePropertyLink
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
+import uk.gov.hmrc.voapropertylinking.binders.clients.GetClientsParameters
 import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -37,7 +38,8 @@ class ExternalPropertyLinkApi @Inject()(
       @Named("voa.myClientsPropertyLink") myClientsPropertyLinkUrl: String,
       @Named("voa.createPropertyLink") createPropertyLinkUrl: String,
       @Named("voa.myOrganisationsAgents") myOrganisationsAgentsUrl: String,
-      @Named("voa.revokeClientsPropertyLink") revokeClientsPropertyLinkUrl: String
+      @Named("voa.revokeClientsPropertyLink") revokeClientsPropertyLinkUrl: String,
+      @Named("voa.myClients") myClientsUrl: String
 )(implicit executionContext: ExecutionContext)
     extends BaseVoaConnector {
 
@@ -98,6 +100,19 @@ class ExternalPropertyLinkApi @Inject()(
   def getClientsPropertyLink(submissionId: String)(
         implicit request: RequestWithPrincipal[_]): Future[Option[ClientPropertyLink]] =
     http.GET[Option[ClientPropertyLink]](myClientsPropertyLinkUrl.replace("{propertyLinkId}", submissionId))
+
+  def getMyClients(searchParams: GetClientsParameters, params: Option[PaginationParams])(
+        implicit request: RequestWithPrincipal[_]): Future[ClientsResponse] =
+    http
+      .GET[ClientsResponse](
+        myClientsUrl,
+        modernisedPaginationParams(params) ++
+          List(
+            searchParams.name.map("name"                           -> _),
+            searchParams.appointedFromDate.map("appointedFromDate" -> _.toString),
+            searchParams.appointedToDate.map("appointedToDate"     -> _.toString)
+          ).flatten
+      )
 
   def createPropertyLink(propertyLink: CreatePropertyLink)(
         implicit hc: HeaderCarrier,
