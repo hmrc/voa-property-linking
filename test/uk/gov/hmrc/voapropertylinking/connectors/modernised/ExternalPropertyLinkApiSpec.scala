@@ -20,12 +20,13 @@ import basespecs.BaseUnitSpec
 import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
 import models.PaginationParams
-import models.modernised.externalpropertylink.myclients.{ClientPropertyLink, PropertyLinksWithClient}
+import models.modernised.externalpropertylink.myclients.{ClientPropertyLink, ClientsResponse, PropertyLinksWithClient}
 import models.modernised.externalpropertylink.myorganisations.{AgentList, PropertyLinkWithAgents, PropertyLinksWithAgents}
 import models.modernised.externalpropertylink.requests.CreatePropertyLink
 import org.mockito.ArgumentMatchers.{any, eq => mEq}
 import org.mockito.Mockito._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.voapropertylinking.binders.clients.GetClientsParameters
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -68,6 +69,7 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
     val clientAuthorisationsUrl = s"$voaApiUrl/my-organisation/clients/all/property-links"
     val createPropertyLinkUrl = s"$voaApiUrl/my-organisation/property-links"
     val myOrganisationsAgentsUrl = s"$voaApiUrl/my-organisation/agents"
+    val myClientsUrl = s"$voaApiUrl/my-organisation/clients"
     val revokeClientsPropertyLinkUrl =
       s"$voaApiUrl/my-organisation/clients/all/property-links/{submissionId}/appointment"
     val httpstring = "VoaAuthedBackendHttp"
@@ -81,7 +83,8 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
       myClientsPropertyLinksUrl = clientAuthorisationsUrl,
       createPropertyLinkUrl = createPropertyLinkUrl,
       myOrganisationsAgentsUrl = myOrganisationsAgentsUrl,
-      revokeClientsPropertyLinkUrl = revokeClientsPropertyLinkUrl
+      revokeClientsPropertyLinkUrl = revokeClientsPropertyLinkUrl,
+      myClientsUrl = myClientsUrl
     )
 
     val paginationParams = PaginationParams(1, 1, true)
@@ -226,6 +229,25 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
 
       verify(connector.http)
         .GET(mEq(myOrganisationsAgentsUrl), mEq(List("requestTotalRowCount" -> "true")))(any(), any(), any(), any())
+    }
+
+  }
+
+  "get my clients" should {
+
+    "return the clients for the given agent organisation" in new Setup {
+
+      val mockReturnedClientsResponse: ClientsResponse = mock[ClientsResponse]
+
+      when(connector.http.GET[ClientsResponse](any(), any())(any(), any(), any(), any()))
+        .thenReturn(Future.successful(mockReturnedClientsResponse))
+
+      connector
+        .getMyClients(GetClientsParameters(), None)
+        .futureValue shouldBe mockReturnedClientsResponse
+
+      verify(connector.http)
+        .GET(mEq(myClientsUrl), mEq(List()))(any(), any(), any(), any())
     }
 
   }

@@ -80,6 +80,7 @@ class GuiceModule(
         "voa.myOrganisationsAgents"         -> "voa.resources.externalPropertyLink.myOrganisationsAgents.path",
         "voa.myClientsPropertyLink"         -> "voa.resources.externalPropertyLink.myClientsPropertyLink.path",
         "voa.myClientsPropertyLinks"        -> "voa.resources.externalPropertyLink.myClientsPropertyLinks.path",
+        "voa.myClients"                     -> "voa.resources.externalPropertyLink.myClients.path",
         "voa.createPropertyLink"            -> "voa.resources.externalPropertyLink.createPropertyLink.path",
         "voa.revokeClientsPropertyLink"     -> "voa.resources.externalPropertyLink.revokeMyClientsPropertyLink.path",
         "voa.createRepresentationRequest"   -> "voa.resources.authorisationManagementApi.createRepresentationRequest.path",

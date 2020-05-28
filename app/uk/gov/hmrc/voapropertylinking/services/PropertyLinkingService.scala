@@ -19,16 +19,16 @@ package uk.gov.hmrc.voapropertylinking.services
 import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import cats.data.OptionT
 import javax.inject.Inject
-
 import models._
 import models.mdtp.propertylink.myclients.PropertyLinksWithClients
 import models.mdtp.propertylink.projections.OwnerAuthResult
 import models.mdtp.propertylink.requests.APIPropertyLinkRequest
-import models.modernised.externalpropertylink.myclients.ClientPropertyLink
+import models.modernised.externalpropertylink.myclients.{ClientPropertyLink, ClientsResponse}
 import models.modernised.externalpropertylink.myorganisations.{AgentList, PropertyLinksWithAgents}
 import models.modernised.externalpropertylink.requests.CreatePropertyLink
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
+import uk.gov.hmrc.voapropertylinking.binders.clients.GetClientsParameters
 import uk.gov.hmrc.voapropertylinking.connectors.modernised.{ExternalPropertyLinkApi, ExternalValuationManagementApi}
 import uk.gov.hmrc.voapropertylinking.utils.Cats
 
@@ -72,6 +72,12 @@ class PropertyLinkingService @Inject()(
   )(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): OptionT[Future, PropertyLinksWithClients] =
     OptionT(propertyLinksConnector.getClientsPropertyLinks(searchParams, paginationParams))
       .map(PropertyLinksWithClients.apply)
+
+  def getMyClients(
+        searchParams: GetClientsParameters,
+        paginationParams: Option[PaginationParams]
+  )(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[ClientsResponse] =
+    propertyLinksConnector.getMyClients(searchParams, paginationParams)
 
   def getMyOrganisationsPropertyLinks(
         searchParams: GetMyOrganisationPropertyLinksParameters,

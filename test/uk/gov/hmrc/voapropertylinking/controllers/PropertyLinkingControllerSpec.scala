@@ -34,6 +34,7 @@ import play.api.mvc.Result
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.http.{HttpResponse, Upstream5xxResponse}
 import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
+import uk.gov.hmrc.voapropertylinking.binders.clients.GetClientsParameters
 import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import utils.FakeObjects
 
@@ -317,6 +318,28 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
 
       status(res) shouldBe OK
       contentAsJson(res) shouldBe Json.toJson(emptyOrganisationsAgentsList)
+    }
+  }
+
+  "getMyClients" should {
+    "return clients for the agent organisation" in {
+      when(mockPropertyLinkingService.getMyClients(any(), any())(any(), any()))
+        .thenReturn(Future.successful(clientsList))
+
+      val res = testController.getMyClients(Some(GetClientsParameters()))(FakeRequest())
+
+      status(res) shouldBe OK
+      contentAsJson(res) shouldBe Json.toJson(clientsList)
+    }
+
+    "return empty clients list for the organisation if the agent organisation has no clients" in {
+      when(mockPropertyLinkingService.getMyClients(any(), any())(any(), any()))
+        .thenReturn(Future.successful(emptyClientsList))
+
+      val res = testController.getMyClients(Some(GetClientsParameters()))(FakeRequest())
+
+      status(res) shouldBe OK
+      contentAsJson(res) shouldBe Json.toJson(emptyClientsList)
     }
   }
 

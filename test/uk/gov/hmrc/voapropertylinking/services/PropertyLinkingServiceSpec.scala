@@ -29,6 +29,7 @@ import models.modernised.externalpropertylink.myorganisations._
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import uk.gov.hmrc.http.HttpResponse
+import uk.gov.hmrc.voapropertylinking.binders.clients.GetClientsParameters
 
 import scala.concurrent.Future
 
@@ -381,6 +382,41 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
 
       verify(mockExternalPropertyLinkApi)
         .getMyOrganisationsAgents()
+
+    }
+  }
+
+  "getMyClients" should {
+    "call connector and return the list of clients belonging to that agent organisation" in {
+      when(
+        mockExternalPropertyLinkApi
+          .getMyClients(any(), any())(any()))
+        .thenReturn(Future.successful(clientsList))
+
+      val result = service
+        .getMyClients(GetClientsParameters(), Some(PaginationParams(1, 15, true)))
+        .futureValue
+
+      result shouldBe clientsList
+
+      verify(mockExternalPropertyLinkApi)
+        .getMyClients(any(), any())(any())
+    }
+
+    "return none when nothing is returned from connector" in {
+      when(
+        mockExternalPropertyLinkApi
+          .getMyClients(any(), any())(any()))
+        .thenReturn(Future.successful(emptyClientsList))
+
+      val result = service
+        .getMyClients(GetClientsParameters(), Some(PaginationParams(1, 15, true)))
+        .futureValue
+
+      result shouldBe emptyClientsList
+
+      verify(mockExternalPropertyLinkApi)
+        .getMyClients(any(), any())(any())
 
     }
   }
