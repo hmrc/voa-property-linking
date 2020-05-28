@@ -332,7 +332,7 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
       contentAsJson(res) shouldBe Json.toJson(clientsList)
     }
 
-    "return empty clients list for the organisation if the agent organisation have no clients" in {
+    "return empty clients list for the organisation if the agent organisation has no clients" in {
       when(mockPropertyLinkingService.getMyClients(any(), any())(any(), any()))
         .thenReturn(Future.successful(emptyClientsList))
 
