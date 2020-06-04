@@ -155,9 +155,9 @@ class PropertyLinkingController @Inject()(
 
   def getMyClients(
         clientsParameters: Option[GetClientsParameters],
-        params: Option[PaginationParams]): Action[AnyContent] = authenticated.async { implicit request =>
+        paginationParams: Option[PaginationParams]): Action[AnyContent] = authenticated.async { implicit request =>
     propertyLinkService
-      .getMyClients(clientsParameters.getOrElse(GetClientsParameters()), params)
+      .getMyClients(clientsParameters.getOrElse(GetClientsParameters()), paginationParams)
       .map(clients => Ok(Json.toJson(clients)))
   }
 
