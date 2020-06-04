@@ -326,7 +326,9 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
       when(mockPropertyLinkingService.getMyClients(any(), any())(any(), any()))
         .thenReturn(Future.successful(clientsList))
 
-      val res = testController.getMyClients(Some(GetClientsParameters()))(FakeRequest())
+      val res = testController.getMyClients(
+        Some(GetClientsParameters()),
+        Some(PaginationParams(startPoint = 1, pageSize = 10, requestTotalRowCount = true)))(FakeRequest())
 
       status(res) shouldBe OK
       contentAsJson(res) shouldBe Json.toJson(clientsList)
@@ -336,7 +338,9 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
       when(mockPropertyLinkingService.getMyClients(any(), any())(any(), any()))
         .thenReturn(Future.successful(emptyClientsList))
 
-      val res = testController.getMyClients(Some(GetClientsParameters()))(FakeRequest())
+      val res = testController.getMyClients(
+        Some(GetClientsParameters()),
+        Some(PaginationParams(startPoint = 1, pageSize = 10, requestTotalRowCount = true)))(FakeRequest())
 
       status(res) shouldBe OK
       contentAsJson(res) shouldBe Json.toJson(emptyClientsList)
