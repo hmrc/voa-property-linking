@@ -129,11 +129,9 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
 
       val getMyAgentPropertyLinksQueryParams = queryParams :+ ("address" -> address) :+ ("uarn" -> uarn.toString) :+ ("baref" -> baref) :+ ("agent" -> agent) :+ ("status" -> status) :+ ("sortfield" -> sortField) :+ ("sortorder" -> sortOrder)
       verify(connector.http)
-        .GET(mEq(agentAuthorisationsUrl.replace("{agentCode}", agentCode.toString)), mEq(getMyAgentPropertyLinksQueryParams))(
-          any(),
-          any(),
-          any(),
-          any())
+        .GET(
+          mEq(agentAuthorisationsUrl.replace("{agentCode}", agentCode.toString)),
+          mEq(getMyAgentPropertyLinksQueryParams))(any(), any(), any(), any())
     }
 
   }
@@ -206,7 +204,12 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
       connector.createPropertyLink(mockVoaCreatePropertyLink).futureValue shouldBe mockHttpResponse
 
       verify(connector.http)
-        .POST(mEq(createPropertyLinkUrl), mEq(mockVoaCreatePropertyLink), mEq(Seq()))(any(), any(), any(), any(), any())
+        .POST(mEq(createPropertyLinkUrl), mEq(mockVoaCreatePropertyLink), mEq(Seq()))(
+          any(),
+          any(),
+          any(),
+          any(),
+          any())
     }
 
   }
