@@ -21,6 +21,7 @@ import uk.gov.hmrc.voapropertylinking.binders.validation.ValidatingBinder
 
 case class GetMyOrganisationPropertyLinksParameters(
       address: Option[String] = None,
+      uarn: Option[Long] = None,
       baref: Option[String] = None,
       agent: Option[String] = None,
       client: Option[String] = None,
@@ -34,6 +35,7 @@ object GetMyOrganisationPropertyLinksParameters extends ValidatingBinder[GetMyOr
   override def validate(params: Params): ValidationResult[GetMyOrganisationPropertyLinksParameters] =
     (
       validateString("address", params),
+      validateUarn("uarn", params),
       validateString("baref", params),
       validateString("agent", params),
       validateString("client", params),
@@ -44,5 +46,8 @@ object GetMyOrganisationPropertyLinksParameters extends ValidatingBinder[GetMyOr
 
   private def validateString(implicit key: String, params: Params): ValidationResult[Option[String]] =
     readOption(key, params)
+
+  private def validateUarn(implicit key: String, params: Params): ValidationResult[Option[Long]] =
+    readOption.ifPresent(uarnString => asLong(uarnString) andThen min(1))
 
 }

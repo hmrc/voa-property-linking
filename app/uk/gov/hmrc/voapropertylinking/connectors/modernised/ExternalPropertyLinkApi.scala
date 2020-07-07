@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
-import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import javax.inject.{Inject, Named}
 import models.PaginationParams
 import models.modernised.externalpropertylink.myclients.{ClientPropertyLink, ClientsResponse, PropertyLinksWithClient}
@@ -25,6 +24,7 @@ import models.modernised.externalpropertylink.requests.CreatePropertyLink
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
 import uk.gov.hmrc.voapropertylinking.binders.clients.GetClientsParameters
+import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -52,6 +52,7 @@ class ExternalPropertyLinkApi @Inject()(
       modernisedPaginationParams(Some(params)) ++
         List(
           searchParams.address.map("address"     -> _),
+          searchParams.uarn.map("uarn"           -> _.toString),
           searchParams.baref.map("baref"         -> _),
           searchParams.agent.map("agent"         -> _),
           searchParams.status.map("status"       -> _),
@@ -68,6 +69,7 @@ class ExternalPropertyLinkApi @Inject()(
       modernisedPaginationParams(params) ++
         List(
           searchParams.address.map("address"     -> _),
+          searchParams.uarn.map("uarn"           -> _.toString),
           searchParams.baref.map("baref"         -> _),
           searchParams.agent.map("agent"         -> _),
           searchParams.status.map("status"       -> _),
