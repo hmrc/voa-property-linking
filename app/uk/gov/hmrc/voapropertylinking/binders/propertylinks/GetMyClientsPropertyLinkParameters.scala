@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.voapropertylinking.binders.propertylinks
 
+import java.time.LocalDate
+
 import binders.{Params, ValidationResult}
 import uk.gov.hmrc.voapropertylinking.binders.validation.ValidatingBinder
 
@@ -26,7 +28,9 @@ case class GetMyClientsPropertyLinkParameters(
       status: Option[String] = None,
       sortField: Option[String] = None,
       sortOrder: Option[String] = None,
-      representationStatus: Option[String] = None
+      representationStatus: Option[String] = None,
+      appointedFromDate: Option[LocalDate] = None,
+      appointedToDate: Option[LocalDate] = None
 )
 
 object GetMyClientsPropertyLinkParameters extends ValidatingBinder[GetMyClientsPropertyLinkParameters] {
@@ -39,10 +43,15 @@ object GetMyClientsPropertyLinkParameters extends ValidatingBinder[GetMyClientsP
       validateString("status", params),
       validateString("sortField", params),
       validateString("sortOrder", params),
-      validateString("representationStatus", params)
+      validateString("representationStatus", params),
+      validateLocalDate("appointedFromDate", params),
+      validateLocalDate("appointedToDate", params)
     ).mapN(GetMyClientsPropertyLinkParameters.apply)
 
   def validateString(implicit key: String, params: Params): ValidationResult[Option[String]] =
     readOption(key, params)
+
+  def validateLocalDate(implicit key: String, params: Params): ValidationResult[Option[LocalDate]] =
+    readOption ifPresent asLocalDate
 
 }
