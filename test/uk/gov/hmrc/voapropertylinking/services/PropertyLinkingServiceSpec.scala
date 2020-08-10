@@ -163,6 +163,7 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
     uarn = 33333,
     address = "1 HIGH STREET, BRIGHTON",
     localAuthorityRef = "44444",
+    appointedDate = date,
     client = ClientDetails(55555, "mock org")
   )
 

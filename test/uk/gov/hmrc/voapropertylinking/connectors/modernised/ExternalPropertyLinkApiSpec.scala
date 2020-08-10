@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
+import java.time.LocalDate
+
 import basespecs.BaseUnitSpec
 import models.PaginationParams
 import models.modernised.externalpropertylink.myclients.{ClientPropertyLink, ClientsResponse, PropertyLinksWithClient}
@@ -41,6 +43,8 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
     val status = "mock status"
     val sortField = "mock sort field"
     val sortOrder = "mock sort order"
+    val appointedFromDate = LocalDate.parse("2020-01-01")
+    val appointedToDate = LocalDate.parse("2020-03-01")
 
     val getMyOrganisationSearchParams = GetMyOrganisationPropertyLinksParameters(
       address = Some(address),
@@ -59,7 +63,9 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
       status = Some(status),
       Some(sortField),
       Some(sortOrder),
-      representationStatus = None)
+      representationStatus = None,
+      Some(appointedFromDate),
+      Some(appointedToDate))
 
     val voaApiUrl = "http://voa-modernised-api/external-property-link-management-api"
     val agentAuthorisationsUrl = s"$voaApiUrl/my-organisation/agents/{agentCode}/property-links"
@@ -165,7 +171,7 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
         .getClientsPropertyLinks(getMyClientsSearchParams, Some(paginationParams))
         .futureValue shouldBe mockReturnedPropertyLinks
 
-      val clientQueryParams = queryParams :+ ("address" -> address) :+ ("baref" -> baref) :+ ("client" -> agent) :+ ("status" -> status) :+ ("sortfield" -> sortField) :+ ("sortorder" -> sortOrder)
+      val clientQueryParams = queryParams :+ ("address" -> address) :+ ("baref" -> baref) :+ ("client" -> agent) :+ ("status" -> status) :+ ("sortfield" -> sortField) :+ ("sortorder" -> sortOrder) :+ ("appointedFromDate" -> appointedFromDate.toString) :+ ("appointedToDate" -> appointedToDate.toString)
       verify(connector.http).GET(mEq(clientAuthorisationsUrl), mEq(clientQueryParams))(any(), any(), any(), any())
     }
 

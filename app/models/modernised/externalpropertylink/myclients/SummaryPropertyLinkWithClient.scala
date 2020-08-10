@@ -31,6 +31,7 @@ case class SummaryPropertyLinkWithClient(
       uarn: Long,
       address: String,
       localAuthorityRef: String,
+      appointedDate: LocalDate,
       client: ClientDetails
 )
 

@@ -95,7 +95,9 @@ class ExternalPropertyLinkApi @Inject()(
             searchParams.status.map("status"                             -> _),
             searchParams.sortField.map("sortfield"                       -> _),
             searchParams.sortOrder.map("sortorder"                       -> _),
-            searchParams.representationStatus.map("representationStatus" -> _)
+            searchParams.representationStatus.map("representationStatus" -> _),
+            searchParams.appointedFromDate.map("appointedFromDate"       -> _.toString),
+            searchParams.appointedToDate.map("appointedToDate"           -> _.toString)
           ).flatten
       )
 
