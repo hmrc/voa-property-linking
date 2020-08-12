@@ -45,6 +45,11 @@ class PropertyLinkingService @Inject()(
         request: RequestWithPrincipal[_]): Future[HttpResponse] =
     propertyLinksConnector.createPropertyLink(CreatePropertyLink(propertyLink))
 
+  def createOnClientBehalf(propertyLink: APIPropertyLinkRequest, clientId: Long)(
+    implicit hc: HeaderCarrier,
+    request: RequestWithPrincipal[_]): Future[HttpResponse] =
+    propertyLinksConnector.createOnClientBehalf(CreatePropertyLink(propertyLink), clientId)
+
   def getClientsPropertyLink(submissionId: String)(
         implicit hc: HeaderCarrier,
         request: RequestWithPrincipal[_]): OptionT[Future, ClientPropertyLink] =

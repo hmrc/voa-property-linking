@@ -44,6 +44,7 @@ GET          /property-links/:plSubmissionId/check-cases/:checkCaseRef/canChalle
 
 #My Property Links
 POST         /property-links                                                                  @uk.gov.hmrc.voapropertylinking.controllers.PropertyLinkingController.create()
+POST         /clients/:clientId/property-links                                                @uk.gov.hmrc.voapropertylinking.controllers.PropertyLinkingController.createOnClientBehalf(clientId: Long)
 
 GET          /owner/agents                                                                    @uk.gov.hmrc.voapropertylinking.controllers.PropertyLinkingController.getMyOrganisationsAgents()
 GET          /owner/property-links                                                            @uk.gov.hmrc.voapropertylinking.controllers.PropertyLinkingController.getMyOrganisationsPropertyLinks(searchParams: GetMyOrganisationPropertyLinksParameters, params: Option[models.PaginationParams], organisationId: Option[Long] ?= None)

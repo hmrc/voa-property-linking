@@ -67,6 +67,24 @@ class PropertyLinkingController @Inject()(
     }
   }
 
+  def createOnClientBehalf(clientId: Long): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
+    withJsonBody[PropertyLinkRequest] { propertyLinkRequest =>
+      propertyLinkService
+        .createOnClientBehalf(APIPropertyLinkRequest.fromPropertyLinkRequest(propertyLinkRequest), clientId)
+        .map { _ =>
+          Logger.info(s"create property link on client behalf: submissionId ${propertyLinkRequest.submissionId}")
+          auditingService.sendEvent("create property link on client behalf", propertyLinkRequest)
+          Accepted
+        }
+        .recover {
+          case _: Upstream5xxResponse =>
+            Logger.info(s"create property link on client behalf failure: submissionId ${propertyLinkRequest.submissionId}")
+            auditingService.sendEvent("create property link on client behalf failure", propertyLinkRequest)
+            InternalServerError
+        }
+    }
+  }
+
   def getMyOrganisationsPropertyLink(submissionId: String): Action[AnyContent] = authenticated.async {
     implicit request =>
       propertyLinkService

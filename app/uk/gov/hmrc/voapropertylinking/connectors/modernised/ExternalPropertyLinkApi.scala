@@ -37,6 +37,7 @@ class ExternalPropertyLinkApi @Inject()(
       @Named("voa.myClientsPropertyLinks") myClientsPropertyLinksUrl: String,
       @Named("voa.myClientsPropertyLink") myClientsPropertyLinkUrl: String,
       @Named("voa.createPropertyLink") createPropertyLinkUrl: String,
+      @Named("voa.createPropertyLinkOnClientBehalf") createPropertyLinkOnClientBehalfUrl: String,
       @Named("voa.myOrganisationsAgents") myOrganisationsAgentsUrl: String,
       @Named("voa.revokeClientsPropertyLink") revokeClientsPropertyLinkUrl: String,
       @Named("voa.myClients") myClientsUrl: String
@@ -123,6 +124,12 @@ class ExternalPropertyLinkApi @Inject()(
         request: RequestWithPrincipal[_]): Future[HttpResponse] =
     http
       .POST[CreatePropertyLink, HttpResponse](createPropertyLinkUrl, propertyLink, Seq())
+
+  def createOnClientBehalf(propertyLink: CreatePropertyLink, clientId: Long)(
+    implicit hc: HeaderCarrier,
+    request: RequestWithPrincipal[_]): Future[HttpResponse] =
+    http
+      .POST[CreatePropertyLink, HttpResponse](createPropertyLinkOnClientBehalfUrl.templated("clientId" -> clientId), propertyLink, Seq())
 
   def getMyOrganisationsAgents()(implicit request: RequestWithPrincipal[_]): Future[AgentList] =
     http.GET[AgentList](myOrganisationsAgentsUrl, List("requestTotalRowCount" -> "true"))
