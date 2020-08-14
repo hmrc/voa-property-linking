@@ -28,7 +28,7 @@ import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
 import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import uk.gov.hmrc.voapropertylinking.binders.clients.GetClientsParameters
 import uk.gov.hmrc.voapropertylinking.binders.propertylinks.temp.GetMyOrganisationsPropertyLinksParametersWithAgentFiltering
-import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
+import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetClientPropertyLinksParameters, GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import uk.gov.hmrc.voapropertylinking.connectors.modernised._
 import uk.gov.hmrc.voapropertylinking.errorhandler.models.ErrorResponse
 import uk.gov.hmrc.voapropertylinking.services.{AssessmentService, PropertyLinkingService}
@@ -78,7 +78,8 @@ class PropertyLinkingController @Inject()(
         }
         .recover {
           case _: Upstream5xxResponse =>
-            Logger.info(s"create property link on client behalf failure: submissionId ${propertyLinkRequest.submissionId}")
+            Logger.info(
+              s"create property link on client behalf failure: submissionId ${propertyLinkRequest.submissionId}")
             auditingService.sendEvent("create property link on client behalf failure", propertyLinkRequest)
             InternalServerError
         }
@@ -145,6 +146,15 @@ class PropertyLinkingController @Inject()(
         paginationParams: Option[PaginationParams]): Action[AnyContent] = authenticated.async { implicit request =>
     propertyLinkService
       .getClientsPropertyLinks(searchParams, paginationParams)
+      .fold(NotFound("clients property links not found"))(propertyLinks => Ok(Json.toJson(propertyLinks)))
+  }
+
+  def getClientPropertyLinks(
+        clientId: Long,
+        searchParams: GetClientPropertyLinksParameters,
+        paginationParams: Option[PaginationParams]): Action[AnyContent] = authenticated.async { implicit request =>
+    propertyLinkService
+      .getClientPropertyLinks(clientId, searchParams, paginationParams)
       .fold(NotFound("clients property links not found"))(propertyLinks => Ok(Json.toJson(propertyLinks)))
   }
 
