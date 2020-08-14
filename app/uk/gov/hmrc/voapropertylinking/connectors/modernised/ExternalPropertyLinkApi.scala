@@ -24,7 +24,7 @@ import models.modernised.externalpropertylink.requests.CreatePropertyLink
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
 import uk.gov.hmrc.voapropertylinking.binders.clients.GetClientsParameters
-import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
+import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetClientPropertyLinksParameters, GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -35,6 +35,7 @@ class ExternalPropertyLinkApi @Inject()(
       @Named("voa.myOrganisationsPropertyLinks") myOrganisationsPropertyLinksUrl: String,
       @Named("voa.myOrganisationsPropertyLink") myOrganisationsPropertyLinkUrl: String,
       @Named("voa.myClientsPropertyLinks") myClientsPropertyLinksUrl: String,
+      @Named("voa.myClientPropertyLinks") myClientPropertyLinksUrl: String,
       @Named("voa.myClientsPropertyLink") myClientsPropertyLinkUrl: String,
       @Named("voa.createPropertyLink") createPropertyLinkUrl: String,
       @Named("voa.createPropertyLinkOnClientBehalf") createPropertyLinkOnClientBehalfUrl: String,
@@ -102,6 +103,27 @@ class ExternalPropertyLinkApi @Inject()(
           ).flatten
       )
 
+  def getAssignedPropertyLinksForClient(
+        clientOrgId: Long,
+        searchParams: GetClientPropertyLinksParameters,
+        params: Option[PaginationParams])(
+        implicit request: RequestWithPrincipal[_]): Future[Option[PropertyLinksWithClient]] =
+    http
+      .GET[Option[PropertyLinksWithClient]](
+        myClientPropertyLinksUrl.replace("{clientId}", clientOrgId.toString),
+        modernisedPaginationParams(params) ++
+          List(
+            searchParams.address.map("address"                           -> _),
+            searchParams.baref.map("baref"                               -> _),
+            searchParams.status.map("status"                             -> _),
+            searchParams.sortField.map("sortfield"                       -> _),
+            searchParams.sortOrder.map("sortorder"                       -> _),
+            searchParams.representationStatus.map("representationStatus" -> _),
+            searchParams.appointedFromDate.map("appointedFromDate"       -> _.toString),
+            searchParams.appointedToDate.map("appointedToDate"           -> _.toString)
+          ).flatten
+      )
+
   def getClientsPropertyLink(submissionId: String)(
         implicit request: RequestWithPrincipal[_]): Future[Option[ClientPropertyLink]] =
     http.GET[Option[ClientPropertyLink]](myClientsPropertyLinkUrl.replace("{propertyLinkId}", submissionId))
@@ -126,10 +148,13 @@ class ExternalPropertyLinkApi @Inject()(
       .POST[CreatePropertyLink, HttpResponse](createPropertyLinkUrl, propertyLink, Seq())
 
   def createOnClientBehalf(propertyLink: CreatePropertyLink, clientId: Long)(
-    implicit hc: HeaderCarrier,
-    request: RequestWithPrincipal[_]): Future[HttpResponse] =
+        implicit hc: HeaderCarrier,
+        request: RequestWithPrincipal[_]): Future[HttpResponse] =
     http
-      .POST[CreatePropertyLink, HttpResponse](createPropertyLinkOnClientBehalfUrl.templated("clientId" -> clientId), propertyLink, Seq())
+      .POST[CreatePropertyLink, HttpResponse](
+        createPropertyLinkOnClientBehalfUrl.templated("clientId" -> clientId),
+        propertyLink,
+        Seq())
 
   def getMyOrganisationsAgents()(implicit request: RequestWithPrincipal[_]): Future[AgentList] =
     http.GET[AgentList](myOrganisationsAgentsUrl, List("requestTotalRowCount" -> "true"))
