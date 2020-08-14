@@ -78,7 +78,8 @@ class PropertyLinkingController @Inject()(
         }
         .recover {
           case _: Upstream5xxResponse =>
-            Logger.info(s"create property link on client behalf failure: submissionId ${propertyLinkRequest.submissionId}")
+            Logger.info(
+              s"create property link on client behalf failure: submissionId ${propertyLinkRequest.submissionId}")
             auditingService.sendEvent("create property link on client behalf failure", propertyLinkRequest)
             InternalServerError
         }
