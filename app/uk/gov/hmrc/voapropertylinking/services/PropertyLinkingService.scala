@@ -25,7 +25,7 @@ import models.mdtp.propertylink.projections.OwnerAuthResult
 import models.mdtp.propertylink.requests.APIPropertyLinkRequest
 import models.modernised.externalpropertylink.myclients.{ClientPropertyLink, ClientsResponse}
 import models.modernised.externalpropertylink.myorganisations.{AgentList, PropertyLinksWithAgents}
-import models.modernised.externalpropertylink.requests.CreatePropertyLink
+import models.modernised.externalpropertylink.requests.{CreatePropertyLink, CreatePropertyLinkOnClientBehalf}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
 import uk.gov.hmrc.voapropertylinking.binders.clients.GetClientsParameters
@@ -48,7 +48,7 @@ class PropertyLinkingService @Inject()(
   def createOnClientBehalf(propertyLink: APIPropertyLinkRequest, clientId: Long)(
         implicit hc: HeaderCarrier,
         request: RequestWithPrincipal[_]): Future[HttpResponse] =
-    propertyLinksConnector.createOnClientBehalf(CreatePropertyLink(propertyLink), clientId)
+    propertyLinksConnector.createOnClientBehalf(CreatePropertyLinkOnClientBehalf(propertyLink), clientId)
 
   def getClientsPropertyLink(submissionId: String)(
         implicit hc: HeaderCarrier,

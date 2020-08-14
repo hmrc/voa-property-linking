@@ -269,6 +269,20 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
     }
   }
 
+  "create on client behalf" should {
+    "call create connector method with correct params" in {
+      val clientId = 100
+      when(mockExternalPropertyLinkApi.createOnClientBehalf(any(), any())(any(), any()))
+        .thenReturn(Future.successful(mockHttpResponse))
+
+      val response = service.createOnClientBehalf(apiPropertyLinkRequest, clientId).futureValue
+
+      response shouldBe mockHttpResponse
+
+      verify(mockExternalPropertyLinkApi).createOnClientBehalf(any(), any())(any(), any())
+    }
+  }
+
   "getClientsPropertyLinks" should {
     "call connector and return a Owner Auth Result for a valid authorisation id" in {
 

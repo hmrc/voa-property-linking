@@ -20,7 +20,7 @@ import javax.inject.{Inject, Named}
 import models.PaginationParams
 import models.modernised.externalpropertylink.myclients.{ClientPropertyLink, ClientsResponse, PropertyLinksWithClient}
 import models.modernised.externalpropertylink.myorganisations.{AgentList, OwnerPropertyLink, PropertyLinksWithAgents}
-import models.modernised.externalpropertylink.requests.CreatePropertyLink
+import models.modernised.externalpropertylink.requests.{CreatePropertyLink, CreatePropertyLinkOnClientBehalf}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
 import uk.gov.hmrc.voapropertylinking.binders.clients.GetClientsParameters
@@ -147,11 +147,11 @@ class ExternalPropertyLinkApi @Inject()(
     http
       .POST[CreatePropertyLink, HttpResponse](createPropertyLinkUrl, propertyLink, Seq())
 
-  def createOnClientBehalf(propertyLink: CreatePropertyLink, clientId: Long)(
+  def createOnClientBehalf(propertyLink: CreatePropertyLinkOnClientBehalf, clientId: Long)(
         implicit hc: HeaderCarrier,
         request: RequestWithPrincipal[_]): Future[HttpResponse] =
     http
-      .POST[CreatePropertyLink, HttpResponse](
+      .POST[CreatePropertyLinkOnClientBehalf, HttpResponse](
         createPropertyLinkOnClientBehalfUrl.templated("clientId" -> clientId),
         propertyLink,
         Seq())

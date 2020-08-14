@@ -171,6 +171,54 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
     }
   }
 
+  "create on client behalf" should {
+    "create a new property link submission in modernised" in {
+      val clientId = 100
+      val testCapacityDeclaration = CapacityDeclaration("TEST_CAPACITY", today, None)
+      val testPropertyLinkSubmission = PropertyLinkRequest(
+        uarn = 1,
+        organisationId = 1,
+        individualId = 1,
+        capacityDeclaration = testCapacityDeclaration,
+        linkedDate = Instant.now(),
+        linkBasis = "TEST_BASIS",
+        fileInfo = Seq(FileInfo("filename", "evidenceType")),
+        submissionId = "PL12345"
+      )
+
+      val plSubmissionJson = Json.toJson(testPropertyLinkSubmission)
+
+      when(mockPropertyLinkingService.createOnClientBehalf(any(), any())(any(), any()))
+        .thenReturn(Future.successful(HttpResponse(200)))
+
+      val res = testController.createOnClientBehalf(clientId)(FakeRequest().withBody(plSubmissionJson))
+      status(res) shouldBe ACCEPTED
+    }
+
+    "return InternalServerError if property link submission fails" in {
+      val clientId = 100
+      val testCapacityDeclaration = CapacityDeclaration("TEST_CAPACITY", today, None)
+      val testPropertyLinkSubmission = PropertyLinkRequest(
+        uarn = 1,
+        organisationId = 1,
+        individualId = 1,
+        capacityDeclaration = testCapacityDeclaration,
+        linkedDate = Instant.now(),
+        linkBasis = "TEST_BASIS",
+        fileInfo = Seq(FileInfo("filename", "evidenceType")),
+        submissionId = "PL12345"
+      )
+
+      val plSubmissionJson = Json.toJson(testPropertyLinkSubmission)
+
+      when(mockPropertyLinkingService.createOnClientBehalf(any(), any())(any(), any()))
+        .thenReturn(Future.failed(Upstream5xxResponse("Failed to create PL", 501, 501)))
+
+      val res = testController.createOnClientBehalf(clientId)(FakeRequest().withBody(plSubmissionJson))
+      status(res) shouldBe INTERNAL_SERVER_ERROR
+    }
+  }
+
   "getMyPropertyLink" should {
     "return a single my org property link" in {
       when(mockPropertyLinkingService.getMyOrganisationsPropertyLink(any())(any(), any()))

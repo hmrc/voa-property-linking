@@ -22,7 +22,7 @@ import basespecs.BaseUnitSpec
 import models.PaginationParams
 import models.modernised.externalpropertylink.myclients.{ClientPropertyLink, ClientsResponse, PropertyLinksWithClient}
 import models.modernised.externalpropertylink.myorganisations.{AgentList, PropertyLinkWithAgents, PropertyLinksWithAgents}
-import models.modernised.externalpropertylink.requests.CreatePropertyLink
+import models.modernised.externalpropertylink.requests.{CreatePropertyLink, CreatePropertyLinkOnClientBehalf}
 import org.mockito.ArgumentMatchers.{any, eq => mEq}
 import org.mockito.Mockito._
 import uk.gov.hmrc.http.HttpResponse
@@ -76,7 +76,7 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
     val clientAuthorisationsUrl = s"$voaApiUrl/my-organisation/clients/all/property-links"
     val myClientPropertyLinksUrl = s"$voaApiUrl/my-organisation/clients/{clientId}/property-links"
     val createPropertyLinkUrl = s"$voaApiUrl/my-organisation/property-links"
-    val createPropertyLinkOnClientBehalfUrl = s""
+    val createPropertyLinkOnClientBehalfUrl = s"$voaApiUrl/my-organisation/clients/{clientId}/property-links"
     val myOrganisationsAgentsUrl = s"$voaApiUrl/my-organisation/agents"
     val myClientsUrl = s"$voaApiUrl/my-organisation/clients"
     val revokeClientsPropertyLinkUrl =
@@ -92,7 +92,7 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
       myClientPropertyLinksUrl = myClientPropertyLinksUrl,
       myClientsPropertyLinksUrl = clientAuthorisationsUrl,
       createPropertyLinkUrl = createPropertyLinkUrl,
-      createPropertyLinkOnClientBehalfUrl = createPropertyLinkUrl,
+      createPropertyLinkOnClientBehalfUrl = createPropertyLinkOnClientBehalfUrl,
       myOrganisationsAgentsUrl = myOrganisationsAgentsUrl,
       revokeClientsPropertyLinkUrl = revokeClientsPropertyLinkUrl,
       myClientsUrl = myClientsUrl
@@ -258,7 +258,26 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
     }
 
   }
+  "create property link on client behalf" should {
 
+    "call modernised createPropertyLinkOnClientBehalf endpoint" in new Setup {
+
+      val mockHttpResponse: HttpResponse = mock[HttpResponse]
+      val mockVoaCreatePropertyLink: CreatePropertyLinkOnClientBehalf = mock[CreatePropertyLinkOnClientBehalf]
+      val clientId = 100
+      when(connector.http
+        .POST[CreatePropertyLinkOnClientBehalf, HttpResponse](any(), any(), any())(any(), any(), any(), any(), any()))
+        .thenReturn(Future.successful(mockHttpResponse))
+      connector.createOnClientBehalf(mockVoaCreatePropertyLink, clientId).futureValue shouldBe mockHttpResponse
+
+      verify(connector.http)
+        .POST(
+          mEq(createPropertyLinkOnClientBehalfUrl.replace("{clientId}", clientId.toString)),
+          mEq(mockVoaCreatePropertyLink),
+          mEq(Seq()))(any(), any(), any(), any(), any())
+    }
+
+  }
   "get my organisations agents" should {
 
     "return the agents list for the given organisation" in new Setup {
