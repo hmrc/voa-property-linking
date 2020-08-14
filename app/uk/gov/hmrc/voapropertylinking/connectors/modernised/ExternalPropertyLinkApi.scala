@@ -103,7 +103,7 @@ class ExternalPropertyLinkApi @Inject()(
           ).flatten
       )
 
-  def getAssignedPropertyLinksForClient(
+  def getClientPropertyLinks(
         clientOrgId: Long,
         searchParams: GetClientPropertyLinksParameters,
         params: Option[PaginationParams])(

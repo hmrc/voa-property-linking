@@ -302,7 +302,7 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
 
       when(
         mockExternalPropertyLinkApi
-          .getAssignedPropertyLinksForClient(clientId, getClientSearchParams, Some(paginationParams)))
+          .getClientPropertyLinks(clientId, getClientSearchParams, Some(paginationParams)))
         .thenReturn(Future.successful(Some(propertyLinksWithClient)))
 
       val result =
@@ -311,7 +311,7 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
       result.getOrElse("None returned") shouldBe ownerAuthResultClient
 
       verify(mockExternalPropertyLinkApi)
-        .getAssignedPropertyLinksForClient(clientId, getClientSearchParams, Some(paginationParams))
+        .getClientPropertyLinks(clientId, getClientSearchParams, Some(paginationParams))
     }
 
     "return none when nothing is returned from connector" in {
@@ -320,7 +320,7 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
 
       when(
         mockExternalPropertyLinkApi
-          .getAssignedPropertyLinksForClient(clientId, getClientSearchParams, Some(paginationParams)))
+          .getClientPropertyLinks(clientId, getClientSearchParams, Some(paginationParams)))
         .thenReturn(Future.successful(None))
 
       val result =
@@ -329,7 +329,7 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
       result shouldBe None
 
       verify(mockExternalPropertyLinkApi)
-        .getAssignedPropertyLinksForClient(clientId, getClientSearchParams, Some(paginationParams))
+        .getClientPropertyLinks(clientId, getClientSearchParams, Some(paginationParams))
     }
   }
 

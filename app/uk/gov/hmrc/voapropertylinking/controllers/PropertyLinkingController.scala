@@ -149,7 +149,7 @@ class PropertyLinkingController @Inject()(
       .fold(NotFound("clients property links not found"))(propertyLinks => Ok(Json.toJson(propertyLinks)))
   }
 
-  def getAssignedPropertyLinksForClient(
+  def getClientPropertyLinks(
         clientId: Long,
         searchParams: GetClientPropertyLinksParameters,
         paginationParams: Option[PaginationParams]): Action[AnyContent] = authenticated.async { implicit request =>

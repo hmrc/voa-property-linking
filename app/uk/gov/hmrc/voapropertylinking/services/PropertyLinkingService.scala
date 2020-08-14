@@ -83,7 +83,7 @@ class PropertyLinkingService @Inject()(
         searchParams: GetClientPropertyLinksParameters,
         paginationParams: Option[PaginationParams]
   )(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): OptionT[Future, PropertyLinksWithClients] =
-    OptionT(propertyLinksConnector.getAssignedPropertyLinksForClient(clientId, searchParams, paginationParams))
+    OptionT(propertyLinksConnector.getClientPropertyLinks(clientId, searchParams, paginationParams))
       .map(PropertyLinksWithClients.apply)
 
   def getMyClients(

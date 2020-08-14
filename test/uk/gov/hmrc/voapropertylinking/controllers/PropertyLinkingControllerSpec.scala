@@ -254,7 +254,7 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
       when(mockPropertyLinkingService.getClientPropertyLinks(any(), any(), any())(any(), any()))
         .thenReturn(OptionT.some[Future](propertyLinksWithClients))
       val res =
-        testController.getAssignedPropertyLinksForClient(111L, GetClientPropertyLinksParameters(), None)(FakeRequest())
+        testController.getClientPropertyLinks(111L, GetClientPropertyLinksParameters(), None)(FakeRequest())
 
       status(res) shouldBe OK
       contentAsJson(res) shouldBe Json.toJson(ownerAuthResult)

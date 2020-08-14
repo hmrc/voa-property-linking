@@ -193,7 +193,7 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
 
       private val clientOrgId = 111L
       connector
-        .getAssignedPropertyLinksForClient(
+        .getClientPropertyLinks(
           clientOrgId,
           GetClientPropertyLinksParameters(
             address = Some(address),
