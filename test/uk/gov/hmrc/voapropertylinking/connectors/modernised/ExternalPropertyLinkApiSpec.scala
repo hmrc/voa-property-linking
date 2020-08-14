@@ -265,9 +265,8 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
       val mockHttpResponse: HttpResponse = mock[HttpResponse]
       val mockVoaCreatePropertyLink: CreatePropertyLinkOnClientBehalf = mock[CreatePropertyLinkOnClientBehalf]
       val clientId = 100
-      when(
-        connector.http
-          .POST[CreatePropertyLinkOnClientBehalf, HttpResponse](any(), any(), any())(any(), any(), any(), any(), any()))
+      when(connector.http
+        .POST[CreatePropertyLinkOnClientBehalf, HttpResponse](any(), any(), any())(any(), any(), any(), any(), any()))
         .thenReturn(Future.successful(mockHttpResponse))
       connector.createOnClientBehalf(mockVoaCreatePropertyLink, clientId).futureValue shouldBe mockHttpResponse
 
