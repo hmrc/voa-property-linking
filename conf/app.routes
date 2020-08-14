@@ -56,6 +56,7 @@ GET          /dashboard/owner/assessments/:submissionId                         
 #My Clients Property Links
 GET          /agent/clients                                                                   @uk.gov.hmrc.voapropertylinking.controllers.PropertyLinkingController.getMyClients(clientsParameters: Option[GetClientsParameters], paginationParams: Option[models.PaginationParams])
 GET          /agent/property-links                                                            @uk.gov.hmrc.voapropertylinking.controllers.PropertyLinkingController.getClientsPropertyLinks(searchParams: GetMyClientsPropertyLinkParameters, params: Option[models.PaginationParams])
+GET          /agent/clients/:clientId/property-links                                          @uk.gov.hmrc.voapropertylinking.controllers.PropertyLinkingController.getClientPropertyLinks(clientId: Long, searchParams: GetClientPropertyLinksParameters, params: Option[models.PaginationParams])
 GET          /agent/property-links/:submissionId                                              @uk.gov.hmrc.voapropertylinking.controllers.PropertyLinkingController.getClientsPropertyLink(submissionId: String, projection: String ?= "propertiesView")
 GET          /dashboard/agent/assessments/:submissionId                                       @uk.gov.hmrc.voapropertylinking.controllers.PropertyLinkingController.getClientsAssessments(submissionId: String)
 

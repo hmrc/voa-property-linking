@@ -19,7 +19,6 @@ package uk.gov.hmrc.voapropertylinking.connectors.modernised
 import java.time.LocalDate
 
 import basespecs.BaseUnitSpec
-import javax.inject.Named
 import models.PaginationParams
 import models.modernised.externalpropertylink.myclients.{ClientPropertyLink, ClientsResponse, PropertyLinksWithClient}
 import models.modernised.externalpropertylink.myorganisations.{AgentList, PropertyLinkWithAgents, PropertyLinksWithAgents}
@@ -28,7 +27,7 @@ import org.mockito.ArgumentMatchers.{any, eq => mEq}
 import org.mockito.Mockito._
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.voapropertylinking.binders.clients.GetClientsParameters
-import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
+import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetClientPropertyLinksParameters, GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
 
 import scala.concurrent.Future
@@ -75,6 +74,7 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
     val ownerAuthorisationsUrl = s"$voaApiUrl/my-organisation/property-links"
     val clientAuthorisationUrl = s"$voaApiUrl/my-organisation/clients/all/property-links/{propertyLinkId}"
     val clientAuthorisationsUrl = s"$voaApiUrl/my-organisation/clients/all/property-links"
+    val myClientPropertyLinksUrl = s"$voaApiUrl/my-organisation/clients/{clientId}/property-links"
     val createPropertyLinkUrl = s"$voaApiUrl/my-organisation/property-links"
     val createPropertyLinkOnClientBehalfUrl = s"$voaApiUrl/my-organisation/clients/{clientId}/property-links"
     val myOrganisationsAgentsUrl = s"$voaApiUrl/my-organisation/agents"
@@ -89,6 +89,7 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
       myOrganisationsPropertyLinksUrl = ownerAuthorisationsUrl,
       myOrganisationsPropertyLinkUrl = ownerAuthorisationUrl,
       myClientsPropertyLinkUrl = clientAuthorisationUrl,
+      myClientPropertyLinksUrl = myClientPropertyLinksUrl,
       myClientsPropertyLinksUrl = clientAuthorisationsUrl,
       createPropertyLinkUrl = createPropertyLinkUrl,
       createPropertyLinkOnClientBehalfUrl = createPropertyLinkOnClientBehalfUrl,
@@ -177,6 +178,40 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
 
       val clientQueryParams = queryParams :+ ("address" -> address) :+ ("baref" -> baref) :+ ("client" -> agent) :+ ("status" -> status) :+ ("sortfield" -> sortField) :+ ("sortorder" -> sortOrder) :+ ("appointedFromDate" -> appointedFromDate.toString) :+ ("appointedToDate" -> appointedToDate.toString)
       verify(connector.http).GET(mEq(clientAuthorisationsUrl), mEq(clientQueryParams))(any(), any(), any(), any())
+    }
+
+  }
+
+  "get a client's property links" should {
+
+    "build the correct query params and call the modernised layer" in new Setup {
+
+      val mockReturnedPropertyLinks: PropertyLinksWithClient = mock[PropertyLinksWithClient]
+
+      when(connector.http.GET[PropertyLinksWithClient](any(), any())(any(), any(), any(), any()))
+        .thenReturn(Future.successful(mockReturnedPropertyLinks))
+
+      private val clientOrgId = 111L
+      connector
+        .getClientPropertyLinks(
+          clientOrgId,
+          GetClientPropertyLinksParameters(
+            address = Some(address),
+            baref = Some(baref),
+            status = Some(status),
+            sortField = Some(sortField),
+            sortOrder = Some(sortOrder),
+            appointedFromDate = Some(appointedFromDate),
+            appointedToDate = Some(appointedToDate)
+          ),
+          Some(paginationParams)
+        )
+        .futureValue shouldBe mockReturnedPropertyLinks
+
+      val clientQueryParams = queryParams :+ ("address" -> address) :+ ("baref" -> baref) :+ ("status" -> status) :+ ("sortfield" -> sortField) :+ ("sortorder" -> sortOrder) :+ ("appointedFromDate" -> appointedFromDate.toString) :+ ("appointedToDate" -> appointedToDate.toString)
+      verify(connector.http).GET(
+        mEq(myClientPropertyLinksUrl.replace("{clientId}", clientOrgId.toString)),
+        mEq(clientQueryParams))(any(), any(), any(), any())
     }
 
   }

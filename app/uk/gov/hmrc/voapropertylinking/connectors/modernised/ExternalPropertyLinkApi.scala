@@ -24,7 +24,7 @@ import models.modernised.externalpropertylink.requests.{CreatePropertyLink, Crea
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
 import uk.gov.hmrc.voapropertylinking.binders.clients.GetClientsParameters
-import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
+import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetClientPropertyLinksParameters, GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -35,6 +35,7 @@ class ExternalPropertyLinkApi @Inject()(
       @Named("voa.myOrganisationsPropertyLinks") myOrganisationsPropertyLinksUrl: String,
       @Named("voa.myOrganisationsPropertyLink") myOrganisationsPropertyLinkUrl: String,
       @Named("voa.myClientsPropertyLinks") myClientsPropertyLinksUrl: String,
+      @Named("voa.myClientPropertyLinks") myClientPropertyLinksUrl: String,
       @Named("voa.myClientsPropertyLink") myClientsPropertyLinkUrl: String,
       @Named("voa.createPropertyLink") createPropertyLinkUrl: String,
       @Named("voa.createPropertyLinkOnClientBehalf") createPropertyLinkOnClientBehalfUrl: String,
@@ -93,6 +94,27 @@ class ExternalPropertyLinkApi @Inject()(
             searchParams.address.map("address"                           -> _),
             searchParams.baref.map("baref"                               -> _),
             searchParams.client.map("client"                             -> _),
+            searchParams.status.map("status"                             -> _),
+            searchParams.sortField.map("sortfield"                       -> _),
+            searchParams.sortOrder.map("sortorder"                       -> _),
+            searchParams.representationStatus.map("representationStatus" -> _),
+            searchParams.appointedFromDate.map("appointedFromDate"       -> _.toString),
+            searchParams.appointedToDate.map("appointedToDate"           -> _.toString)
+          ).flatten
+      )
+
+  def getClientPropertyLinks(
+        clientOrgId: Long,
+        searchParams: GetClientPropertyLinksParameters,
+        params: Option[PaginationParams])(
+        implicit request: RequestWithPrincipal[_]): Future[Option[PropertyLinksWithClient]] =
+    http
+      .GET[Option[PropertyLinksWithClient]](
+        myClientPropertyLinksUrl.replace("{clientId}", clientOrgId.toString),
+        modernisedPaginationParams(params) ++
+          List(
+            searchParams.address.map("address"                           -> _),
+            searchParams.baref.map("baref"                               -> _),
             searchParams.status.map("status"                             -> _),
             searchParams.sortField.map("sortfield"                       -> _),
             searchParams.sortOrder.map("sortorder"                       -> _),

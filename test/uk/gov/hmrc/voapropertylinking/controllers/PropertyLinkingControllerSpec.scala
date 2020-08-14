@@ -35,7 +35,7 @@ import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.http.{HttpResponse, Upstream5xxResponse}
 import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import uk.gov.hmrc.voapropertylinking.binders.clients.GetClientsParameters
-import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
+import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetClientPropertyLinksParameters, GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import utils.FakeObjects
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -291,6 +291,18 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
       when(mockPropertyLinkingService.getClientsPropertyLinks(any(), any())(any(), any()))
         .thenReturn(OptionT.some[Future](propertyLinksWithClients))
       val res = testController.getClientsPropertyLinks(GetMyClientsPropertyLinkParameters(), None)(FakeRequest())
+
+      status(res) shouldBe OK
+      contentAsJson(res) shouldBe Json.toJson(ownerAuthResult)
+    }
+  }
+
+  "getAssignedPropertyLinksForClient" should {
+    "return client property links" in {
+      when(mockPropertyLinkingService.getClientPropertyLinks(any(), any(), any())(any(), any()))
+        .thenReturn(OptionT.some[Future](propertyLinksWithClients))
+      val res =
+        testController.getClientPropertyLinks(111L, GetClientPropertyLinksParameters(), None)(FakeRequest())
 
       status(res) shouldBe OK
       contentAsJson(res) shouldBe Json.toJson(ownerAuthResult)

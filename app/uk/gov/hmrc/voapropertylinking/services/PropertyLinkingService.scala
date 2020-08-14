@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.voapropertylinking.services
 
-import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
+import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetClientPropertyLinksParameters, GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import cats.data.OptionT
 import javax.inject.Inject
 import models._
@@ -76,6 +76,14 @@ class PropertyLinkingService @Inject()(
         paginationParams: Option[PaginationParams]
   )(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): OptionT[Future, PropertyLinksWithClients] =
     OptionT(propertyLinksConnector.getClientsPropertyLinks(searchParams, paginationParams))
+      .map(PropertyLinksWithClients.apply)
+
+  def getClientPropertyLinks(
+        clientId: Long,
+        searchParams: GetClientPropertyLinksParameters,
+        paginationParams: Option[PaginationParams]
+  )(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): OptionT[Future, PropertyLinksWithClients] =
+    OptionT(propertyLinksConnector.getClientPropertyLinks(clientId, searchParams, paginationParams))
       .map(PropertyLinksWithClients.apply)
 
   def getMyClients(
