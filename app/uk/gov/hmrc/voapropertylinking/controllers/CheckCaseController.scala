@@ -17,10 +17,8 @@
 package uk.gov.hmrc.voapropertylinking.controllers
 
 import javax.inject.Inject
-import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
-import uk.gov.hmrc.http.NotFoundException
 import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
 import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
 import uk.gov.hmrc.voapropertylinking.connectors.modernised.ExternalCaseManagementApi
@@ -39,13 +37,12 @@ class CheckCaseController @Inject()(
 )(implicit executionContext: ExecutionContext)
     extends PropertyLinkingBaseController(controllerComponents) {
 
-  def getCheckCases(submissionId: String, party: String): Action[AnyContent] = authenticated.async {
-    implicit request =>
-      party match {
-        case "agent"  => getMyClientsCheckCases(propertyLinkSubmissionId = submissionId)
-        case "client" => getMyOrganisationCheckCases(propertyLinkSubmissionId = submissionId)
-        case p        => Future.successful(NotImplemented(s"invalid party (projection) supplied: $p"))
-      }
+  def getCheckCases(submissionId: String, party: String): Action[AnyContent] = authenticated.async { implicit request =>
+    party match {
+      case "agent"  => getMyClientsCheckCases(propertyLinkSubmissionId = submissionId)
+      case "client" => getMyOrganisationCheckCases(propertyLinkSubmissionId = submissionId)
+      case p        => Future.successful(NotImplemented(s"invalid party (projection) supplied: $p"))
+    }
   }
 
   private def getMyOrganisationCheckCases(propertyLinkSubmissionId: String)(

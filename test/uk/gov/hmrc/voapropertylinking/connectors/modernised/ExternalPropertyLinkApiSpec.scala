@@ -249,12 +249,7 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
       connector.createPropertyLink(mockVoaCreatePropertyLink).futureValue shouldBe mockHttpResponse
 
       verify(connector.http)
-        .POST(mEq(createPropertyLinkUrl), mEq(mockVoaCreatePropertyLink), mEq(Seq()))(
-          any(),
-          any(),
-          any(),
-          any(),
-          any())
+        .POST(mEq(createPropertyLinkUrl), mEq(mockVoaCreatePropertyLink), mEq(Seq()))(any(), any(), any(), any(), any())
     }
 
   }
@@ -265,8 +260,9 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
       val mockHttpResponse: HttpResponse = mock[HttpResponse]
       val mockVoaCreatePropertyLink: CreatePropertyLinkOnClientBehalf = mock[CreatePropertyLinkOnClientBehalf]
       val clientId = 100
-      when(connector.http
-        .POST[CreatePropertyLinkOnClientBehalf, HttpResponse](any(), any(), any())(any(), any(), any(), any(), any()))
+      when(
+        connector.http
+          .POST[CreatePropertyLinkOnClientBehalf, HttpResponse](any(), any(), any())(any(), any(), any(), any(), any()))
         .thenReturn(Future.successful(mockHttpResponse))
       connector.createOnClientBehalf(mockVoaCreatePropertyLink, clientId).futureValue shouldBe mockHttpResponse
 
@@ -327,7 +323,7 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
 
       connector
         .revokeClientProperty("some-submissionId")
-        .futureValue shouldBe ()
+        .futureValue shouldBe ((): Unit)
 
       verify(connector.http)
         .DELETE(any())(any(), any(), any(), any())

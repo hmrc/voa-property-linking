@@ -37,7 +37,6 @@ import java.time.Clock
 import com.google.inject.AbstractModule
 import com.google.inject.name.Names
 import com.google.inject.name.Names.named
-import com.typesafe.config.ConfigException
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
 
@@ -85,7 +84,6 @@ class GuiceModule(
         "voa.createPropertyLink"               -> "voa.resources.externalPropertyLink.createPropertyLink.path",
         "voa.createPropertyLinkOnClientBehalf" -> "voa.resources.externalPropertyLink.createPropertyLinkOnClientBehalf.path",
         "voa.revokeClientsPropertyLink"        -> "voa.resources.externalPropertyLink.revokeMyClientsPropertyLink.path",
-        "voa.createRepresentationRequest"      -> "voa.resources.authorisationManagementApi.createRepresentationRequest.path",
         "voa.representationRequestResponse"    -> "voa.resources.authorisationManagementApi.representationRequestResponse.path",
         "voa.agentAppointmentChanges"          -> "voa.resources.organisationManagementApi.agentAppointmentChanges.path",
         "voa.myAgentDetails"                   -> "voa.resources.organisationManagementApi.myAgentDetails.path"
@@ -103,5 +101,4 @@ class GuiceModule(
     case _  => name
   }
 
-  private def configException(path: String) = throw new ConfigException.Missing(path)
 }

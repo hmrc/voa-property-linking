@@ -17,7 +17,7 @@
 package uk.gov.hmrc.voapropertylinking.binders.validation
 
 import cats.Show
-import org.apache.commons.lang3.text.WordUtils
+import org.apache.commons.text.WordUtils
 
 sealed trait ValidationError extends Product with Serializable
 
@@ -43,7 +43,7 @@ object ValidationError {
       s"""Value for parameter "$key" is longer than the the acceptable maximum: $acceptableLimit"""
     case e @ UnderMinLengthError(key, acceptableLimit) =>
       s"""Value for parameter "$key" is shorter than the acceptable minimum: $acceptableLimit"""
-    case e @ AllMissingError(key, keys @ _ *) =>
+    case e @ AllMissingError(key, keys @ _*) =>
       s"""At least one of these parameters must be provided: [${(key :: keys.toList).mkString(", ")}]"""
     case InvalidFormat(key) =>
       s"""Invalid format for parameter "$key""""

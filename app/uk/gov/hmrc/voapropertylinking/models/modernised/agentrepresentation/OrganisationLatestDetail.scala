@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation
 
-import java.time.LocalDateTime
-
 import play.api.libs.json.{Json, OFormat}
 
 case class OrganisationLatestDetail(

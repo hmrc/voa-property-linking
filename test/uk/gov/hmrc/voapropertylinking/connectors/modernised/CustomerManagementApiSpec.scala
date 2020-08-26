@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
-import java.time._
-
 import basespecs.BaseUnitSpec
 import models._
 import org.mockito.ArgumentMatchers.any
@@ -26,10 +24,7 @@ import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import uk.gov.hmrc.http.NotFoundException
-import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation.{AgentOrganisation, OrganisationLatestDetail}
 
 class CustomerManagementApiSpec extends BaseUnitSpec {
 
@@ -145,7 +140,6 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
   "CustomerManagementApi.updateIndividualAccount" should {
     "update the person id with the individual account submission" in {
       val personId = 1234L
-      val updateUrl = s"$url/$personId"
 
       when(defaultHttpClient.PUT[APIIndividualAccount, JsValue](any(), any(), any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(Json.toJson(APIDetailedIndividualAccount(

@@ -30,7 +30,6 @@ import models.searchApi.{OwnerAuthResult => ModernisedOwnerAuthResult}
 import org.mockito.ArgumentMatchers.{any, eq => mEq}
 import org.mockito.Mockito._
 import play.api.libs.json.Json
-import play.api.mvc.Result
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.http.{HttpResponse, Upstream5xxResponse}
 import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
@@ -38,7 +37,6 @@ import uk.gov.hmrc.voapropertylinking.binders.clients.GetClientsParameters
 import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetClientPropertyLinksParameters, GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import utils.FakeObjects
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects {
@@ -221,7 +219,7 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
 
   "getMyPropertyLink" should {
     "return a single my org property link" in {
-      when(mockPropertyLinkingService.getMyOrganisationsPropertyLink(any())(any(), any()))
+      when(mockPropertyLinkingService.getMyOrganisationsPropertyLink(any())(any()))
         .thenReturn(OptionT.some[Future](validPropertiesView))
       val res = testController.getMyOrganisationsPropertyLink("11111")(FakeRequest())
 
@@ -230,7 +228,7 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
     }
 
     "return a single my client property link - propertiesView" in {
-      when(mockPropertyLinkingService.getClientsPropertyLink(any())(any(), any()))
+      when(mockPropertyLinkingService.getClientsPropertyLink(any())(any()))
         .thenReturn(OptionT.some[Future](clientPropertyLink))
       val res = testController.getClientsPropertyLink("11111", "propertiesView")(FakeRequest())
 
@@ -239,7 +237,7 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
     }
 
     "return a single my client property link - clientPropertyLink" in {
-      when(mockPropertyLinkingService.getClientsPropertyLink(any())(any(), any()))
+      when(mockPropertyLinkingService.getClientsPropertyLink(any())(any()))
         .thenReturn(OptionT.some[Future](clientPropertyLink))
       val res = testController.getClientsPropertyLink("11111", "clientsPropertyLink")(FakeRequest())
 
@@ -250,7 +248,7 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
 
   "getMyPropertyLinks" should {
     "return owner property links" in {
-      when(mockPropertyLinkingService.getMyOrganisationsPropertyLinks(any(), any())(any(), any()))
+      when(mockPropertyLinkingService.getMyOrganisationsPropertyLinks(any(), any())(any()))
         .thenReturn(Future.successful(ownerAuthResult))
       val res = testController.getMyOrganisationsPropertyLinks(GetMyOrganisationPropertyLinksParameters(), None, None)(
         FakeRequest())
@@ -262,7 +260,7 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
     "search via authorisationSearchApi when AGENT sortField" when {
 
       "organisationId is provided" in {
-        when(mockPropertyLinkingService.getMyOrganisationsPropertyLinks(any(), any())(any(), any()))
+        when(mockPropertyLinkingService.getMyOrganisationsPropertyLinks(any(), any())(any()))
           .thenReturn(Future.successful(ownerAuthResult))
         val res = testController.getMyOrganisationsPropertyLinks(
           GetMyOrganisationPropertyLinksParameters(sortField = Some("AGENT")),
@@ -288,7 +286,7 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
 
     }
     "return client property links" in {
-      when(mockPropertyLinkingService.getClientsPropertyLinks(any(), any())(any(), any()))
+      when(mockPropertyLinkingService.getClientsPropertyLinks(any(), any())(any()))
         .thenReturn(OptionT.some[Future](propertyLinksWithClients))
       val res = testController.getClientsPropertyLinks(GetMyClientsPropertyLinkParameters(), None)(FakeRequest())
 
@@ -299,7 +297,7 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
 
   "getAssignedPropertyLinksForClient" should {
     "return client property links" in {
-      when(mockPropertyLinkingService.getClientPropertyLinks(any(), any(), any())(any(), any()))
+      when(mockPropertyLinkingService.getClientPropertyLinks(any(), any(), any())(any()))
         .thenReturn(OptionT.some[Future](propertyLinksWithClients))
       val res =
         testController.getClientPropertyLinks(111L, GetClientPropertyLinksParameters(), None)(FakeRequest())
@@ -312,7 +310,7 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
   "getMyAgentPropertyLinks" should {
     val agentCode = 1
     "return owner property links by agent code" in {
-      when(mockPropertyLinkingService.getMyAgentPropertyLinks(any(), any(), any())(any(), any()))
+      when(mockPropertyLinkingService.getMyAgentPropertyLinks(any(), any(), any())(any()))
         .thenReturn(Future.successful(ownerAuthResult))
       val res = testController.getMyAgentPropertyLinks(
         agentCode,
@@ -327,7 +325,7 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
   "getMyPropertyLinksCount" should {
 
     "return owner property links count" in {
-      when(mockPropertyLinkingService.getMyOrganisationsPropertyLinksCount()(any(), any()))
+      when(mockPropertyLinkingService.getMyOrganisationsPropertyLinksCount()(any()))
         .thenReturn(Future.successful(propertyLinksCount))
       val res = testController.getMyOrganisationsPropertyLinksCount()(FakeRequest())
 
@@ -339,7 +337,7 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
   "getMyOrganisationsAssessments" should {
     "return property links with assessments" in {
       val submissionId = "SUB123"
-      when(mockAssessmentService.getMyOrganisationsAssessments(mEq(submissionId))(any(), any()))
+      when(mockAssessmentService.getMyOrganisationsAssessments(mEq(submissionId))(any()))
         .thenReturn(OptionT.some[Future](assessments))
 
       val res = testController.getMyOrganisationsAssessments(submissionId)(FakeRequest())
@@ -351,7 +349,7 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
   "getClientsAssessments" should {
     "return property links with assessments" in {
       val submissionId = "SUB123"
-      when(mockAssessmentService.getClientsAssessments(mEq(submissionId))(any(), any()))
+      when(mockAssessmentService.getClientsAssessments(mEq(submissionId))(any()))
         .thenReturn(OptionT.some[Future](assessments))
 
       val res = testController.getClientsAssessments(submissionId)(FakeRequest())
@@ -362,7 +360,7 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
 
   "getMyOrganisationsAgents" should {
     "return agents list for the organisation" in {
-      when(mockPropertyLinkingService.getMyOrganisationsAgents()(any(), any()))
+      when(mockPropertyLinkingService.getMyOrganisationsAgents()(any()))
         .thenReturn(Future.successful(organisationsAgentsList))
 
       val res = testController.getMyOrganisationsAgents()(FakeRequest())
@@ -372,7 +370,7 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
     }
 
     "return empty agents list for the organisation if the organisation have no agents" in {
-      when(mockPropertyLinkingService.getMyOrganisationsAgents()(any(), any()))
+      when(mockPropertyLinkingService.getMyOrganisationsAgents()(any()))
         .thenReturn(Future.successful(emptyOrganisationsAgentsList))
       val res = testController.getMyOrganisationsAgents()(FakeRequest())
 
@@ -383,7 +381,7 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
 
   "getMyClients" should {
     "return clients for the agent organisation" in {
-      when(mockPropertyLinkingService.getMyClients(any(), any())(any(), any()))
+      when(mockPropertyLinkingService.getMyClients(any(), any())(any()))
         .thenReturn(Future.successful(clientsList))
 
       val res = testController.getMyClients(
@@ -395,7 +393,7 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
     }
 
     "return empty clients list for the organisation if the agent organisation has no clients" in {
-      when(mockPropertyLinkingService.getMyClients(any(), any())(any(), any()))
+      when(mockPropertyLinkingService.getMyClients(any(), any())(any()))
         .thenReturn(Future.successful(emptyClientsList))
 
       val res = testController.getMyClients(

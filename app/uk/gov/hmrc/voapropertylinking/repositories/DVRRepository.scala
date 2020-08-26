@@ -31,7 +31,6 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.http.logging.Mdc
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.language.postfixOps
 
 @Singleton
 class DVRRepository @Inject()(
@@ -51,7 +50,7 @@ class DVRRepository @Inject()(
     Index(
       key = Seq("createdAt" -> IndexType.Ascending),
       name = Some("ttl"),
-      options = BSONDocument("expireAfterSeconds" -> (ttlDuration).toSeconds))
+      options = BSONDocument("expireAfterSeconds" -> ttlDuration.toSeconds))
   )
 
   override def create(request: DetailedValuationRequest): Future[Unit] =

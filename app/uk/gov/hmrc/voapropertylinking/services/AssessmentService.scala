@@ -17,11 +17,10 @@
 package uk.gov.hmrc.voapropertylinking.services
 
 import cats.data.OptionT
-import javax.inject.{Inject, Named}
+import javax.inject.Inject
 import models._
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
-import uk.gov.hmrc.voapropertylinking.connectors.modernised.{AuthorisationManagementApi, ExternalPropertyLinkApi, ExternalValuationManagementApi, MdtpDashboardManagementApi}
+import uk.gov.hmrc.voapropertylinking.connectors.modernised.{ExternalPropertyLinkApi, ExternalValuationManagementApi}
 import uk.gov.hmrc.voapropertylinking.utils.Cats
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -34,7 +33,7 @@ class AssessmentService @Inject()(
 
   def getMyOrganisationsAssessments(
         submissionId: String
-  )(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): OptionT[Future, Assessments] =
+  )(implicit request: RequestWithPrincipal[_]): OptionT[Future, Assessments] =
     for {
       propertyLink <- OptionT(propertyLinksConnector.getMyOrganisationsPropertyLink(submissionId))
       history <- OptionT(
@@ -47,7 +46,7 @@ class AssessmentService @Inject()(
 
   def getClientsAssessments(
         submissionId: String
-  )(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): OptionT[Future, Assessments] =
+  )(implicit request: RequestWithPrincipal[_]): OptionT[Future, Assessments] =
     for {
       propertyLink <- OptionT(propertyLinksConnector.getClientsPropertyLink(submissionId))
       history <- OptionT(

@@ -18,7 +18,7 @@ package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
 import basespecs.BaseUnitSpec
 import models.PaginationParams
-import models.searchApi.{OwnerAuthResult => ModernisedAuthResult, _}
+import models.searchApi.{OwnerAuthResult => ModernisedAuthResult}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 

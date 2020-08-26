@@ -105,9 +105,6 @@ class ExternalValuationManagementApiSpec extends BaseUnitSpec with ContentTypes 
       val propertyLinkId = "PL-123456789"
       val fileRef = "1L"
 
-      val dvrUrl =
-        s"/external-valuation-management-api/properties/$uarn/valuations/$valuationId/files/$fileRef?propertyLinkId=$propertyLinkId"
-
       val mockWsResponse = {
         val m = new WSResponse {
           override def status: Int = 200
