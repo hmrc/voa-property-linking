@@ -17,7 +17,6 @@
 package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
 import basespecs.BaseUnitSpec
-import models._
 import models.modernised.addressmanagement.{Addresses, DetailedAddress, SimpleAddress}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when

@@ -26,8 +26,6 @@ import scala.concurrent.Future
 
 class SubmissionIdControllerSpec extends BaseControllerSpec {
 
-  import scala.concurrent.ExecutionContext.Implicits.global
-
   trait Setup {
     val prefix = "pReFiX"
     val mockSequenceGeneratorMongoRepository: SequenceGeneratorMongoRepository =

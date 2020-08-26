@@ -44,7 +44,7 @@ class SubmissionIdController @Inject()(
     //no mapping for s, t, u as they are not allowed.
   ).withDefault(identity)
 
-  def get(prefix: String): Action[AnyContent] = authenticated.async { implicit request =>
+  def get(prefix: String): Action[AnyContent] = authenticated.async {
     sequenceGenerator.getNextSequenceId(prefix).map { id =>
       Ok(Json.toJson(formatId(prefix, id)))
     }

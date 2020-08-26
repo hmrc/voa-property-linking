@@ -82,13 +82,7 @@ class DVRCaseManagement @Inject()(
       }
   }
 
-  def dvrExists(
-        organisationId: Long,
-        assessmentRef: Long
-  ): Action[AnyContent] = authenticated.async { implicit request =>
-    dvrRecordRepository.exists(organisationId, assessmentRef).map {
-      case true  => Ok(Json.toJson(true))
-      case false => Ok(Json.toJson(false))
-    }
+  def dvrExists(organisationId: Long, assessmentRef: Long): Action[AnyContent] = authenticated.async {
+    dvrRecordRepository.exists(organisationId, assessmentRef).map(res => Ok(Json.toJson(res)))
   }
 }

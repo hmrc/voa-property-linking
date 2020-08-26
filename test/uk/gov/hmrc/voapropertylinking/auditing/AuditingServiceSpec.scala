@@ -23,7 +23,6 @@ import play.api.http.ContentTypes
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class AuditingServiceSpec extends BaseUnitSpec with ContentTypes {
@@ -42,7 +41,7 @@ class AuditingServiceSpec extends BaseUnitSpec with ContentTypes {
         when(mockAuditingConnector.sendEvent(any())(any(), any())).thenReturn(Future.successful(AuditResult.Success))
         val result = auditingService.sendEvent("test", 999)
 
-        result shouldBe ()
+        result shouldBe ((): Unit)
       }
     }
 
@@ -51,7 +50,7 @@ class AuditingServiceSpec extends BaseUnitSpec with ContentTypes {
         when(mockAuditingConnector.sendEvent(any())(any(), any())).thenReturn(Future.successful(AuditResult.Disabled))
         val result = auditingService.sendEvent("test", 999)
 
-        result shouldBe ()
+        result shouldBe ((): Unit)
       }
 
       "auditing fails" should {
@@ -60,7 +59,7 @@ class AuditingServiceSpec extends BaseUnitSpec with ContentTypes {
             .thenReturn(Future.successful(AuditResult.Failure("failure")))
           val result = auditingService.sendEvent("test", 999)
 
-          result shouldBe ()
+          result shouldBe ((): Unit)
         }
       }
     }

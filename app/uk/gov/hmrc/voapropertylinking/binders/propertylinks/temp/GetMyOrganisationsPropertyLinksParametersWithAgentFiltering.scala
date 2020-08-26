@@ -35,8 +35,7 @@ case class GetMyOrganisationsPropertyLinksParametersWithAgentFiltering(
 object GetMyOrganisationsPropertyLinksParametersWithAgentFiltering
     extends ValidatingBinder[GetMyOrganisationsPropertyLinksParametersWithAgentFiltering] {
 
-  override def validate(
-        params: Params): ValidationResult[GetMyOrganisationsPropertyLinksParametersWithAgentFiltering] =
+  override def validate(params: Params): ValidationResult[GetMyOrganisationsPropertyLinksParametersWithAgentFiltering] =
     (
       readStringOption("address", params),
       readStringOption("baref", params),

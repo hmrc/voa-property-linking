@@ -23,8 +23,8 @@ object PostcodeValidator {
 
   def validate(candidate: String): Boolean =
     candidate match {
-      case postcodeRegex(_ *) => true
-      case _                  => false
+      case postcodeRegex(_*) => true
+      case _                 => false
     }
 
   def validateAndFormat(candidate: String): Option[String] =

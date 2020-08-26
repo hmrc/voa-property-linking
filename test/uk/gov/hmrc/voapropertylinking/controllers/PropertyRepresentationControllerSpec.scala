@@ -25,7 +25,6 @@ import play.api.libs.json.Json
 import play.api.mvc.Result
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.http.HttpResponse
-import uk.gov.hmrc.voapropertylinking.connectors.modernised.ExternalPropertyLinkApi
 import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation.AgentDetails
 
 import scala.concurrent.Future
@@ -98,7 +97,6 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
   "revoke client property" should {
     "return 204 NoContent" when {
       "property link submission id is provided" in new Setup {
-        val authorisedPartyId = 123L
         when(mockExternalPropertyLinkApi.revokeClientProperty(any())(any()))
           .thenReturn(Future.successful(()))
 

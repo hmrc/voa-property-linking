@@ -16,13 +16,12 @@
 
 package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
-import javax.inject.{Inject, Named}
+import javax.inject.Inject
 import models._
 import play.api.libs.json.JsValue
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, NotFoundException}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
-import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation.AgentOrganisation
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -71,8 +70,7 @@ class CustomerManagementApi @Inject()(
       .GET[Option[APIDetailedIndividualAccount]](s"$individualUrl?personId=$id")
       .map(_.map(a => a.toIndividualAccount))
 
-  def findDetailedIndividualAccountByGGID(ggId: String)(
-        implicit hc: HeaderCarrier): Future[Option[IndividualAccount]] =
+  def findDetailedIndividualAccountByGGID(ggId: String)(implicit hc: HeaderCarrier): Future[Option[IndividualAccount]] =
     http
       .GET[Option[APIDetailedIndividualAccount]](s"$individualUrl?governmentGatewayExternalId=$ggId")
       .map(_.map(_.toIndividualAccount))

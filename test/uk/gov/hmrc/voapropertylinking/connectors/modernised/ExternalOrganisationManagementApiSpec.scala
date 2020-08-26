@@ -17,13 +17,10 @@
 package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
 import basespecs.BaseUnitSpec
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito
+import org.mockito.ArgumentMatchers.{any, eq => matching}
 import org.mockito.Mockito.{times, verify, when}
-import org.mockito.ArgumentMatchers.{eq => matching}
-import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation.{AgentDetails, AppointmentAction, AppointmentChangeResponse, AppointmentChangesRequest, AppointmentScope}
+import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation._
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class ExternalOrganisationManagementApiSpec extends BaseUnitSpec {

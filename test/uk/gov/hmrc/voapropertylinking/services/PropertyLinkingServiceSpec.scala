@@ -16,10 +16,7 @@
 
 package uk.gov.hmrc.voapropertylinking.services
 
-import java.time.LocalDate
-
 import basespecs.BaseUnitSpec
-import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetClientPropertyLinksParameters, GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import models._
 import models.mdtp.propertylink.myclients.{PropertyLinkWithClient, PropertyLinksWithClients}
 import models.mdtp.propertylink.projections.{OwnerAuthResult, OwnerAuthorisation}
@@ -30,6 +27,7 @@ import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.voapropertylinking.binders.clients.GetClientsParameters
+import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetClientPropertyLinksParameters, GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 
 import scala.concurrent.Future
 

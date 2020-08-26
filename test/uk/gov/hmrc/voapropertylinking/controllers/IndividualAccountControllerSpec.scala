@@ -27,7 +27,6 @@ import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import uk.gov.hmrc.voapropertylinking.connectors.mdtp.BusinessRatesAuthConnector
 import uk.gov.hmrc.voapropertylinking.connectors.modernised.CustomerManagementApi
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class IndividualAccountControllerSpec extends BaseControllerSpec {

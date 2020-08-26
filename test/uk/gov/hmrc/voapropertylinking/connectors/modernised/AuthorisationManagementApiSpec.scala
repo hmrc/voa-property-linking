@@ -32,7 +32,6 @@ class AuthorisationManagementApiSpec extends BaseUnitSpec {
   val connector: AuthorisationManagementApi = new AuthorisationManagementApi(
     http,
     mockServicesConfig,
-    "http://localhost:9540/authorisation-management-api/agent/submit_agent_representation",
     "http://localhost:9540authorisation-management-api/agent/submit_agent_rep_reponse"
   ) {
     override lazy val baseUrl: String = "http://some-url"
@@ -94,7 +93,7 @@ class AuthorisationManagementApiSpec extends BaseUnitSpec {
         .thenReturn(Future.successful(HttpResponse(200)))
 
       val result: Unit = connector.response(response)(hc).futureValue
-      result shouldBe (())
+      result shouldBe ((): Unit)
     }
   }
 
