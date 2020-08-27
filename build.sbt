@@ -37,6 +37,7 @@ lazy val scoverageSettings: Seq[Def.Setting[_ >: String with Double with Boolean
 
 lazy val microservice: Project = Project(appName, file("."))
   .enablePlugins(PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory)
+  .disablePlugins(JUnitXmlReportPlugin)
   .settings(playSettings: _*)
   .settings(scoverageSettings: _*)
   .settings(scalaSettings: _*)
