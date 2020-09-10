@@ -16,6 +16,7 @@ POST         /my-organisation/agent/remove-from-organisation                    
 POST         /my-organisation/agent/unassign                                                  @uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.unassignAgent()
 POST         /my-organisation/agent/unassign-from-some-properties                             @uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.unassignAgentFromSomeProperties()
 
+
 DELETE       /property-representations/revoke-client-property/:submissionId                    @uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.revokeClientProperty(submissionId: String)
 
 # Manage Agents
@@ -65,3 +66,4 @@ GET          /agent/property-links/:submissionId                                
 GET          /dashboard/agent/assessments/:submissionId                                       @uk.gov.hmrc.voapropertylinking.controllers.PropertyLinkingController.getClientsAssessments(submissionId: String)
 
 GET          /my-organisation/agents/:agentCode/property-links                                @uk.gov.hmrc.voapropertylinking.controllers.PropertyLinkingController.getMyAgentPropertyLinks(agentCode: Long, searchParams: GetMyOrganisationPropertyLinksParameters, params: models.PaginationParams)
+GET          /my-organisation/clients/:clientId/property-links                                @uk.gov.hmrc.voapropertylinking.controllers.PropertyLinkingController.getClientPropertyLinks(clientId: Long, searchParams: GetClientPropertyLinksParameters, pagination: ExtendedPaginationParameters)

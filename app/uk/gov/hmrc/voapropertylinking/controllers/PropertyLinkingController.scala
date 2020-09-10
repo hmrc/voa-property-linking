@@ -152,6 +152,19 @@ class PropertyLinkingController @Inject()(
 
     }
 
+  def getClientPropertyLinks(
+                              clientOrganisationId: Long,
+                              searchParams: GetClientPropertyLinksParameters,
+                              pagination: ExtendedPaginationParameters): Action[AnyContent] = authenticatedAction.async { implicit request =>
+    authorisationService
+      .findSimpleAuthorisationsForAgentWithClient(
+        request.orgId,
+        clientOrganisationId,
+        searchParams,
+        pagination.paginationParameters)
+      .map(result => Ok(result.json))
+  }
+
   // $COVERAGE-OFF$
   /*
   TODO Remove this method once external endpoints have caught up.
