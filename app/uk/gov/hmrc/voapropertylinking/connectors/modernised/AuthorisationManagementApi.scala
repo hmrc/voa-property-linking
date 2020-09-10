@@ -16,11 +16,9 @@
 
 package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
-import java.time.LocalDate
-
 import javax.inject.{Inject, Named}
-import models.{APIRepresentationRequest, APIRepresentationResponse}
-import play.api.libs.json.{JsValue, Json}
+import models.APIRepresentationResponse
+import play.api.libs.json.JsValue
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
@@ -30,7 +28,6 @@ import scala.concurrent.{ExecutionContext, Future}
 class AuthorisationManagementApi @Inject()(
       http: DefaultHttpClient,
       servicesConfig: ServicesConfig,
-      @Named("voa.createRepresentationRequest") createRepresentationRequestUrl: String,
       @Named("voa.representationRequestResponse") representationRequestResponseUrl: String
 )(implicit executionContext: ExecutionContext)
     extends BaseVoaConnector {
@@ -57,21 +54,8 @@ class AuthorisationManagementApi @Inject()(
       })
   }
 
-  def create(reprRequest: APIRepresentationRequest)(implicit hc: HeaderCarrier): Future[HttpResponse] =
-    http
-      .POST[APIRepresentationRequest, HttpResponse](createRepresentationRequestUrl, reprRequest)
-
   def response(representationResponse: APIRepresentationResponse)(implicit hc: HeaderCarrier): Future[HttpResponse] =
     http
       .PUT[APIRepresentationResponse, HttpResponse](representationRequestResponseUrl, representationResponse)
 
-  def revoke(authorisedPartyId: Long)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
-    val url = baseUrl + s"/authorisedParty/$authorisedPartyId"
-    http.PATCH[JsValue, HttpResponse](
-      url,
-      Json.obj(
-        "endDate"               -> LocalDate.now.toString,
-        "authorisedPartyStatus" -> "REVOKED"
-      ))
-  }
 }

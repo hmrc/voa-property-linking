@@ -33,7 +33,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.voapropertylinking.connectors.modernised.{CCACaseManagementApi, ExternalValuationManagementApi}
 import uk.gov.hmrc.voapropertylinking.repositories.DVRRecordRepository
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.xml.Elem
 
@@ -190,8 +189,7 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
 
   lazy val mockCcaCaseManagementConnector = {
     val m = mock[CCACaseManagementApi]
-    when(m.requestDetailedValuation(any[DetailedValuationRequest])(any[HeaderCarrier])) thenReturn Future.successful(
-      ())
+    when(m.requestDetailedValuation(any[DetailedValuationRequest])(any[HeaderCarrier])) thenReturn Future.successful(())
     m
   }
 

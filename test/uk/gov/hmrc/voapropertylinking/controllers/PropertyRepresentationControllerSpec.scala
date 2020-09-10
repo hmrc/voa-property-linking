@@ -25,7 +25,6 @@ import play.api.libs.json.Json
 import play.api.mvc.Result
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.http.HttpResponse
-import uk.gov.hmrc.voapropertylinking.connectors.modernised.ExternalPropertyLinkApi
 import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation.AgentDetails
 
 import scala.concurrent.Future
@@ -51,27 +50,6 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
     protected val paginationParams = PaginationParams(startPoint = 1, pageSize = 1, requestTotalRowCount = false)
     protected val ownerAuthResult = ModernisedOwnerAuthResult(1, 1, 1, 1, Seq())
 
-  }
-
-  "create" should {
-    "return 200 OK" when {
-      "valid JSON payload is POSTed" in new Setup {
-
-        when(mockAuthorisationManagementApi.create(any())(any()))
-          .thenReturn(Future.successful(HttpResponse(OK)))
-
-        val result: Future[Result] =
-          testController.create()(FakeRequest().withBody(Json.parse("""{
-                                                                      |  "authorisationId" : 1,
-                                                                      |  "agentOrganisationId" : 2,
-                                                                      |  "individualId" : 3,
-                                                                      |  "submissionId" : "A1",
-                                                                      |  "createDatetime" : "2019-09-12T15:36:47.125Z"
-                                                                      |}""".stripMargin)))
-
-        status(result) shouldBe OK
-      }
-    }
   }
 
   "validateAgentCode" should {
@@ -116,26 +94,9 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
     }
   }
 
-  "revoke" should {
-    "return OK 200" when {
-      "valid PATCH request is made with authorisedPartyId" in new Setup {
-        val authorisedPartyId = 123L
-        when(mockAuthorisationManagementApi.revoke(mEq(authorisedPartyId))(any()))
-          .thenReturn(Future.successful(mock[HttpResponse]))
-
-        val result: Future[Result] =
-          testController.revoke(authorisedPartyId)(FakeRequest().withBody(Json.obj()))
-
-        status(result) shouldBe OK
-        verify(mockAuthorisationManagementApi).revoke(mEq(authorisedPartyId))(any())
-      }
-    }
-  }
-
   "revoke client property" should {
     "return 204 NoContent" when {
       "property link submission id is provided" in new Setup {
-        val authorisedPartyId = 123L
         when(mockExternalPropertyLinkApi.revokeClientProperty(any())(any()))
           .thenReturn(Future.successful(()))
 

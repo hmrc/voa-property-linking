@@ -18,7 +18,7 @@ package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
 import basespecs.BaseUnitSpec
 import models.PaginationParams
-import models.searchApi.{OwnerAuthResult => ModernisedAuthResult, _}
+import models.searchApi.{OwnerAuthResult => ModernisedAuthResult}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 
@@ -68,19 +68,6 @@ class AuthorisationSearchApiSpec extends BaseUnitSpec {
 
         res shouldBe ownerAuthResult
       }
-    }
-  }
-
-  "A manage agents" should {
-    "find owner agents" in {
-      val organisationId = 123
-
-      when(mockDefaultHttpClient.GET[Agents](any())(any(), any(), any())).thenReturn(
-        Future.successful(
-          Agents(Seq(Agent("Test name 1", 123), Agent("Test name 2", 123)))
-        ))
-
-      connector.manageAgents(organisationId)(hc).futureValue.agents.size shouldBe 2
     }
   }
 

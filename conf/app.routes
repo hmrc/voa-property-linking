@@ -1,10 +1,6 @@
 # microservice specific routes
 
 GET          /property-representations/validate-agent-code/:agentCode/:authorisationId        @uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.validateAgentCode(agentCode:Long, authorisationId: Long)
-
-POST         /property-representations/create                                                 @uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.create()
-
-PATCH        /property-representations/revoke/:authorisedPartyId                              @uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.revoke(authorisedPartyId: Long)
 PUT          /property-representations/response                                               @uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.response()
 
 GET          /property-links-appointable                                                      @uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.appointableToAgent(ownerId: Long, agentCode: Long, params: models.PaginationParams, sortfield: Option[String], sortorder: Option[String], address: Option[String], agent: Option[String])
@@ -18,9 +14,6 @@ POST         /my-organisation/agent/unassign-from-some-properties               
 
 
 DELETE       /property-representations/revoke-client-property/:submissionId                    @uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.revokeClientProperty(submissionId: String)
-
-# Manage Agents
-GET          /manage-agents/:id/agents                                                        @uk.gov.hmrc.voapropertylinking.controllers.AgentController.manageAgents(id: Long)
 
 GET          /individuals/:personId                                                           @uk.gov.hmrc.voapropertylinking.controllers.IndividualAccountController.get(personId: Long)
 GET          /individuals                                                                     @uk.gov.hmrc.voapropertylinking.controllers.IndividualAccountController.withExternalId(externalId)
@@ -52,6 +45,7 @@ GET          /property-links/:plSubmissionId/check-cases/:checkCaseRef/canChalle
 
 #My Property Links
 POST         /property-links                                                                  @uk.gov.hmrc.voapropertylinking.controllers.PropertyLinkingController.create()
+POST         /clients/:clientId/property-links                                                @uk.gov.hmrc.voapropertylinking.controllers.PropertyLinkingController.createOnClientBehalf(clientId: Long)
 
 GET          /owner/agents                                                                    @uk.gov.hmrc.voapropertylinking.controllers.PropertyLinkingController.getMyOrganisationsAgents()
 GET          /owner/property-links                                                            @uk.gov.hmrc.voapropertylinking.controllers.PropertyLinkingController.getMyOrganisationsPropertyLinks(searchParams: GetMyOrganisationPropertyLinksParameters, params: Option[models.PaginationParams], organisationId: Option[Long] ?= None)
@@ -61,9 +55,9 @@ GET          /owner/property-links/:submissionId                                
 GET          /dashboard/owner/assessments/:submissionId                                       @uk.gov.hmrc.voapropertylinking.controllers.PropertyLinkingController.getMyOrganisationsAssessments(submissionId: String)
 
 #My Clients Property Links
+GET          /agent/clients                                                                   @uk.gov.hmrc.voapropertylinking.controllers.PropertyLinkingController.getMyClients(clientsParameters: Option[GetClientsParameters], paginationParams: Option[models.PaginationParams])
 GET          /agent/property-links                                                            @uk.gov.hmrc.voapropertylinking.controllers.PropertyLinkingController.getClientsPropertyLinks(searchParams: GetMyClientsPropertyLinkParameters, params: Option[models.PaginationParams])
+GET          /agent/clients/:clientId/property-links                                          @uk.gov.hmrc.voapropertylinking.controllers.PropertyLinkingController.getClientPropertyLinks(clientId: Long, searchParams: GetClientPropertyLinksParameters, params: Option[models.PaginationParams])
 GET          /agent/property-links/:submissionId                                              @uk.gov.hmrc.voapropertylinking.controllers.PropertyLinkingController.getClientsPropertyLink(submissionId: String, projection: String ?= "propertiesView")
-GET          /dashboard/agent/assessments/:submissionId                                       @uk.gov.hmrc.voapropertylinking.controllers.PropertyLinkingController.getClientsAssessments(submissionId: String)
 
 GET          /my-organisation/agents/:agentCode/property-links                                @uk.gov.hmrc.voapropertylinking.controllers.PropertyLinkingController.getMyAgentPropertyLinks(agentCode: Long, searchParams: GetMyOrganisationPropertyLinksParameters, params: models.PaginationParams)
-GET          /my-organisation/clients/:clientId/property-links                                @uk.gov.hmrc.voapropertylinking.controllers.PropertyLinkingController.getClientPropertyLinks(clientId: Long, searchParams: GetClientPropertyLinksParameters, pagination: ExtendedPaginationParameters)

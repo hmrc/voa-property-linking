@@ -32,7 +32,6 @@ class AuthorisationManagementApiSpec extends BaseUnitSpec {
   val connector: AuthorisationManagementApi = new AuthorisationManagementApi(
     http,
     mockServicesConfig,
-    "http://localhost:9540/authorisation-management-api/agent/submit_agent_representation",
     "http://localhost:9540authorisation-management-api/agent/submit_agent_rep_reponse"
   ) {
     override lazy val baseUrl: String = "http://some-url"
@@ -82,25 +81,6 @@ class AuthorisationManagementApiSpec extends BaseUnitSpec {
     }
   }
 
-  "AuthorisationManagementApi.create" should {
-    "return a created property representation" in {
-
-      val createRequest = APIRepresentationRequest(
-        authorisationId = 123456,
-        submissionId = "abc123",
-        authorisationOwnerPersonId = 98765,
-        authorisedPartyOrganisationId = 24680,
-        createDatetime = instant
-      )
-
-      when(http.POST[APIRepresentationRequest, HttpResponse](any(), any(), any())(any(), any(), any(), any()))
-        .thenReturn(Future.successful(HttpResponse(200)))
-
-      val result: Unit = connector.create(createRequest)(hc).futureValue
-      result shouldBe (())
-    }
-  }
-
   "AuthorisationManagementApi.response" should {
     "return a unit after putting a property representation response" in {
       val response = APIRepresentationResponse(
@@ -113,20 +93,7 @@ class AuthorisationManagementApiSpec extends BaseUnitSpec {
         .thenReturn(Future.successful(HttpResponse(200)))
 
       val result: Unit = connector.response(response)(hc).futureValue
-      result shouldBe (())
-    }
-  }
-
-  "AuthorisationManagementApi.revoke" should {
-    "return a unit after revoking property representation response" in {
-
-      val authorisedPartyId = 34567890
-
-      when(http.PATCH[JsValue, HttpResponse](any(), any(), any())(any(), any(), any(), any()))
-        .thenReturn(Future.successful(HttpResponse(200)))
-
-      val result: Unit = connector.revoke(authorisedPartyId)(hc).futureValue
-      result shouldBe (())
+      result shouldBe ((): Unit)
     }
   }
 

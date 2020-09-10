@@ -18,7 +18,6 @@ package uk.gov.hmrc.voapropertylinking.repositories
 
 import com.google.inject.Singleton
 import javax.inject.Inject
-
 import play.api.libs.json._
 import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.bson.{BSONDocument, BSONInteger, BSONString}
@@ -27,8 +26,7 @@ import reactivemongo.play.json.collection.JSONBatchCommands.FindAndModifyCommand
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.play.http.logging.Mdc
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 case class Sequence(_id: String, sequence: Long)
 
@@ -41,7 +39,8 @@ trait SequenceGeneratorRepository extends ReactiveRepository[Sequence, String] {
 }
 
 @Singleton
-class SequenceGeneratorMongoRepository @Inject()(mongo: ReactiveMongoComponent)
+class SequenceGeneratorMongoRepository @Inject()(mongo: ReactiveMongoComponent)(
+      implicit executionContext: ExecutionContext)
     extends ReactiveRepository[Sequence, String](
       collectionName = "sequences",
       mongo = mongo.mongoConnector.db,

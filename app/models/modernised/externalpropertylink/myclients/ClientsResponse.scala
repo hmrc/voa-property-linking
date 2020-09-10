@@ -14,20 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation
+package models.modernised.externalpropertylink.myclients
 
 import play.api.libs.json.{Json, OFormat}
 
-case class OrganisationLatestDetail(
-      id: Long,
-      addressUnitId: Long,
-      organisationName: String,
-      organisationEmailAddress: String,
-      organisationTelephoneNumber: String,
-      representativeFlag: Boolean
-)
+case class ClientsResponse(resultCount: Option[Int], clients: List[Client])
 
-object OrganisationLatestDetail {
-  implicit val format: OFormat[OrganisationLatestDetail] = Json.format[OrganisationLatestDetail]
-
+object ClientsResponse {
+  implicit val format: OFormat[ClientsResponse] = Json.format
 }

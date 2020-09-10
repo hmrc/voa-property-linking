@@ -37,7 +37,6 @@ import java.time.Clock
 import com.google.inject.AbstractModule
 import com.google.inject.name.Names
 import com.google.inject.name.Names.named
-import com.typesafe.config.ConfigException
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
 
@@ -73,19 +72,21 @@ class GuiceModule(
   private def bindModernisedEndpoints(): Unit =
     bindEndpoints(
       Map(
-        "voa.authValuationHistoryUrl"       -> "voa.resources.externalValuationManagement.valuationHistory.path",
-        "voa.myAgentPropertyLinks"          -> "voa.resources.externalPropertyLink.myAgentPropertyLinks.path",
-        "voa.myOrganisationsPropertyLinks"  -> "voa.resources.externalPropertyLink.myOrganisationsPropertyLinks.path",
-        "voa.myOrganisationsPropertyLink"   -> "voa.resources.externalPropertyLink.myOrganisationsPropertyLink.path",
-        "voa.myOrganisationsAgents"         -> "voa.resources.externalPropertyLink.myOrganisationsAgents.path",
-        "voa.myClientsPropertyLink"         -> "voa.resources.externalPropertyLink.myClientsPropertyLink.path",
-        "voa.myClientsPropertyLinks"        -> "voa.resources.externalPropertyLink.myClientsPropertyLinks.path",
-        "voa.createPropertyLink"            -> "voa.resources.externalPropertyLink.createPropertyLink.path",
-        "voa.revokeClientsPropertyLink"     -> "voa.resources.externalPropertyLink.revokeMyClientsPropertyLink.path",
-        "voa.createRepresentationRequest"   -> "voa.resources.authorisationManagementApi.createRepresentationRequest.path",
-        "voa.representationRequestResponse" -> "voa.resources.authorisationManagementApi.representationRequestResponse.path",
-        "voa.agentAppointmentChanges"       -> "voa.resources.organisationManagementApi.agentAppointmentChanges.path",
-        "voa.myAgentDetails"                -> "voa.resources.organisationManagementApi.myAgentDetails.path"
+        "voa.authValuationHistoryUrl"          -> "voa.resources.externalValuationManagement.valuationHistory.path",
+        "voa.myAgentPropertyLinks"             -> "voa.resources.externalPropertyLink.myAgentPropertyLinks.path",
+        "voa.myOrganisationsPropertyLinks"     -> "voa.resources.externalPropertyLink.myOrganisationsPropertyLinks.path",
+        "voa.myOrganisationsPropertyLink"      -> "voa.resources.externalPropertyLink.myOrganisationsPropertyLink.path",
+        "voa.myOrganisationsAgents"            -> "voa.resources.externalPropertyLink.myOrganisationsAgents.path",
+        "voa.myClientsPropertyLink"            -> "voa.resources.externalPropertyLink.myClientsPropertyLink.path",
+        "voa.myClientsPropertyLinks"           -> "voa.resources.externalPropertyLink.myClientsPropertyLinks.path",
+        "voa.myClientPropertyLinks"            -> "voa.resources.externalPropertyLink.myClientPropertyLinks.path",
+        "voa.myClients"                        -> "voa.resources.externalPropertyLink.myClients.path",
+        "voa.createPropertyLink"               -> "voa.resources.externalPropertyLink.createPropertyLink.path",
+        "voa.createPropertyLinkOnClientBehalf" -> "voa.resources.externalPropertyLink.createPropertyLinkOnClientBehalf.path",
+        "voa.revokeClientsPropertyLink"        -> "voa.resources.externalPropertyLink.revokeMyClientsPropertyLink.path",
+        "voa.representationRequestResponse"    -> "voa.resources.authorisationManagementApi.representationRequestResponse.path",
+        "voa.agentAppointmentChanges"          -> "voa.resources.organisationManagementApi.agentAppointmentChanges.path",
+        "voa.myAgentDetails"                   -> "voa.resources.organisationManagementApi.myAgentDetails.path"
       ),
       servicesConfig.baseUrl("voa-modernised-api")
     )
@@ -100,5 +101,4 @@ class GuiceModule(
     case _  => name
   }
 
-  private def configException(path: String) = throw new ConfigException.Missing(path)
 }

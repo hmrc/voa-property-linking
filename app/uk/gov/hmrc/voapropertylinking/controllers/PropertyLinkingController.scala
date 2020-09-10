@@ -26,8 +26,9 @@ import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.http.Upstream5xxResponse
 import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
 import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
+import uk.gov.hmrc.voapropertylinking.binders.clients.GetClientsParameters
 import uk.gov.hmrc.voapropertylinking.binders.propertylinks.temp.GetMyOrganisationsPropertyLinksParametersWithAgentFiltering
-import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
+import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetClientPropertyLinksParameters, GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import uk.gov.hmrc.voapropertylinking.connectors.modernised._
 import uk.gov.hmrc.voapropertylinking.errorhandler.models.ErrorResponse
 import uk.gov.hmrc.voapropertylinking.services.{AssessmentService, PropertyLinkingService}
@@ -61,6 +62,25 @@ class PropertyLinkingController @Inject()(
           case _: Upstream5xxResponse =>
             Logger.info(s"create property link failure: submissionId ${propertyLinkRequest.submissionId}")
             auditingService.sendEvent("create property link failure", propertyLinkRequest)
+            InternalServerError
+        }
+    }
+  }
+
+  def createOnClientBehalf(clientId: Long): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
+    withJsonBody[PropertyLinkRequest] { propertyLinkRequest =>
+      propertyLinkService
+        .createOnClientBehalf(APIPropertyLinkRequest.fromPropertyLinkRequest(propertyLinkRequest), clientId)
+        .map { _ =>
+          Logger.info(s"create property link on client behalf: submissionId ${propertyLinkRequest.submissionId}")
+          auditingService.sendEvent("create property link on client behalf", propertyLinkRequest)
+          Accepted
+        }
+        .recover {
+          case _: Upstream5xxResponse =>
+            Logger.info(
+              s"create property link on client behalf failure: submissionId ${propertyLinkRequest.submissionId}")
+            auditingService.sendEvent("create property link on client behalf failure", propertyLinkRequest)
             InternalServerError
         }
     }
@@ -129,6 +149,15 @@ class PropertyLinkingController @Inject()(
       .fold(NotFound("clients property links not found"))(propertyLinks => Ok(Json.toJson(propertyLinks)))
   }
 
+  def getClientPropertyLinks(
+        clientId: Long,
+        searchParams: GetClientPropertyLinksParameters,
+        paginationParams: Option[PaginationParams]): Action[AnyContent] = authenticated.async { implicit request =>
+    propertyLinkService
+      .getClientPropertyLinks(clientId, searchParams, paginationParams)
+      .fold(NotFound("clients property links not found"))(propertyLinks => Ok(Json.toJson(propertyLinks)))
+  }
+
   def getClientsPropertyLink(submissionId: String, projection: String = "propertiesView"): Action[AnyContent] =
     authenticated.async { implicit request =>
       projection match {
@@ -152,17 +181,12 @@ class PropertyLinkingController @Inject()(
 
     }
 
-  def getClientPropertyLinks(
-                              clientOrganisationId: Long,
-                              searchParams: GetClientPropertyLinksParameters,
-                              pagination: ExtendedPaginationParameters): Action[AnyContent] = authenticatedAction.async { implicit request =>
-    authorisationService
-      .findSimpleAuthorisationsForAgentWithClient(
-        request.orgId,
-        clientOrganisationId,
-        searchParams,
-        pagination.paginationParameters)
-      .map(result => Ok(result.json))
+  def getMyClients(
+        clientsParameters: Option[GetClientsParameters],
+        paginationParams: Option[PaginationParams]): Action[AnyContent] = authenticated.async { implicit request =>
+    propertyLinkService
+      .getMyClients(clientsParameters.getOrElse(GetClientsParameters()), paginationParams)
+      .map(clients => Ok(Json.toJson(clients)))
   }
 
   // $COVERAGE-OFF$

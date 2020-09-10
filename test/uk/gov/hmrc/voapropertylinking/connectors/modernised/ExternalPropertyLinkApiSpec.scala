@@ -16,32 +16,39 @@
 
 package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
+import java.time.LocalDate
+
 import basespecs.BaseUnitSpec
-import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
-import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
 import models.PaginationParams
-import models.modernised.externalpropertylink.myclients.{ClientPropertyLink, PropertyLinksWithClient}
+import models.modernised.externalpropertylink.myclients.{ClientPropertyLink, ClientsResponse, PropertyLinksWithClient}
 import models.modernised.externalpropertylink.myorganisations.{AgentList, PropertyLinkWithAgents, PropertyLinksWithAgents}
-import models.modernised.externalpropertylink.requests.CreatePropertyLink
+import models.modernised.externalpropertylink.requests.{CreatePropertyLink, CreatePropertyLinkOnClientBehalf}
 import org.mockito.ArgumentMatchers.{any, eq => mEq}
 import org.mockito.Mockito._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.HttpResponse
+import uk.gov.hmrc.voapropertylinking.binders.clients.GetClientsParameters
+import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetClientPropertyLinksParameters, GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
+import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
 
   trait Setup {
 
     val address = "mock address"
+    val uarn = 123
     val baref = "mock baref"
     val agent = "mock agent"
     val status = "mock status"
     val sortField = "mock sort field"
     val sortOrder = "mock sort order"
+    val appointedFromDate = LocalDate.parse("2020-01-01")
+    val appointedToDate = LocalDate.parse("2020-03-01")
 
-    val searchParams = GetMyOrganisationPropertyLinksParameters(
+    val getMyOrganisationSearchParams = GetMyOrganisationPropertyLinksParameters(
       address = Some(address),
+      uarn = Some(uarn),
       baref = Some(baref),
       agent = Some(agent),
       client = None,
@@ -56,9 +63,10 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
       status = Some(status),
       Some(sortField),
       Some(sortOrder),
-      representationStatus = None)
-
-    val emptySearchParams = GetMyOrganisationPropertyLinksParameters()
+      representationStatus = None,
+      Some(appointedFromDate),
+      Some(appointedToDate)
+    )
 
     val voaApiUrl = "http://voa-modernised-api/external-property-link-management-api"
     val agentAuthorisationsUrl = s"$voaApiUrl/my-organisation/agents/{agentCode}/property-links"
@@ -66,8 +74,11 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
     val ownerAuthorisationsUrl = s"$voaApiUrl/my-organisation/property-links"
     val clientAuthorisationUrl = s"$voaApiUrl/my-organisation/clients/all/property-links/{propertyLinkId}"
     val clientAuthorisationsUrl = s"$voaApiUrl/my-organisation/clients/all/property-links"
+    val myClientPropertyLinksUrl = s"$voaApiUrl/my-organisation/clients/{clientId}/property-links"
     val createPropertyLinkUrl = s"$voaApiUrl/my-organisation/property-links"
+    val createPropertyLinkOnClientBehalfUrl = s"$voaApiUrl/my-organisation/clients/{clientId}/property-links"
     val myOrganisationsAgentsUrl = s"$voaApiUrl/my-organisation/agents"
+    val myClientsUrl = s"$voaApiUrl/my-organisation/clients"
     val revokeClientsPropertyLinkUrl =
       s"$voaApiUrl/my-organisation/clients/all/property-links/{submissionId}/appointment"
     val httpstring = "VoaAuthedBackendHttp"
@@ -78,10 +89,13 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
       myOrganisationsPropertyLinksUrl = ownerAuthorisationsUrl,
       myOrganisationsPropertyLinkUrl = ownerAuthorisationUrl,
       myClientsPropertyLinkUrl = clientAuthorisationUrl,
+      myClientPropertyLinksUrl = myClientPropertyLinksUrl,
       myClientsPropertyLinksUrl = clientAuthorisationsUrl,
       createPropertyLinkUrl = createPropertyLinkUrl,
+      createPropertyLinkOnClientBehalfUrl = createPropertyLinkOnClientBehalfUrl,
       myOrganisationsAgentsUrl = myOrganisationsAgentsUrl,
-      revokeClientsPropertyLinkUrl = revokeClientsPropertyLinkUrl
+      revokeClientsPropertyLinkUrl = revokeClientsPropertyLinkUrl,
+      myClientsUrl = myClientsUrl
     )
 
     val paginationParams = PaginationParams(1, 1, true)
@@ -101,11 +115,12 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
         .thenReturn(Future.successful(mockReturnedPropertyLinks))
 
       connector
-        .getMyOrganisationsPropertyLinks(emptySearchParams, params = Some(paginationParams))
+        .getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, params = Some(paginationParams))
         .futureValue shouldBe mockReturnedPropertyLinks
 
+      val getMyOrgPropertyLinksQueryParams = queryParams :+ ("address" -> address) :+ ("uarn" -> uarn.toString) :+ ("baref" -> baref) :+ ("agent" -> agent) :+ ("status" -> status) :+ ("sortfield" -> sortField) :+ ("sortorder" -> sortOrder)
       verify(connector.http)
-        .GET(mEq(ownerAuthorisationsUrl), mEq(queryParams))(any(), any(), any(), any())
+        .GET(mEq(ownerAuthorisationsUrl), mEq(getMyOrgPropertyLinksQueryParams))(any(), any(), any(), any())
     }
 
   }
@@ -120,15 +135,14 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
         .thenReturn(Future.successful(mockReturnedPropertyLinks))
 
       connector
-        .getMyAgentPropertyLinks(agentCode, emptySearchParams, params = paginationParams)
+        .getMyAgentPropertyLinks(agentCode, getMyOrganisationSearchParams, params = paginationParams)
         .futureValue shouldBe mockReturnedPropertyLinks
 
+      val getMyAgentPropertyLinksQueryParams = queryParams :+ ("address" -> address) :+ ("uarn" -> uarn.toString) :+ ("baref" -> baref) :+ ("agent" -> agent) :+ ("status" -> status) :+ ("sortfield" -> sortField) :+ ("sortorder" -> sortOrder)
       verify(connector.http)
-        .GET(mEq(agentAuthorisationsUrl.replace("{agentCode}", agentCode.toString)), mEq(queryParams))(
-          any(),
-          any(),
-          any(),
-          any())
+        .GET(
+          mEq(agentAuthorisationsUrl.replace("{agentCode}", agentCode.toString)),
+          mEq(getMyAgentPropertyLinksQueryParams))(any(), any(), any(), any())
     }
 
   }
@@ -162,8 +176,42 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
         .getClientsPropertyLinks(getMyClientsSearchParams, Some(paginationParams))
         .futureValue shouldBe mockReturnedPropertyLinks
 
-      val clientQueryParams = queryParams :+ ("address" -> address) :+ ("baref" -> baref) :+ ("client" -> agent) :+ ("status" -> status) :+ ("sortfield" -> sortField) :+ ("sortorder" -> sortOrder)
+      val clientQueryParams = queryParams :+ ("address" -> address) :+ ("baref" -> baref) :+ ("client" -> agent) :+ ("status" -> status) :+ ("sortfield" -> sortField) :+ ("sortorder" -> sortOrder) :+ ("appointedFromDate" -> appointedFromDate.toString) :+ ("appointedToDate" -> appointedToDate.toString)
       verify(connector.http).GET(mEq(clientAuthorisationsUrl), mEq(clientQueryParams))(any(), any(), any(), any())
+    }
+
+  }
+
+  "get a client's property links" should {
+
+    "build the correct query params and call the modernised layer" in new Setup {
+
+      val mockReturnedPropertyLinks: PropertyLinksWithClient = mock[PropertyLinksWithClient]
+
+      when(connector.http.GET[PropertyLinksWithClient](any(), any())(any(), any(), any(), any()))
+        .thenReturn(Future.successful(mockReturnedPropertyLinks))
+
+      private val clientOrgId = 111L
+      connector
+        .getClientPropertyLinks(
+          clientOrgId,
+          GetClientPropertyLinksParameters(
+            address = Some(address),
+            baref = Some(baref),
+            status = Some(status),
+            sortField = Some(sortField),
+            sortOrder = Some(sortOrder),
+            appointedFromDate = Some(appointedFromDate),
+            appointedToDate = Some(appointedToDate)
+          ),
+          Some(paginationParams)
+        )
+        .futureValue shouldBe mockReturnedPropertyLinks
+
+      val clientQueryParams = queryParams :+ ("address" -> address) :+ ("baref" -> baref) :+ ("status" -> status) :+ ("sortfield" -> sortField) :+ ("sortorder" -> sortOrder) :+ ("appointedFromDate" -> appointedFromDate.toString) :+ ("appointedToDate" -> appointedToDate.toString)
+      verify(connector.http).GET(
+        mEq(myClientPropertyLinksUrl.replace("{clientId}", clientOrgId.toString)),
+        mEq(clientQueryParams))(any(), any(), any(), any())
     }
 
   }
@@ -201,16 +249,31 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
       connector.createPropertyLink(mockVoaCreatePropertyLink).futureValue shouldBe mockHttpResponse
 
       verify(connector.http)
-        .POST(mEq(createPropertyLinkUrl), mEq(mockVoaCreatePropertyLink), mEq(Seq()))(
-          any(),
-          any(),
-          any(),
-          any(),
-          any())
+        .POST(mEq(createPropertyLinkUrl), mEq(mockVoaCreatePropertyLink), mEq(Seq()))(any(), any(), any(), any(), any())
     }
 
   }
+  "create property link on client behalf" should {
 
+    "call modernised createPropertyLinkOnClientBehalf endpoint" in new Setup {
+
+      val mockHttpResponse: HttpResponse = mock[HttpResponse]
+      val mockVoaCreatePropertyLink: CreatePropertyLinkOnClientBehalf = mock[CreatePropertyLinkOnClientBehalf]
+      val clientId = 100
+      when(
+        connector.http
+          .POST[CreatePropertyLinkOnClientBehalf, HttpResponse](any(), any(), any())(any(), any(), any(), any(), any()))
+        .thenReturn(Future.successful(mockHttpResponse))
+      connector.createOnClientBehalf(mockVoaCreatePropertyLink, clientId).futureValue shouldBe mockHttpResponse
+
+      verify(connector.http)
+        .POST(
+          mEq(createPropertyLinkOnClientBehalfUrl.replace("{clientId}", clientId.toString)),
+          mEq(mockVoaCreatePropertyLink),
+          mEq(Seq()))(any(), any(), any(), any(), any())
+    }
+
+  }
   "get my organisations agents" should {
 
     "return the agents list for the given organisation" in new Setup {
@@ -230,6 +293,25 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
 
   }
 
+  "get my clients" should {
+
+    "return the clients for the given agent organisation" in new Setup {
+
+      val mockReturnedClientsResponse: ClientsResponse = mock[ClientsResponse]
+
+      when(connector.http.GET[ClientsResponse](any(), any())(any(), any(), any(), any()))
+        .thenReturn(Future.successful(mockReturnedClientsResponse))
+
+      connector
+        .getMyClients(GetClientsParameters(), None)
+        .futureValue shouldBe mockReturnedClientsResponse
+
+      verify(connector.http)
+        .GET(mEq(myClientsUrl), mEq(List()))(any(), any(), any(), any())
+    }
+
+  }
+
   "revoke client property" should {
 
     "revoke a client property" in new Setup {
@@ -241,7 +323,7 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
 
       connector
         .revokeClientProperty("some-submissionId")
-        .futureValue shouldBe ()
+        .futureValue shouldBe ((): Unit)
 
       verify(connector.http)
         .DELETE(any())(any(), any(), any(), any())

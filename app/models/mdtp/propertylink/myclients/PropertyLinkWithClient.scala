@@ -16,6 +16,8 @@
 
 package models.mdtp.propertylink.myclients
 
+import java.time.LocalDate
+
 import models.modernised.externalpropertylink.myclients.{SummaryPropertyLinkWithClient => ModernisedSummaryPropertyLinkWithClient}
 import models.searchApi.Client
 import play.api.libs.json.{Json, OFormat}
@@ -28,6 +30,7 @@ case class PropertyLinkWithClient(
       uarn: Long,
       address: String,
       localAuthorityRef: String,
+      appointedDate: LocalDate,
       client: Client
 )
 
@@ -43,6 +46,7 @@ object PropertyLinkWithClient {
       uarn = propertyLink.uarn,
       address = propertyLink.address,
       localAuthorityRef = propertyLink.localAuthorityRef,
+      appointedDate = propertyLink.appointedDate,
       client = Client(propertyLink.client.organisationId, propertyLink.client.organisationName)
     )
 

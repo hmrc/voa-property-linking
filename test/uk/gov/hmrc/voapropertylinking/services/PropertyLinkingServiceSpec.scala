@@ -16,10 +16,7 @@
 
 package uk.gov.hmrc.voapropertylinking.services
 
-import java.time.LocalDate
-
 import basespecs.BaseUnitSpec
-import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import models._
 import models.mdtp.propertylink.myclients.{PropertyLinkWithClient, PropertyLinksWithClients}
 import models.mdtp.propertylink.projections.{OwnerAuthResult, OwnerAuthorisation}
@@ -29,6 +26,8 @@ import models.modernised.externalpropertylink.myorganisations._
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import uk.gov.hmrc.http.HttpResponse
+import uk.gov.hmrc.voapropertylinking.binders.clients.GetClientsParameters
+import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetClientPropertyLinksParameters, GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 
 import scala.concurrent.Future
 
@@ -162,6 +161,7 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
     uarn = 33333,
     address = "1 HIGH STREET, BRIGHTON",
     localAuthorityRef = "44444",
+    appointedDate = date,
     client = ClientDetails(55555, "mock org")
   )
 
@@ -207,6 +207,7 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
 
   val getMyOrganisationSearchParams = GetMyOrganisationPropertyLinksParameters()
   val getMyClientsSearchParams = GetMyClientsPropertyLinkParameters()
+  val getClientSearchParams = GetClientPropertyLinksParameters()
   val paginationParams = PaginationParams(startPoint = 1, pageSize = 1, requestTotalRowCount = true)
 
   "getMyOrganisationsPropertyLink" should {
@@ -266,6 +267,20 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
     }
   }
 
+  "create on client behalf" should {
+    "call create connector method with correct params" in {
+      val clientId = 100
+      when(mockExternalPropertyLinkApi.createOnClientBehalf(any(), any())(any(), any()))
+        .thenReturn(Future.successful(mockHttpResponse))
+
+      val response = service.createOnClientBehalf(apiPropertyLinkRequest, clientId).futureValue
+
+      response shouldBe mockHttpResponse
+
+      verify(mockExternalPropertyLinkApi).createOnClientBehalf(any(), any())(any(), any())
+    }
+  }
+
   "getClientsPropertyLinks" should {
     "call connector and return a Owner Auth Result for a valid authorisation id" in {
 
@@ -289,6 +304,44 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
       result shouldBe None
 
       verify(mockExternalPropertyLinkApi).getClientsPropertyLinks(getMyClientsSearchParams, Some(paginationParams))
+    }
+  }
+
+  "getClientPropertyLinks" should {
+    "call connector and return a Owner Auth Result for a valid authorisation id" in {
+
+      val clientId = 111L
+
+      when(
+        mockExternalPropertyLinkApi
+          .getClientPropertyLinks(clientId, getClientSearchParams, Some(paginationParams)))
+        .thenReturn(Future.successful(Some(propertyLinksWithClient)))
+
+      val result =
+        service.getClientPropertyLinks(clientId, getClientSearchParams, Some(paginationParams)).value.futureValue
+
+      result.getOrElse("None returned") shouldBe ownerAuthResultClient
+
+      verify(mockExternalPropertyLinkApi)
+        .getClientPropertyLinks(clientId, getClientSearchParams, Some(paginationParams))
+    }
+
+    "return none when nothing is returned from connector" in {
+
+      val clientId = 111L
+
+      when(
+        mockExternalPropertyLinkApi
+          .getClientPropertyLinks(clientId, getClientSearchParams, Some(paginationParams)))
+        .thenReturn(Future.successful(None))
+
+      val result =
+        service.getClientPropertyLinks(clientId, getClientSearchParams, Some(paginationParams)).value.futureValue
+
+      result shouldBe None
+
+      verify(mockExternalPropertyLinkApi)
+        .getClientPropertyLinks(clientId, getClientSearchParams, Some(paginationParams))
     }
   }
 
@@ -381,6 +434,41 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
 
       verify(mockExternalPropertyLinkApi)
         .getMyOrganisationsAgents()
+
+    }
+  }
+
+  "getMyClients" should {
+    "call connector and return the list of clients belonging to that agent organisation" in {
+      when(
+        mockExternalPropertyLinkApi
+          .getMyClients(any(), any())(any()))
+        .thenReturn(Future.successful(clientsList))
+
+      val result = service
+        .getMyClients(GetClientsParameters(), Some(PaginationParams(1, 15, true)))
+        .futureValue
+
+      result shouldBe clientsList
+
+      verify(mockExternalPropertyLinkApi)
+        .getMyClients(any(), any())(any())
+    }
+
+    "return none when nothing is returned from connector" in {
+      when(
+        mockExternalPropertyLinkApi
+          .getMyClients(any(), any())(any()))
+        .thenReturn(Future.successful(emptyClientsList))
+
+      val result = service
+        .getMyClients(GetClientsParameters(), Some(PaginationParams(1, 15, true)))
+        .futureValue
+
+      result shouldBe emptyClientsList
+
+      verify(mockExternalPropertyLinkApi)
+        .getMyClients(any(), any())(any())
 
     }
   }

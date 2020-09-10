@@ -17,7 +17,7 @@
 package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
 import javax.inject.Inject
-import models.{APIParty, PropertiesView}
+import models.PropertiesView
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient

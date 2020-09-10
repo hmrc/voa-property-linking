@@ -37,22 +37,16 @@ class TestController @Inject()(
   Move tests away from this method.
    */
   def deleteOrganisation(organisationId: Long): Action[AnyContent] = authenticated.async { implicit request =>
-    testConnector
-      .deleteOrganisation(organisationId)
-      .map(_ => Ok)
+    testConnector.deleteOrganisation(organisationId).map(_ => Ok)
   }
 
-  def clearDvrRecords(organisationId: Long): Action[AnyContent] = authenticated.async { implicit request =>
-    dvrRecordRepository
-      .clear(organisationId)
-      .map(_ => Ok)
+  def clearDvrRecords(organisationId: Long): Action[AnyContent] = authenticated.async {
+    dvrRecordRepository.clear(organisationId).map(_ => Ok)
   }
 
   def deleteCheckCases(propertyLinkingSubmissionId: String): Action[AnyContent] = authenticated.async {
     implicit request =>
-      testConnector
-        .deleteCheckCases(propertyLinkingSubmissionId)
-        .map(_ => Ok)
+      testConnector.deleteCheckCases(propertyLinkingSubmissionId).map(_ => Ok)
   }
 
 }
