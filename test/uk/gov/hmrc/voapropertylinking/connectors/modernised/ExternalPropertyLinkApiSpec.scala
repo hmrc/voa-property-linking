@@ -45,6 +45,7 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
     val sortOrder = "mock sort order"
     val appointedFromDate = LocalDate.parse("2020-01-01")
     val appointedToDate = LocalDate.parse("2020-03-01")
+    val clientName = "ABC-LTD"
 
     val getMyOrganisationSearchParams = GetMyOrganisationPropertyLinksParameters(
       address = Some(address),
@@ -202,13 +203,15 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
             sortField = Some(sortField),
             sortOrder = Some(sortOrder),
             appointedFromDate = Some(appointedFromDate),
-            appointedToDate = Some(appointedToDate)
+            appointedToDate = Some(appointedToDate),
+            uarn = Some(uarn),
+            client = Some(clientName)
           ),
           Some(paginationParams)
         )
         .futureValue shouldBe mockReturnedPropertyLinks
 
-      val clientQueryParams = queryParams :+ ("address" -> address) :+ ("baref" -> baref) :+ ("status" -> status) :+ ("sortfield" -> sortField) :+ ("sortorder" -> sortOrder) :+ ("appointedFromDate" -> appointedFromDate.toString) :+ ("appointedToDate" -> appointedToDate.toString)
+      val clientQueryParams = queryParams :+ ("address" -> address) :+ ("baref" -> baref) :+ ("status" -> status) :+ ("sortfield" -> sortField) :+ ("sortorder" -> sortOrder) :+ ("appointedFromDate" -> appointedFromDate.toString) :+ ("appointedToDate" -> appointedToDate.toString) :+ ("uarn" -> uarn.toString) :+ ("client" -> clientName)
       verify(connector.http).GET(
         mEq(myClientPropertyLinksUrl.replace("{clientId}", clientOrgId.toString)),
         mEq(clientQueryParams))(any(), any(), any(), any())
