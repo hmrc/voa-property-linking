@@ -17,10 +17,10 @@
 package uk.gov.hmrc.voapropertylinking.connectors
 
 import play.api.mvc.Request
-import uk.gov.hmrc.http.{HeaderCarrier, JsonHttpReads, OptionHttpReads, RawReads}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 
-trait BaseConnector extends JsonHttpReads with OptionHttpReads with RawReads {
+trait BaseConnector {
 
   implicit def hc(implicit request: Request[_]): HeaderCarrier =
     HeaderCarrierConverter.fromHeadersAndSession(request.headers)

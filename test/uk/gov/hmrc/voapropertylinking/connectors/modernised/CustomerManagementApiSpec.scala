@@ -306,7 +306,7 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
       when(
         defaultHttpClient
           .PUT[UpdatedOrganisationAccount, HttpResponse](any(), any(), any())(any(), any(), any(), any()))
-        .thenReturn(Future.successful(HttpResponse(200)))
+        .thenReturn(Future.successful(emptyJsonHttpResponse(200)))
 
       val result: Unit = testConnector.updateGroupAccount(orgId = orgId, updatedOrgAccount).futureValue
       result should be(())

@@ -33,9 +33,9 @@ class BusinessRatesAuthConnectorSpec extends BaseUnitSpec {
   "BusinessRatesAuthConnector clear cache" should {
     "delete the cache" in {
       when(mockDefaultHttpClient.DELETE[HttpResponse](any(), any())(any(), any(), any()))
-        .thenReturn(Future.successful(HttpResponse(200)))
+        .thenReturn(Future.successful(emptyJsonHttpResponse(200)))
 
-      connector.clearCache().futureValue shouldBe (())
+      connector.clearCache().futureValue shouldBe ((): Unit)
     }
   }
 

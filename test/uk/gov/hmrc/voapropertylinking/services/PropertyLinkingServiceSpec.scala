@@ -25,7 +25,6 @@ import models.modernised.externalpropertylink.myclients.{PropertyLinkWithClient 
 import models.modernised.externalpropertylink.myorganisations._
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
-import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.voapropertylinking.binders.clients.GetClientsParameters
 import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetClientPropertyLinksParameters, GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 
@@ -33,7 +32,7 @@ import scala.concurrent.Future
 
 class PropertyLinkingServiceSpec extends BaseUnitSpec {
 
-  val httpResponse = HttpResponse(200)
+  val httpResponse = emptyJsonHttpResponse(200)
 
   val service = new PropertyLinkingService(
     propertyLinksConnector = mockExternalPropertyLinkApi,

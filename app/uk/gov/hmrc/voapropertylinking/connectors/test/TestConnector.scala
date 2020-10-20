@@ -17,6 +17,7 @@
 package uk.gov.hmrc.voapropertylinking.connectors.test
 
 import javax.inject.Inject
+import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig

@@ -31,7 +31,7 @@ import org.mockito.ArgumentMatchers.{any, eq => mEq}
 import org.mockito.Mockito._
 import play.api.libs.json.Json
 import play.api.test.{FakeRequest, Helpers}
-import uk.gov.hmrc.http.{HttpResponse, Upstream5xxResponse}
+import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import uk.gov.hmrc.voapropertylinking.binders.clients.GetClientsParameters
 import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetClientPropertyLinksParameters, GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
@@ -140,7 +140,8 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
 
       val plSubmissionJson = Json.toJson(testPropertyLinkSubmission)
 
-      when(mockPropertyLinkingService.create(any())(any(), any())).thenReturn(Future.successful(HttpResponse(200)))
+      when(mockPropertyLinkingService.create(any())(any(), any()))
+        .thenReturn(Future.successful(emptyJsonHttpResponse(200)))
 
       val res = testController.create()(FakeRequest().withBody(plSubmissionJson))
       status(res) shouldBe ACCEPTED
@@ -162,7 +163,7 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
       val plSubmissionJson = Json.toJson(testPropertyLinkSubmission)
 
       when(mockPropertyLinkingService.create(any())(any(), any()))
-        .thenReturn(Future.failed(Upstream5xxResponse("Failed to create PL", 501, 501)))
+        .thenReturn(Future.failed(UpstreamErrorResponse("Failed to create PL", 501, 501)))
 
       val res = testController.create()(FakeRequest().withBody(plSubmissionJson))
       status(res) shouldBe INTERNAL_SERVER_ERROR
@@ -187,7 +188,7 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
       val plSubmissionJson = Json.toJson(testPropertyLinkSubmission)
 
       when(mockPropertyLinkingService.createOnClientBehalf(any(), any())(any(), any()))
-        .thenReturn(Future.successful(HttpResponse(200)))
+        .thenReturn(Future.successful(emptyJsonHttpResponse(200)))
 
       val res = testController.createOnClientBehalf(clientId)(FakeRequest().withBody(plSubmissionJson))
       status(res) shouldBe ACCEPTED
@@ -210,7 +211,7 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
       val plSubmissionJson = Json.toJson(testPropertyLinkSubmission)
 
       when(mockPropertyLinkingService.createOnClientBehalf(any(), any())(any(), any()))
-        .thenReturn(Future.failed(Upstream5xxResponse("Failed to create PL", 501, 501)))
+        .thenReturn(Future.failed(UpstreamErrorResponse("Failed to create PL", 501, 501)))
 
       val res = testController.createOnClientBehalf(clientId)(FakeRequest().withBody(plSubmissionJson))
       status(res) shouldBe INTERNAL_SERVER_ERROR

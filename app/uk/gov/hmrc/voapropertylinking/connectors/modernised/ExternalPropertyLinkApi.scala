@@ -22,6 +22,7 @@ import models.modernised.externalpropertylink.myclients.{ClientPropertyLink, Cli
 import models.modernised.externalpropertylink.myorganisations.{AgentList, OwnerPropertyLink, PropertyLinksWithAgents}
 import models.modernised.externalpropertylink.requests.{CreatePropertyLink, CreatePropertyLinkOnClientBehalf}
 import uk.gov.hmrc.http._
+import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
 import uk.gov.hmrc.voapropertylinking.binders.clients.GetClientsParameters
 import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetClientPropertyLinksParameters, GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}

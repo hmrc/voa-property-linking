@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
-import java.net.URI
 import java.time.LocalDateTime
 
 import akka.stream.scaladsl.Source
@@ -130,8 +129,6 @@ class ExternalValuationManagementApiSpec extends BaseUnitSpec with ContentTypes 
           override def xml: Elem = ???
 
           override def json: JsValue = ???
-
-          override def uri: URI = ???
         }
         m
       }
