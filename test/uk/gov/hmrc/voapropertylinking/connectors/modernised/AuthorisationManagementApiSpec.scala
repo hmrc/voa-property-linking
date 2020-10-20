@@ -90,7 +90,7 @@ class AuthorisationManagementApiSpec extends BaseUnitSpec {
       )
 
       when(http.PUT[APIRepresentationResponse, HttpResponse](any(), any(), any())(any(), any(), any(), any()))
-        .thenReturn(Future.successful(HttpResponse(200)))
+        .thenReturn(Future.successful(emptyJsonHttpResponse(200)))
 
       val result: Unit = connector.response(response)(hc).futureValue
       result shouldBe ((): Unit)

@@ -36,7 +36,7 @@ class CCACaseManagementApiSpec extends BaseUnitSpec {
     "update the valuation with the detailed valuation request" in {
 
       when(http.POST[DetailedValuationRequest, HttpResponse](any(), any(), any())(any(), any(), any(), any()))
-        .thenReturn(Future.successful(HttpResponse(200)))
+        .thenReturn(Future.successful(emptyJsonHttpResponse(200)))
 
       val dvr = DetailedValuationRequest(
         authorisationId = 123456,
@@ -48,7 +48,7 @@ class CCACaseManagementApiSpec extends BaseUnitSpec {
         billingAuthorityReferenceNumber = "barn1"
       )
 
-      connector.requestDetailedValuation(dvr).futureValue shouldBe (())
+      connector.requestDetailedValuation(dvr).futureValue shouldBe ((): Unit)
     }
   }
 }

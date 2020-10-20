@@ -38,14 +38,14 @@ import com.google.inject.AbstractModule
 import com.google.inject.name.Names
 import com.google.inject.name.Names.named
 import play.api.{Configuration, Environment}
-import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 class GuiceModule(
       environment: Environment,
       configuration: Configuration
 ) extends AbstractModule {
 
-  val servicesConfig = new ServicesConfig(configuration, new RunMode(configuration, environment.mode))
+  lazy val servicesConfig = new ServicesConfig(configuration)
 
   override def configure(): Unit = {
 

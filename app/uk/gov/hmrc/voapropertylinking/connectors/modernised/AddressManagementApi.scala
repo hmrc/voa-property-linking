@@ -19,6 +19,7 @@ package uk.gov.hmrc.voapropertylinking.connectors.modernised
 import javax.inject.Inject
 import models.modernised.addressmanagement.{Addresses, DetailedAddress, SimpleAddress}
 import play.api.libs.json.{JsDefined, JsNumber, JsValue}
+import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient

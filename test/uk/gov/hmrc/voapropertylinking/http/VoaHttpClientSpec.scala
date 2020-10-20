@@ -20,6 +20,7 @@ import basespecs.BaseUnitSpec
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import org.mockito.{ArgumentCaptor, ArgumentMatchers}
+import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.logging._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, Token, UserId}
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient

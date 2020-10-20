@@ -71,25 +71,24 @@ scalacOptions += s"-P:silencer:sourceRoots=${baseDirectory.value.getCanonicalPat
 val compileDependencies = Seq(
   ws,
   guice,
+  "uk.gov.hmrc"        %% "bootstrap-backend-play-26" % "2.23.0",
   "uk.gov.hmrc"        %% "simple-reactivemongo"   % "7.20.0-play-26",
-  "com.typesafe.play"  %% "play-ahc-ws-standalone" % "2.0.8",
   "uk.gov.hmrc"        %% "auth-client"            % "2.32.0-play-26",
-  "uk.gov.hmrc"        %% "bootstrap-play-26"      % "1.3.0",
   "uk.gov.hmrc"        %% "mongo-lock"             % "6.15.0-play-26",
   "uk.gov.hmrc"        %% "domain"                 % "5.6.0-play-26",
   "org.typelevel"      %% "cats-core"              % "1.6.1",
   "com.typesafe.play"  %% "play-json"              % "2.6.13",
   "org.scalacheck"     %% "scalacheck"             % "1.13.5",
   "uk.gov.hmrc"        %% "uri-template"           % "1.3.0",
-  "org.apache.commons" % "commons-text"            % "1.6"
+  "org.apache.commons" %  "commons-text"           % "1.6"
 )
 
 val testDependencies = Seq(
-  "org.scalatest"          %% "scalatest"          % "3.0.8"             % "test",
-  "org.pegdown"            % "pegdown"             % "1.6.0"             % "test",
-  "com.typesafe.play"      %% "play-test"          % PlayVersion.current % "test",
-  "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.0"             % "test",
-  "org.mockito"            % "mockito-core"        % "2.25.0"            % "test"
+  "org.scalatest"          %% "scalatest"           % "3.0.8"             % "test",
+  "org.pegdown"            %  "pegdown"             % "1.6.0"             % "test",
+  "com.typesafe.play"      %% "play-test"           % PlayVersion.current % "test",
+  "org.scalatestplus.play" %% "scalatestplus-play"  % "3.1.0"             % "test",
+  "org.mockito"            %  "mockito-core"        % "2.25.0"            % "test"
 )
 
 addCommandAlias("precommit", ";scalafmt;test:scalafmt;coverage;test;coverageReport")

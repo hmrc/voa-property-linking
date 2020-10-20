@@ -24,7 +24,6 @@ import org.mockito.Mockito._
 import play.api.libs.json.Json
 import play.api.mvc.Result
 import play.api.test.{FakeRequest, Helpers}
-import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation.AgentDetails
 
 import scala.concurrent.Future
@@ -82,7 +81,7 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
       "a valid representation response is POSTed" in new Setup {
         val repResp = APIRepresentationResponse(submissionId, 1L, "OUTCOME")
         when(mockAuthorisationManagementApi.response(mEq(repResp))(any()))
-          .thenReturn(Future.successful(HttpResponse(OK)))
+          .thenReturn(Future.successful(emptyJsonHttpResponse(OK)))
 
         val result: Future[Result] =
           testController.response()(FakeRequest().withBody(Json.toJson(repResp)))

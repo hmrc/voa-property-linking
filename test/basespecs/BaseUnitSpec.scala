@@ -21,9 +21,10 @@ import org.scalatest.concurrent.{PatienceConfiguration, ScalaFutures}
 import org.scalatest.matchers.{BeMatcher, MatchResult}
 import org.scalatest.time.{Milliseconds, Second, Span}
 import org.scalatestplus.mockito.MockitoSugar
+import play.api.libs.json.JsNull
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.{DefaultAwaitTimeout, FakeRequest}
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.test.AllMocks
 import uk.gov.hmrc.voapropertylinking.auth.{Principal, RequestWithPrincipal}
 import uk.gov.hmrc.voapropertylinking.utils.Cats
@@ -48,4 +49,6 @@ abstract class BaseUnitSpec
   val upperCased: BeMatcher[String] =
     BeMatcher(s => MatchResult(s == s.toUpperCase, "not all characters are upper-case", "found upper-case characters"))
 
+  def emptyJsonHttpResponse(status: Int): HttpResponse =
+    HttpResponse(status = status, json = JsNull, headers = Map[String, Seq[String]]())
 }

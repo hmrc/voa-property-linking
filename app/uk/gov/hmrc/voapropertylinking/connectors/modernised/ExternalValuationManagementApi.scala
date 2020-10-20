@@ -21,6 +21,7 @@ import models.modernised.ValuationHistoryResponse
 import models.modernised.externalvaluationmanagement.documents.DvrDocumentFiles
 import play.api.http.HeaderNames._
 import play.api.libs.ws.{WSClient, WSResponse}
+import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
@@ -76,9 +77,9 @@ class ExternalValuationManagementApi @Inject()(
       .flatMap { response =>
         response.status match {
           case s if is4xx(s) =>
-            Future.failed(Upstream4xxResponse(s"Upload failed with status ${response.status}.", s, s))
+            Future.failed(UpstreamErrorResponse(s"Upload failed with status ${response.status}.", s, s))
           case s if is5xx(s) =>
-            Future.failed(Upstream5xxResponse(s"Upload failed with status ${response.status}.", s, s))
+            Future.failed(UpstreamErrorResponse(s"Upload failed with status ${response.status}.", s, s))
           case _ => Future.successful(response)
         }
       }

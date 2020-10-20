@@ -20,7 +20,7 @@ import play.api.Logger
 import play.api.mvc.{ControllerComponents, Request}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
-import uk.gov.hmrc.play.bootstrap.controller.BackendController
+import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import uk.gov.hmrc.voapropertylinking.utils.Cats
 
 abstract class PropertyLinkingBaseController(controllerComponents: ControllerComponents)
