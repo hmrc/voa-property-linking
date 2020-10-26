@@ -20,15 +20,13 @@ import javax.inject.Inject
 import models.AgentPermission.StartAndContinue
 import models.PaginationParams
 import models.searchApi.OwnerAuthResult
-import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class AuthorisationSearchApi @Inject()(
-      http: DefaultHttpClient,
+      http: HttpClient,
       servicesConfig: ServicesConfig
 )(implicit executionContext: ExecutionContext)
     extends BaseVoaConnector {

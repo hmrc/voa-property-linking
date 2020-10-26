@@ -18,12 +18,12 @@ package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
 import uk.gov.hmrc.uritemplate.syntax.UriTemplateSyntax
 import uk.gov.hmrc.voapropertylinking.connectors.BaseConnector
-import uk.gov.hmrc.voapropertylinking.connectors.modernised.errorhandler.VoaModernisedHttpErrorFunctions
+import uk.gov.hmrc.voapropertylinking.connectors.modernised.errorhandler.VoaExceptionThrowingReads
+import uk.gov.hmrc.voapropertylinking.utils.HttpStatusCodes
 
-abstract class BaseVoaConnector extends BaseConnector with VoaModernisedHttpErrorFunctions with UriTemplateSyntax {
-
+abstract class BaseVoaConnector
+    extends BaseConnector with VoaExceptionThrowingReads with HttpStatusCodes with UriTemplateSyntax {
   def toNone[T]: PartialFunction[T, None.type] = {
     case _ => None
   }
-
 }

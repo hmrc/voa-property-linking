@@ -28,7 +28,6 @@ import org.mockito.Mockito.when
 import play.api.http.ContentTypes
 import play.api.libs.json.JsValue
 import play.api.libs.ws.{WSClient, WSCookie, WSRequest, WSResponse}
-import uk.gov.hmrc.http.NotFoundException
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.Future
@@ -70,13 +69,14 @@ class ExternalValuationManagementApiSpec extends BaseUnitSpec with ContentTypes 
 
       val now = LocalDateTime.now()
 
-      when(mockVoaHttpClient.GET[DvrDocumentFiles](any(), any())(any(), any(), any(), any()))
+      when(mockVoaHttpClient.GET[Option[DvrDocumentFiles]](any(), any())(any(), any(), any(), any()))
         .thenReturn(
           Future.successful(
-            DvrDocumentFiles(
-              checkForm = Document(DocumentSummary("1", "Check Document", now)),
-              detailedValuation = Document(DocumentSummary("2", "Detailed Valuation Document", now))
-            )))
+            Some(
+              DvrDocumentFiles(
+                checkForm = Document(DocumentSummary("1", "Check Document", now)),
+                detailedValuation = Document(DocumentSummary("2", "Detailed Valuation Document", now))
+              ))))
 
       val result = connector.getDvrDocuments(valuationId, uarn, propertyLinkId).futureValue
       result shouldBe Some(
@@ -90,8 +90,8 @@ class ExternalValuationManagementApiSpec extends BaseUnitSpec with ContentTypes 
       val valuationId = 1L
       val propertyLinkId = "PL-123456789"
 
-      when(mockVoaHttpClient.GET[DvrDocumentFiles](any(), any())(any(), any(), any(), any()))
-        .thenReturn(Future.failed(new NotFoundException("not found dvr documents")))
+      when(mockVoaHttpClient.GET[Option[DvrDocumentFiles]](any(), any())(any(), any(), any(), any()))
+        .thenReturn(Future.successful(None))
 
       val result = connector.getDvrDocuments(valuationId, uarn, propertyLinkId).futureValue
       result shouldBe None

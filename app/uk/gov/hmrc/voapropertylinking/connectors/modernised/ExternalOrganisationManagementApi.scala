@@ -18,8 +18,6 @@ package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
 import javax.inject.{Inject, Named}
 import uk.gov.hmrc.http._
-import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
 import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
 import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation.{AgentDetails, AppointmentChangeResponse, AppointmentChangesRequest}
@@ -28,7 +26,6 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class ExternalOrganisationManagementApi @Inject()(
       http: VoaHttpClient,
-      config: ServicesConfig,
       @Named("voa.agentAppointmentChanges") agentAppointmentChangesUrl: String,
       @Named("voa.myAgentDetails") getAgentDetailsUrl: String
 )(implicit executionContext: ExecutionContext)

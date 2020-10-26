@@ -21,7 +21,6 @@ import models.modernised.ValuationHistoryResponse
 import models.modernised.externalvaluationmanagement.documents.DvrDocumentFiles
 import play.api.http.HeaderNames._
 import play.api.libs.ws.{WSClient, WSResponse}
-import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
@@ -45,16 +44,9 @@ class ExternalValuationManagementApi @Inject()(
   def getDvrDocuments(valuationId: Long, uarn: Long, propertyLinkId: String)(
         implicit request: RequestWithPrincipal[_]): Future[Option[DvrDocumentFiles]] =
     http
-      .GET[DvrDocumentFiles](
+      .GET[Option[DvrDocumentFiles]](
         s"$url/properties/$uarn/valuations/$valuationId/files",
         Seq("propertyLinkId" -> propertyLinkId))
-      .map(Option.apply)
-      .recover {
-        case _: NotFoundException =>
-          None
-        case e =>
-          throw e
-      }
 
   def getValuationHistory(uarn: Long, propertyLinkSubmissionId: String)(
         implicit request: RequestWithPrincipal[_]): Future[Option[ValuationHistoryResponse]] =
@@ -76,9 +68,7 @@ class ExternalValuationManagementApi @Inject()(
       .stream()
       .flatMap { response =>
         response.status match {
-          case s if is4xx(s) =>
-            Future.failed(UpstreamErrorResponse(s"Upload failed with status ${response.status}.", s, s))
-          case s if is5xx(s) =>
+          case s if is4xx(s) || is5xx(s) =>
             Future.failed(UpstreamErrorResponse(s"Upload failed with status ${response.status}.", s, s))
           case _ => Future.successful(response)
         }
