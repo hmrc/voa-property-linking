@@ -72,15 +72,15 @@ val compileDependencies = Seq(
   ws,
   guice,
   "uk.gov.hmrc"        %% "bootstrap-backend-play-26" % "2.23.0",
-  "uk.gov.hmrc"        %% "simple-reactivemongo"   % "7.20.0-play-26",
-  "uk.gov.hmrc"        %% "auth-client"            % "2.32.0-play-26",
-  "uk.gov.hmrc"        %% "mongo-lock"             % "6.15.0-play-26",
-  "uk.gov.hmrc"        %% "domain"                 % "5.6.0-play-26",
-  "org.typelevel"      %% "cats-core"              % "1.6.1",
-  "com.typesafe.play"  %% "play-json"              % "2.6.13",
-  "org.scalacheck"     %% "scalacheck"             % "1.13.5",
-  "uk.gov.hmrc"        %% "uri-template"           % "1.3.0",
-  "org.apache.commons" %  "commons-text"           % "1.6"
+  "uk.gov.hmrc"        %% "simple-reactivemongo"      % "7.20.0-play-26",
+  "uk.gov.hmrc"        %% "auth-client"               % "2.32.0-play-26",
+  "uk.gov.hmrc"        %% "mongo-lock"                % "6.15.0-play-26",
+  "uk.gov.hmrc"        %% "domain"                    % "5.6.0-play-26",
+  "org.typelevel"      %% "cats-core"                 % "1.6.1",
+  "com.typesafe.play"  %% "play-json"                 % "2.6.13",
+  "org.scalacheck"     %% "scalacheck"                % "1.13.5",
+  "uk.gov.hmrc"        %% "uri-template"              % "1.3.0",
+  "org.apache.commons" %  "commons-text"              % "1.6"
 )
 
 val testDependencies = Seq(

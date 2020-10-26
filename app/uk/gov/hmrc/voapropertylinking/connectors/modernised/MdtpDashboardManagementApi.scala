@@ -18,15 +18,13 @@ package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
 import javax.inject.Inject
 import models.PropertiesView
-import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, NotFoundException}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class MdtpDashboardManagementApi @Inject()(
-      http: DefaultHttpClient,
+      http: HttpClient,
       servicesConfig: ServicesConfig
 )(implicit executionContext: ExecutionContext)
     extends BaseVoaConnector {

@@ -34,6 +34,9 @@ trait HttpStatusCodes {
   def codeName(code: Int): String =
     codeMap.getOrElse(code, "")
 
+  def is4xx(code: Int): Boolean = code >= 400 && code <= 499
+  def is5xx(code: Int): Boolean = code >= 500 && code <= 599
+
   private val codeMap: Map[Int, String] = Map(
     100 -> "CONTINUE",
     101 -> "SWITCHING_PROTOCOLS",

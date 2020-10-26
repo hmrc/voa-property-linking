@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.voapropertylinking.connectors.mdtp
 
-import uk.gov.hmrc.http.HttpErrorFunctions
 import uk.gov.hmrc.voapropertylinking.connectors.BaseConnector
 
-abstract class BaseMdtpConnector extends BaseConnector with HttpErrorFunctions
+abstract class BaseMdtpConnector extends BaseConnector

@@ -19,15 +19,13 @@ package uk.gov.hmrc.voapropertylinking.connectors.modernised
 import javax.inject.{Inject, Named}
 import models.APIRepresentationResponse
 import play.api.libs.json.JsValue
-import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class AuthorisationManagementApi @Inject()(
-      http: DefaultHttpClient,
+      http: HttpClient,
       servicesConfig: ServicesConfig,
       @Named("voa.representationRequestResponse") representationRequestResponseUrl: String
 )(implicit executionContext: ExecutionContext)

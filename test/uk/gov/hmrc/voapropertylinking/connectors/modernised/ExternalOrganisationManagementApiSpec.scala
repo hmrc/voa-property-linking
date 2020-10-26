@@ -25,10 +25,8 @@ import scala.concurrent.Future
 
 class ExternalOrganisationManagementApiSpec extends BaseUnitSpec {
 
-  val config = mockServicesConfig
   val testConnector = new ExternalOrganisationManagementApi(
     http = mockVoaHttpClient,
-    config = config,
     agentAppointmentChangesUrl = "agentAppointmentChangesUrl",
     getAgentDetailsUrl = "getAgentDetailsUrl/{representativeCode}"
   )

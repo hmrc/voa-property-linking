@@ -19,14 +19,12 @@ package uk.gov.hmrc.voapropertylinking.connectors.modernised
 import javax.inject.Inject
 import models.modernised.ccacasemanagement.requests.DetailedValuationRequest
 import uk.gov.hmrc.http._
-import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class CCACaseManagementApi @Inject()(
-      http: DefaultHttpClient,
+      http: HttpClient,
       config: ServicesConfig
 )(implicit executionContext: ExecutionContext)
     extends BaseVoaConnector {
