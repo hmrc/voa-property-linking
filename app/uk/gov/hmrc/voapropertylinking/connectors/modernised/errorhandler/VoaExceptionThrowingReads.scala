@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.voapropertylinking.connectors.modernised.errorhandler
 
-import uk.gov.hmrc.voapropertylinking.utils.Cats
+import uk.gov.hmrc.voapropertylinking.utils.Cats._
 import uk.gov.hmrc.http.{HttpReads, HttpReadsInstances, HttpResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.voapropertylinking.utils.HttpStatusCodes._
 
-trait VoaExceptionThrowingReads extends Cats {
+trait VoaExceptionThrowingReads {
 
   implicit def voaReads[A](implicit hrds: HttpReads[A]): HttpReads[A] = {
 
@@ -34,7 +34,7 @@ trait VoaExceptionThrowingReads extends Cats {
       }
 
     HttpReads.ask.flatMap {
-      // case (method, url, response)
+      // use case (method, url, response) if 'method' or 'url' are needed
       case (_, _, response) =>
         HttpReadsInstances.readEitherOf[A].map(_.leftMap(mapToException(response)).merge)
     }
