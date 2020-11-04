@@ -49,8 +49,7 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
     propertyLinkService = mockPropertyLinkingService,
     assessmentService = mockAssessmentService,
     customerManagementApi = mockCustomerManagementApi,
-    auditingService = mock[AuditingService],
-    agentQueryParameterEnabledExternal = true
+    auditingService = mock[AuditingService]
   )
 
   val clientOrgId: Long = 222L
