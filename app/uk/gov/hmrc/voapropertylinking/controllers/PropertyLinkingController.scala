@@ -44,8 +44,7 @@ class PropertyLinkingController @Inject()(
       propertyLinkService: PropertyLinkingService,
       assessmentService: AssessmentService,
       customerManagementApi: CustomerManagementApi,
-      auditingService: AuditingService,
-      @Named("agentQueryParameterEnabledExternal") agentQueryParameterEnabledExternal: Boolean
+      auditingService: AuditingService
 )(implicit executionContext: ExecutionContext)
     extends PropertyLinkingBaseController(controllerComponents) with Cats {
 
@@ -118,7 +117,7 @@ class PropertyLinkingController @Inject()(
         organisationId: Option[Long]
   ): Action[AnyContent] = authenticated.async { implicit request =>
     //TODO remove once modernised external has caught up.
-    if (searchParams.sortField.contains("AGENT") && agentQueryParameterEnabledExternal) {
+    if (searchParams.sortField.contains("AGENT")) {
 
       organisationId.fold(Future.successful(BadRequest("organisationId is required for this query.")))(
         id =>

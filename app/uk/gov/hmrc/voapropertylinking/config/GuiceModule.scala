@@ -52,12 +52,6 @@ class GuiceModule(
     bind(classOf[ServicesConfig]).toInstance(servicesConfig)
 
     bindConstant().annotatedWith(Names.named("dvrCollectionName")).to(configuration.get[String]("dvr.collection.name"))
-    bindConstant()
-      .annotatedWith(Names.named("agentQueryParameterEnabledExternal"))
-      .to(
-        configuration
-          .getAndValidate[String]("featureFlags.agentQueryParameterEnabledExternal", Set("true", "false"))
-          .toBoolean)
 
     bind(classOf[Clock]).toInstance(Clock.systemUTC())
 
