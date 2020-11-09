@@ -18,6 +18,7 @@ package models
 
 import java.time.LocalDate
 
+import models.modernised.ListType.ListType
 import models.modernised.externalpropertylink.myclients.PropertyLinkWithClient
 import models.modernised.externalpropertylink.myorganisations.PropertyLinkWithAgents
 import models.modernised.{PropertyLinkStatus, ValuationHistory}
@@ -32,6 +33,7 @@ case class Assessment(
       rateableValue: Option[Long],
       address: PropertyAddress,
       billingAuthorityReference: String,
+      listType: ListType,
       currentFromDate: Option[LocalDate],
       currentToDate: Option[LocalDate]
 )
@@ -49,34 +51,21 @@ case class Assessments(
 object Assessment {
   implicit val formats = Json.format[Assessment]
 
-  def fromAPIValuationHistory(valuationHistory: APIValuationHistory, authorisationId: Long) =
-    Assessment(
-      authorisationId,
-      valuationHistory.asstRef,
-      valuationHistory.listYear,
-      valuationHistory.uarn,
-      valuationHistory.effectiveDate,
-      valuationHistory.rateableValue,
-      PropertyAddress.fromString(valuationHistory.address),
-      valuationHistory.billingAuthorityReference,
-      valuationHistory.currentFromDate,
-      valuationHistory.currentToDate
-    )
-
   def fromValuationHistory(valuationHistory: ValuationHistory, authorisationId: Long) =
     Assessment(
-      authorisationId,
-      valuationHistory.asstRef,
-      valuationHistory.listYear,
-      valuationHistory.uarn,
-      valuationHistory.effectiveDate,
-      valuationHistory.rateableValue.map { d =>
+      authorisationId = authorisationId,
+      assessmentRef = valuationHistory.asstRef,
+      listYear = valuationHistory.listYear,
+      uarn = valuationHistory.uarn,
+      effectiveDate = valuationHistory.effectiveDate,
+      rateableValue = valuationHistory.rateableValue.map { d =>
         d.longValue()
       },
-      PropertyAddress.fromString(valuationHistory.address),
-      valuationHistory.billingAuthorityReference,
-      valuationHistory.currentFromDate,
-      valuationHistory.currentToDate
+      address = PropertyAddress.fromString(valuationHistory.address),
+      billingAuthorityReference = valuationHistory.billingAuthorityReference,
+      listType = valuationHistory.listType,
+      currentFromDate = valuationHistory.currentFromDate,
+      currentToDate = valuationHistory.currentToDate
     )
 
 }

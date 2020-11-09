@@ -95,7 +95,8 @@ class AssessmentServiceSpec extends BaseUnitSpec {
       transitionalCertificate = None,
       deletedIndicator = None,
       valuationDetailsAvailable = None,
-      billingAuthorityCode = None
+      billingAuthorityCode = None,
+      listType = ListType.CURRENT
     )
 
     val assessmentService = new AssessmentService(mockExternalPropertyLinkApi, mockExternalValuationManagementApi)
