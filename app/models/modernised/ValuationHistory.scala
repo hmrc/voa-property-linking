@@ -18,6 +18,7 @@ package models.modernised
 
 import java.time.LocalDate
 
+import models.modernised.ListType.ListType
 import play.api.libs.json.{Json, OFormat}
 
 case class ValuationHistory(
@@ -41,7 +42,8 @@ case class ValuationHistory(
       valuationDetailsAvailable: Option[Boolean],
       billingAuthorityCode: Option[String],
       currentFromDate: Option[LocalDate] = None,
-      currentToDate: Option[LocalDate] = None)
+      currentToDate: Option[LocalDate] = None,
+      listType: ListType)
 
 object ValuationHistory {
   implicit val valuationHistoryFormats: OFormat[ValuationHistory] = Json.format
