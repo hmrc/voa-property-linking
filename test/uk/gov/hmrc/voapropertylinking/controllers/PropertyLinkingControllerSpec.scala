@@ -45,10 +45,8 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
     controllerComponents = Helpers.stubControllerComponents(),
     authenticated = preAuthenticatedActionBuilders(),
     authorisationSearchApi = mockAuthorisationSearchApi,
-    mdtpDashboardManagementApi = mockMdtpDashboardManagementApi,
     propertyLinkService = mockPropertyLinkingService,
     assessmentService = mockAssessmentService,
-    customerManagementApi = mockCustomerManagementApi,
     auditingService = mock[AuditingService]
   )
 
@@ -230,7 +228,7 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
     "return a single my client property link - propertiesView" in {
       when(mockPropertyLinkingService.getClientsPropertyLink(any())(any()))
         .thenReturn(OptionT.some[Future](clientPropertyLink))
-      val res = testController.getClientsPropertyLink("11111", "propertiesView")(FakeRequest())
+      val res = testController.getClientsPropertyLink("11111")(FakeRequest())
 
       status(res) shouldBe OK
       contentAsJson(res) shouldBe Json.toJson(PropertiesView(clientPropertyLink.authorisation, Nil))

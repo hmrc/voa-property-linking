@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.voapropertylinking.controllers
 
-import javax.inject.{Inject, Named}
 import models._
 import models.mdtp.propertylink.projections.OwnerAuthResult
 import models.mdtp.propertylink.requests.{APIPropertyLinkRequest, PropertyLinkRequest}
@@ -34,16 +33,15 @@ import uk.gov.hmrc.voapropertylinking.errorhandler.models.ErrorResponse
 import uk.gov.hmrc.voapropertylinking.services.{AssessmentService, PropertyLinkingService}
 import uk.gov.hmrc.voapropertylinking.utils.Cats
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class PropertyLinkingController @Inject()(
       controllerComponents: ControllerComponents,
       authenticated: AuthenticatedActionBuilder,
       authorisationSearchApi: AuthorisationSearchApi,
-      mdtpDashboardManagementApi: MdtpDashboardManagementApi,
       propertyLinkService: PropertyLinkingService,
       assessmentService: AssessmentService,
-      customerManagementApi: CustomerManagementApi,
       auditingService: AuditingService
 )(implicit executionContext: ExecutionContext)
     extends PropertyLinkingBaseController(controllerComponents) with Cats {
@@ -94,7 +92,7 @@ class PropertyLinkingController @Inject()(
         }
   }
 
-  def getMyOrganisationsPropertyLinksCount(): Action[AnyContent] = authenticated.async { implicit request =>
+  def getMyOrganisationsPropertyLinksCount: Action[AnyContent] = authenticated.async { implicit request =>
     propertyLinkService
       .getMyOrganisationsPropertyLinksCount()
       .map(propertyLinksCount => Ok(Json.toJson(propertyLinksCount)))
@@ -160,20 +158,18 @@ class PropertyLinkingController @Inject()(
   def getClientsPropertyLink(submissionId: String, projection: String = "propertiesView"): Action[AnyContent] =
     authenticated.async { implicit request =>
       projection match {
-        case "propertiesView" => {
+        case "propertiesView" =>
           propertyLinkService
             .getClientsPropertyLink(submissionId)
             .fold(NotFound("client property link not found")) { pl =>
               Ok(Json.toJson(PropertiesView(pl.authorisation, Nil)))
             }
-        }
-        case "clientsPropertyLink" => {
+        case "clientsPropertyLink" =>
           propertyLinkService
             .getClientsPropertyLink(submissionId)
             .fold(NotFound("client property link not found")) { pl =>
               Ok(Json.toJson(pl.authorisation))
             }
-        }
         case _ =>
           Future successful ErrorResponse.notImplementedJsonResult(s"Projection $projection is not implemented")
       }
