@@ -45,7 +45,6 @@ trait AllMocks extends MockitoSugar { me: BeforeAndAfterEach =>
   val mockExternalPropertyLinkApi: ExternalPropertyLinkApi = mock[ExternalPropertyLinkApi]
   val mockExternalValuationManagementApi: ExternalValuationManagementApi = mock[ExternalValuationManagementApi]
   val mockHttpResponse: HttpResponse = mock[HttpResponse]
-  val mockMdtpDashboardManagementApi: MdtpDashboardManagementApi = mock[MdtpDashboardManagementApi]
   val mockMeter: Meter = mock[Meter]
   val mockMetricRegistry: MetricRegistry = mock[MetricRegistry]
   val mockMetrics: Metrics = mock[Metrics]
@@ -69,7 +68,6 @@ trait AllMocks extends MockitoSugar { me: BeforeAndAfterEach =>
       mockExternalPropertyLinkApi,
       mockExternalValuationManagementApi,
       mockHttpResponse,
-      mockMdtpDashboardManagementApi,
       mockMeter,
       mockMetricRegistry,
       mockMetrics,
