@@ -1,3 +1,2 @@
-DELETE        /de-register/:orgId                        uk.gov.hmrc.voapropertylinking.controllers.test.TestController.deleteOrganisation(orgId: Long)
-DELETE        /clear-dvr-records/:orgId                  uk.gov.hmrc.voapropertylinking.controllers.test.TestController.clearDvrRecords(orgId: Long)
-DELETE        /delete-check-cases/:plSubmissionId        uk.gov.hmrc.voapropertylinking.controllers.test.TestController.deleteCheckCases(plSubmissionId: String)
+#empty test routes file
+#at least a comment line is required
