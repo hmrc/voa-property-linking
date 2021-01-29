@@ -38,8 +38,7 @@ class ExternalValuationManagementApi @Inject()(
 
   lazy val appName = config.getConfString("appName", "voa-property-linking")
 
-  lazy val baseURL = config.baseUrl("external-business-rates-data-platform")
-  lazy val url = baseURL + "/external-valuation-management-api"
+  lazy val url = config.baseUrl("voa-modernised-api") + "/external-valuation-management-api"
 
   def getDvrDocuments(valuationId: Long, uarn: Long, propertyLinkId: String)(
         implicit request: RequestWithPrincipal[_]): Future[Option[DvrDocumentFiles]] =

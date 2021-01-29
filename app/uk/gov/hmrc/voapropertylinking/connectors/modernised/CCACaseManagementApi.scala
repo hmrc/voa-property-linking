@@ -28,8 +28,8 @@ class CCACaseManagementApi @Inject()(
       config: ServicesConfig
 )(implicit executionContext: ExecutionContext)
     extends BaseVoaConnector {
-  lazy val baseURL = config.baseUrl("external-business-rates-data-platform")
-  lazy val url = baseURL + "/cca-case-management-api"
+
+  lazy val url = config.baseUrl("voa-modernised-api") + "/cca-case-management-api"
 
   def requestDetailedValuation(request: DetailedValuationRequest)(implicit hc: HeaderCarrier): Future[Unit] =
     http
