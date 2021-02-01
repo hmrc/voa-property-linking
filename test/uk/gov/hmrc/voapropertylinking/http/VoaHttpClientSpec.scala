@@ -22,15 +22,13 @@ import org.mockito.Mockito._
 import org.mockito.{ArgumentCaptor, ArgumentMatchers}
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.logging._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, Token, UserId}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import uk.gov.hmrc.voapropertylinking.auth.Principal
 
 class VoaHttpClientSpec extends BaseUnitSpec {
 
   val authorization = Authorization("authorization")
-  val userId = UserId("userId")
-  val token = Token("token")
   val forwarded = ForwardedFor("ipAdress")
   val sessionId = SessionId("1234567890")
   val requestId = RequestId("0987654321")

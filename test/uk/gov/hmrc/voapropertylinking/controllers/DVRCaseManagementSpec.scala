@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.voapropertylinking.controllers
 
+import java.net.URI
 import java.time.LocalDateTime
 
 import akka.stream.scaladsl.Source
@@ -156,6 +157,8 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
           override def xml: Elem = ???
 
           override def json: JsValue = ???
+
+          override def uri: URI = ???
         }
         m
       }
