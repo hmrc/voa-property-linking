@@ -29,7 +29,7 @@ class CCACaseManagementApiSpec extends BaseUnitSpec {
 
   val http = mock[DefaultHttpClient]
   val connector = new CCACaseManagementApi(http, mockServicesConfig) {
-    override lazy val baseURL: String = "http://some-url"
+    override lazy val url: String = "http://some-url"
   }
 
   "request detailed valuation" should {

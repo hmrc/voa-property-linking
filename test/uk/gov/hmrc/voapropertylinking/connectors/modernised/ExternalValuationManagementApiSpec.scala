@@ -47,7 +47,7 @@ class ExternalValuationManagementApiSpec extends BaseUnitSpec with ContentTypes 
     val config = mock[ServicesConfig]
 
     val connector = new ExternalValuationManagementApi(wsClient, mockVoaHttpClient, valuationHistoryUrl, config) {
-      override lazy val baseURL: String = "http://localhost:9555"
+      override lazy val url: String = "http://localhost:9555"
     }
   }
 

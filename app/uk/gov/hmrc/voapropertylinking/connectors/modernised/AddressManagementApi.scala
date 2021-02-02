@@ -30,8 +30,7 @@ class AddressManagementApi @Inject()(
 )(implicit executionContext: ExecutionContext)
     extends BaseVoaConnector {
 
-  lazy val url
-    : String = servicesConfig.baseUrl("voa-modernised-api") + "/address-management-api/address"
+  lazy val url: String = servicesConfig.baseUrl("voa-modernised-api") + "/address-management-api/address"
 
   def find(postcode: String)(implicit hc: HeaderCarrier): Future[Seq[DetailedAddress]] =
     http
