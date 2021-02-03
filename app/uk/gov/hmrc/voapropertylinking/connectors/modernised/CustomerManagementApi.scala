@@ -30,8 +30,7 @@ class CustomerManagementApi @Inject()(
 )(implicit executionContext: ExecutionContext)
     extends BaseVoaConnector {
 
-  lazy val baseUrl
-    : String = servicesConfig.baseUrl("external-business-rates-data-platform") + "/customer-management-api"
+  lazy val baseUrl: String = servicesConfig.baseUrl("voa-modernised-api") + "/customer-management-api"
   lazy val organisationUrl: String = baseUrl + "/organisation"
   lazy val individualUrl: String = baseUrl + "/person"
 
