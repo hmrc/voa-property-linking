@@ -24,6 +24,7 @@ import play.api.libs.json.Json
 import play.api.mvc.Results.Status
 import play.api.mvc.{RequestHeader, Result}
 import uk.gov.hmrc.auth.core.{BearerTokenExpired, InvalidBearerToken, MissingBearerToken}
+import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.voapropertylinking.auth.Principal
 import uk.gov.hmrc.voapropertylinking.connectors.modernised.errorhandler.VoaClientException
 import uk.gov.hmrc.voapropertylinking.errorhandler.models.ErrorResponse
@@ -74,11 +75,12 @@ class CustomHttpErrorHandler @Inject()() extends HttpErrorHandler with EventLogg
       case e: VoaClientException =>
         logResponse(VoaErrorOccurred, exceptionDetails: _*)
         ErrorResponse(e.responseCode, HttpStatusCodes.codeName(e.responseCode), e.message)
-
+      case e: UpstreamErrorResponse =>
+        logger.error(s"UpstreamErrorResponse with status ${e.statusCode}.", e)
+        ErrorResponse(e.statusCode, HttpStatusCodes.codeName(e.statusCode), e.message)
       case _: MissingBearerToken => ErrorResponse.unauthorized("Missing bearer token.")
       case _: BearerTokenExpired => ErrorResponse.unauthorized("The bearer token has expired.")
       case _: InvalidBearerToken => ErrorResponse.unauthorized("Invalid bearer token.")
-
       case e: Throwable =>
         logResponse(InternalServerErrorEvent, exceptionDetails: _*)
         ErrorResponse.internalServerError(e.getMessage)

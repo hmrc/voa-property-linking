@@ -64,6 +64,8 @@ object ErrorResponse extends HttpStatusCodes with Results {
     ErrorResponse(UNAUTHORIZED, message)
   def unauthorizedJsonResult(message: String) =
     Unauthorized(ErrorResponse(UNAUTHORIZED, message).json)
+  def forbidden(message: String) =
+    ErrorResponse(FORBIDDEN, message)
 
   /* 404 */
   def notFound(message: String) =
