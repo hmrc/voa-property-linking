@@ -111,31 +111,11 @@ class PropertyLinkingController @Inject()(
 
   def getMyOrganisationsPropertyLinks(
         searchParams: GetMyOrganisationPropertyLinksParameters,
-        paginationParams: Option[PaginationParams],
-        organisationId: Option[Long]
+        paginationParams: Option[PaginationParams]
   ): Action[AnyContent] = authenticated.async { implicit request =>
-    //TODO remove once modernised external has caught up.
-    if (searchParams.sortField.contains("AGENT")) {
-
-      organisationId.fold(Future.successful(BadRequest("organisationId is required for this query.")))(
-        id =>
-          authorisationSearchApi
-            .searchAndSort(
-              id,
-              paginationParams.getOrElse(DefaultPaginationParams),
-              searchParams.sortField,
-              searchParams.sortOrder,
-              searchParams.status,
-              searchParams.address,
-              searchParams.baref,
-              searchParams.agent
-            )
-            .map(response => Ok(Json.toJson(OwnerAuthResult(response)))))
-    } else {
-      propertyLinkService
-        .getMyOrganisationsPropertyLinks(searchParams, paginationParams)
-        .map(propertyLinks => Ok(Json.toJson(propertyLinks)))
-    }
+    propertyLinkService
+      .getMyOrganisationsPropertyLinks(searchParams, paginationParams)
+      .map(propertyLinks => Ok(Json.toJson(propertyLinks)))
   }
 
   def getClientsPropertyLinks(

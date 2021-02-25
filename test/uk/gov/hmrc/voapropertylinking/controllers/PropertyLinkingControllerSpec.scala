@@ -248,41 +248,24 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
     "return owner property links" in {
       when(mockPropertyLinkingService.getMyOrganisationsPropertyLinks(any(), any())(any()))
         .thenReturn(Future.successful(ownerAuthResult))
-      val res = testController.getMyOrganisationsPropertyLinks(GetMyOrganisationPropertyLinksParameters(), None, None)(
-        FakeRequest())
+      val res =
+        testController.getMyOrganisationsPropertyLinks(GetMyOrganisationPropertyLinksParameters(), None)(FakeRequest())
 
       status(res) shouldBe OK
       contentAsJson(res) shouldBe Json.toJson(ownerAuthResult)
     }
 
-    "search via authorisationSearchApi when AGENT sortField" when {
+    "search via authorisationSearchApi when AGENT sortField" in {
+      val orgId: Long = 123L
+      when(mockPropertyLinkingService.getMyOrganisationsPropertyLinks(any(), any())(any()))
+        .thenReturn(Future.successful(ownerAuthResult))
+      val res = testController.getMyOrganisationsPropertyLinks(
+        GetMyOrganisationPropertyLinksParameters(sortField = Some("AGENT")),
+        None)(FakeRequest())
 
-      "organisationId is provided" in {
-        when(mockPropertyLinkingService.getMyOrganisationsPropertyLinks(any(), any())(any()))
-          .thenReturn(Future.successful(ownerAuthResult))
-        val res = testController.getMyOrganisationsPropertyLinks(
-          GetMyOrganisationPropertyLinksParameters(sortField = Some("AGENT")),
-          None,
-          None)(FakeRequest())
-
-        status(res) shouldBe BAD_REQUEST
-      }
-
-      "organisationId is NOT provided" in {
-        val orgId: Long = 123L
-        when(
-          mockAuthorisationSearchApi
-            .searchAndSort(mEq(orgId), any(), mEq(Some("AGENT")), any(), any(), any(), any(), any(), any())(any()))
-          .thenReturn(Future.successful(modernisedOwnerAuthResult))
-        val res = testController.getMyOrganisationsPropertyLinks(
-          GetMyOrganisationPropertyLinksParameters(sortField = Some("AGENT")),
-          None,
-          Some(orgId))(FakeRequest())
-
-        status(res) shouldBe OK
-      }
-
+      status(res) shouldBe OK
     }
+
     "return client property links" in {
       when(mockPropertyLinkingService.getClientsPropertyLinks(any(), any())(any()))
         .thenReturn(OptionT.some[Future](propertyLinksWithClients))
