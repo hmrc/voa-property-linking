@@ -3,8 +3,6 @@
 GET          /property-representations/validate-agent-code/:agentCode/:authorisationId        uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.validateAgentCode(agentCode:Long, authorisationId: Long)
 PUT          /property-representations/response                                               uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.response()
 
-GET          /property-links-appointable                                                      uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.appointableToAgent(ownerId: Long, agentCode: Long, params: models.PaginationParams, sortfield: Option[String], sortorder: Option[String], address: Option[String], agent: Option[String])
-
 GET          /my-organisation/agent/:agentCode                                                uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.getAgentDetails(agentCode: Long)
 POST         /my-organisation/agent/assign                                                    uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.assignAgent()
 POST         /my-organisation/agent/assign-to-some-properties                                 uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.assignAgentToSomeProperties()
@@ -49,7 +47,6 @@ POST         /clients/:clientId/property-links                                  
 GET          /owner/agents                                                                    uk.gov.hmrc.voapropertylinking.controllers.PropertyLinkingController.getMyOrganisationsAgents()
 GET          /owner/property-links                                                            uk.gov.hmrc.voapropertylinking.controllers.PropertyLinkingController.getMyOrganisationsPropertyLinks(searchParams: GetMyOrganisationPropertyLinksParameters, params: Option[models.PaginationParams], organisationId: Option[Long] ?= None)
 GET          /owner/property-links/count                                                      uk.gov.hmrc.voapropertylinking.controllers.PropertyLinkingController.getMyOrganisationsPropertyLinksCount()
-GET          /owner/property-links/appointable                                                uk.gov.hmrc.voapropertylinking.controllers.PropertyLinkingController.getMyOrganisationPropertyLinksWithAppointable(searchParams: GetMyOrganisationsPropertyLinksParametersWithAgentFiltering, params: Option[models.PaginationParams])
 GET          /owner/property-links/:submissionId                                              uk.gov.hmrc.voapropertylinking.controllers.PropertyLinkingController.getMyOrganisationsPropertyLink(submissionId: String)
 GET          /dashboard/owner/assessments/:submissionId                                       uk.gov.hmrc.voapropertylinking.controllers.PropertyLinkingController.getMyOrganisationsAssessments(submissionId: String)
 
@@ -61,3 +58,4 @@ GET          /agent/property-links/:submissionId                                
 GET          /dashboard/agent/assessments/:submissionId                                       uk.gov.hmrc.voapropertylinking.controllers.PropertyLinkingController.getClientsAssessments(submissionId: String)
 
 GET          /my-organisation/agents/:agentCode/property-links                                uk.gov.hmrc.voapropertylinking.controllers.PropertyLinkingController.getMyAgentPropertyLinks(agentCode: Long, searchParams: GetMyOrganisationPropertyLinksParameters, params: models.PaginationParams)
+GET          /my-organisation/agents/:agentCode/available-property-links                      uk.gov.hmrc.voapropertylinking.controllers.PropertyLinkingController.getMyAgentAppointablePropertyLinks(agentCode: Long, searchParams: GetMyOrganisationPropertyLinksParameters, params: Option[models.PaginationParams])

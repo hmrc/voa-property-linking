@@ -26,7 +26,6 @@ import uk.gov.hmrc.http.Upstream5xxResponse
 import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
 import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import uk.gov.hmrc.voapropertylinking.binders.clients.GetClientsParameters
-import uk.gov.hmrc.voapropertylinking.binders.propertylinks.temp.GetMyOrganisationsPropertyLinksParametersWithAgentFiltering
 import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetClientPropertyLinksParameters, GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import uk.gov.hmrc.voapropertylinking.connectors.modernised._
 import uk.gov.hmrc.voapropertylinking.errorhandler.models.ErrorResponse
@@ -184,49 +183,28 @@ class PropertyLinkingController @Inject()(
       .map(clients => Ok(Json.toJson(clients)))
   }
 
-  // $COVERAGE-OFF$
-  /*
-  TODO Remove this method once external endpoints have caught up.
-   */
-  def getMyOrganisationPropertyLinksWithAppointable(
-        searchParams: GetMyOrganisationsPropertyLinksParametersWithAgentFiltering,
+  def getMyOrganisationAppointablePropertyLinks(
+        searchParams: GetMyOrganisationPropertyLinksParameters,
         paginationParams: Option[PaginationParams]
   ): Action[AnyContent] = authenticated.async { implicit request =>
-    searchParams.agentAppointed.getOrElse("BOTH") match {
-      case "NO" =>
-        authorisationSearchApi
-          .searchAndSort(
-            searchParams.organisationId,
-            paginationParams.getOrElse(DefaultPaginationParams),
-            searchParams.sortField,
-            searchParams.sortOrder,
-            searchParams.status,
-            searchParams.address,
-            searchParams.baref,
-            searchParams.agent,
-            searchParams.agentAppointed
-          )
-          .map { response =>
-            Ok(Json.toJson(OwnerAuthResult(response)))
-          }
-      case _ =>
-        authorisationSearchApi
-          .appointableToAgent(
-            searchParams.organisationId,
-            searchParams.agentOrganisationId,
-            paginationParams.getOrElse(DefaultPaginationParams),
-            searchParams.sortField,
-            searchParams.sortOrder,
-            searchParams.address,
-            searchParams.agent
-          )
-          .map { response =>
-            Ok(Json.toJson(OwnerAuthResult(response)))
-          }
-    }
+    propertyLinkService
+      .getMyOrganisationsPropertyLinks(searchParams, paginationParams)
+      .map { response =>
+        Ok(Json.toJson(response))
+      }
   }
 
-  // $COVERAGE-ON$
+  def getMyAgentAppointablePropertyLinks(
+        agentCode: Long,
+        searchParams: GetMyOrganisationPropertyLinksParameters,
+        paginationParams: Option[PaginationParams]
+  ): Action[AnyContent] = authenticated.async { implicit request =>
+    propertyLinkService
+      .getMyAgentAvailablePropertyLinks(agentCode, searchParams, paginationParams)
+      .map { response =>
+        Ok(Json.toJson(response))
+      }
+  }
 
   def getMyOrganisationsAssessments(submissionId: String): Action[AnyContent] = authenticated.async {
     implicit request =>

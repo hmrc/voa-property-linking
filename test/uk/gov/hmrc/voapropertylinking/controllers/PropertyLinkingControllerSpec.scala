@@ -320,6 +320,35 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
     }
   }
 
+  "getMyOrganisationAppointablePropertyLinks" should {
+    val agentCode = 1
+    "return owner property links" in {
+      when(mockPropertyLinkingService.getMyOrganisationsPropertyLinks(any(), any())(any()))
+        .thenReturn(Future.successful(ownerAuthResult))
+      val res = testController.getMyOrganisationAppointablePropertyLinks(
+        GetMyOrganisationPropertyLinksParameters(),
+        Some(PaginationParams(1, 10, true)))(FakeRequest())
+
+      status(res) shouldBe OK
+      contentAsJson(res) shouldBe Json.toJson(ownerAuthResult)
+    }
+  }
+
+  "getMyAgentAppointablePropertyLinks" should {
+    val agentCode = 1
+    "return property links by agent code" in {
+      when(mockPropertyLinkingService.getMyAgentAvailablePropertyLinks(any(), any(), any())(any()))
+        .thenReturn(Future.successful(ownerAuthResult))
+      val res = testController.getMyAgentAppointablePropertyLinks(
+        agentCode,
+        GetMyOrganisationPropertyLinksParameters(),
+        Some(PaginationParams(1, 10, true)))(FakeRequest())
+
+      status(res) shouldBe OK
+      contentAsJson(res) shouldBe Json.toJson(ownerAuthResult)
+    }
+  }
+
   "getMyPropertyLinksCount" should {
 
     "return owner property links count" in {

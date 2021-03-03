@@ -52,23 +52,4 @@ class AuthorisationSearchApiSpec extends BaseUnitSpec {
     }
   }
 
-  "appointableToAgent" should {
-    "return what modernised returned" when {
-      "called with minimal query parameters" in new Setup {
-        when(mockDefaultHttpClient.GET[ModernisedAuthResult](any())(any(), any(), any()))
-          .thenReturn(Future.successful(ownerAuthResult))
-
-        val res: ModernisedAuthResult = connector
-          .appointableToAgent(
-            ownerId = orgId,
-            agentId = agentId,
-            params = paginationParams
-          )
-          .futureValue
-
-        res shouldBe ownerAuthResult
-      }
-    }
-  }
-
 }

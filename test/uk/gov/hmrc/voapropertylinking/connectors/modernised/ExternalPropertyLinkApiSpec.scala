@@ -71,6 +71,7 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
 
     val voaApiUrl = "http://voa-modernised-api/external-property-link-management-api"
     val agentAuthorisationsUrl = s"$voaApiUrl/my-organisation/agents/{agentCode}/property-links"
+    val agentAvailableAuthorisationsUrl = s"$voaApiUrl/my-organisation/agents/{agentCode}/available-property-links"
     val ownerAuthorisationUrl = s"$voaApiUrl/my-organisation/property-links/{propertyLinkId}"
     val ownerAuthorisationsUrl = s"$voaApiUrl/my-organisation/property-links"
     val clientAuthorisationUrl = s"$voaApiUrl/my-organisation/clients/all/property-links/{propertyLinkId}"
@@ -87,6 +88,7 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
     val connector = new ExternalPropertyLinkApi(
       http = mock[VoaHttpClient],
       myAgentPropertyLinksUrl = agentAuthorisationsUrl,
+      myAgentAvailablePropertyLinks = agentAvailableAuthorisationsUrl,
       myOrganisationsPropertyLinksUrl = ownerAuthorisationsUrl,
       myOrganisationsPropertyLinkUrl = ownerAuthorisationUrl,
       myClientsPropertyLinkUrl = clientAuthorisationUrl,
@@ -143,6 +145,28 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
       verify(connector.http)
         .GET(
           mEq(agentAuthorisationsUrl.replace("{agentCode}", agentCode.toString)),
+          mEq(getMyAgentPropertyLinksQueryParams))(any(), any(), any(), any())
+    }
+
+  }
+
+  "get my agent available property links" should {
+
+    "build the correct query params and call the modernised layer" in new Setup {
+      val agentCode = 1
+      val mockReturnedPropertyLinks: PropertyLinksWithAgents = mock[PropertyLinksWithAgents]
+
+      when(connector.http.GET[PropertyLinksWithAgents](any(), any())(any(), any(), any(), any()))
+        .thenReturn(Future.successful(mockReturnedPropertyLinks))
+
+      connector
+        .getMyAgentAvailablePropertyLinks(agentCode, getMyOrganisationSearchParams, params = Some(paginationParams))
+        .futureValue shouldBe mockReturnedPropertyLinks
+
+      val getMyAgentPropertyLinksQueryParams = queryParams :+ ("address" -> address) :+ ("sortfield" -> sortField) :+ ("sortorder" -> sortOrder)
+      verify(connector.http)
+        .GET(
+          mEq(agentAvailableAuthorisationsUrl.replace("{agentCode}", agentCode.toString)),
           mEq(getMyAgentPropertyLinksQueryParams))(any(), any(), any(), any())
     }
 

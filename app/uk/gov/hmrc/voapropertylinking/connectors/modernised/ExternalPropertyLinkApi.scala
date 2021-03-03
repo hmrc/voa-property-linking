@@ -32,6 +32,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class ExternalPropertyLinkApi @Inject()(
       val http: VoaHttpClient,
       @Named("voa.myAgentPropertyLinks") myAgentPropertyLinksUrl: String,
+      @Named("voa.myAgentAvailablePropertyLinks") myAgentAvailablePropertyLinks: String,
       @Named("voa.myOrganisationsPropertyLinks") myOrganisationsPropertyLinksUrl: String,
       @Named("voa.myOrganisationsPropertyLink") myOrganisationsPropertyLinkUrl: String,
       @Named("voa.myClientsPropertyLinks") myClientsPropertyLinksUrl: String,
@@ -58,6 +59,20 @@ class ExternalPropertyLinkApi @Inject()(
           searchParams.baref.map("baref"         -> _),
           searchParams.agent.map("agent"         -> _),
           searchParams.status.map("status"       -> _),
+          searchParams.sortField.map("sortfield" -> _),
+          searchParams.sortOrder.map("sortorder" -> _)
+        ).flatten
+    )
+
+  def getMyAgentAvailablePropertyLinks(
+        agentCode: Long,
+        searchParams: GetMyOrganisationPropertyLinksParameters,
+        params: Option[PaginationParams])(implicit request: RequestWithPrincipal[_]): Future[PropertyLinksWithAgents] =
+    http.GET[PropertyLinksWithAgents](
+      myAgentAvailablePropertyLinks.replace("{agentCode}", agentCode.toString),
+      modernisedPaginationParams(params) ++
+        List(
+          searchParams.address.map("address"     -> _),
           searchParams.sortField.map("sortfield" -> _),
           searchParams.sortOrder.map("sortorder" -> _)
         ).flatten

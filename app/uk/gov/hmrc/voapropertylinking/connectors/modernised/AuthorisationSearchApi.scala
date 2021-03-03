@@ -58,27 +58,6 @@ class AuthorisationSearchApi @Inject()(
     http.GET[OwnerAuthResult](url).map(_.uppercase)
   }
 
-  def appointableToAgent(
-        ownerId: Long,
-        agentId: Long,
-        params: PaginationParams,
-        sortfield: Option[String] = None,
-        sortorder: Option[String] = None,
-        address: Option[String] = None,
-        agent: Option[String] = None)(implicit hc: HeaderCarrier): Future[OwnerAuthResult] = {
-    val url = baseUrl +
-      s"/authorisation-search-api/owners/$ownerId/agents/$agentId/availableAuthorisations" +
-      s"?start=${params.startPoint}&size=${params.pageSize}" +
-      buildQueryParams("check", Some(StartAndContinue.toString)) +
-      buildQueryParams("challenge", Some(StartAndContinue.toString)) +
-      buildQueryParams("sortfield", sortfield) +
-      buildQueryParams("sortorder", sortorder) +
-      buildQueryParams("address", address) +
-      buildQueryParams("agent", agent)
-
-    http.GET[OwnerAuthResult](url).map(_.uppercase)
-  }
-
   private def buildQueryParams(name: String, value: Option[String]): String =
     value match {
       case Some(paramValue) if paramValue != "" => s"&$name=$paramValue";
