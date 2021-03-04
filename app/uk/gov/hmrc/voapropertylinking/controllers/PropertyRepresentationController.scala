@@ -71,36 +71,6 @@ class PropertyRepresentationController @Inject()(
     externalPropertyLinkApi.revokeClientProperty(submissionId).map(_ => NoContent)
   }
 
-  def appointableToAgent(
-        ownerId: Long,
-        agentCode: Long,
-        paginationParams: PaginationParams,
-        sortfield: Option[String],
-        sortorder: Option[String],
-        address: Option[String],
-        agent: Option[String]
-  ): Action[AnyContent] = authenticated.async { implicit request =>
-    customerManagementApi
-      .withAgentCode(agentCode.toString)
-      .flatMap {
-        case Some(agentGroup) =>
-          authorisationSearchApi
-            .appointableToAgent(
-              ownerId = ownerId,
-              agentId = agentGroup.id,
-              params = paginationParams,
-              sortfield = sortfield,
-              sortorder = sortorder,
-              address = address,
-              agent = agent
-            )
-            .map(x => Ok(Json.toJson(OwnerAuthResult(x))))
-        case None =>
-          Logger.error(s"Agent details lookup failed for agentCode: $agentCode")
-          Future.successful(NotFound)
-      }
-  }
-
   def getAgentDetails(agentCode: Long): Action[AnyContent] = authenticated.async { implicit request =>
     organisationManagementApi.getAgentDetails(agentCode) map {
       case None        => ErrorResponse.notFoundJsonResult("Agent does not exist")

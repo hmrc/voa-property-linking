@@ -68,6 +68,7 @@ class GuiceModule(
       Map(
         "voa.authValuationHistoryUrl"          -> "voa.resources.externalValuationManagement.valuationHistory.path",
         "voa.myAgentPropertyLinks"             -> "voa.resources.externalPropertyLink.myAgentPropertyLinks.path",
+        "voa.myAgentAvailablePropertyLinks"    -> "voa.resources.externalPropertyLink.myAgentAvailablePropertyLinks.path",
         "voa.myOrganisationsPropertyLinks"     -> "voa.resources.externalPropertyLink.myOrganisationsPropertyLinks.path",
         "voa.myOrganisationsPropertyLink"      -> "voa.resources.externalPropertyLink.myOrganisationsPropertyLink.path",
         "voa.myOrganisationsAgents"            -> "voa.resources.externalPropertyLink.myOrganisationsAgents.path",

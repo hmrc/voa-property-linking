@@ -17,6 +17,7 @@
 package uk.gov.hmrc.voapropertylinking.services
 
 import cats.data.OptionT
+
 import javax.inject.Inject
 import models._
 import models.mdtp.propertylink.myclients.PropertyLinksWithClients
@@ -60,6 +61,15 @@ class PropertyLinkingService @Inject()(
         paginationParams: PaginationParams)(implicit request: RequestWithPrincipal[_]): Future[OwnerAuthResult] =
     propertyLinksConnector
       .getMyAgentPropertyLinks(agentCode, searchParams, paginationParams)
+      .map(OwnerAuthResult.apply)
+
+  def getMyAgentAvailablePropertyLinks(
+        agentCode: Long,
+        searchParams: GetMyOrganisationPropertyLinksParameters,
+        paginationParams: Option[PaginationParams])(
+        implicit request: RequestWithPrincipal[_]): Future[OwnerAuthResult] =
+    propertyLinksConnector
+      .getMyAgentAvailablePropertyLinks(agentCode, searchParams, paginationParams)
       .map(OwnerAuthResult.apply)
 
   def getMyOrganisationsPropertyLink(submissionId: String)(

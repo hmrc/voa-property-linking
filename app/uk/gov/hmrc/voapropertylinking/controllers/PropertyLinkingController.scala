@@ -111,8 +111,7 @@ class PropertyLinkingController @Inject()(
 
   def getMyOrganisationsPropertyLinks(
         searchParams: GetMyOrganisationPropertyLinksParameters,
-        paginationParams: Option[PaginationParams]
-  ): Action[AnyContent] = authenticated.async { implicit request =>
+        paginationParams: Option[PaginationParams]): Action[AnyContent] = authenticated.async { implicit request =>
     propertyLinkService
       .getMyOrganisationsPropertyLinks(searchParams, paginationParams)
       .map(propertyLinks => Ok(Json.toJson(propertyLinks)))
@@ -164,49 +163,17 @@ class PropertyLinkingController @Inject()(
       .map(clients => Ok(Json.toJson(clients)))
   }
 
-  // $COVERAGE-OFF$
-  /*
-  TODO Remove this method once external endpoints have caught up.
-   */
-  def getMyOrganisationPropertyLinksWithAppointable(
-        searchParams: GetMyOrganisationsPropertyLinksParametersWithAgentFiltering,
+  def getMyAgentAppointablePropertyLinks(
+        agentCode: Long,
+        searchParams: GetMyOrganisationPropertyLinksParameters,
         paginationParams: Option[PaginationParams]
   ): Action[AnyContent] = authenticated.async { implicit request =>
-    searchParams.agentAppointed.getOrElse("BOTH") match {
-      case "NO" =>
-        authorisationSearchApi
-          .searchAndSort(
-            searchParams.organisationId,
-            paginationParams.getOrElse(DefaultPaginationParams),
-            searchParams.sortField,
-            searchParams.sortOrder,
-            searchParams.status,
-            searchParams.address,
-            searchParams.baref,
-            searchParams.agent,
-            searchParams.agentAppointed
-          )
-          .map { response =>
-            Ok(Json.toJson(OwnerAuthResult(response)))
-          }
-      case _ =>
-        authorisationSearchApi
-          .appointableToAgent(
-            searchParams.organisationId,
-            searchParams.agentOrganisationId,
-            paginationParams.getOrElse(DefaultPaginationParams),
-            searchParams.sortField,
-            searchParams.sortOrder,
-            searchParams.address,
-            searchParams.agent
-          )
-          .map { response =>
-            Ok(Json.toJson(OwnerAuthResult(response)))
-          }
-    }
+    propertyLinkService
+      .getMyAgentAvailablePropertyLinks(agentCode, searchParams, paginationParams)
+      .map { response =>
+        Ok(Json.toJson(response))
+      }
   }
-
-  // $COVERAGE-ON$
 
   def getMyOrganisationsAssessments(submissionId: String): Action[AnyContent] = authenticated.async {
     implicit request =>

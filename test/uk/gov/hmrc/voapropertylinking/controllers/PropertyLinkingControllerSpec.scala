@@ -255,17 +255,18 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
       contentAsJson(res) shouldBe Json.toJson(ownerAuthResult)
     }
 
-    "search via authorisationSearchApi when AGENT sortField" in {
-      val orgId: Long = 123L
-      when(mockPropertyLinkingService.getMyOrganisationsPropertyLinks(any(), any())(any()))
-        .thenReturn(Future.successful(ownerAuthResult))
-      val res = testController.getMyOrganisationsPropertyLinks(
-        GetMyOrganisationPropertyLinksParameters(sortField = Some("AGENT")),
-        None)(FakeRequest())
+    "getMyOrganisationsPropertyLinks" when {
 
-      status(res) shouldBe OK
+      "return owner property links" in {
+        when(mockPropertyLinkingService.getMyOrganisationsPropertyLinks(any(), any())(any()))
+          .thenReturn(Future.successful(ownerAuthResult))
+        val res = testController.getMyOrganisationsPropertyLinks(
+          GetMyOrganisationPropertyLinksParameters(sortField = Some("AGENT")),
+          None)(FakeRequest())
+        status(res) shouldBe OK
+      }
+
     }
-
     "return client property links" in {
       when(mockPropertyLinkingService.getClientsPropertyLinks(any(), any())(any()))
         .thenReturn(OptionT.some[Future](propertyLinksWithClients))
@@ -297,6 +298,21 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
         agentCode,
         GetMyOrganisationPropertyLinksParameters(),
         PaginationParams(1, 10, true))(FakeRequest())
+
+      status(res) shouldBe OK
+      contentAsJson(res) shouldBe Json.toJson(ownerAuthResult)
+    }
+  }
+
+  "getMyAgentAppointablePropertyLinks" should {
+    val agentCode = 1
+    "return property links by agent code" in {
+      when(mockPropertyLinkingService.getMyAgentAvailablePropertyLinks(any(), any(), any())(any()))
+        .thenReturn(Future.successful(ownerAuthResult))
+      val res = testController.getMyAgentAppointablePropertyLinks(
+        agentCode,
+        GetMyOrganisationPropertyLinksParameters(),
+        Some(PaginationParams(1, 10, true)))(FakeRequest())
 
       status(res) shouldBe OK
       contentAsJson(res) shouldBe Json.toJson(ownerAuthResult)

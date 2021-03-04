@@ -108,52 +108,6 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
     }
   }
 
-  "appointableToAgent" should {
-    "return OK 200" when {
-      "customer management API returns an agent group for specified agent code" in new Setup {
-        when(mockCustomerManagementApi.withAgentCode(mEq(agentCode.toString))(any()))
-          .thenReturn(Future.successful(Some(groupAccount)))
-        when(mockAuthorisationSearchApi.appointableToAgent(any(), any(), any(), any(), any(), any(), any())(any()))
-          .thenReturn(Future.successful(ownerAuthResult))
-
-        val result: Future[Result] =
-          testController.appointableToAgent(
-            ownerId = 1L,
-            agentCode = agentCode,
-            paginationParams = paginationParams,
-            sortfield = None,
-            sortorder = None,
-            address = None,
-            agent = None)(FakeRequest())
-
-        status(result) shouldBe OK
-      }
-    }
-
-    "return NOT FOUND 404" when {
-      "customer management API returns nothing for given agent code" in new Setup {
-        when(mockCustomerManagementApi.withAgentCode(mEq(agentCode.toString))(any()))
-          .thenReturn(Future.successful(Option.empty[GroupAccount]))
-
-        val result: Future[Result] =
-          testController.appointableToAgent(
-            ownerId = 1L,
-            agentCode = agentCode,
-            paginationParams = paginationParams,
-            sortfield = None,
-            sortorder = None,
-            address = None,
-            agent = None)(FakeRequest())
-
-        status(result) shouldBe NOT_FOUND
-
-        verify(mockAuthorisationSearchApi, never())
-          .appointableToAgent(any(), any(), any(), any(), any(), any(), any())(any())
-      }
-    }
-
-  }
-
   "getAgentDetails" should {
     "return OK 200" when {
       "organisation management API returns AgentDetails for a provided agent code" in new Setup {
