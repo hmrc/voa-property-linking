@@ -45,7 +45,7 @@ POST         /property-links                                                    
 POST         /clients/:clientId/property-links                                                uk.gov.hmrc.voapropertylinking.controllers.PropertyLinkingController.createOnClientBehalf(clientId: Long)
 
 GET          /owner/agents                                                                    uk.gov.hmrc.voapropertylinking.controllers.PropertyLinkingController.getMyOrganisationsAgents()
-GET          /owner/property-links                                                            uk.gov.hmrc.voapropertylinking.controllers.PropertyLinkingController.getMyOrganisationsPropertyLinks(searchParams: GetMyOrganisationPropertyLinksParameters, params: Option[models.PaginationParams], organisationId: Option[Long] ?= None)
+GET          /owner/property-links                                                            uk.gov.hmrc.voapropertylinking.controllers.PropertyLinkingController.getMyOrganisationsPropertyLinks(searchParams: GetMyOrganisationPropertyLinksParameters, params: Option[models.PaginationParams])
 GET          /owner/property-links/count                                                      uk.gov.hmrc.voapropertylinking.controllers.PropertyLinkingController.getMyOrganisationsPropertyLinksCount()
 GET          /owner/property-links/:submissionId                                              uk.gov.hmrc.voapropertylinking.controllers.PropertyLinkingController.getMyOrganisationsPropertyLink(submissionId: String)
 GET          /dashboard/owner/assessments/:submissionId                                       uk.gov.hmrc.voapropertylinking.controllers.PropertyLinkingController.getMyOrganisationsAssessments(submissionId: String)

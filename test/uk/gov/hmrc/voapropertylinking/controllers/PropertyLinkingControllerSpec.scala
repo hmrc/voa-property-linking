@@ -248,37 +248,21 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
     "return owner property links" in {
       when(mockPropertyLinkingService.getMyOrganisationsPropertyLinks(any(), any())(any()))
         .thenReturn(Future.successful(ownerAuthResult))
-      val res = testController.getMyOrganisationsPropertyLinks(GetMyOrganisationPropertyLinksParameters(), None, None)(
-        FakeRequest())
+      val res =
+        testController.getMyOrganisationsPropertyLinks(GetMyOrganisationPropertyLinksParameters(), None)(FakeRequest())
 
       status(res) shouldBe OK
       contentAsJson(res) shouldBe Json.toJson(ownerAuthResult)
     }
 
-    "search via authorisationSearchApi when AGENT sortField" when {
+    "getMyOrganisationsPropertyLinks" when {
 
-      "organisationId is provided" in {
+      "return owner property links" in {
         when(mockPropertyLinkingService.getMyOrganisationsPropertyLinks(any(), any())(any()))
           .thenReturn(Future.successful(ownerAuthResult))
         val res = testController.getMyOrganisationsPropertyLinks(
           GetMyOrganisationPropertyLinksParameters(sortField = Some("AGENT")),
-          None,
           None)(FakeRequest())
-
-        status(res) shouldBe BAD_REQUEST
-      }
-
-      "organisationId is NOT provided" in {
-        val orgId: Long = 123L
-        when(
-          mockAuthorisationSearchApi
-            .searchAndSort(mEq(orgId), any(), mEq(Some("AGENT")), any(), any(), any(), any(), any(), any())(any()))
-          .thenReturn(Future.successful(modernisedOwnerAuthResult))
-        val res = testController.getMyOrganisationsPropertyLinks(
-          GetMyOrganisationPropertyLinksParameters(sortField = Some("AGENT")),
-          None,
-          Some(orgId))(FakeRequest())
-
         status(res) shouldBe OK
       }
 
@@ -314,20 +298,6 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
         agentCode,
         GetMyOrganisationPropertyLinksParameters(),
         PaginationParams(1, 10, true))(FakeRequest())
-
-      status(res) shouldBe OK
-      contentAsJson(res) shouldBe Json.toJson(ownerAuthResult)
-    }
-  }
-
-  "getMyOrganisationAppointablePropertyLinks" should {
-    val agentCode = 1
-    "return owner property links" in {
-      when(mockPropertyLinkingService.getMyOrganisationsPropertyLinks(any(), any())(any()))
-        .thenReturn(Future.successful(ownerAuthResult))
-      val res = testController.getMyOrganisationAppointablePropertyLinks(
-        GetMyOrganisationPropertyLinksParameters(),
-        Some(PaginationParams(1, 10, true)))(FakeRequest())
 
       status(res) shouldBe OK
       contentAsJson(res) shouldBe Json.toJson(ownerAuthResult)
