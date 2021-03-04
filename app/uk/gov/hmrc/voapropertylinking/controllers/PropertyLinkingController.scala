@@ -26,6 +26,7 @@ import uk.gov.hmrc.http.Upstream5xxResponse
 import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
 import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import uk.gov.hmrc.voapropertylinking.binders.clients.GetClientsParameters
+import uk.gov.hmrc.voapropertylinking.binders.propertylinks.temp.GetMyOrganisationsPropertyLinksParametersWithAgentFiltering
 import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetClientPropertyLinksParameters, GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import uk.gov.hmrc.voapropertylinking.connectors.modernised._
 import uk.gov.hmrc.voapropertylinking.errorhandler.models.ErrorResponse
@@ -110,8 +111,7 @@ class PropertyLinkingController @Inject()(
 
   def getMyOrganisationsPropertyLinks(
         searchParams: GetMyOrganisationPropertyLinksParameters,
-        paginationParams: Option[PaginationParams],
-  ): Action[AnyContent] = authenticated.async { implicit request =>
+        paginationParams: Option[PaginationParams]): Action[AnyContent] = authenticated.async { implicit request =>
     propertyLinkService
       .getMyOrganisationsPropertyLinks(searchParams, paginationParams)
       .map(propertyLinks => Ok(Json.toJson(propertyLinks)))
