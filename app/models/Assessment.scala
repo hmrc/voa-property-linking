@@ -33,6 +33,7 @@ case class Assessment(
       rateableValue: Option[Long],
       address: PropertyAddress,
       billingAuthorityReference: String,
+      billingAuthorityCode: Option[String],
       listType: ListType,
       currentFromDate: Option[LocalDate],
       currentToDate: Option[LocalDate]
@@ -51,18 +52,17 @@ case class Assessments(
 object Assessment {
   implicit val formats = Json.format[Assessment]
 
-  def fromValuationHistory(valuationHistory: ValuationHistory, authorisationId: Long) =
+  def fromValuationHistory(valuationHistory: ValuationHistory, authorisationId: Long): Assessment =
     Assessment(
       authorisationId = authorisationId,
       assessmentRef = valuationHistory.asstRef,
       listYear = valuationHistory.listYear,
       uarn = valuationHistory.uarn,
       effectiveDate = valuationHistory.effectiveDate,
-      rateableValue = valuationHistory.rateableValue.map { d =>
-        d.longValue()
-      },
+      rateableValue = valuationHistory.rateableValue.map(_.longValue()),
       address = PropertyAddress.fromString(valuationHistory.address),
       billingAuthorityReference = valuationHistory.billingAuthorityReference,
+      billingAuthorityCode = valuationHistory.billingAuthCode,
       listType = valuationHistory.listType,
       currentFromDate = valuationHistory.currentFromDate,
       currentToDate = valuationHistory.currentToDate
