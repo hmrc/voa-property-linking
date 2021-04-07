@@ -16,10 +16,10 @@
 
 package models.modernised
 
-import java.time.LocalDate
-
 import models.modernised.ListType.ListType
 import play.api.libs.json.{Json, OFormat}
+
+import java.time.LocalDate
 
 case class ValuationHistory(
       asstRef: Long,
@@ -40,7 +40,7 @@ case class ValuationHistory(
       transitionalCertificate: Option[Boolean],
       deletedIndicator: Option[Boolean],
       valuationDetailsAvailable: Option[Boolean],
-      billingAuthorityCode: Option[String],
+      billingAuthCode: Option[String],
       currentFromDate: Option[LocalDate] = None,
       currentToDate: Option[LocalDate] = None,
       listType: ListType)

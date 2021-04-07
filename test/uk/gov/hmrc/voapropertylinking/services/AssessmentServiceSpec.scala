@@ -95,7 +95,7 @@ class AssessmentServiceSpec extends BaseUnitSpec {
       transitionalCertificate = None,
       deletedIndicator = None,
       valuationDetailsAvailable = None,
-      billingAuthorityCode = None,
+      billingAuthCode = None,
       listType = ListType.CURRENT
     )
 
