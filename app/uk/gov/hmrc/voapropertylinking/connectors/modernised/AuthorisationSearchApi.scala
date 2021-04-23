@@ -31,7 +31,7 @@ class AuthorisationSearchApi @Inject()(
 )(implicit executionContext: ExecutionContext)
     extends BaseVoaConnector {
 
-  lazy val baseUrl: String = servicesConfig.baseUrl("external-business-rates-data-platform")
+  lazy val baseUrl: String = servicesConfig.baseUrl("voa-modernised-api")
 
   def searchAndSort(
         organisationId: Long,
