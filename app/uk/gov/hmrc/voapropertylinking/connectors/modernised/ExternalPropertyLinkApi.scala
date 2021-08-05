@@ -73,6 +73,7 @@ class ExternalPropertyLinkApi @Inject()(
       modernisedPaginationParams(params) ++
         List(
           searchParams.address.map("address"     -> _),
+          searchParams.agent.map("agent"         -> _),
           searchParams.sortField.map("sortfield" -> _),
           searchParams.sortOrder.map("sortorder" -> _)
         ).flatten
