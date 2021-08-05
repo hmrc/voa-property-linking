@@ -163,6 +163,27 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
         .getMyAgentAvailablePropertyLinks(agentCode, getMyOrganisationSearchParams, params = Some(paginationParams))
         .futureValue shouldBe mockReturnedPropertyLinks
 
+      val getMyAgentPropertyLinksQueryParams = queryParams :+ ("address" -> address) :+ ("agent" -> agent) :+ ("sortfield" -> sortField) :+ ("sortorder" -> sortOrder)
+      verify(connector.http)
+        .GET(
+          mEq(agentAvailableAuthorisationsUrl.replace("{agentCode}", agentCode.toString)),
+          mEq(getMyAgentPropertyLinksQueryParams))(any(), any(), any(), any())
+    }
+
+    "build the correct query params and call the modernised layer - when agent not provided" in new Setup {
+      val agentCode = 1
+      val mockReturnedPropertyLinks: PropertyLinksWithAgents = mock[PropertyLinksWithAgents]
+
+      when(connector.http.GET[PropertyLinksWithAgents](any(), any())(any(), any(), any(), any()))
+        .thenReturn(Future.successful(mockReturnedPropertyLinks))
+
+      connector
+        .getMyAgentAvailablePropertyLinks(
+          agentCode,
+          getMyOrganisationSearchParams.copy(agent = None),
+          params = Some(paginationParams))
+        .futureValue shouldBe mockReturnedPropertyLinks
+
       val getMyAgentPropertyLinksQueryParams = queryParams :+ ("address" -> address) :+ ("sortfield" -> sortField) :+ ("sortorder" -> sortOrder)
       verify(connector.http)
         .GET(
