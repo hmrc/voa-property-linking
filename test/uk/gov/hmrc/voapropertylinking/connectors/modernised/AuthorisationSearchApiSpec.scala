@@ -42,7 +42,7 @@ class AuthorisationSearchApiSpec extends BaseUnitSpec {
   "searching and sorting agents" should {
     "return what modernised returned" when {
       "called with minimal query parameters" in new Setup {
-        when(mockDefaultHttpClient.GET[ModernisedAuthResult](any())(any(), any(), any()))
+        when(mockDefaultHttpClient.GET[ModernisedAuthResult](any(), any(), any())(any(), any(), any()))
           .thenReturn(Future.successful(ownerAuthResult))
 
         val res: ModernisedAuthResult = connector.searchAndSort(orgId, paginationParams).futureValue

@@ -19,7 +19,7 @@ package uk.gov.hmrc.voapropertylinking.auditing
 import javax.inject.Inject
 import play.api.libs.json.{Json, Writes}
 import play.api.mvc.Request
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, HeaderNames}
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
 
@@ -40,7 +40,7 @@ class AuditingService @Inject()(
     ExtendedDataEvent(
       auditSource = "voa-property-linking",
       auditType = auditType,
-      tags = hc.headers.toMap ++ Map("Ip Address" -> request.remoteAddress),
+      tags = hc.headers(HeaderNames.explicitlyIncludedHeaders).toMap ++ Map("Ip Address" -> request.remoteAddress),
       detail = Json.toJson(obj)
     )
 }

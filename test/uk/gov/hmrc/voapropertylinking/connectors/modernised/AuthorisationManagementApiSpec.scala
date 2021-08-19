@@ -42,7 +42,7 @@ class AuthorisationManagementApiSpec extends BaseUnitSpec {
       val agentCode = 123
       val authId = 987
 
-      when(http.GET[JsValue](any())(any(), any(), any()))
+      when(http.GET[JsValue](any(), any(), any())(any(), any(), any()))
         .thenReturn(Future.successful(Json.parse(validAgentCodeResponse)))
 
       inside(connector.validateAgentCode(agentCode, authId)(hc).futureValue) {
@@ -57,7 +57,7 @@ class AuthorisationManagementApiSpec extends BaseUnitSpec {
       val agentCode = 123
       val authId = 987
 
-      when(http.GET[JsValue](any())(any(), any(), any()))
+      when(http.GET[JsValue](any(), any(), any())(any(), any(), any()))
         .thenReturn(Future.successful(Json.parse(noAgentFlagResponse)))
 
       inside(connector.validateAgentCode(agentCode, authId)(hc).futureValue) {
@@ -72,7 +72,7 @@ class AuthorisationManagementApiSpec extends BaseUnitSpec {
       val agentCode = 123
       val authId = 987
 
-      when(http.GET[JsValue](any())(any(), any(), any()))
+      when(http.GET[JsValue](any(), any(), any())(any(), any(), any()))
         .thenReturn(Future.successful(Json.parse(invalidAgentCodeResponse)))
 
       inside(connector.validateAgentCode(agentCode, authId)(hc).futureValue) {
