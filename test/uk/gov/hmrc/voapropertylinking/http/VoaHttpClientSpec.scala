@@ -21,8 +21,7 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
 import org.mockito.{ArgumentCaptor, ArgumentMatchers}
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.logging._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import uk.gov.hmrc.voapropertylinking.auth.Principal
 
@@ -69,7 +68,7 @@ class VoaHttpClientSpec extends BaseUnitSpec {
       voaHttpClient.GET[HttpResponse](mockUrl)
 
       verify(mockHttpClient)
-        .GET(ArgumentMatchers.eq(mockUrl))(any(), headerCaptor.capture(), any())
+        .GET(ArgumentMatchers.eq(mockUrl), any(), any())(any(), headerCaptor.capture(), any())
 
       checkGovernmentGatewayHeaders(headerCaptor)
     }
@@ -78,7 +77,10 @@ class VoaHttpClientSpec extends BaseUnitSpec {
       voaHttpClient.GET[HttpResponse](mockUrl, mockQueryParams)
 
       verify(mockHttpClient)
-        .GET(ArgumentMatchers.eq(mockUrl), ArgumentMatchers.eq(mockQueryParams))(any(), headerCaptor.capture(), any())
+        .GET(ArgumentMatchers.eq(mockUrl), ArgumentMatchers.eq(mockQueryParams), any())(
+          any(),
+          headerCaptor.capture(),
+          any())
 
       checkGovernmentGatewayHeaders(headerCaptor)
     }

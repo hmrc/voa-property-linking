@@ -71,7 +71,7 @@ scalacOptions += s"-P:silencer:sourceRoots=${baseDirectory.value.getCanonicalPat
 val compileDependencies = Seq(
   ws,
   guice,
-  "uk.gov.hmrc"        %% "bootstrap-backend-play-27" % "3.2.0",
+  "uk.gov.hmrc"        %% "bootstrap-backend-play-27" % "5.11.0",
   "uk.gov.hmrc"        %% "simple-reactivemongo"      % "7.31.0-play-27",
   "uk.gov.hmrc"        %% "auth-client"               % "3.3.0-play-27",
   "uk.gov.hmrc"        %% "mongo-lock"                % "6.24.0-play-27",
