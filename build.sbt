@@ -71,23 +71,24 @@ scalacOptions += s"-P:silencer:sourceRoots=${baseDirectory.value.getCanonicalPat
 val compileDependencies = Seq(
   ws,
   guice,
-  "uk.gov.hmrc"        %% "bootstrap-backend-play-27" % "5.11.0",
-  "uk.gov.hmrc"        %% "simple-reactivemongo"      % "7.31.0-play-27",
-  "uk.gov.hmrc"        %% "auth-client"               % "3.3.0-play-27",
-  "uk.gov.hmrc"        %% "mongo-lock"                % "6.24.0-play-27",
-  "org.typelevel"      %% "cats-core"                 % "1.6.1",
+  "uk.gov.hmrc"        %% "bootstrap-backend-play-28" % "5.11.0",
+  "uk.gov.hmrc"        %% "simple-reactivemongo"      % "8.0.0-play-28",
+  "uk.gov.hmrc"        %% "mongo-lock"                % "7.0.0-play-28",
+  "org.typelevel"      %% "cats-core"                 % "2.1.0",
   "com.typesafe.play"  %% "play-json"                 % "2.6.13",
-  "org.scalacheck"     %% "scalacheck"                % "1.13.5",
-  "uk.gov.hmrc"        %% "uri-template"              % "1.7.0",
+  "org.scalacheck"     %% "scalacheck"                % "1.15.4",
+  "uk.gov.hmrc"        %% "uri-template"              % "1.9.0",
   "org.apache.commons" %  "commons-text"              % "1.9"
 )
 
 val testDependencies = Seq(
-  "org.scalatest"          %% "scalatest"           % "3.0.8"             % "test",
-  "org.pegdown"            %  "pegdown"             % "1.6.0"             % "test",
-  "com.typesafe.play"      %% "play-test"           % PlayVersion.current % "test",
-  "org.scalatestplus.play" %% "scalatestplus-play"  % "4.0.3"             % "test",
-  "org.mockito"            %  "mockito-core"        % "2.27.0"            % "test"
+  "org.scalatest"           %% "scalatest"            % "3.0.8"              % "test",
+  "org.pegdown"             %  "pegdown"              % "1.6.0"              % "test",
+  "com.typesafe.play"       %% "play-test"            % PlayVersion.current  % "test",
+  "org.scalatestplus.play"  %% "scalatestplus-play"   % "5.1.0"              % "test",
+  "org.scalatestplus"       %% "mockito-3-4"          % "3.2.9.0"            % "test,it",
+  "com.vladsch.flexmark"    % "flexmark-all"          % "0.35.10"            % "test,it",
+  "org.mockito"             %  "mockito-core"         % "3.4.6"              % "test"
 )
 
 addCommandAlias("precommit", ";scalafmt;test:scalafmt;coverage;test;coverageReport")
