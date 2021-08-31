@@ -86,9 +86,9 @@ val testDependencies = Seq(
   "org.pegdown"             %  "pegdown"              % "1.6.0"              % "test",
   "com.typesafe.play"       %% "play-test"            % PlayVersion.current  % "test",
   "org.scalatestplus.play"  %% "scalatestplus-play"   % "5.1.0"              % "test",
-  "org.scalatestplus"       %% "mockito-3-4"          % "3.2.9.0"            % "test,it",
-  "com.vladsch.flexmark"    % "flexmark-all"          % "0.35.10"            % "test,it",
-  "org.mockito"             %  "mockito-core"         % "3.4.6"              % "test"
+  "org.mockito"             %  "mockito-core"         % "3.4.6"              % "test",
+  "org.scalatestplus"       %% "mockito-3-4"          % "3.2.9.0"            % "test",
+  "com.vladsch.flexmark"    % "flexmark-all"          % "0.35.10"            % "test"
 )
 
 addCommandAlias("precommit", ";scalafmt;test:scalafmt;coverage;test;coverageReport")
