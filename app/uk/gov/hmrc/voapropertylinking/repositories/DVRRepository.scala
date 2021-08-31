@@ -20,7 +20,6 @@ import com.google.inject.name.Named
 import com.google.inject.{ImplementedBy, Singleton}
 import javax.inject.Inject
 import models.modernised.ccacasemanagement.requests.DetailedValuationRequest
-import play.api.Logger
 import play.api.libs.json._
 import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.indexes.{Index, IndexType}
@@ -58,7 +57,7 @@ class DVRRepository @Inject()(
       insert(DVRRecord(request.organisationId, request.assessmentRef, request.agents))
         .map(_ => ())
         .recover {
-          case e: DatabaseException => Logger.debug(e.getMessage())
+          case e: DatabaseException => logger.debug(e.getMessage())
         }
     }
 
@@ -73,7 +72,7 @@ class DVRRepository @Inject()(
       remove(query(organisationId))
         .map(_ => ())
         .recover {
-          case e: DatabaseException => Logger.debug(e.getMessage())
+          case e: DatabaseException => logger.debug(e.getMessage())
         }
     }
 

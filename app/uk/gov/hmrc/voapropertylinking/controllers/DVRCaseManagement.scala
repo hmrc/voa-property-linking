@@ -18,7 +18,6 @@ package uk.gov.hmrc.voapropertylinking.controllers
 
 import javax.inject.Inject
 import models.modernised.ccacasemanagement.requests.DetailedValuationRequest
-import play.api.Logger
 import play.api.http.HttpEntity
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
@@ -39,7 +38,7 @@ class DVRCaseManagement @Inject()(
 
   def requestDetailedValuationV2: Action[JsValue] = authenticated.async(parse.json) { implicit request =>
     withJsonBody[DetailedValuationRequest] { dvrRequest =>
-      Logger.info(s"detailed valuation request submitted: ${dvrRequest.submissionId}")
+      logger.info(s"detailed valuation request submitted: ${dvrRequest.submissionId}")
       for {
         _ <- dvrRecordRepository.create(dvrRequest)
         _ <- dvrCaseManagementV2.requestDetailedValuation(dvrRequest)

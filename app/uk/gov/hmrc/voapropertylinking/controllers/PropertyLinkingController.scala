@@ -17,16 +17,13 @@
 package uk.gov.hmrc.voapropertylinking.controllers
 
 import models._
-import models.mdtp.propertylink.projections.OwnerAuthResult
 import models.mdtp.propertylink.requests.{APIPropertyLinkRequest, PropertyLinkRequest}
-import play.api.Logger
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.http.Upstream5xxResponse
 import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
 import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import uk.gov.hmrc.voapropertylinking.binders.clients.GetClientsParameters
-import uk.gov.hmrc.voapropertylinking.binders.propertylinks.temp.GetMyOrganisationsPropertyLinksParametersWithAgentFiltering
 import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetClientPropertyLinksParameters, GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import uk.gov.hmrc.voapropertylinking.connectors.modernised._
 import uk.gov.hmrc.voapropertylinking.errorhandler.models.ErrorResponse
@@ -51,13 +48,13 @@ class PropertyLinkingController @Inject()(
       propertyLinkService
         .create(APIPropertyLinkRequest.fromPropertyLinkRequest(propertyLinkRequest))
         .map { _ =>
-          Logger.info(s"create property link: submissionId ${propertyLinkRequest.submissionId}")
+          logger.info(s"create property link: submissionId ${propertyLinkRequest.submissionId}")
           auditingService.sendEvent("create property link", propertyLinkRequest)
           Accepted
         }
         .recover {
           case _: Upstream5xxResponse =>
-            Logger.info(s"create property link failure: submissionId ${propertyLinkRequest.submissionId}")
+            logger.info(s"create property link failure: submissionId ${propertyLinkRequest.submissionId}")
             auditingService.sendEvent("create property link failure", propertyLinkRequest)
             InternalServerError
         }
@@ -69,13 +66,13 @@ class PropertyLinkingController @Inject()(
       propertyLinkService
         .createOnClientBehalf(APIPropertyLinkRequest.fromPropertyLinkRequest(propertyLinkRequest), clientId)
         .map { _ =>
-          Logger.info(s"create property link on client behalf: submissionId ${propertyLinkRequest.submissionId}")
+          logger.info(s"create property link on client behalf: submissionId ${propertyLinkRequest.submissionId}")
           auditingService.sendEvent("create property link on client behalf", propertyLinkRequest)
           Accepted
         }
         .recover {
           case _: Upstream5xxResponse =>
-            Logger.info(
+            logger.info(
               s"create property link on client behalf failure: submissionId ${propertyLinkRequest.submissionId}")
             auditingService.sendEvent("create property link on client behalf failure", propertyLinkRequest)
             InternalServerError
