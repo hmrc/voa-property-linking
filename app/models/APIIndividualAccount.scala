@@ -21,7 +21,7 @@ import java.time.Instant
 import play.api.libs.json.Json
 
 case class PersonData(
-      identifyVerificationId: String,
+      identifyVerificationId: Option[String],
       firstName: String,
       lastName: String,
       organisationId: Long,
@@ -44,7 +44,7 @@ object APIIndividualAccount {
 }
 
 case class APIIndividualAccountForOrganisation(
-      identifyVerificationId: String,
+      identifyVerificationId: Option[String],
       firstName: String,
       lastName: String,
       addressUnitId: Long,

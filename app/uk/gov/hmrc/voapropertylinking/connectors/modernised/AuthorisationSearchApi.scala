@@ -17,7 +17,6 @@
 package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
 import javax.inject.Inject
-import models.AgentPermission.StartAndContinue
 import models.PaginationParams
 import models.searchApi.OwnerAuthResult
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}

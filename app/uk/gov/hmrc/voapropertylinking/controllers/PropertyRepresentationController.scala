@@ -16,20 +16,18 @@
 
 package uk.gov.hmrc.voapropertylinking.controllers
 
-import javax.inject.Inject
 import models._
-import models.mdtp.propertylink.projections.OwnerAuthResult
-import play.api.Logger
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
 import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import uk.gov.hmrc.voapropertylinking.connectors.modernised._
 import uk.gov.hmrc.voapropertylinking.errorhandler.models.ErrorResponse
-import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation.{AppointmentChangesRequest, AssignAgent, AssignAgentToSomeProperties, RemoveAgentFromIpOrganisation, UnassignAgent, UnassignAgentFromSomeProperties}
 import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation.AppointmentChangeResponse._
+import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation._
 
-import scala.concurrent.{ExecutionContext, Future}
+import javax.inject.Inject
+import scala.concurrent.ExecutionContext
 
 class PropertyRepresentationController @Inject()(
       controllerComponents: ControllerComponents,

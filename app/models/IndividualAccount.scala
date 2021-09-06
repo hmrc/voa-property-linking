@@ -34,7 +34,7 @@ object IndividualDetails {
 
 case class IndividualAccount(
       externalId: String,
-      trustId: String,
+      trustId: Option[String],
       organisationId: Long,
       individualId: Long,
       details: IndividualDetails)
@@ -45,7 +45,7 @@ object IndividualAccount {
 
 case class IndividualAccountSubmission(
       externalId: String,
-      trustId: String,
+      trustId: Option[String],
       organisationId: Long,
       details: IndividualDetails) {
 
@@ -70,7 +70,11 @@ object IndividualAccountSubmission {
 }
 
 //used as part of POST /organisation - no organisationId is passed here.
-case class IndividualAccountSubmissionForOrganisation(externalId: String, trustId: String, details: IndividualDetails)
+case class IndividualAccountSubmissionForOrganisation(
+      externalId: String,
+      trustId: Option[String],
+      details: IndividualDetails)
+
 object IndividualAccountSubmissionForOrganisation {
   implicit val formats = Json.format[IndividualAccountSubmissionForOrganisation]
 }

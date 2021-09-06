@@ -18,6 +18,7 @@ package basespecs
 
 import org.scalatest._
 import org.scalatest.concurrent.{PatienceConfiguration, ScalaFutures}
+import org.scalatest.matchers.must.Matchers
 import org.scalatest.matchers.{BeMatcher, MatchResult}
 import org.scalatest.time.{Milliseconds, Second, Span}
 import org.scalatestplus.mockito.MockitoSugar

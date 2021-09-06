@@ -49,7 +49,7 @@ case class APIIndividualDetails(
       emailAddress: String,
       telephoneNumber: Option[String],
       mobileNumber: Option[String],
-      identifyVerificationId: String)
+      identifyVerificationId: Option[String])
 
 object APIIndividualDetails {
   private def withDefault[A](key: String, default: A)(implicit wrts: Writes[A]): Reads[JsObject] =
