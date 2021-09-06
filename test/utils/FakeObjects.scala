@@ -73,7 +73,7 @@ trait FakeObjects {
     isAgent = false,
     individualAccountSubmission = IndividualAccountSubmissionForOrganisation(
       externalId = "Ext123",
-      trustId = "trust234",
+      trustId = Some("trust234"),
       details = IndividualDetails(
         firstName = "Donald",
         lastName = "Trump",
@@ -101,7 +101,7 @@ trait FakeObjects {
 
   val individualAccountSubmission = IndividualAccountSubmission(
     externalId = "ggEId12",
-    trustId = "idv1",
+    trustId = Some("idv1"),
     organisationId = 13579,
     details = IndividualDetails(
       firstName = "Kim",
@@ -116,7 +116,7 @@ trait FakeObjects {
   val expectedGetValidResponse = Some(
     IndividualAccount(
       externalId = "ggEId12",
-      trustId = "idv1",
+      trustId = Some("idv1"),
       organisationId = 13579,
       individualId = 2,
       details = IndividualDetails(
