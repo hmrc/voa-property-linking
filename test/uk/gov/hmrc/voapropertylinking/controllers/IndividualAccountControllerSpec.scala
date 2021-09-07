@@ -35,7 +35,7 @@ class IndividualAccountControllerSpec extends BaseControllerSpec {
     "create a new individual user in modernised" in {
       val testIndividualDetails = IndividualDetails("Test", "Name", "test@test.com", "01234556676", None, 1)
       val testIndividualAccountSubmission =
-        IndividualAccountSubmission("test-external-id", "test-trust-id", 1, testIndividualDetails)
+        IndividualAccountSubmission("test-external-id", Some("test-trust-id"), 1, testIndividualDetails)
 
       val individualJson = Json.toJson(testIndividualAccountSubmission)
 
@@ -53,7 +53,7 @@ class IndividualAccountControllerSpec extends BaseControllerSpec {
     "update an individual user in modernised" in {
       val testIndividualDetails = IndividualDetails("Test", "Name", "test@test.com", "01234556676", None, 1)
       val testIndividualAccountSubmission =
-        IndividualAccountSubmission("test-external-id", "test-trust-id", 1, testIndividualDetails)
+        IndividualAccountSubmission("test-external-id", Some("test-trust-id"), 1, testIndividualDetails)
 
       val individualJson = Json.toJson(testIndividualAccountSubmission)
       val testJsonResponse = """{ "some": "json" }"""
@@ -71,7 +71,8 @@ class IndividualAccountControllerSpec extends BaseControllerSpec {
   "get" should {
     "return the json for an individual from modernised" in {
       val testIndividualDetails = IndividualDetails("Test", "Name", "test@test.com", "01234556676", None, 1)
-      val testIndividualAccount = IndividualAccount("test-external-id", "test-trust-id", 1, 1, testIndividualDetails)
+      val testIndividualAccount =
+        IndividualAccount("test-external-id", Some("test-trust-id"), 1, 1, testIndividualDetails)
 
       val individualJson = Json.toJson(testIndividualAccount)
 
@@ -97,7 +98,8 @@ class IndividualAccountControllerSpec extends BaseControllerSpec {
   "withExternalId" should {
     "return the json for an individual from modernised using the GG external ID" in {
       val testIndividualDetails = IndividualDetails("Test", "Name", "test@test.com", "01234556676", None, 1)
-      val testIndividualAccount = IndividualAccount("test-external-id", "test-trust-id", 1, 1, testIndividualDetails)
+      val testIndividualAccount =
+        IndividualAccount("test-external-id", Some("test-trust-id"), 1, 1, testIndividualDetails)
 
       val individualJson = Json.toJson(testIndividualAccount)
 

@@ -54,7 +54,7 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
                   "theFakeDonald@potus.com",
                   Some("24680"),
                   Some("13579"),
-                  "idv1"
+                  Some("idv1")
                 ),
                 13579,
                 GroupDetails(
@@ -98,7 +98,7 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
                   "theFakeDonald@potus.com",
                   Some("24680"),
                   Some("13579"),
-                  "idv1"
+                  Some("idv1")
                 ),
                 13579,
                 GroupDetails(
@@ -152,7 +152,7 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
             "theFakeDonald@potus.com",
             Some("24680"),
             Some("13579"),
-            "idv1"
+            Some("idv1")
           ),
           13579,
           GroupDetails(

@@ -37,7 +37,7 @@ class GroupAccountControllerSpec extends BaseControllerSpec {
     "create a new individual user in modernised" in {
       val testIndividualDetails = IndividualDetails("Test", "Name", "test@test.com", "01234556676", None, 1)
       val testIndividualOrg =
-        IndividualAccountSubmissionForOrganisation("test-external-id", "test-trust-id", testIndividualDetails)
+        IndividualAccountSubmissionForOrganisation("test-external-id", Some("test-trust-id"), testIndividualDetails)
       val testGroupAccountSubmission = GroupAccountSubmission(
         "test-group-id",
         "test-group-id",
