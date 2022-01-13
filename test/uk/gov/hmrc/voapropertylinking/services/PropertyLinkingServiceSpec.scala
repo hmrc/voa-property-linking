@@ -71,7 +71,8 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
           agentCode = 1111,
           organisationName = "org name",
           organisationId = 123456
-        )))
+        ))),
+    client = None
   )
 
   val clientValidPropertiesView = PropertiesView(
@@ -95,7 +96,8 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
         currentToDate = None
       )),
     parties = Seq(),
-    agents = Some(Nil)
+    agents = Some(Nil),
+    client = None
   )
 
   val propertyLinkWithAgents: PropertyLinkWithAgents = PropertyLinkWithAgents(

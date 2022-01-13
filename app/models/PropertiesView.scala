@@ -21,6 +21,7 @@ import java.time.{Instant, LocalDate}
 import models.modernised.ValuationHistory
 import models.modernised.externalpropertylink.myclients.PropertyLinkWithClient
 import models.modernised.externalpropertylink.myorganisations.PropertyLinkWithAgents
+import models.searchApi.Client
 import play.api.libs.json._
 
 case class PropertiesView(
@@ -33,7 +34,8 @@ case class PropertiesView(
       address: Option[String],
       NDRListValuationHistoryItems: Seq[APIValuationHistory],
       parties: Seq[APIParty],
-      agents: Option[Seq[LegacyParty]]) {
+      agents: Option[Seq[LegacyParty]],
+      client: Option[Client]) {
 
   def upperCase: PropertiesView =
     this.copy(NDRListValuationHistoryItems = NDRListValuationHistoryItems.map(_.capatalise))
@@ -57,7 +59,11 @@ object PropertiesView {
       submissionId = propertyLink.submissionId,
       NDRListValuationHistoryItems = history.map(APIValuationHistory(_)).toList,
       parties = Seq(),
-      agents = Some(Seq())
+      agents = Some(Seq()),
+      client = Some(
+        Client(
+          organisationId = propertyLink.client.organisationId,
+          organisationName = propertyLink.client.organisationName))
     )
 
   def apply(propertyLink: PropertyLinkWithAgents, history: Seq[ValuationHistory]): PropertiesView =
@@ -83,7 +89,8 @@ object PropertiesView {
             agentCode = agent.representativeCode,
             organisationName = agent.organisationName,
             organisationId = agent.organisationId
-        )))
+        ))),
+      client = None
     )
 
 }

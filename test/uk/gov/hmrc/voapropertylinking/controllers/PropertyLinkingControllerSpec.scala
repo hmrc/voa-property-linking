@@ -94,7 +94,8 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
         id = 24680,
         authorisedPartyOrganisationId = agentOrgId
       )),
-    agents = Some(Nil)
+    agents = Some(Nil),
+    client = None
   )
 
   val ownerAuthorisation = OwnerAuthorisation(
@@ -417,7 +418,8 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
           1L,
           agentOrgId
         )),
-      agents = None
+      agents = None,
+      client = None
     )
 
     val groupAccount = GroupAccount(
