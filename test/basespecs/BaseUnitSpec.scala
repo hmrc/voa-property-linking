@@ -18,8 +18,10 @@ package basespecs
 
 import org.scalatest._
 import org.scalatest.concurrent.{PatienceConfiguration, ScalaFutures}
+import org.scalatest.matchers.should.Matchers
 import org.scalatest.matchers.{BeMatcher, MatchResult}
 import org.scalatest.time.{Milliseconds, Second, Span}
+import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.JsNull
 import play.api.mvc.AnyContentAsEmpty
@@ -33,7 +35,7 @@ import utils.FakeObjects
 import scala.concurrent.ExecutionContext
 
 abstract class BaseUnitSpec
-    extends WordSpec with Matchers with BeforeAndAfterEach with BeforeAndAfterAll with AllMocks with Inspectors
+    extends AnyWordSpec with Matchers with BeforeAndAfterEach with BeforeAndAfterAll with AllMocks with Inspectors
     with Inside with EitherValues with LoneElement with ScalaFutures with FakeObjects with MockitoSugar
     with PatienceConfiguration with DefaultAwaitTimeout with Cats {
 

@@ -118,9 +118,11 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
     uarn = 111111,
     address = "address",
     pending = false,
+    clientOrgName = None,
     capacity = Some("OWNER"),
     assessments = Seq(),
-    agents = Seq())
+    agents = Seq()
+  )
 
   "create" should {
     "create a new property link submission in modernised" in {
