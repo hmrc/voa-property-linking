@@ -45,6 +45,7 @@ case class Assessments(
       uarn: Long,
       address: String,
       pending: Boolean,
+      clientOrgName: Option[String],
       capacity: Option[String],
       assessments: Seq[Assessment],
       agents: Seq[Party])
@@ -83,6 +84,7 @@ object Assessments {
       propertyLink.uarn,
       history.headOption.map(_.address).getOrElse("No address found"),
       propertyLink.status != PropertyLinkStatus.APPROVED,
+      clientOrgName = None,
       capacity = capacity,
       assessments = history.map(x => Assessment.fromValuationHistory(x, propertyLink.authorisationId)),
       agents = propertyLink.agents.map(
@@ -100,13 +102,14 @@ object Assessments {
         history: Seq[ValuationHistory],
         capacity: Option[String]): Assessments =
     Assessments(
-      propertyLink.authorisationId,
-      propertyLink.submissionId,
-      propertyLink.uarn,
-      history.headOption.map(_.address).getOrElse("No address found"),
-      propertyLink.status != PropertyLinkStatus.APPROVED,
+      authorisationId = propertyLink.authorisationId,
+      submissionId = propertyLink.submissionId,
+      uarn = propertyLink.uarn,
+      address = history.headOption.map(_.address).getOrElse("No address found"),
+      pending = propertyLink.status != PropertyLinkStatus.APPROVED,
+      clientOrgName = Some(propertyLink.client.organisationName),
       capacity = capacity,
-      history.map(x => Assessment.fromValuationHistory(x, propertyLink.authorisationId)),
-      Seq()
+      assessments = history.map(x => Assessment.fromValuationHistory(x, propertyLink.authorisationId)),
+      agents = Seq()
     )
 }
