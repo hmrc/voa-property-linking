@@ -33,8 +33,6 @@ class PropertyRepresentationController @Inject()(
       controllerComponents: ControllerComponents,
       authenticated: AuthenticatedActionBuilder,
       authorisationManagementApi: AuthorisationManagementApi,
-      authorisationSearchApi: AuthorisationSearchApi,
-      customerManagementApi: CustomerManagementApi,
       organisationManagementApi: ExternalOrganisationManagementApi,
       externalPropertyLinkApi: ExternalPropertyLinkApi,
       auditingService: AuditingService

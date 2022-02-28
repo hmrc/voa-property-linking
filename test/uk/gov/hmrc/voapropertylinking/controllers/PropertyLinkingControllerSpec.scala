@@ -44,7 +44,6 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
   lazy val testController = new PropertyLinkingController(
     controllerComponents = Helpers.stubControllerComponents(),
     authenticated = preAuthenticatedActionBuilders(),
-    authorisationSearchApi = mockAuthorisationSearchApi,
     propertyLinkService = mockPropertyLinkingService,
     assessmentService = mockAssessmentService,
     auditingService = mock[AuditingService]
