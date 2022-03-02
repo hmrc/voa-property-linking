@@ -16,9 +16,10 @@
 
 package uk.gov.hmrc.voapropertylinking.utils
 
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-class PostcodeValidatorSpec extends FlatSpec with Matchers {
+class PostcodeValidatorSpec extends AnyFlatSpec with Matchers {
 
   behavior of "PostcodeValidator"
 

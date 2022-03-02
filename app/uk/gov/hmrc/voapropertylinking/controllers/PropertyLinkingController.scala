@@ -25,7 +25,6 @@ import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
 import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import uk.gov.hmrc.voapropertylinking.binders.clients.GetClientsParameters
 import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetClientPropertyLinksParameters, GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
-import uk.gov.hmrc.voapropertylinking.connectors.modernised._
 import uk.gov.hmrc.voapropertylinking.errorhandler.models.ErrorResponse
 import uk.gov.hmrc.voapropertylinking.services.{AssessmentService, PropertyLinkingService}
 import uk.gov.hmrc.voapropertylinking.utils.Cats
@@ -36,7 +35,6 @@ import scala.concurrent.{ExecutionContext, Future}
 class PropertyLinkingController @Inject()(
       controllerComponents: ControllerComponents,
       authenticated: AuthenticatedActionBuilder,
-      authorisationSearchApi: AuthorisationSearchApi,
       propertyLinkService: PropertyLinkingService,
       assessmentService: AssessmentService,
       auditingService: AuditingService
