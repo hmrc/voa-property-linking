@@ -78,6 +78,7 @@ val compileDependencies = Seq(
   "com.typesafe.play"  %% "play-json"                 % "2.6.13",
   "org.scalacheck"     %% "scalacheck"                % "1.15.4",
   "uk.gov.hmrc"        %% "uri-template"              % "1.9.0",
+  "ai.x"               %% "play-json-extensions"      % "0.10.0",
   "org.apache.commons" %  "commons-text"              % "1.9"
 )
 

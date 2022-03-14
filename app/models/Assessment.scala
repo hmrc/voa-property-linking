@@ -16,8 +16,9 @@
 
 package models
 
-import java.time.LocalDate
+import models.modernised.AllowedAction.AllowedAction
 
+import java.time.LocalDate
 import models.modernised.ListType.ListType
 import models.modernised.externalpropertylink.myclients.PropertyLinkWithClient
 import models.modernised.externalpropertylink.myorganisations.PropertyLinkWithAgents
@@ -35,6 +36,7 @@ case class Assessment(
       billingAuthorityReference: String,
       billingAuthorityCode: Option[String],
       listType: ListType,
+      allowedActions: List[AllowedAction],
       currentFromDate: Option[LocalDate],
       currentToDate: Option[LocalDate]
 )
@@ -65,6 +67,7 @@ object Assessment {
       billingAuthorityReference = valuationHistory.billingAuthorityReference,
       billingAuthorityCode = valuationHistory.billingAuthCode,
       listType = valuationHistory.listType,
+      allowedActions = valuationHistory.allowedActions,
       currentFromDate = valuationHistory.currentFromDate,
       currentToDate = valuationHistory.currentToDate
     )

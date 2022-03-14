@@ -16,8 +16,10 @@
 
 package models.modernised
 
+import ai.x.play.json.Jsonx
+import models.modernised.AllowedAction.AllowedAction
 import models.modernised.ListType.ListType
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.OFormat
 
 import java.time.LocalDate
 
@@ -43,8 +45,10 @@ case class ValuationHistory(
       billingAuthCode: Option[String],
       currentFromDate: Option[LocalDate] = None,
       currentToDate: Option[LocalDate] = None,
-      listType: ListType)
+      listType: ListType,
+      allowedActions: List[AllowedAction]
+)
 
 object ValuationHistory {
-  implicit val valuationHistoryFormats: OFormat[ValuationHistory] = Json.format
+  implicit val valuationHistoryFormats: OFormat[ValuationHistory] = Jsonx.formatCaseClass
 }
