@@ -192,7 +192,8 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
         deletedIndicator = None,
         valuationDetailsAvailable = None,
         billingAuthCode = None,
-        listType = ListType.CURRENT
+        listType = ListType.CURRENT,
+        allowedActions = List(AllowedAction.VIEW_DETAILED_VALUATION)
       )))
 
   val agentAuthorisation: ModernisedPropertyLinkWithClient = propertyLinkClient
