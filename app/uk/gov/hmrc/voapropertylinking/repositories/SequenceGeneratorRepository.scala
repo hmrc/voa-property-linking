@@ -18,60 +18,59 @@ package uk.gov.hmrc.voapropertylinking.repositories
 
 import com.google.inject.Singleton
 import javax.inject.Inject
+import org.mongodb.scala.model.Filters._
+import org.mongodb.scala.model.Sorts._
+import org.mongodb.scala.model.Updates._
 import play.api.libs.json._
-import play.modules.reactivemongo.ReactiveMongoComponent
-import reactivemongo.bson.{BSONDocument, BSONInteger, BSONString}
-import reactivemongo.play.json.ImplicitBSONHandlers._
-import reactivemongo.play.json.collection.JSONBatchCommands.FindAndModifyCommand
-import uk.gov.hmrc.mongo.ReactiveRepository
+import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
+import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.play.http.logging.Mdc
+import org.mongodb.scala.model.{FindOneAndUpdateOptions, IndexModel, IndexOptions, ReturnDocument}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 case class Sequence(_id: String, sequence: Long)
 
 object Sequence {
-  val format: OFormat[Sequence] = Json.format
+  implicit val format: Format[Sequence] = Json.format
 }
 
-trait SequenceGeneratorRepository extends ReactiveRepository[Sequence, String] {
+trait SequenceGeneratorRepository extends PlayMongoRepository[Sequence] {
   def getNextSequenceId(key: String): Future[Long]
 }
 
 @Singleton
-class SequenceGeneratorMongoRepository @Inject()(mongo: ReactiveMongoComponent)(
-      implicit executionContext: ExecutionContext)
-    extends ReactiveRepository[Sequence, String](
+class SequenceGeneratorMongoRepository @Inject()(mongo: MongoComponent)(implicit executionContext: ExecutionContext)
+    extends PlayMongoRepository[Sequence](
       collectionName = "sequences",
-      mongo = mongo.mongoConnector.db,
-      domainFormat = Sequence.format,
-      idFormat = implicitly[Format[String]]
+      mongoComponent = mongo,
+      domainFormat = implicitly,
+      indexes = Seq(IndexModel(ascending("sequence"), IndexOptions().sparse(false).unique(true)))
     ) with SequenceGeneratorRepository {
 
-  def sequenceNo(in: FindAndModifyCommand.FindAndModifyResult): Long =
-    in.result[Sequence].map(_.sequence).getOrElse(throw new RuntimeException("Unable to generate sequence number"))
-
-  override def getNextSequenceId(key: String): Future[Long] = {
+  override def getNextSequenceId(key: String): Future[Long] =
     // get latest from sequence, if none - then set next number to 600_000_000, else inc by one
     // if num=999_999_999 throw error
-    val selector: BSONDocument = BSONDocument("_id" -> BSONString(key))
-
-    def update(inc: Int): BSONDocument = BSONDocument(s"$$inc" -> BSONDocument("sequence" -> BSONInteger(inc)))
     Mdc.preservingMdc {
-      findLatestSequence(key).flatMap { optSequence =>
-        optSequence.fold(
-          collection.findAndUpdate(selector, update(600000000), fetchNewObject = true, upsert = true).map(sequenceNo)
-        ) {
-          case sequence if sequence.sequence == 999999999 =>
-            Future.failed(new RuntimeException("Reached upper limit of 999999999 on generating sequence number"))
-          case _ =>
-            collection.findAndUpdate(selector, update(1), fetchNewObject = true, upsert = false).map(sequenceNo)
-        }
+      findLatestSequence(key).flatMap {
+        case Some(sequence) if sequence.sequence >= 999999999 =>
+          throw new IllegalStateException("Reached upper limit of id on generating sequence number")
+        case Some(_) => update(key = key, value = 1)
+        case None    => update(key = key, value = 600000000)
       }
     }
-  }
+
+  private def update(key: String, value: Int): Future[Long] =
+    collection
+      .findOneAndUpdate(
+        equal("_id", key),
+        inc("sequence", value),
+        options = FindOneAndUpdateOptions().upsert(true).returnDocument(ReturnDocument.AFTER)
+      )
+      .toFuture()
+      .map(_.sequence)
 
   private def findLatestSequence(key: String): Future[Option[Sequence]] =
-    find("_id" -> key).map(_.headOption)
+    collection.find(equal("_id", key)).toFuture().map(_.headOption)
 
 }

@@ -16,16 +16,23 @@
 
 package uk.gov.hmrc.voapropertylinking.repositories
 
+import java.time.Instant
+
 import com.google.inject.name.Named
 import com.google.inject.{ImplementedBy, Singleton}
 import javax.inject.Inject
 import models.modernised.ccacasemanagement.requests.DetailedValuationRequest
+import org.mongodb.scala.bson.conversions.Bson
 import play.api.libs.json._
-import play.modules.reactivemongo.ReactiveMongoComponent
-import reactivemongo.api.indexes.{Index, IndexType}
-import reactivemongo.bson.{BSONDateTime, BSONDocument}
+import org.mongodb.scala.model.{IndexModel, IndexOptions}
+import org.mongodb.scala.model.Filters._
+
+import scala.concurrent.duration._
+import org.mongodb.scala.model.Indexes.ascending
+import play.api.Logging
 import reactivemongo.core.errors.DatabaseException
-import uk.gov.hmrc.mongo.ReactiveRepository
+import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
+import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.http.logging.Mdc
 
@@ -33,28 +40,25 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class DVRRepository @Inject()(
-      mongo: ReactiveMongoComponent,
+      mongo: MongoComponent,
       @Named("dvrCollectionName") val dvrCollectionName: String,
       config: ServicesConfig
 )(implicit executionContext: ExecutionContext)
-    extends ReactiveRepository[DVRRecord, String](
-      dvrCollectionName,
-      mongo.mongoConnector.db,
-      DVRRecord.mongoFormat,
-      implicitly[Format[String]]) with DVRRecordRepository {
-
-  lazy val ttlDuration = config.getDuration("dvr.record.ttl.duration")
-
-  override def indexes: Seq[Index] = Seq(
-    Index(
-      key = Seq("createdAt" -> IndexType.Ascending),
-      name = Some("ttl"),
-      options = BSONDocument("expireAfterSeconds" -> ttlDuration.toSeconds))
-  )
+    extends PlayMongoRepository[DVRRecord](
+      collectionName = dvrCollectionName,
+      mongoComponent = mongo,
+      domainFormat = DVRRecord.mongoFormat,
+      indexes = Seq(
+        IndexModel(
+          ascending("createdAt"),
+          IndexOptions().name("ttl").expireAfter(config.getDuration("dvr.record.ttl.duration").toSeconds, SECONDS)))
+    ) with DVRRecordRepository with Logging {
 
   override def create(request: DetailedValuationRequest): Future[Unit] =
     Mdc.preservingMdc {
-      insert(DVRRecord(request.organisationId, request.assessmentRef, request.agents))
+      collection
+        .insertOne(DVRRecord(request.organisationId, request.assessmentRef, request.agents))
+        .toFuture()
         .map(_ => ())
         .recover {
           case e: DatabaseException => logger.debug(e.getMessage())
@@ -63,21 +67,23 @@ class DVRRepository @Inject()(
 
   override def exists(organisationId: Long, assessmentRef: Long): Future[Boolean] =
     Mdc.preservingMdc {
-      find(query(organisationId))
-        .map(_.exists(_.assessmentRef == assessmentRef))
+      collection.find(or(query(organisationId))).toFuture().map(_.exists(_.assessmentRef == assessmentRef))
     }
 
   override def clear(organisationId: Long): Future[Unit] =
     Mdc.preservingMdc {
-      remove(query(organisationId))
+      collection
+        .findOneAndDelete(query(organisationId))
+        .toFuture()
         .map(_ => ())
         .recover {
           case e: DatabaseException => logger.debug(e.getMessage())
         }
     }
 
-  private def query(organisationId: Long): (String, Json.JsValueWrapper) =
-    "$or" -> Json.arr(Json.obj("organisationId" -> organisationId), Json.obj("agents" -> organisationId))
+  private def query(organisationId: Long): Bson =
+    or(equal("organisationId", organisationId), in("agents", Seq(organisationId)))
+
 }
 
 case class DVRRecord(
@@ -88,11 +94,11 @@ case class DVRRecord(
 
 object DVRRecord {
 
-  import reactivemongo.play.json.BSONFormats.BSONDateTimeFormat
+  private implicit val dateFormat = uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats.instantFormat
 
   val mongoFormat: OFormat[DVRRecord] = new OFormat[DVRRecord] {
     override def writes(o: DVRRecord): JsObject =
-      Json.writes[DVRRecord].writes(o) ++ Json.obj("createdAt" -> BSONDateTime(System.currentTimeMillis))
+      Json.writes[DVRRecord].writes(o) ++ Json.obj("createdAt" -> Instant.now())
 
     override def reads(json: JsValue): JsResult[DVRRecord] = Json.reads[DVRRecord].reads(json)
   }
