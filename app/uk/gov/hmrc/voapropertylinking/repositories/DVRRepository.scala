@@ -24,11 +24,8 @@ import javax.inject.Inject
 import models.modernised.ccacasemanagement.requests.DetailedValuationRequest
 import org.mongodb.scala.bson.conversions.Bson
 import play.api.libs.json._
-import org.mongodb.scala.model.{IndexModel, IndexOptions}
 import org.mongodb.scala.model.Filters._
 
-import scala.concurrent.duration._
-import org.mongodb.scala.model.Indexes.ascending
 import play.api.Logging
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import uk.gov.hmrc.mongo.MongoComponent
@@ -47,10 +44,7 @@ class DVRRepository @Inject()(
       collectionName = dvrCollectionName,
       mongoComponent = mongo,
       domainFormat = DVRRecord.mongoFormat,
-      indexes = Seq(
-        IndexModel(
-          ascending("createdAt"),
-          IndexOptions().name("ttl").expireAfter(config.getDuration("dvr.record.ttl.duration").toSeconds, SECONDS)))
+      indexes = Seq.empty
     ) with DVRRecordRepository with Logging {
 
   override def create(request: DetailedValuationRequest): Future[Unit] =
@@ -92,15 +86,7 @@ case class DVRRecord(
 )
 
 object DVRRecord {
-
-  private implicit val dateFormat = uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats.instantFormat
-
-  val mongoFormat: OFormat[DVRRecord] = new OFormat[DVRRecord] {
-    override def writes(o: DVRRecord): JsObject =
-      Json.writes[DVRRecord].writes(o) ++ Json.obj("createdAt" -> Instant.now())
-
-    override def reads(json: JsValue): JsResult[DVRRecord] = Json.reads[DVRRecord].reads(json)
-  }
+  implicit val mongoFormat: Format[DVRRecord] = Json.format[DVRRecord]
 }
 
 @ImplementedBy(classOf[DVRRepository])
