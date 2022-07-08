@@ -30,7 +30,6 @@ import org.mongodb.scala.model.Filters._
 import scala.concurrent.duration._
 import org.mongodb.scala.model.Indexes.ascending
 import play.api.Logging
-import reactivemongo.core.errors.DatabaseException
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
@@ -61,7 +60,7 @@ class DVRRepository @Inject()(
         .toFuture()
         .map(_ => ())
         .recover {
-          case e: DatabaseException => logger.debug(e.getMessage())
+          case e: Exception => logger.debug(e.getMessage())
         }
     }
 
@@ -77,7 +76,7 @@ class DVRRepository @Inject()(
         .toFuture()
         .map(_ => ())
         .recover {
-          case e: DatabaseException => logger.debug(e.getMessage())
+          case e: Exception => logger.debug(e.getMessage())
         }
     }
 
