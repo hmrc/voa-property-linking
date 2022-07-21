@@ -76,7 +76,7 @@ class CustomHttpErrorHandler @Inject()() extends HttpErrorHandler with EventLogg
         logResponse(VoaErrorOccurred, exceptionDetails: _*)
         ErrorResponse(e.responseCode, HttpStatusCodes.codeName(e.responseCode), e.message)
       case e: UpstreamErrorResponse =>
-        logger.error(s"UpstreamErrorResponse with status ${e.statusCode}.", e)
+        logger.warn(s"UpstreamErrorResponse with status ${e.statusCode}.", e)
         ErrorResponse(e.statusCode, HttpStatusCodes.codeName(e.statusCode), e.message)
       case _: MissingBearerToken => ErrorResponse.unauthorized("Missing bearer token.")
       case _: BearerTokenExpired => ErrorResponse.unauthorized("The bearer token has expired.")
