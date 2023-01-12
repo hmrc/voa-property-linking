@@ -7,8 +7,7 @@ import sbt._
 import uk.gov.hmrc.DefaultBuildSettings._
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
-import uk.gov.hmrc.versioning.SbtGitVersioning
-import uk.gov.hmrc.{SbtArtifactory, SbtAutoBuildPlugin}
+import uk.gov.hmrc.{SbtAutoBuildPlugin}
 
 lazy val appName = "voa-property-linking"
 
@@ -36,7 +35,7 @@ lazy val scoverageSettings: Seq[Def.Setting[_ >: String with Double with Boolean
 }
 
 lazy val microservice: Project = Project(appName, file("."))
-  .enablePlugins(PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory)
+  .enablePlugins(PlayScala, SbtAutoBuildPlugin, SbtDistributablesPlugin)
   .disablePlugins(JUnitXmlReportPlugin)
   .settings(playSettings: _*)
   .settings(scoverageSettings: _*)
