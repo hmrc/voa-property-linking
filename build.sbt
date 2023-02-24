@@ -71,7 +71,6 @@ val compileDependencies = Seq(
   "uk.gov.hmrc.mongo"  %% "hmrc-mongo-play-28"        % "0.68.0",
   "org.typelevel"      %% "cats-core"                 % "2.1.0",
   "com.typesafe.play"  %% "play-json"                 % "2.8.1",
-  "org.scalacheck"     %% "scalacheck"                % "1.15.4",
   "uk.gov.hmrc"        %% "uri-template"              % "1.11.0",
   "ai.x"               %% "play-json-extensions"      % "0.42.0",
   "org.apache.commons" %  "commons-text"              % "1.9"
@@ -85,7 +84,8 @@ val testDependencies = Seq(
   "org.scalatestplus.play"  %% "scalatestplus-play"      % "5.1.0"                % "test",
   "org.mockito"             %  "mockito-core"            % "3.4.6"                % "test",
   "org.scalatestplus"       %% "mockito-3-4"             % "3.2.9.0"              % "test",
-  "com.vladsch.flexmark"    % "flexmark-all"             % "0.35.10"              % "test"
+  "com.vladsch.flexmark"    % "flexmark-all"             % "0.35.10"              % "test",
+  "org.scalacheck"          %% "scalacheck"              % "1.15.4"               % "test"
 )
 
 addCommandAlias("precommit", ";scalafmt;test:scalafmt;coverage;test;coverageReport")
