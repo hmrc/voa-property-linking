@@ -47,7 +47,7 @@ object APIValuationHistory {
       uarn = history.uarn,
       effectiveDate = history.effectiveDate,
       rateableValue = history.rateableValue.map { d =>
-        d.longValue()
+        d.longValue
       },
       address = history.address,
       billingAuthorityReference = history.billingAuthorityReference,

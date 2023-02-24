@@ -62,7 +62,7 @@ object Assessment {
       listYear = valuationHistory.listYear,
       uarn = valuationHistory.uarn,
       effectiveDate = valuationHistory.effectiveDate,
-      rateableValue = valuationHistory.rateableValue.map(_.longValue()),
+      rateableValue = valuationHistory.rateableValue.map(_.longValue),
       address = PropertyAddress.fromString(valuationHistory.address),
       billingAuthorityReference = valuationHistory.billingAuthorityReference,
       billingAuthorityCode = valuationHistory.billingAuthCode,

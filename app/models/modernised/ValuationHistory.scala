@@ -20,6 +20,7 @@ import ai.x.play.json.Jsonx
 import models.modernised.AllowedAction.AllowedAction
 import models.modernised.ListType.ListType
 import play.api.libs.json.OFormat
+import ai.x.play.json.Encoders.encoder
 
 import java.time.LocalDate
 
