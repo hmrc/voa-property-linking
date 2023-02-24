@@ -18,7 +18,6 @@ package uk.gov.hmrc.voapropertylinking.controllers
 
 import java.net.URI
 import java.time.LocalDateTime
-
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import basespecs.BaseControllerSpec
@@ -31,21 +30,35 @@ import play.api.libs.ws.{WSCookie, WSResponse}
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.voapropertylinking.connectors.modernised.{CCACaseManagementApi, ExternalValuationManagementApi}
-import uk.gov.hmrc.voapropertylinking.repositories.DVRRecordRepository
+import uk.gov.hmrc.voapropertylinking.repositories.{DVRRecord, DVRRecordRepository}
 
 import scala.concurrent.Future
 import scala.xml.Elem
 
 class DVRCaseManagementSpec extends BaseControllerSpec {
 
-  val testDvr = DetailedValuationRequest(
-    authorisationId = 123l,
-    organisationId = 1l,
-    personId = 2l,
+  val testDvr: DetailedValuationRequest = DetailedValuationRequest(
+    authorisationId = 123L,
+    organisationId = 1L,
+    personId = 2L,
     submissionId = "EMAIL123",
-    assessmentRef = 3l,
+    assessmentRef = 3L,
     agents = None,
     billingAuthorityReferenceNumber = "BAREF"
+  )
+
+  val testDvrRecordNoSubId: DVRRecord = DVRRecord(
+    organisationId = 1L,
+    assessmentRef = 3L,
+    agents = Some(List(4L)),
+    dvrSubmissionId = None
+  )
+
+  val testDvrRecordWithSubId: DVRRecord = DVRRecord(
+    organisationId = 1L,
+    assessmentRef = 3L,
+    agents = Some(List(4L)),
+    dvrSubmissionId = Some("DVR123-4567")
   )
 
   "request detailed valuation v2 " should {
@@ -61,25 +74,36 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
   }
 
   "dvr exists" should {
-    "return true if the DVR already exists in mongo" in {
-      when(mockRepo.exists(anyLong(), anyLong())) thenReturn Future.successful((true))
-      val res = testController.dvrExists(1l, 3l)(FakeRequest())
+    "return OK with a record with DVR id if the DVR exists in mongo with an id" in {
+      when(mockRepo.find(anyLong(), anyLong())) thenReturn Future.successful(Some(testDvrRecordWithSubId))
+      val res = testController.getDvrRecord(1L, 3L)(FakeRequest())
 
       status(res) shouldBe OK
-      contentAsJson(res) shouldBe Json.toJson(true)
+      contentAsJson(res) shouldBe Json.toJson(testDvrRecordWithSubId)
 
-      verify(mockRepo).exists(matching(1l), matching(3l))
+      verify(mockRepo).find(matching(1l), matching(3l))
       reset(mockRepo)
     }
 
-    "return false if the DVR does not exist in mongo" in {
-      when(mockRepo.exists(anyLong(), anyLong())) thenReturn Future.successful((false))
-      val res = testController.dvrExists(1l, 3l)(FakeRequest())
+    "return OK with a record with no DVR id if the DVR already exists in mongo with no id" in {
+      when(mockRepo.find(anyLong(), anyLong())) thenReturn Future.successful(Some(testDvrRecordNoSubId))
+      val res = testController.getDvrRecord(1L, 3L)(FakeRequest())
 
       status(res) shouldBe OK
-      contentAsJson(res) shouldBe Json.toJson(false)
+      contentAsJson(res) shouldBe Json.toJson(testDvrRecordNoSubId)
 
-      verify(mockRepo).exists(matching(1l), matching(3l))
+      verify(mockRepo).find(matching(1L), matching(3L))
+      reset(mockRepo)
+    }
+
+    "return NOT_FOUND with None if the DVR does not exist in mongo" in {
+      when(mockRepo.find(anyLong(), anyLong())) thenReturn Future.successful(None)
+      val res = testController.getDvrRecord(1L, 3L)(FakeRequest())
+
+      status(res) shouldBe NOT_FOUND
+      contentAsJson(res) shouldBe Json.toJson(None)
+
+      verify(mockRepo).find(matching(1L), matching(3L))
       reset(mockRepo)
     }
   }

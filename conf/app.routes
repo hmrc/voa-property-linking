@@ -32,7 +32,7 @@ GET          /submissionId/:prefix                                              
 POST         /detailed-valuation                                                              uk.gov.hmrc.voapropertylinking.controllers.DVRCaseManagement.requestDetailedValuationV2
 GET          /properties/:uarn/valuation/:valuationId/files                                   uk.gov.hmrc.voapropertylinking.controllers.DVRCaseManagement.getDvrDocuments(valuationId: Long, uarn: Long, propertyLinkId: String)
 GET          /properties/:uarn/valuation/:valuationId/files/:ref                              uk.gov.hmrc.voapropertylinking.controllers.DVRCaseManagement.getDvrDocument(valuationId: Long, uarn: Long, propertyLinkId: String, ref: String)
-GET          /dvr-exists                                                                      uk.gov.hmrc.voapropertylinking.controllers.DVRCaseManagement.dvrExists(organisationId: Long, assessmentRef: Long)
+GET          /dvr-record                                                                      uk.gov.hmrc.voapropertylinking.controllers.DVRCaseManagement.getDvrRecord(organisationId: Long, assessmentRef: Long)
 
 
 GET          /check-cases/:submissionId/:party                                                uk.gov.hmrc.voapropertylinking.controllers.CheckCaseController.getCheckCases(submissionId: String, party: String)

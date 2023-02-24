@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.voapropertylinking.repositories
 
-import java.time.Instant
-
 import com.google.inject.name.Named
 import com.google.inject.{ImplementedBy, Singleton}
 import javax.inject.Inject
@@ -29,7 +27,6 @@ import org.mongodb.scala.model.Filters._
 import play.api.Logging
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import uk.gov.hmrc.mongo.MongoComponent
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.http.logging.Mdc
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -37,8 +34,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class DVRRepository @Inject()(
       mongo: MongoComponent,
-      @Named("dvrCollectionName") val dvrCollectionName: String,
-      config: ServicesConfig
+      @Named("dvrCollectionName") val dvrCollectionName: String
 )(implicit executionContext: ExecutionContext)
     extends PlayMongoRepository[DVRRecord](
       collectionName = dvrCollectionName,
@@ -50,7 +46,7 @@ class DVRRepository @Inject()(
   override def create(request: DetailedValuationRequest): Future[Unit] =
     Mdc.preservingMdc {
       collection
-        .insertOne(DVRRecord(request.organisationId, request.assessmentRef, request.agents))
+        .insertOne(DVRRecord(request.organisationId, request.assessmentRef, request.agents, Some(request.submissionId)))
         .toFuture()
         .map(_ => ())
         .recover {
@@ -58,9 +54,12 @@ class DVRRepository @Inject()(
         }
     }
 
-  override def exists(organisationId: Long, assessmentRef: Long): Future[Boolean] =
+  override def find(organisationId: Long, assessmentRef: Long): Future[Option[DVRRecord]] =
     Mdc.preservingMdc {
-      collection.find(or(query(organisationId))).toFuture().map(_.exists(_.assessmentRef == assessmentRef))
+      collection
+        .find(query(organisationId))
+        .toFuture()
+        .map(_.find(_.assessmentRef == assessmentRef))
     }
 
   override def clear(organisationId: Long): Future[Unit] =
@@ -82,7 +81,8 @@ class DVRRepository @Inject()(
 case class DVRRecord(
       organisationId: Long,
       assessmentRef: Long,
-      agents: Option[List[Long]]
+      agents: Option[List[Long]],
+      dvrSubmissionId: Option[String]
 )
 
 object DVRRecord {
@@ -93,7 +93,7 @@ object DVRRecord {
 trait DVRRecordRepository {
   def create(dvr: DetailedValuationRequest): Future[Unit]
 
-  def exists(organisationId: Long, assessmentRef: Long): Future[Boolean]
+  def find(organisationId: Long, assessmentRef: Long): Future[Option[DVRRecord]]
 
   def clear(organisationId: Long): Future[Unit]
 }
