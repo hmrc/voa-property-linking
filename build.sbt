@@ -46,6 +46,7 @@ lazy val microservice: Project = Project(appName, file("."))
   .settings(majorVersion := 0)
   .settings(
     libraryDependencies ++= compileDependencies ++ testDependencies,
+    retrieveManaged := true,
     update / evictionWarningOptions := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
     Test / testGrouping := oneForkedJvmPerTest((Test / definedTests).value)
   )
@@ -77,20 +78,20 @@ val compileDependencies = Seq(
   "com.typesafe.play"  %% "play-json"                 % "2.8.1",
   "uk.gov.hmrc"        %% "uri-template"              % "1.11.0",
   "ai.x"               %% "play-json-extensions"      % "0.42.0",
-  "org.apache.commons" %  "commons-text"              % "1.9"
+  "org.apache.commons" % "commons-text"               % "1.9"
 )
 
 val testDependencies = Seq(
-  "uk.gov.hmrc"             %% "bootstrap-test-play-28"  % bootstrapPlayVersion   % "it,test",
-  "org.scalatest"           %% "scalatest"               % "3.0.8"                % "it,test",
-  "org.pegdown"             %  "pegdown"                 % "1.6.0"                % "test",
-  "com.typesafe.play"       %% "play-test"               % PlayVersion.current    % "it,test",
-  "org.scalatestplus.play"  %% "scalatestplus-play"      % "5.1.0"                % "it,test",
-  "org.mockito"             %  "mockito-core"            % "3.4.6"                % "test",
-  "org.scalatestplus"       %% "mockito-3-4"             % "3.2.9.0"              % "test",
-  "com.vladsch.flexmark"    % "flexmark-all"             % "0.35.10"              % "test",
-  "org.scalacheck"          %% "scalacheck"              % "1.15.4"               % "test",
-  "uk.gov.hmrc.mongo"      %% "hmrc-mongo-test-play-28" % "0.68.0" % "it"
+  "uk.gov.hmrc"            %% "bootstrap-test-play-28"  % bootstrapPlayVersion % "it,test",
+  "org.scalatest"          %% "scalatest"               % "3.0.8"              % "it,test",
+  "org.pegdown"            % "pegdown"                  % "1.6.0"              % "test",
+  "com.typesafe.play"      %% "play-test"               % PlayVersion.current  % "it,test",
+  "org.scalatestplus.play" %% "scalatestplus-play"      % "5.1.0"              % "it,test",
+  "org.mockito"            % "mockito-core"             % "3.4.6"              % "test",
+  "org.scalatestplus"      %% "mockito-3-4"             % "3.2.9.0"            % "test",
+  "com.vladsch.flexmark"   % "flexmark-all"             % "0.35.10"            % "test",
+  "org.scalacheck"         %% "scalacheck"              % "1.15.4"             % "test",
+  "uk.gov.hmrc.mongo"      %% "hmrc-mongo-test-play-28" % "0.68.0"             % "it"
 )
 
 addCommandAlias("precommit", ";scalafmt;test:scalafmt;coverage;test;it:test;coverageReport")
