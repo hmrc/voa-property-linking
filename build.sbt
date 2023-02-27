@@ -81,7 +81,7 @@ val compileDependencies = Seq(
 )
 
 val testDependencies = Seq(
-  "uk.gov.hmrc"             %% "bootstrap-test-play-28"  % bootstrapPlayVersion   % "test",
+  "uk.gov.hmrc"             %% "bootstrap-test-play-28"  % bootstrapPlayVersion   % "it,test",
   "org.scalatest"           %% "scalatest"               % "3.0.8"                % "it,test",
   "org.pegdown"             %  "pegdown"                 % "1.6.0"                % "test",
   "com.typesafe.play"       %% "play-test"               % PlayVersion.current    % "it,test",
