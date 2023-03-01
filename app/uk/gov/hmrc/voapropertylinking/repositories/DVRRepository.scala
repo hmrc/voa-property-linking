@@ -57,9 +57,8 @@ class DVRRepository @Inject()(
   override def find(organisationId: Long, assessmentRef: Long): Future[Option[DVRRecord]] =
     Mdc.preservingMdc {
       collection
-        .find(query(organisationId))
-        .toFuture()
-        .map(_.find(_.assessmentRef == assessmentRef))
+        .find(and(query(organisationId), equal("assessmentRef", assessmentRef)))
+        .headOption()
     }
 
   override def clear(organisationId: Long): Future[Unit] =

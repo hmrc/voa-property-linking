@@ -52,7 +52,7 @@ class DVRRepositorySpec
           .futureValue
           .value shouldBe dvrRecord
       }
-      "a dvrSubmission matches an agent's orgId but not the owner's" in {
+      "a dvrSubmission matches an agent orgId but not the IP orgId" in {
         insert(dvrRecord)
           .flatMap(_ => repository.find(dvrRecord.agents.flatMap(_.headOption).getOrElse(90L), dvrRecord.assessmentRef))
           .futureValue
@@ -60,8 +60,18 @@ class DVRRepositorySpec
       }
     }
     "return nothing" when {
-      "a matching record does not exist" in {
+      "no record matching either IP or agent organisationId exists" in {
+        val unrelatedOrgId = 13579L
         deleteAll()
+          .flatMap(_ => repository.collection.insertOne(dvrRecord.copy(organisationId = unrelatedOrgId)).toFuture())
+          .flatMap(_ => repository.find(dvrRequest.organisationId, dvrRequest.assessmentRef))
+          .futureValue shouldBe None
+      }
+      "no record matching assessmentRef exists" in {
+        val unrelatedAssessmentRef = 13579L
+        deleteAll()
+          .flatMap(_ =>
+            repository.collection.insertOne(dvrRecord.copy(assessmentRef = unrelatedAssessmentRef)).toFuture())
           .flatMap(_ => repository.find(dvrRequest.organisationId, dvrRequest.assessmentRef))
           .futureValue shouldBe None
       }
