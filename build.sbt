@@ -7,7 +7,7 @@ import sbt._
 import uk.gov.hmrc.DefaultBuildSettings._
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
-import uk.gov.hmrc.{SbtAutoBuildPlugin}
+import uk.gov.hmrc.SbtAutoBuildPlugin
 
 lazy val appName = "voa-property-linking"
 
@@ -47,8 +47,13 @@ lazy val microservice: Project = Project(appName, file("."))
   .settings(
     libraryDependencies ++= compileDependencies ++ testDependencies,
     retrieveManaged := true,
-    evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
-    testGrouping in Test := oneForkedJvmPerTest((definedTests in Test).value)
+    update / evictionWarningOptions := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
+    Test / testGrouping := oneForkedJvmPerTest((Test / definedTests).value)
+  )
+  .configs(IntegrationTest)
+  .settings(
+    Defaults.itSettings,
+    IntegrationTest / unmanagedSourceDirectories := Seq(baseDirectory.value / "it")
   )
   .settings(scalaVersion := "2.13.8")
 
@@ -73,19 +78,20 @@ val compileDependencies = Seq(
   "com.typesafe.play"  %% "play-json"                 % "2.8.1",
   "uk.gov.hmrc"        %% "uri-template"              % "1.11.0",
   "ai.x"               %% "play-json-extensions"      % "0.42.0",
-  "org.apache.commons" %  "commons-text"              % "1.9"
+  "org.apache.commons" % "commons-text"               % "1.9"
 )
 
 val testDependencies = Seq(
-  "uk.gov.hmrc"             %% "bootstrap-test-play-28"  % bootstrapPlayVersion   % "test",
-  "org.scalatest"           %% "scalatest"               % "3.0.8"                % "test",
-  "org.pegdown"             %  "pegdown"                 % "1.6.0"                % "test",
-  "com.typesafe.play"       %% "play-test"               % PlayVersion.current    % "test",
-  "org.scalatestplus.play"  %% "scalatestplus-play"      % "5.1.0"                % "test",
-  "org.mockito"             %  "mockito-core"            % "3.4.6"                % "test",
-  "org.scalatestplus"       %% "mockito-3-4"             % "3.2.9.0"              % "test",
-  "com.vladsch.flexmark"    % "flexmark-all"             % "0.35.10"              % "test",
-  "org.scalacheck"          %% "scalacheck"              % "1.15.4"               % "test"
+  "uk.gov.hmrc"            %% "bootstrap-test-play-28"  % bootstrapPlayVersion % "it,test",
+  "org.scalatest"          %% "scalatest"               % "3.0.8"              % "it,test",
+  "org.pegdown"            % "pegdown"                  % "1.6.0"              % "test",
+  "com.typesafe.play"      %% "play-test"               % PlayVersion.current  % "it,test",
+  "org.scalatestplus.play" %% "scalatestplus-play"      % "5.1.0"              % "it,test",
+  "org.mockito"            % "mockito-core"             % "3.4.6"              % "test",
+  "org.scalatestplus"      %% "mockito-3-4"             % "3.2.9.0"            % "test",
+  "com.vladsch.flexmark"   % "flexmark-all"             % "0.35.10"            % "test",
+  "org.scalacheck"         %% "scalacheck"              % "1.15.4"             % "test",
+  "uk.gov.hmrc.mongo"      %% "hmrc-mongo-test-play-28" % "0.68.0"             % "it"
 )
 
-addCommandAlias("precommit", ";scalafmt;test:scalafmt;coverage;test;coverageReport")
+addCommandAlias("precommit", ";scalafmt;test:scalafmt;coverage;test;it:test;coverageReport")
