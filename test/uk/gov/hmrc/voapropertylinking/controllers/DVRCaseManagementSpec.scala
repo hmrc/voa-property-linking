@@ -51,14 +51,16 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
     organisationId = 1L,
     assessmentRef = 3L,
     agents = Some(List(4L)),
-    dvrSubmissionId = None
+    dvrSubmissionId = None,
+    LocalDateTime.now()
   )
 
   val testDvrRecordWithSubId: DVRRecord = DVRRecord(
     organisationId = 1L,
     assessmentRef = 3L,
     agents = Some(List(4L)),
-    dvrSubmissionId = Some("DVR123-4567")
+    dvrSubmissionId = Some("DVR123-4567"),
+    LocalDateTime.now()
   )
 
   "request detailed valuation v2 " should {
@@ -81,7 +83,7 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
       status(res) shouldBe OK
       contentAsJson(res) shouldBe Json.toJson(testDvrRecordWithSubId)
 
-      verify(mockRepo).find(matching(1l), matching(3l))
+      verify(mockRepo).find(matching(1L), matching(3L))
       reset(mockRepo)
     }
 

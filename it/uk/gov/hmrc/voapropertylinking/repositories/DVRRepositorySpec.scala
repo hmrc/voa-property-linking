@@ -8,7 +8,9 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.{LoneElement, OptionValues}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import uk.gov.hmrc.mongo.test.{CleanMongoCollectionSupport, PlayMongoRepositorySupport}
+import uk.gov.hmrc.voapropertylinking.services.DateTimeService
 
+import java.time.LocalDateTime
 import scala.concurrent.ExecutionContext
 
 class DVRRepositorySpec
@@ -16,7 +18,8 @@ class DVRRepositorySpec
     with PlayMongoRepositorySupport[DVRRecord] with CleanMongoCollectionSupport {
 
   implicit val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
-  override val repository = new DVRRepository(mongoComponent, "test-dvrRecords")
+  val dateTimeService: DateTimeService = app.injector.instanceOf[DateTimeService]
+  override val repository = new DVRRepository(mongoComponent, dateTimeService, "test-dvrRecords")
 
   val dvrRequest: DetailedValuationRequest = DetailedValuationRequest(
     authorisationId = 12L,
@@ -27,12 +30,13 @@ class DVRRepositorySpec
     agents = Some(List(90L)),
     billingAuthorityReferenceNumber = "01234"
   )
+  val timestamp: LocalDateTime = LocalDateTime.of(2022, 12, 10, 1, 1, 1)
   val dvrRecord: DVRRecord =
-    DVRRecord(dvrRequest.organisationId, dvrRequest.assessmentRef, dvrRequest.agents, Some(dvrRequest.submissionId))
+    DVRRecord(dvrRequest.organisationId, dvrRequest.assessmentRef, dvrRequest.agents, Some(dvrRequest.submissionId), timestamp)
 
   "create" should {
     "add one dvrRecord" in {
-      repository.create(dvrRequest).flatMap(_ => findAll()).futureValue.loneElement shouldBe dvrRecord
+      repository.create(dvrRequest).flatMap(_ => findAll()).futureValue.loneElement.copy(createdAtTimestamp = timestamp) shouldBe dvrRecord
     }
   }
 
