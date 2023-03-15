@@ -31,7 +31,7 @@ class DvrScheduler @Inject()(
 
   val log: LoggerLike = Logger(this.getClass)
 
-  actorSystem.scheduler.scheduleWithFixedDelay(initialDelay = 0 seconds, delay = 1 minutes) { () =>
+  actorSystem.scheduler.scheduleWithFixedDelay(initialDelay = 0 seconds, delay = 15 minutes) { () =>
     dvrRecordsJobHandler.processJob()
   }
 }

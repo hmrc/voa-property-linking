@@ -20,14 +20,17 @@ import com.google.inject.name.Named
 import com.google.inject.{ImplementedBy, Singleton}
 import models.modernised.ccacasemanagement.requests.DetailedValuationRequest
 import org.bson.BsonType
-import org.mongodb.scala.bson.BsonValue
+import org.mongodb.scala.bson.{BsonObjectId, BsonValue, ObjectId}
 import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.model.Filters._
-import org.mongodb.scala.model.Projections
+import org.mongodb.scala.model.Sorts.ascending
+import org.mongodb.scala.model.{IndexModel, IndexOptions, Projections}
 import org.mongodb.scala.model.Updates.set
 import play.api.Logging
 import play.api.libs.json._
 import uk.gov.hmrc.mongo.MongoComponent
+import uk.gov.hmrc.mongo.play.json.formats.MongoFormats
+import uk.gov.hmrc.mongo.play.json.formats.MongoFormats.objectIdFormat
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats.localDateTimeFormat
 import uk.gov.hmrc.play.http.logging.Mdc
@@ -36,6 +39,7 @@ import uk.gov.hmrc.voapropertylinking.services.DateTimeService
 import java.time.LocalDateTime
 import javax.inject.Inject
 import scala.compat.Platform.currentTime
+import scala.concurrent.duration.{DAYS, SECONDS}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -47,8 +51,13 @@ class DVRRepository @Inject()(
       collectionName = dvrCollectionName,
       mongoComponent = mongo,
       domainFormat = DVRRecord.mongoFormat,
-      indexes = Seq.empty
-    ) with DVRRecordRepository with Logging {
+      indexes = Seq(IndexModel(
+        ascending("createdAt"),
+        IndexOptions()
+          .name("ttl")
+          .unique(false)
+          .expireAfter(183L, DAYS)))
+    ) with DVRRecordRepository with Logging with MongoFormats {
 
   override def create(request: DetailedValuationRequest): Future[Unit] =
     Mdc.preservingMdc {
@@ -59,7 +68,7 @@ class DVRRepository @Inject()(
             request.assessmentRef,
             request.agents,
             Some(request.submissionId),
-            dateTimeService.now()))
+            Some(LocalDateTime.now())))
         .toFuture()
         .map(_ => ())
         .recover {
@@ -88,17 +97,18 @@ class DVRRepository @Inject()(
   private def query(organisationId: Long): Bson =
     or(equal("organisationId", organisationId), in("agents", Seq(organisationId)))
 
-  override def findDocumentsNoTimestamp: Future[Seq[String]] = {
-    val longReads: Reads[String] = (__ \ "_id").read[String]
+  override def findDocumentsNoTimestamp: Future[Seq[ObjectId]] = {
+    implicit val bsonfObjectIdFormat = objectIdFormat
+    val longReads: Reads[ObjectId] = (__ \ "_id").read[ObjectId]
     collection
       .find[BsonValue](or(exists("createdAt", false), `type`("createdAt", BsonType.INT32)))
       .projection(Projections.include("_id"))
       .limit(1000)
       .toFuture()
-      .map(_.map(bson => Codecs.fromBson[String](bson)(longReads)))
+      .map(_.map(bson => Codecs.fromBson[ObjectId](bson)(longReads)))
   }
 
-  override def updateCreatedAtTimestampById(ids: Seq[String]): Future[Long] =
+  override def updateCreatedAtTimestampById(ids: Seq[ObjectId]): Future[Long] =
     collection
       .updateMany(filter = in("_id", ids: _*), update = set("createdAt", dateTimeService.now()))
       .toFuture()
@@ -111,7 +121,7 @@ case class DVRRecord(
       assessmentRef: Long,
       agents: Option[List[Long]],
       dvrSubmissionId: Option[String],
-      createdAt: LocalDateTime
+      createdAt: Option[LocalDateTime]
 )
 
 object DVRRecord {
@@ -127,7 +137,7 @@ trait DVRRecordRepository {
 
   def clear(organisationId: Long): Future[Unit]
 
-  def findDocumentsNoTimestamp: Future[Seq[String]]
+  def findDocumentsNoTimestamp: Future[Seq[ObjectId]]
 
-  def updateCreatedAtTimestampById(ids: Seq[String]): Future[Long]
+  def updateCreatedAtTimestampById(ids: Seq[ObjectId]): Future[Long]
 }
