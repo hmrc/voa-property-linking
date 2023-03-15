@@ -111,7 +111,7 @@ case class DVRRecord(
       assessmentRef: Long,
       agents: Option[List[Long]],
       dvrSubmissionId: Option[String],
-      createdAtTimestamp: LocalDateTime
+      createdAt: LocalDateTime
 )
 
 object DVRRecord {

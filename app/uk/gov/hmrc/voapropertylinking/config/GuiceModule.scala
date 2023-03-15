@@ -33,12 +33,12 @@
 package uk.gov.hmrc.voapropertylinking.config
 
 import java.time.Clock
-
 import com.google.inject.AbstractModule
 import com.google.inject.name.Names
 import com.google.inject.name.Names.named
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import uk.gov.hmrc.voapropertylinking.jobHandler.DvrScheduler
 
 class GuiceModule(
       environment: Environment,

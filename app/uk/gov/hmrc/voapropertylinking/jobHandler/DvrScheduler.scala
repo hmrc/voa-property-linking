@@ -30,7 +30,6 @@ class DvrScheduler @Inject()(
       actorSystem: ActorSystem)(implicit executionContext: ExecutionContext) {
 
   val log: LoggerLike = Logger(this.getClass)
-  private lazy val housekeepingIntervalMinutes: Int = configuration.get[Int]("housekeepingIntervalMinutes")
 
   actorSystem.scheduler.scheduleWithFixedDelay(initialDelay = 0 seconds, delay = 1 minutes) { () =>
     dvrRecordsJobHandler.processJob()
