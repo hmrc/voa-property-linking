@@ -28,17 +28,16 @@ class DvrRecordsJobHandler @Inject()(dvrRepository: DVRRepository)(implicit ec: 
 
   def processJob(): Future[Unit] =
     for {
-      findDocumentsNoTimestamp  <- dvrRepository.findDocumentsNoTimestamp
-      updatedCreatedAtTimestamp <- {
-        log.info(s"ids found $findDocumentsNoTimestamp")
-        dvrRepository.updateCreatedAtTimestampById(findDocumentsNoTimestamp)
+      recordsToUpdate <- dvrRepository.findIdsNoTimestamp
+      recordsUpdated <- {
+        log.info(s"DvrRecord Ids found: $recordsToUpdate")
+        dvrRepository.updateCreatedAtTimestampById(recordsToUpdate)
       }
     } yield {
-      log.info(s"updated $updatedCreatedAtTimestamp")
-      if (updatedCreatedAtTimestamp > 0) {
-        log.info(s"Successful updated: $updatedCreatedAtTimestamp createdAt Strings to use current LocalDateTime")
+      if (recordsUpdated > 0) {
+        log.info(s"Successful updated: $recordsUpdated DvrRecords")
       } else {
-        log.info("No dvr records updated")
+        log.info("No DvrRecords updated")
       }
     }
 }

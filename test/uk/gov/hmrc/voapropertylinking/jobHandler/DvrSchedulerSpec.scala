@@ -28,9 +28,9 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.FiniteDuration
 
-class SchedulerSpec extends AnyWordSpec with Matchers with MockitoSugar with BeforeAndAfterEach {
+class DvrSchedulerSpec extends AnyWordSpec with Matchers with MockitoSugar with BeforeAndAfterEach {
 
-  "Scheduler" should {
+  "DvrScheduler" should {
     "schedule accounts cache updating old createdAt records" in {
       val mockConfiguration = mock[Configuration]
       val mockDvrRecordsJobHandler = mock[DvrRecordsJobHandler]

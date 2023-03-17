@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.voapropertylinking.jobHandler
 
+import org.bson.types.ObjectId
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.{verify, when}
 import org.scalatest.BeforeAndAfterEach
@@ -35,14 +36,13 @@ class DvrRecordsJobHandlerSpec extends AnyWordSpec with Matchers with MockitoSug
 
   "DvrRecordsJobHandler process job" should {
     "run updateStringCreatedAtTimestamp" in new Setup {
-      when(mockDVRRepository.findDocumentsNoTimestamp)
-        .thenReturn(Future.successful(Seq("id")))
+      when(mockDVRRepository.findIdsNoTimestamp)
+        .thenReturn(Future.successful(Seq[ObjectId](new ObjectId())))
       when(mockDVRRepository.updateCreatedAtTimestampById(any())).thenReturn(Future.successful(1L))
       running(app) {
-
         await(handler.processJob())
-        verify(mockDVRRepository).findDocumentsNoTimestamp
-        await(mockDVRRepository.findDocumentsNoTimestamp)
+        verify(mockDVRRepository).findIdsNoTimestamp
+        await(mockDVRRepository.findIdsNoTimestamp)
         verify(mockDVRRepository).updateCreatedAtTimestampById(any())
       }
     }
@@ -65,6 +65,6 @@ class DvrRecordsJobHandlerSpec extends AnyWordSpec with Matchers with MockitoSug
     private val organisationId = 1234
     private val assessmentRef = 5678
     private val dvrSubmissionId = Some("dvrId")
-    val dvrRecord = DVRRecord(organisationId, assessmentRef, None, dvrSubmissionId, LocalDateTime.now())
+    val dvrRecord = DVRRecord(organisationId, assessmentRef, None, dvrSubmissionId, Some(LocalDateTime.now()))
   }
 }

@@ -20,43 +20,40 @@ import com.google.inject.name.Named
 import com.google.inject.{ImplementedBy, Singleton}
 import models.modernised.ccacasemanagement.requests.DetailedValuationRequest
 import org.bson.BsonType
-import org.mongodb.scala.bson.{BsonObjectId, BsonValue, ObjectId}
 import org.mongodb.scala.bson.conversions.Bson
+import org.mongodb.scala.bson.{BsonValue, ObjectId}
 import org.mongodb.scala.model.Filters._
 import org.mongodb.scala.model.Sorts.ascending
-import org.mongodb.scala.model.{IndexModel, IndexOptions, Projections}
 import org.mongodb.scala.model.Updates.set
+import org.mongodb.scala.model.{IndexModel, IndexOptions, Projections}
 import play.api.Logging
 import play.api.libs.json._
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.formats.MongoFormats
-import uk.gov.hmrc.mongo.play.json.formats.MongoFormats.objectIdFormat
-import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats.localDateTimeFormat
+import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
 import uk.gov.hmrc.play.http.logging.Mdc
-import uk.gov.hmrc.voapropertylinking.services.DateTimeService
 
 import java.time.LocalDateTime
 import javax.inject.Inject
-import scala.compat.Platform.currentTime
-import scala.concurrent.duration.{DAYS, SECONDS}
+import scala.concurrent.duration.DAYS
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class DVRRepository @Inject()(
-      mongo: MongoComponent,
-      dateTimeService: DateTimeService,
-      @Named("dvrCollectionName") val dvrCollectionName: String)(implicit executionContext: ExecutionContext)
+class DVRRepository @Inject()(mongo: MongoComponent, @Named("dvrCollectionName") val dvrCollectionName: String)(
+      implicit executionContext: ExecutionContext)
     extends PlayMongoRepository[DVRRecord](
       collectionName = dvrCollectionName,
       mongoComponent = mongo,
       domainFormat = DVRRecord.mongoFormat,
-      indexes = Seq(IndexModel(
-        ascending("createdAt"),
-        IndexOptions()
-          .name("ttl")
-          .unique(false)
-          .expireAfter(183L, DAYS)))
+      indexes = Seq(
+        IndexModel(
+          ascending("createdAt"),
+          IndexOptions()
+            .name("ttl")
+            .unique(false)
+            .expireAfter(183L, DAYS))),
+      replaceIndexes = true
     ) with DVRRecordRepository with Logging with MongoFormats {
 
   override def create(request: DetailedValuationRequest): Future[Unit] =
@@ -97,11 +94,11 @@ class DVRRepository @Inject()(
   private def query(organisationId: Long): Bson =
     or(equal("organisationId", organisationId), in("agents", Seq(organisationId)))
 
-  override def findDocumentsNoTimestamp: Future[Seq[ObjectId]] = {
-    implicit val bsonfObjectIdFormat = objectIdFormat
+  override def findIdsNoTimestamp: Future[Seq[ObjectId]] = {
+    implicit val bsonObjectIdFormat: Format[ObjectId] = objectIdFormat
     val longReads: Reads[ObjectId] = (__ \ "_id").read[ObjectId]
     collection
-      .find[BsonValue](or(exists("createdAt", false), `type`("createdAt", BsonType.INT32)))
+      .find[BsonValue](or(exists("createdAt", false), not(`type`("createdAt", BsonType.DATE_TIME))))
       .projection(Projections.include("_id"))
       .limit(1000)
       .toFuture()
@@ -110,7 +107,7 @@ class DVRRepository @Inject()(
 
   override def updateCreatedAtTimestampById(ids: Seq[ObjectId]): Future[Long] =
     collection
-      .updateMany(filter = in("_id", ids: _*), update = set("createdAt", dateTimeService.now()))
+      .updateMany(filter = in("_id", ids: _*), update = set("createdAt", LocalDateTime.now()))
       .toFuture()
       .map(_.getModifiedCount)
 
@@ -137,7 +134,7 @@ trait DVRRecordRepository {
 
   def clear(organisationId: Long): Future[Unit]
 
-  def findDocumentsNoTimestamp: Future[Seq[ObjectId]]
+  def findIdsNoTimestamp: Future[Seq[ObjectId]]
 
   def updateCreatedAtTimestampById(ids: Seq[ObjectId]): Future[Long]
 }

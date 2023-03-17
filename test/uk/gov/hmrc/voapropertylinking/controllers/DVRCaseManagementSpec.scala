@@ -52,7 +52,7 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
     assessmentRef = 3L,
     agents = Some(List(4L)),
     dvrSubmissionId = None,
-    LocalDateTime.now()
+    createdAt = Some(LocalDateTime.now())
   )
 
   val testDvrRecordWithSubId: DVRRecord = DVRRecord(
@@ -60,7 +60,7 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
     assessmentRef = 3L,
     agents = Some(List(4L)),
     dvrSubmissionId = Some("DVR123-4567"),
-    LocalDateTime.now()
+    createdAt = Some(LocalDateTime.now())
   )
 
   "request detailed valuation v2 " should {
