@@ -29,10 +29,7 @@ class DvrRecordsJobHandler @Inject()(dvrRepository: DVRRepository)(implicit ec: 
   def processJob(): Future[Unit] =
     for {
       recordsToUpdate <- dvrRepository.findIdsNoTimestamp
-      recordsUpdated <- {
-        log.info(s"DvrRecord Ids found: $recordsToUpdate")
-        dvrRepository.updateCreatedAtTimestampById(recordsToUpdate)
-      }
+      recordsUpdated <- dvrRepository.updateCreatedAtTimestampById(recordsToUpdate)
     } yield {
       if (recordsUpdated > 0) {
         log.info(s"Successful updated: $recordsUpdated DvrRecords")
