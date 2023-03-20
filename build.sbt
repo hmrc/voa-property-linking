@@ -6,7 +6,6 @@ import sbt.Tests.{Group, SubProcess}
 import sbt._
 import uk.gov.hmrc.DefaultBuildSettings._
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
-import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 import uk.gov.hmrc.SbtAutoBuildPlugin
 
 lazy val appName = "voa-property-linking"
@@ -40,7 +39,6 @@ lazy val microservice: Project = Project(appName, file("."))
   .settings(playSettings: _*)
   .settings(scoverageSettings: _*)
   .settings(scalaSettings: _*)
-  .settings(publishingSettings: _*)
   .settings(defaultSettings(): _*)
   .settings(PlayKeys.playDefaultPort := defaultPort)
   .settings(majorVersion := 0)
@@ -73,7 +71,7 @@ val compileDependencies = Seq(
   ws,
   guice,
   "uk.gov.hmrc"        %% "bootstrap-backend-play-28" % bootstrapPlayVersion,
-  "uk.gov.hmrc.mongo"  %% "hmrc-mongo-play-28"        % "0.68.0",
+  "uk.gov.hmrc.mongo"  %% "hmrc-mongo-play-28"        % "0.74.0",
   "org.typelevel"      %% "cats-core"                 % "2.1.0",
   "com.typesafe.play"  %% "play-json"                 % "2.8.1",
   "uk.gov.hmrc"        %% "uri-template"              % "1.11.0",
@@ -91,7 +89,7 @@ val testDependencies = Seq(
   "org.scalatestplus"      %% "mockito-3-4"             % "3.2.9.0"            % "test",
   "com.vladsch.flexmark"   % "flexmark-all"             % "0.35.10"            % "test",
   "org.scalacheck"         %% "scalacheck"              % "1.15.4"             % "test",
-  "uk.gov.hmrc.mongo"      %% "hmrc-mongo-test-play-28" % "0.68.0"             % "it"
+  "uk.gov.hmrc.mongo"      %% "hmrc-mongo-test-play-28" % "0.74.0"             % "it"
 )
 
 addCommandAlias("precommit", ";scalafmt;test:scalafmt;coverage;test;it:test;coverageReport")

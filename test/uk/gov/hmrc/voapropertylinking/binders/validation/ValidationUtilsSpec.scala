@@ -130,7 +130,7 @@ class ValidationUtilsSpec extends BaseUnitSpec {
       "valid string of yyyy-mm-dd format is provided" in new Setup {
         implicit val params: Params = Map("date" -> Seq("2019-09-17"))
         implicit val key: String = "date"
-        read andThen asLocalDate shouldBe 'valid
+        read andThen asLocalDate shouldBe Symbol("valid")
       }
     }
 
@@ -149,7 +149,7 @@ class ValidationUtilsSpec extends BaseUnitSpec {
 
   "validating non-blank strings" should {
     "accept a non-blank string" in new Setup {
-      nonBlankString("foobar")("key") shouldBe 'valid
+      nonBlankString("foobar")("key") shouldBe Symbol("valid")
     }
     "reject a string containing only blanks" in new Setup {
       inside(nonBlankString("    ")("key")) {
@@ -169,7 +169,7 @@ class ValidationUtilsSpec extends BaseUnitSpec {
     "accept strings within valid range" in new Setup {
       val s = "foo"
       implicit val key: String = "key"
-      minLength(1)(s) andThen maxLength(5) shouldBe 'valid
+      minLength(1)(s) andThen maxLength(5) shouldBe Symbol("valid")
     }
 
     "reject strings outside valid range" in new Setup {

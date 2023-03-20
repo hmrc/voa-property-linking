@@ -33,7 +33,6 @@
 package uk.gov.hmrc.voapropertylinking.config
 
 import java.time.Clock
-
 import com.google.inject.AbstractModule
 import com.google.inject.name.Names
 import com.google.inject.name.Names.named
