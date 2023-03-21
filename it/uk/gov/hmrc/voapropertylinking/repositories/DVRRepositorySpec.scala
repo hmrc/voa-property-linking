@@ -1,10 +1,7 @@
 package uk.gov.hmrc.voapropertylinking.repositories
 
 import models.modernised.ccacasemanagement.requests.DetailedValuationRequest
-import org.mongodb.scala.bson.ObjectId
-import org.scalatest.matchers.should.Matchers
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
-import uk.gov.hmrc.mongo.test.CleanMongoCollectionSupport
 import uk.gov.hmrc.voapropertylinking.repositories.helpers.MongoSpec
 
 import java.time.LocalDateTime
@@ -60,46 +57,6 @@ class DVRRepositorySpec extends MongoSpec {
       repo.awaitCount shouldBe 1
       await(repo.clear(dvrRequest.organisationId))
       repo.awaitCount shouldBe 0
-    }
-  }
-
-  "findIdsNoTimestamp" should {
-    "remove one dvrRecord" in new Setup {
-      //insert dvrRecord with valid createdAt field
-      await(repo.create(dvrRequest))
-      await(repo.findIdsNoTimestamp) shouldBe List.empty
-      //insert dvrRecord with invalid createdAt field
-      repo.awaitInsert(dvrRecord.copy(createdAt = None).copy(organisationId = 505L))
-      repo.awaitCount shouldBe 2
-      await(repo.findIdsNoTimestamp).size shouldBe 1
-    }
-  }
-
-  "updateCreatedAtTimestampById" should {
-    "update dvrRecord to include createdAt field" in new Setup {
-      await(repo.create(dvrRequest))
-      repo.awaitInsert(dvrRecord.copy(createdAt = None).copy(organisationId = 505L))
-      repo.awaitCount shouldBe 2
-      val result: Seq[ObjectId] = await(repo.findIdsNoTimestamp)
-      result.size shouldBe 1
-      await(repo.updateCreatedAtTimestampById(result)) shouldBe 1
-      await(repo.findIdsNoTimestamp).size shouldBe 0
-    }
-
-    "update dvrRecord where createdAt field isn't of type DATE_TIME" in new Setup {
-      //insert valid dvrRecord(No record to be updated)
-      repo.awaitInsert(dvrRecord)
-      repo.awaitCount shouldBe 1
-      await(repo.findIdsNoTimestamp).size shouldBe 0
-
-      //update 'createdAt' field value have incorrect data type(Int)
-      repo.updateCreatedAtWrongDataType(dvrRecord.organisationId)
-
-      //find ID & update 'createdAt' field
-      val result = await(repo.findIdsNoTimestamp)
-      result.size shouldBe 1
-      await(repo.updateCreatedAtTimestampById(result)) shouldBe 1
-      await(repo.findIdsNoTimestamp).size shouldBe 0
     }
   }
 
