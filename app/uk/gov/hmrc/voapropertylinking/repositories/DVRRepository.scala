@@ -19,21 +19,17 @@ package uk.gov.hmrc.voapropertylinking.repositories
 import com.google.inject.name.Named
 import com.google.inject.{ImplementedBy, Singleton}
 import models.modernised.ccacasemanagement.requests.DetailedValuationRequest
-import org.bson.BsonType
 import org.mongodb.scala.bson.conversions.Bson
-import org.mongodb.scala.bson.{BsonValue, ObjectId}
 import org.mongodb.scala.model.Filters._
 import org.mongodb.scala.model.Sorts.ascending
-import org.mongodb.scala.model.Updates.set
-import org.mongodb.scala.model.{IndexModel, IndexOptions, Projections}
+import org.mongodb.scala.model.{IndexModel, IndexOptions}
 import play.api.Logging
 import play.api.libs.json._
 import uk.gov.hmrc.mongo.MongoComponent
+import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import uk.gov.hmrc.mongo.play.json.formats.MongoFormats
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats.localDateTimeFormat
-import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
 import uk.gov.hmrc.play.http.logging.Mdc
-
 import java.time.LocalDateTime
 import javax.inject.Inject
 import scala.concurrent.duration.DAYS
@@ -52,8 +48,7 @@ class DVRRepository @Inject()(mongo: MongoComponent, @Named("dvrCollectionName")
           IndexOptions()
             .name("ttl")
             .unique(false)
-            .expireAfter(183L, DAYS))),
-      replaceIndexes = true
+            .expireAfter(183L, DAYS)))
     ) with DVRRecordRepository with Logging with MongoFormats {
 
   override def create(request: DetailedValuationRequest): Future[Unit] =
@@ -94,23 +89,6 @@ class DVRRepository @Inject()(mongo: MongoComponent, @Named("dvrCollectionName")
   private def query(organisationId: Long): Bson =
     or(equal("organisationId", organisationId), in("agents", Seq(organisationId)))
 
-  override def findIdsNoTimestamp: Future[Seq[ObjectId]] = {
-    implicit val bsonObjectIdFormat: Format[ObjectId] = objectIdFormat
-    val longReads: Reads[ObjectId] = (__ \ "_id").read[ObjectId]
-    collection
-      .find[BsonValue](or(exists("createdAt", false), not(`type`("createdAt", BsonType.DATE_TIME))))
-      .projection(Projections.include("_id"))
-      .limit(1000)
-      .toFuture()
-      .map(_.map(bson => Codecs.fromBson[ObjectId](bson)(longReads)))
-  }
-
-  override def updateCreatedAtTimestampById(ids: Seq[ObjectId]): Future[Long] =
-    collection
-      .updateMany(filter = in("_id", ids: _*), update = set("createdAt", LocalDateTime.now()))
-      .toFuture()
-      .map(_.getModifiedCount)
-
 }
 
 case class DVRRecord(
@@ -133,8 +111,4 @@ trait DVRRecordRepository {
   def find(organisationId: Long, assessmentRef: Long): Future[Option[DVRRecord]]
 
   def clear(organisationId: Long): Future[Unit]
-
-  def findIdsNoTimestamp: Future[Seq[ObjectId]]
-
-  def updateCreatedAtTimestampById(ids: Seq[ObjectId]): Future[Long]
 }
