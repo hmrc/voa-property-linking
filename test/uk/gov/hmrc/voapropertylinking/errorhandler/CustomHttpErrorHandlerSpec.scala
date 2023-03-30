@@ -22,7 +22,7 @@ import play.api.mvc.RequestHeader
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.{BearerTokenExpired, InvalidBearerToken, MissingBearerToken}
-import uk.gov.hmrc.voapropertylinking.connectors.modernised.errorhandler.VoaClientException
+import uk.gov.hmrc.voapropertylinking.connectors.errorhandler.VoaClientException
 
 class CustomHttpErrorHandlerSpec extends BaseUnitSpec with MockitoSugar {
 

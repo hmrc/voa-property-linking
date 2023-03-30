@@ -35,7 +35,7 @@ trait FakeObjects {
 
   val date = LocalDate.parse("2018-09-05")
   val today = LocalDate.now()
-  val instant = date.atStartOfDay().toInstant(ZoneOffset.UTC)
+  val instant: Instant = date.atStartOfDay().toInstant(ZoneOffset.UTC)
   val FILE_NAME = "test.pdf"
   val fileInfo = FileInfo(FILE_NAME, "ratesBill")
   val evidence = Evidence(FILE_NAME, EvidenceType.RATES_BILL)

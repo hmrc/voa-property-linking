@@ -26,7 +26,7 @@ import play.api.mvc.{RequestHeader, Result}
 import uk.gov.hmrc.auth.core.{BearerTokenExpired, InvalidBearerToken, MissingBearerToken}
 import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.voapropertylinking.auth.Principal
-import uk.gov.hmrc.voapropertylinking.connectors.modernised.errorhandler.VoaClientException
+import uk.gov.hmrc.voapropertylinking.connectors.errorhandler.VoaClientException
 import uk.gov.hmrc.voapropertylinking.errorhandler.models.ErrorResponse
 import uk.gov.hmrc.voapropertylinking.utils.{ErrorHandlingUtils, EventLogging, HttpStatusCodes}
 

@@ -46,7 +46,6 @@ case class DetailedAddress(
       postcode = postcode
     )
   }
-
 }
 
 object DetailedAddress {

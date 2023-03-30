@@ -27,7 +27,7 @@ lazy val scoverageSettings: Seq[Def.Setting[_ >: String with Double with Boolean
   import scoverage.ScoverageKeys
   Seq(
     ScoverageKeys.coverageExcludedPackages := "<empty>;.*Reverse.*;Reverse.*;views.*;uk.gov.hmrc.voapropertylinking.config.*;.*\\.temp\\..*;.*\\.test\\..*;poc.view.*;poc.uk.gov.hmrc.voapropertylinking.config.*;.*(AuthService|BuildInfo|Routes).*",
-    ScoverageKeys.coverageMinimum := 75,
+    ScoverageKeys.coverageMinimumStmtTotal := 85,
     ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting := true
   )
@@ -36,10 +36,10 @@ lazy val scoverageSettings: Seq[Def.Setting[_ >: String with Double with Boolean
 lazy val microservice: Project = Project(appName, file("."))
   .enablePlugins(PlayScala, SbtAutoBuildPlugin, SbtDistributablesPlugin)
   .disablePlugins(JUnitXmlReportPlugin)
-  .settings(playSettings: _*)
-  .settings(scoverageSettings: _*)
-  .settings(scalaSettings: _*)
-  .settings(defaultSettings(): _*)
+  .settings(playSettings *)
+  .settings(scoverageSettings *)
+  .settings(scalaSettings *)
+  .settings(defaultSettings() *)
   .settings(PlayKeys.playDefaultPort := defaultPort)
   .settings(majorVersion := 0)
   .settings(
@@ -51,7 +51,11 @@ lazy val microservice: Project = Project(appName, file("."))
   .configs(IntegrationTest)
   .settings(
     Defaults.itSettings,
-    IntegrationTest / unmanagedSourceDirectories := Seq(baseDirectory.value / "it")
+    IntegrationTest / unmanagedSourceDirectories := Seq(baseDirectory.value / "it"),
+    IntegrationTest / dependencyClasspath := {
+      (IntegrationTest / dependencyClasspath).value ++ (Test / exportedProducts).value
+    },
+    IntegrationTest / parallelExecution := false
   )
   .settings(scalaVersion := "2.13.8")
 
@@ -85,11 +89,12 @@ val testDependencies = Seq(
   "org.pegdown"            % "pegdown"                  % "1.6.0"              % "test",
   "com.typesafe.play"      %% "play-test"               % PlayVersion.current  % "it,test",
   "org.scalatestplus.play" %% "scalatestplus-play"      % "5.1.0"              % "it,test",
-  "org.mockito"            % "mockito-core"             % "3.4.6"              % "test",
-  "org.scalatestplus"      %% "mockito-3-4"             % "3.2.9.0"            % "test",
+  "org.mockito"            % "mockito-core"             % "3.4.6"              % "it,test",
+  "org.scalatestplus"      %% "mockito-3-4"             % "3.2.9.0"            % "it,test",
   "com.vladsch.flexmark"   % "flexmark-all"             % "0.35.10"            % "test",
   "org.scalacheck"         %% "scalacheck"              % "1.15.4"             % "test",
-  "uk.gov.hmrc.mongo"      %% "hmrc-mongo-test-play-28" % "0.74.0"             % "it"
+  "uk.gov.hmrc.mongo"      %% "hmrc-mongo-test-play-28" % "0.74.0"             % "it",
+  "com.github.tomakehurst" % "wiremock-jre8"            % "2.23.2"             % "test,it"
 )
 
 addCommandAlias("precommit", ";scalafmt;test:scalafmt;coverage;test;it:test;coverageReport")

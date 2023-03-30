@@ -33,26 +33,50 @@ class ChallengeControllerSpec extends BaseControllerSpec {
     val controller = new ChallengeController(
       Helpers.stubControllerComponents(),
       preAuthenticatedActionBuilders(),
-      mockExternalCaseManagementApi)
+      mockModernisedExternalCaseManagementApi,
+      mockCaseManagementApi,
+      mockFeatureSwitch
+    )
     val plSubmissionId = "PL12AB34"
     val canChallengeResponse = CanChallengeResponse(result = true, reasonCode = None, reason = None)
   }
 
-  "canChallenge endpoint" should {
-    "return 200 OK" when {
-      "user can challenge" in new Setup {
-        when(mockExternalCaseManagementApi.canChallenge(mEq(plSubmissionId), any(), any(), any())(any()))
-          .thenReturn(Future.successful(Some(canChallengeResponse)))
+  "Using the controller with the bstDownstream feature switch disabled" when {
+    "canChallenge endpoint" should {
+      "return 200 OK" when {
+        "user can challenge" in new Setup {
+          when(mockModernisedExternalCaseManagementApi.canChallenge(mEq(plSubmissionId), any(), any(), any())(any()))
+            .thenReturn(Future.successful(Some(canChallengeResponse)))
 
-        val result: Future[Result] =
-          controller.canChallenge(plSubmissionId, "CHK123ABC", 123L, "partyID")(FakeRequest())
+          val result: Future[Result] =
+            controller.canChallenge(plSubmissionId, "CHK123ABC", 123L, "partyID")(FakeRequest())
 
-        status(result) shouldBe OK
-        inside(contentAsJson(result) \ "result") {
-          case JsDefined(JsBoolean(canChallenge)) => canChallenge shouldBe canChallengeResponse.result
+          status(result) shouldBe OK
+          inside(contentAsJson(result) \ "result") {
+            case JsDefined(JsBoolean(canChallenge)) => canChallenge shouldBe canChallengeResponse.result
+          }
         }
       }
     }
   }
 
+  "Using the controller with the bstDownstream feature switch enabled" when {
+    "canChallenge endpoint" should {
+      "return 200 OK" when {
+        "user can challenge" in new Setup {
+          when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
+          when(mockCaseManagementApi.canChallenge(mEq(plSubmissionId), any(), any(), any())(any()))
+            .thenReturn(Future.successful(Some(canChallengeResponse)))
+
+          val result: Future[Result] =
+            controller.canChallenge(plSubmissionId, "CHK123ABC", 123L, "partyID")(FakeRequest())
+
+          status(result) shouldBe OK
+          inside(contentAsJson(result) \ "result") {
+            case JsDefined(JsBoolean(canChallenge)) => canChallenge shouldBe canChallengeResponse.result
+          }
+        }
+      }
+    }
+  }
 }

@@ -33,10 +33,13 @@ class AddressLookupControllerSpec extends BaseControllerSpec {
     val controller = new AddressLookupController(
       Helpers.stubControllerComponents(),
       preAuthenticatedActionBuilders(),
-      mockAddressManagementApi)
+      mockModernisedAddressManagementApi,
+      mockAddressManagementApi,
+      mockFeatureSwitch)
+
     val validPostcode = "BN1 1NB"
     val addressUnitId = 1L
-    val detailedAddress = DetailedAddress(
+    val detailedAddress: DetailedAddress = DetailedAddress(
       addressUnitId = Some(1L),
       nonAbpAddressId = Some(2L),
       organisationName = Some("Org name"),
@@ -54,87 +57,173 @@ class AddressLookupControllerSpec extends BaseControllerSpec {
     val simpleAddress: SimpleAddress = detailedAddress.simplify
   }
 
-  "looking up an address by postcode" should {
-    "return 200 OK with addresses retrieved via the connector" when {
-      "the post code is a valid string" in new Setup {
-        when(mockAddressManagementApi.find(mEq(validPostcode))(any()))
-          .thenReturn(Future.successful(Seq(detailedAddress)))
+  "Using the controller with the bstDownstream feature switch enabled" when {
+    "looking up an address by postcode" should {
+      "return 200 OK with addresses retrieved via the connector" when {
+        "the post code is a valid string" in new Setup {
+          when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
+          when(mockAddressManagementApi.find(mEq(validPostcode))(any()))
+            .thenReturn(Future.successful(Seq(detailedAddress)))
 
-        val result: Future[Result] =
-          controller.find(validPostcode)(request)
+          val result: Future[Result] =
+            controller.find(validPostcode)(request)
 
-        status(result) shouldBe OK
-        inside(contentAsJson(result).validate[Seq[DetailedAddress]]) {
-          case JsSuccess(addresses, _) =>
-            addresses.loneElement shouldBe detailedAddress
+          status(result) shouldBe OK
+          inside(contentAsJson(result).validate[Seq[DetailedAddress]]) {
+            case JsSuccess(addresses, _) =>
+              addresses.loneElement shouldBe detailedAddress
+          }
+        }
+      }
+
+      "return 400 BAD REQUEST" when {
+        "an invalid post code format is used" in new Setup {
+          val result: Future[Result] = controller.find("this is not a valid postcode")(request)
+
+          status(result) shouldBe BAD_REQUEST
         }
       }
     }
 
-    "return 400 BAD REQUEST" when {
-      "an invalid post code format is used" in new Setup {
-        val result: Future[Result] =
-          controller.find("this is not a valid postcode")(request)
+    "getting an address by unit id" should {
+      "return 200 OK" when {
+        "an address is found in modernised" in new Setup {
+          when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
+          when(mockAddressManagementApi.get(mEq(addressUnitId))(any()))
+            .thenReturn(Future.successful(Some(simpleAddress)))
 
-        status(result) shouldBe BAD_REQUEST
-        verify(mockAddressManagementApi, never()).find(any())(any())
+          val result: Future[Result] =
+            controller.get(addressUnitId)(request)
+
+          status(result) shouldBe OK
+          inside(contentAsJson(result).validate[SimpleAddress]) {
+            case JsSuccess(a, _) => a shouldBe simpleAddress
+          }
+        }
       }
-    }
-  }
 
-  "getting an address by unit id" should {
-    "return 200 OK" when {
-      "an address is found in modernised" in new Setup {
-        when(mockAddressManagementApi.get(mEq(addressUnitId))(any()))
-          .thenReturn(Future.successful(Some(simpleAddress)))
+      "return 404 NOT FOUND" when {
+        "the address doesn't exist" in new Setup {
+          when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
+          when(mockAddressManagementApi.get(mEq(addressUnitId))(any()))
+            .thenReturn(Future.successful(Option.empty[SimpleAddress]))
 
-        val result: Future[Result] =
-          controller.get(addressUnitId)(request)
+          val result: Future[Result] =
+            controller.get(addressUnitId)(request)
 
-        status(result) shouldBe OK
-        inside(contentAsJson(result).validate[SimpleAddress]) {
-          case JsSuccess(a, _) => a shouldBe simpleAddress
+          status(result) shouldBe NOT_FOUND
         }
       }
     }
 
-    "return 404 NOT FOUND" when {
-      "the address doesn't exist" in new Setup {
-        when(mockAddressManagementApi.get(mEq(addressUnitId))(any()))
-          .thenReturn(Future.successful(Option.empty[SimpleAddress]))
+    "creating a simple address" should {
+      "return 201 CREATED" when {
+        "valid JSON SimpleAddress is submitted" in new Setup {
+          when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
+          when(mockAddressManagementApi.create(mEq(simpleAddress))(any()))
+            .thenReturn(Future.successful(123L))
 
-        val result: Future[Result] =
-          controller.get(addressUnitId)(request)
+          val result: Future[Result] =
+            controller.create(request.withBody(toJson(simpleAddress)))
 
-        status(result) shouldBe NOT_FOUND
+          status(result) shouldBe CREATED
+          inside(contentAsJson(result) \ "id") {
+            case JsDefined(JsNumber(value)) => value shouldBe 123L
+          }
+        }
       }
-    }
-  }
+      "reject invalid payload with 400 BAD REQUEST" when {
+        "submitted JSON isn't a valid SimpleAddress" in new Setup {
+          val result: Future[Result] =
+            controller.create(request.withBody(Json.parse("""{"foo": "bar"}""")))
 
-  "creating a simple address" should {
-    "return 201 CREATED" when {
-      "valid JSON SimpleAddress is submitted" in new Setup {
-        when(mockAddressManagementApi.create(mEq(simpleAddress))(any()))
-          .thenReturn(Future.successful(123L))
-
-        val result: Future[Result] =
-          controller.create(request.withBody(toJson(simpleAddress)))
-
-        status(result) shouldBe CREATED
-        inside(contentAsJson(result) \ "id") {
-          case JsDefined(JsNumber(value)) => value shouldBe 123L
+          status(result) shouldBe BAD_REQUEST
         }
       }
     }
-    "reject invalid payload with 400 BAD REQUEST" when {
-      "submitted JSON isn't a valid SimpleAddress" in new Setup {
-        val result: Future[Result] =
-          controller.create(request.withBody(Json.parse("""{"foo": "bar"}""")))
+  }
 
-        status(result) shouldBe BAD_REQUEST
+  "Using the controller with the bstDownstream feature switch disabled" when {
+    "looking up an address by postcode" should {
+      "return 200 OK with addresses retrieved via the connector" when {
+        "the post code is a valid string" in new Setup {
+          when(mockModernisedAddressManagementApi.find(mEq(validPostcode))(any()))
+            .thenReturn(Future.successful(Seq(detailedAddress)))
+
+          val result: Future[Result] =
+            controller.find(validPostcode)(request)
+
+          status(result) shouldBe OK
+          inside(contentAsJson(result).validate[Seq[DetailedAddress]]) {
+            case JsSuccess(addresses, _) =>
+              addresses.loneElement shouldBe detailedAddress
+          }
+        }
+      }
+
+      "return 400 BAD REQUEST" when {
+        "an invalid post code format is used" in new Setup {
+          val result: Future[Result] =
+            controller.find("this is not a valid postcode")(request)
+
+          status(result) shouldBe BAD_REQUEST
+          verify(mockModernisedAddressManagementApi, never()).find(any())(any())
+        }
       }
     }
 
-  }
+    "getting an address by unit id" should {
+      "return 200 OK" when {
+        "an address is found in modernised" in new Setup {
+          when(mockModernisedAddressManagementApi.get(mEq(addressUnitId))(any()))
+            .thenReturn(Future.successful(Some(simpleAddress)))
 
+          val result: Future[Result] =
+            controller.get(addressUnitId)(request)
+
+          status(result) shouldBe OK
+          inside(contentAsJson(result).validate[SimpleAddress]) {
+            case JsSuccess(a, _) => a shouldBe simpleAddress
+          }
+        }
+      }
+
+      "return 404 NOT FOUND" when {
+        "the address doesn't exist" in new Setup {
+          when(mockModernisedAddressManagementApi.get(mEq(addressUnitId))(any()))
+            .thenReturn(Future.successful(Option.empty[SimpleAddress]))
+
+          val result: Future[Result] =
+            controller.get(addressUnitId)(request)
+
+          status(result) shouldBe NOT_FOUND
+        }
+      }
+    }
+
+    "creating a simple address" should {
+      "return 201 CREATED" when {
+        "valid JSON SimpleAddress is submitted" in new Setup {
+          when(mockModernisedAddressManagementApi.create(mEq(simpleAddress))(any()))
+            .thenReturn(Future.successful(123L))
+
+          val result: Future[Result] =
+            controller.create(request.withBody(toJson(simpleAddress)))
+
+          status(result) shouldBe CREATED
+          inside(contentAsJson(result) \ "id") {
+            case JsDefined(JsNumber(value)) => value shouldBe 123L
+          }
+        }
+      }
+      "reject invalid payload with 400 BAD REQUEST" when {
+        "submitted JSON isn't a valid SimpleAddress" in new Setup {
+          val result: Future[Result] =
+            controller.create(request.withBody(Json.parse("""{"foo": "bar"}""")))
+
+          status(result) shouldBe BAD_REQUEST
+        }
+      }
+    }
+  }
 }

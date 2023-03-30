@@ -19,43 +19,58 @@ package uk.gov.hmrc.voapropertylinking.controllers
 import models._
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
+import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
 import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
+import uk.gov.hmrc.voapropertylinking.config.FeatureSwitch
+import uk.gov.hmrc.voapropertylinking.connectors.bst.{AuthorisationManagementApi, ExternalOrganisationManagementApi, ExternalPropertyLinkApi}
 import uk.gov.hmrc.voapropertylinking.connectors.modernised._
 import uk.gov.hmrc.voapropertylinking.errorhandler.models.ErrorResponse
 import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation.AppointmentChangeResponse._
 import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation._
 
 import javax.inject.Inject
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class PropertyRepresentationController @Inject()(
       controllerComponents: ControllerComponents,
       authenticated: AuthenticatedActionBuilder,
+      modernisedAuthorisationManagementApi: ModernisedAuthorisationManagementApi,
+      modernisedOrganisationManagementApi: ModernisedExternalOrganisationManagementApi,
+      modernisedExternalPropertyLinkApi: ModernisedExternalPropertyLinkApi,
       authorisationManagementApi: AuthorisationManagementApi,
       organisationManagementApi: ExternalOrganisationManagementApi,
-      externalPropertyLinkApi: ExternalPropertyLinkApi,
+      propertyLinkApi: ExternalPropertyLinkApi,
+      featureSwitch: FeatureSwitch,
       auditingService: AuditingService
 )(implicit executionContext: ExecutionContext)
     extends PropertyLinkingBaseController(controllerComponents) {
 
-  def validateAgentCode(
-        agentCode: Long,
-        authorisationId: Long
-  ): Action[AnyContent] = authenticated.async { implicit request =>
-    authorisationManagementApi
-      .validateAgentCode(agentCode, authorisationId)
-      .map { errorOrOrganisationId =>
-        errorOrOrganisationId.fold(
-          orgId => Ok(Json.obj("organisationId"    -> orgId)),
-          errorString => Ok(Json.obj("failureCode" -> errorString)))
-      }
+  def validateAgentCode(agentCode: Long, authorisationId: Long): Action[AnyContent] = authenticated.async {
+    implicit request =>
+      lazy val validateAgentCodeResponse: Future[Either[Long, String]] =
+        if (featureSwitch.isBstDownstreamEnabled) {
+          authorisationManagementApi.validateAgentCode(agentCode, authorisationId)
+        } else {
+          modernisedAuthorisationManagementApi.validateAgentCode(agentCode, authorisationId)
+        }
+      validateAgentCodeResponse
+        .map { errorOrOrganisationId =>
+          errorOrOrganisationId.fold(
+            orgId => Ok(Json.obj("organisationId"    -> orgId)),
+            errorString => Ok(Json.obj("failureCode" -> errorString)))
+        }
   }
 
   def response(): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
     withJsonBody[APIRepresentationResponse] { representationResponse =>
-      authorisationManagementApi
-        .response(representationResponse)
+      lazy val response: Future[HttpResponse] =
+        if (featureSwitch.isBstDownstreamEnabled) {
+          authorisationManagementApi.response(representationResponse)
+        } else {
+          modernisedAuthorisationManagementApi.response(representationResponse)
+        }
+      response
         .map { _ =>
           auditingService.sendEvent("agent representation response", representationResponse)
           Ok("")
@@ -64,11 +79,21 @@ class PropertyRepresentationController @Inject()(
   }
 
   def revokeClientProperty(submissionId: String): Action[AnyContent] = authenticated.async { implicit request =>
-    externalPropertyLinkApi.revokeClientProperty(submissionId).map(_ => NoContent)
+    if (featureSwitch.isBstDownstreamEnabled) {
+      propertyLinkApi.revokeClientProperty(submissionId).map(_ => NoContent)
+    } else {
+      modernisedExternalPropertyLinkApi.revokeClientProperty(submissionId).map(_ => NoContent)
+    }
   }
 
   def getAgentDetails(agentCode: Long): Action[AnyContent] = authenticated.async { implicit request =>
-    organisationManagementApi.getAgentDetails(agentCode) map {
+    lazy val getAgentDetails: Future[Option[AgentDetails]] =
+      if (featureSwitch.isBstDownstreamEnabled) {
+        organisationManagementApi.getAgentDetails(agentCode)
+      } else {
+        modernisedOrganisationManagementApi.getAgentDetails(agentCode)
+      }
+    getAgentDetails.map {
       case None        => ErrorResponse.notFoundJsonResult("Agent does not exist")
       case Some(agent) => Ok(Json.toJson(agent))
     }
@@ -76,8 +101,13 @@ class PropertyRepresentationController @Inject()(
 
   def assignAgent(): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
     withJsonBody[AssignAgent] { appointAgent =>
-      organisationManagementApi
-        .agentAppointmentChanges(AppointmentChangesRequest(appointAgent))
+      lazy val agentAppointmentChanges: Future[AppointmentChangeResponse] =
+        if (featureSwitch.isBstDownstreamEnabled) {
+          organisationManagementApi.agentAppointmentChanges(AppointmentChangesRequest(appointAgent))
+        } else {
+          modernisedOrganisationManagementApi.agentAppointmentChanges(AppointmentChangesRequest(appointAgent))
+        }
+      agentAppointmentChanges
         .map { response =>
           Accepted(Json.toJson(response))
         }
@@ -86,8 +116,13 @@ class PropertyRepresentationController @Inject()(
 
   def assignAgentToSomeProperties(): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
     withJsonBody[AssignAgentToSomeProperties] { appointAgent =>
-      organisationManagementApi
-        .agentAppointmentChanges(AppointmentChangesRequest(appointAgent))
+      lazy val agentAppointmentChanges: Future[AppointmentChangeResponse] =
+        if (featureSwitch.isBstDownstreamEnabled) {
+          organisationManagementApi.agentAppointmentChanges(AppointmentChangesRequest(appointAgent))
+        } else {
+          modernisedOrganisationManagementApi.agentAppointmentChanges(AppointmentChangesRequest(appointAgent))
+        }
+      agentAppointmentChanges
         .map { response =>
           Accepted(Json.toJson(response))
         }
@@ -96,8 +131,13 @@ class PropertyRepresentationController @Inject()(
 
   def unassignAgent(): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
     withJsonBody[UnassignAgent] { unassignAgent =>
-      organisationManagementApi
-        .agentAppointmentChanges(AppointmentChangesRequest(unassignAgent))
+      lazy val agentAppointmentChanges: Future[AppointmentChangeResponse] =
+        if (featureSwitch.isBstDownstreamEnabled) {
+          organisationManagementApi.agentAppointmentChanges(AppointmentChangesRequest(unassignAgent))
+        } else {
+          modernisedOrganisationManagementApi.agentAppointmentChanges(AppointmentChangesRequest(unassignAgent))
+        }
+      agentAppointmentChanges
         .map { response =>
           Accepted(Json.toJson(response))
         }
@@ -106,8 +146,13 @@ class PropertyRepresentationController @Inject()(
 
   def removeAgentFromOrganisation(): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
     withJsonBody[RemoveAgentFromIpOrganisation] { removeAgent =>
-      organisationManagementApi
-        .agentAppointmentChanges(AppointmentChangesRequest(removeAgent))
+      lazy val agentAppointmentChanges: Future[AppointmentChangeResponse] =
+        if (featureSwitch.isBstDownstreamEnabled) {
+          organisationManagementApi.agentAppointmentChanges(AppointmentChangesRequest(removeAgent))
+        } else {
+          modernisedOrganisationManagementApi.agentAppointmentChanges(AppointmentChangesRequest(removeAgent))
+        }
+      agentAppointmentChanges
         .map { response =>
           Accepted(Json.toJson(response))
         }
@@ -116,8 +161,13 @@ class PropertyRepresentationController @Inject()(
 
   def unassignAgentFromSomeProperties(): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
     withJsonBody[UnassignAgentFromSomeProperties] { unassignAgent =>
-      organisationManagementApi
-        .agentAppointmentChanges(AppointmentChangesRequest(unassignAgent))
+      lazy val agentAppointmentChanges: Future[AppointmentChangeResponse] =
+        if (featureSwitch.isBstDownstreamEnabled) {
+          organisationManagementApi.agentAppointmentChanges(AppointmentChangesRequest(unassignAgent))
+        } else {
+          modernisedOrganisationManagementApi.agentAppointmentChanges(AppointmentChangesRequest(unassignAgent))
+        }
+      agentAppointmentChanges
         .map { response =>
           Accepted(Json.toJson(response))
         }

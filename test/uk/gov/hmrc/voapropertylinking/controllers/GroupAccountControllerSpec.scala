@@ -27,142 +27,330 @@ import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import uk.gov.hmrc.voapropertylinking.connectors.mdtp.BusinessRatesAuthConnector
-import uk.gov.hmrc.voapropertylinking.connectors.modernised.CustomerManagementApi
+import uk.gov.hmrc.voapropertylinking.connectors.modernised.ModernisedCustomerManagementApi
 
 import scala.concurrent.Future
 
 class GroupAccountControllerSpec extends BaseControllerSpec {
 
-  "create" should {
-    "create a new individual user in modernised" in {
-      val testIndividualDetails = IndividualDetails("Test", "Name", "test@test.com", "01234556676", None, 1)
-      val testIndividualOrg =
-        IndividualAccountSubmissionForOrganisation("test-external-id", Some("test-trust-id"), testIndividualDetails)
-      val testGroupAccountSubmission = GroupAccountSubmission(
-        "test-group-id",
-        "test-group-id",
-        1,
-        "test@test.com",
-        "012312321321",
-        false,
-        testIndividualOrg)
+  "Using the controller with the bstDownstream feature switch enabled" when {
+    "create" should {
+      "create a new individual user in modernised" in {
+        val testIndividualDetails = IndividualDetails("Test", "Name", "test@test.com", "01234556676", None, 1)
+        val testIndividualOrg =
+          IndividualAccountSubmissionForOrganisation("test-external-id", Some("test-trust-id"), testIndividualDetails)
+        val testGroupAccountSubmission = GroupAccountSubmission(
+          id = "test-group-id",
+          companyName = "test-group-id",
+          addressId = 1,
+          email = "test@test.com",
+          phone = "012312321321",
+          isAgent = false,
+          individualAccountSubmission = testIndividualOrg
+        )
 
-      val groupJson = Json.toJson(testGroupAccountSubmission)
+        val groupJson = Json.toJson(testGroupAccountSubmission)
 
-      when(mockGroupAccountConnector.createGroupAccount(any())(any[HeaderCarrier]))
-        .thenReturn(Future.successful(GroupId(1, "test", 23)))
+        when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
+        when(mockCustomerManagementApi.createGroupAccount(any(), any())(any[HeaderCarrier]))
+          .thenReturn(Future.successful(GroupId(1, "test", 23)))
 
-      val res = testController.create()(FakeRequest().withBody(groupJson))
+        val res = testController.create()(FakeRequest().withBody(groupJson))
 
-      status(res) shouldBe CREATED
-      contentAsJson(res) shouldBe Json.toJson(GroupId(1, "test", 23))
+        status(res) shouldBe CREATED
+        contentAsJson(res) shouldBe Json.toJson(GroupId(1, "test", 23))
+      }
+    }
+
+    "get" should {
+      "return group account json from modernised if it exists" in {
+        val testGroupAccount =
+          GroupAccount(
+            id = 1,
+            groupId = "test-group-id",
+            companyName = "Test Company",
+            addressId = 1,
+            email = "test@test.com",
+            phone = "01233421342",
+            isAgent = false,
+            agentCode = Some(1))
+
+        when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
+        when(mockCustomerManagementApi.getDetailedGroupAccount(any())(any[HeaderCarrier]))
+          .thenReturn(Future.successful(Some(testGroupAccount)))
+
+        val res = testController.get(1)(FakeRequest())
+
+        status(res) shouldBe OK
+        contentAsJson(res) shouldBe Json.toJson(testGroupAccount)
+      }
+
+      "return NotFound if the account does not exist in modernised" in {
+        when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
+        when(mockCustomerManagementApi.getDetailedGroupAccount(any())(any[HeaderCarrier]))
+          .thenReturn(Future.successful(None))
+
+        val res = testController.get(1)(FakeRequest())
+
+        status(res) shouldBe NOT_FOUND
+      }
+    }
+
+    "withGroupId" should {
+      "return group account json from modernised if it exists using the group ID" in {
+        val testGroupAccount =
+          GroupAccount(
+            id = 1,
+            groupId = "test-group-id",
+            companyName = "Test Company",
+            addressId = 1,
+            email = "test@test.com",
+            phone = "01233421342",
+            isAgent = false,
+            agentCode = Some(1))
+
+        when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
+        when(mockCustomerManagementApi.findDetailedGroupAccountByGGID(any())(any[HeaderCarrier]))
+          .thenReturn(Future.successful(Some(testGroupAccount)))
+
+        val res = testController.withGroupId("test-group-id")(FakeRequest())
+
+        status(res) shouldBe OK
+        contentAsJson(res) shouldBe Json.toJson(testGroupAccount)
+      }
+
+      "return NotFound if the account does not exist in modernised" in {
+        when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
+        when(mockCustomerManagementApi.findDetailedGroupAccountByGGID(any())(any[HeaderCarrier]))
+          .thenReturn(Future.successful(None))
+
+        val res = testController.withGroupId("test-group-id")(FakeRequest())
+
+        status(res) shouldBe NOT_FOUND
+      }
+    }
+
+    "withAgentCode" should {
+      "return group account json from modernised if it exists using the agent code" in {
+        val testGroupAccount =
+          GroupAccount(
+            id = 1,
+            groupId = "test-group-id",
+            companyName = "Test Company",
+            addressId = 1,
+            email = "test@test.com",
+            phone = "01233421342",
+            isAgent = true,
+            agentCode = Some(1))
+
+        when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
+        when(mockCustomerManagementApi.withAgentCode(any())(any[HeaderCarrier]))
+          .thenReturn(Future.successful(Some(testGroupAccount)))
+
+        val res = testController.withAgentCode("test-agent-code")(FakeRequest())
+
+        status(res) shouldBe OK
+        contentAsJson(res) shouldBe Json.toJson(testGroupAccount)
+      }
+
+      "return NotFound if the account does not exist in modernised" in {
+        when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
+        when(mockCustomerManagementApi.withAgentCode(any())(any[HeaderCarrier])).thenReturn(Future.successful(None))
+
+        val res = testController.withAgentCode("test-agent-code")(FakeRequest())
+
+        status(res) shouldBe NOT_FOUND
+      }
+    }
+
+    "update" should {
+      "update an existing group in modernised" in {
+        val testUpdatedOrgAccount = UpdatedOrganisationAccount(
+          governmentGatewayGroupId = "test-group-id",
+          addressUnitId = 1,
+          representativeFlag = false,
+          organisationName = "Test Company",
+          organisationEmailAddress = "test@test.com",
+          organisationTelephoneNumber = "0123456778",
+          effectiveFrom = Instant.now(),
+          changedByGGExternalId = "test-external-id"
+        )
+
+        val testUpdatedOrgAccountJson = Json.toJson(testUpdatedOrgAccount)
+
+        when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
+        when(mockCustomerManagementApi.updateGroupAccount(any(), any())(any[HeaderCarrier]))
+          .thenReturn(Future.successful(()))
+        when(mockBrAuth.clearCache()(any[HeaderCarrier])).thenReturn(Future.successful(()))
+
+        val res = testController.update(1)(FakeRequest().withBody(testUpdatedOrgAccountJson))
+
+        status(res) shouldBe OK
+      }
     }
   }
 
-  "get" should {
-    "return group account json from modernised if it exists" in {
-      val testGroupAccount =
-        GroupAccount(1, "test-group-id", "Test Company", 1, "test@test.com", "01233421342", false, Some(1))
+  "Using the controller with the bstDownstream feature switch disabled" when {
+    "create" should {
+      "create a new individual user in modernised" in {
+        val testIndividualDetails = IndividualDetails("Test", "Name", "test@test.com", "01234556676", None, 1)
+        val testIndividualOrg =
+          IndividualAccountSubmissionForOrganisation("test-external-id", Some("test-trust-id"), testIndividualDetails)
+        val testGroupAccountSubmission = GroupAccountSubmission(
+          id = "test-group-id",
+          companyName = "test-group-id",
+          addressId = 1,
+          email = "test@test.com",
+          phone = "012312321321",
+          isAgent = false,
+          individualAccountSubmission = testIndividualOrg
+        )
 
-      when(mockGroupAccountConnector.getDetailedGroupAccount(any())(any[HeaderCarrier]))
-        .thenReturn(Future.successful(Some(testGroupAccount)))
+        val groupJson = Json.toJson(testGroupAccountSubmission)
 
-      val res = testController.get(1)(FakeRequest())
+        when(mockModernisedCustomerManagementApi.createGroupAccount(any(), any())(any[HeaderCarrier]))
+          .thenReturn(Future.successful(GroupId(1, "test", 23)))
 
-      status(res) shouldBe OK
-      contentAsJson(res) shouldBe Json.toJson(testGroupAccount)
+        val res = testController.create()(FakeRequest().withBody(groupJson))
+
+        status(res) shouldBe CREATED
+        contentAsJson(res) shouldBe Json.toJson(GroupId(1, "test", 23))
+      }
     }
 
-    "return NotFound if the account does not exist in modernised" in {
-      when(mockGroupAccountConnector.getDetailedGroupAccount(any())(any[HeaderCarrier]))
-        .thenReturn(Future.successful(None))
+    "get" should {
+      "return group account json from modernised if it exists" in {
+        val testGroupAccount =
+          GroupAccount(
+            id = 1,
+            groupId = "test-group-id",
+            companyName = "Test Company",
+            addressId = 1,
+            email = "test@test.com",
+            phone = "01233421342",
+            isAgent = false,
+            agentCode = Some(1))
 
-      val res = testController.get(1)(FakeRequest())
+        when(mockModernisedCustomerManagementApi.getDetailedGroupAccount(any())(any[HeaderCarrier]))
+          .thenReturn(Future.successful(Some(testGroupAccount)))
 
-      status(res) shouldBe NOT_FOUND
+        val res = testController.get(1)(FakeRequest())
+
+        status(res) shouldBe OK
+        contentAsJson(res) shouldBe Json.toJson(testGroupAccount)
+      }
+
+      "return NotFound if the account does not exist in modernised" in {
+        when(mockModernisedCustomerManagementApi.getDetailedGroupAccount(any())(any[HeaderCarrier]))
+          .thenReturn(Future.successful(None))
+
+        val res = testController.get(1)(FakeRequest())
+
+        status(res) shouldBe NOT_FOUND
+      }
     }
+
+    "withGroupId" should {
+      "return group account json from modernised if it exists using the group ID" in {
+        val testGroupAccount =
+          GroupAccount(
+            id = 1,
+            groupId = "test-group-id",
+            companyName = "Test Company",
+            addressId = 1,
+            email = "test@test.com",
+            phone = "01233421342",
+            isAgent = false,
+            agentCode = Some(1))
+
+        when(mockModernisedCustomerManagementApi.findDetailedGroupAccountByGGID(any())(any[HeaderCarrier]))
+          .thenReturn(Future.successful(Some(testGroupAccount)))
+
+        val res = testController.withGroupId("test-group-id")(FakeRequest())
+
+        status(res) shouldBe OK
+        contentAsJson(res) shouldBe Json.toJson(testGroupAccount)
+      }
+
+      "return NotFound if the account does not exist in modernised" in {
+        when(mockModernisedCustomerManagementApi.findDetailedGroupAccountByGGID(any())(any[HeaderCarrier]))
+          .thenReturn(Future.successful(None))
+
+        val res = testController.withGroupId("test-group-id")(FakeRequest())
+
+        status(res) shouldBe NOT_FOUND
+      }
+    }
+
+    "withAgentCode" should {
+      "return group account json from modernised if it exists using the agent code" in {
+        val testGroupAccount =
+          GroupAccount(
+            id = 1,
+            groupId = "test-group-id",
+            companyName = "Test Company",
+            addressId = 1,
+            email = "test@test.com",
+            phone = "01233421342",
+            isAgent = true,
+            agentCode = Some(1))
+
+        when(mockModernisedCustomerManagementApi.withAgentCode(any())(any[HeaderCarrier]))
+          .thenReturn(Future.successful(Some(testGroupAccount)))
+
+        val res = testController.withAgentCode("test-agent-code")(FakeRequest())
+
+        status(res) shouldBe OK
+        contentAsJson(res) shouldBe Json.toJson(testGroupAccount)
+      }
+
+      "return NotFound if the account does not exist in modernised" in {
+        when(mockModernisedCustomerManagementApi.withAgentCode(any())(any[HeaderCarrier]))
+          .thenReturn(Future.successful(None))
+
+        val res = testController.withAgentCode("test-agent-code")(FakeRequest())
+
+        status(res) shouldBe NOT_FOUND
+      }
+    }
+
+    "update" should {
+      "update an existing group in modernised" in {
+        val testUpdatedOrgAccount = UpdatedOrganisationAccount(
+          governmentGatewayGroupId = "test-group-id",
+          addressUnitId = 1,
+          representativeFlag = false,
+          organisationName = "Test Company",
+          organisationEmailAddress = "test@test.com",
+          organisationTelephoneNumber = "0123456778",
+          effectiveFrom = Instant.now(),
+          changedByGGExternalId = "test-external-id"
+        )
+
+        val testUpdatedOrgAccountJson = Json.toJson(testUpdatedOrgAccount)
+
+        when(mockModernisedCustomerManagementApi.updateGroupAccount(any(), any())(any[HeaderCarrier]))
+          .thenReturn(Future.successful(()))
+        when(mockBrAuth.clearCache()(any[HeaderCarrier])).thenReturn(Future.successful(()))
+
+        val res = testController.update(1)(FakeRequest().withBody(testUpdatedOrgAccountJson))
+
+        status(res) shouldBe OK
+      }
+    }
+
   }
 
-  "withGroupId" should {
-    "return group account json from modernised if it exists using the group ID" in {
-      val testGroupAccount =
-        GroupAccount(1, "test-group-id", "Test Company", 1, "test@test.com", "01233421342", false, Some(1))
-
-      when(mockGroupAccountConnector.findDetailedGroupAccountByGGID(any())(any[HeaderCarrier]))
-        .thenReturn(Future.successful(Some(testGroupAccount)))
-
-      val res = testController.withGroupId("test-group-id")(FakeRequest())
-
-      status(res) shouldBe OK
-      contentAsJson(res) shouldBe Json.toJson(testGroupAccount)
-    }
-
-    "return NotFound if the account does not exist in modernised" in {
-      when(mockGroupAccountConnector.findDetailedGroupAccountByGGID(any())(any[HeaderCarrier]))
-        .thenReturn(Future.successful(None))
-
-      val res = testController.withGroupId("test-group-id")(FakeRequest())
-
-      status(res) shouldBe NOT_FOUND
-    }
-  }
-
-  "withAgentCode" should {
-    "return group account json from modernised if it exists using the agent code" in {
-      val testGroupAccount =
-        GroupAccount(1, "test-group-id", "Test Company", 1, "test@test.com", "01233421342", true, Some(1))
-
-      when(mockGroupAccountConnector.withAgentCode(any())(any[HeaderCarrier]))
-        .thenReturn(Future.successful(Some(testGroupAccount)))
-
-      val res = testController.withAgentCode("test-agent-code")(FakeRequest())
-
-      status(res) shouldBe OK
-      contentAsJson(res) shouldBe Json.toJson(testGroupAccount)
-    }
-
-    "return NotFound if the account does not exist in modernised" in {
-      when(mockGroupAccountConnector.withAgentCode(any())(any[HeaderCarrier])).thenReturn(Future.successful(None))
-
-      val res = testController.withAgentCode("test-agent-code")(FakeRequest())
-
-      status(res) shouldBe NOT_FOUND
-    }
-  }
-
-  "update" should {
-    "update an existing group in modernised" in {
-      val testUpdatedOrgAccount = UpdatedOrganisationAccount(
-        "test-group-id",
-        1,
-        false,
-        "Test Company",
-        "test@test.com",
-        "0123456778",
-        Instant.now(),
-        "test-external-id")
-
-      val testUpdatedOrgAccountJson = Json.toJson(testUpdatedOrgAccount)
-
-      when(mockGroupAccountConnector.updateGroupAccount(any(), any())(any[HeaderCarrier]))
-        .thenReturn(Future.successful(()))
-      when(mockBrAuth.clearCache()(any[HeaderCarrier])).thenReturn(Future.successful(()))
-
-      val res = testController.update(1)(FakeRequest().withBody(testUpdatedOrgAccountJson))
-
-      status(res) shouldBe OK
-    }
-  }
-
-  lazy val mockGroupAccountConnector = mock[CustomerManagementApi]
-
-  lazy val mockBrAuth = mock[BusinessRatesAuthConnector]
+  lazy val mockBrAuth: BusinessRatesAuthConnector = mock[BusinessRatesAuthConnector]
 
   lazy val testController = new GroupAccountController(
     Helpers.stubControllerComponents(),
     preAuthenticatedActionBuilders(),
     mock[AuditingService],
-    mockGroupAccountConnector,
-    mockBrAuth)
+    mockModernisedCustomerManagementApi,
+    mockCustomerManagementApi,
+    mockFeatureSwitch,
+    mockBrAuth
+  )
 
 }

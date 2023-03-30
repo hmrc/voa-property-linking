@@ -21,7 +21,9 @@ import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
 import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
-import uk.gov.hmrc.voapropertylinking.connectors.modernised.ExternalCaseManagementApi
+import uk.gov.hmrc.voapropertylinking.config.FeatureSwitch
+import uk.gov.hmrc.voapropertylinking.connectors.bst.ExternalCaseManagementApi
+import uk.gov.hmrc.voapropertylinking.connectors.modernised.ModernisedExternalCaseManagementApi
 import uk.gov.hmrc.voapropertylinking.models.modernised.casemanagement.check.myclients.CheckCasesWithClient
 import uk.gov.hmrc.voapropertylinking.models.modernised.casemanagement.check.myorganisation.CheckCasesWithAgent
 
@@ -33,7 +35,9 @@ import scala.concurrent.{ExecutionContext, Future}
 class CheckCaseController @Inject()(
       controllerComponents: ControllerComponents,
       authenticated: AuthenticatedActionBuilder,
-      externalCaseManagementApi: ExternalCaseManagementApi
+      modernisedExternalCaseManagementApi: ModernisedExternalCaseManagementApi,
+      externalCaseManagementApi: ExternalCaseManagementApi,
+      featureSwitch: FeatureSwitch
 )(implicit executionContext: ExecutionContext)
     extends PropertyLinkingBaseController(controllerComponents) {
 
@@ -46,25 +50,37 @@ class CheckCaseController @Inject()(
   }
 
   private def getMyOrganisationCheckCases(propertyLinkSubmissionId: String)(
-        implicit request: RequestWithPrincipal[_]): Future[Result] =
-    externalCaseManagementApi
-      .getMyOrganisationCheckCases(propertyLinkSubmissionId)
+        implicit request: RequestWithPrincipal[_]): Future[Result] = {
+    val checkCasesWithAgent: Future[CheckCasesWithAgent] =
+      if (featureSwitch.isBstDownstreamEnabled) {
+        externalCaseManagementApi.getMyOrganisationCheckCases(propertyLinkSubmissionId)
+      } else {
+        modernisedExternalCaseManagementApi.getMyOrganisationCheckCases(propertyLinkSubmissionId)
+      }
+    checkCasesWithAgent
       .recover {
         case e: Throwable =>
           logger.warn("get my organisation check cases returned unexpected exception", e)
-          CheckCasesWithAgent(1, 100, 0, 0, Nil) // I believe this shouldnt be handled here. I think this should return the error it got.
+          CheckCasesWithAgent(start = 1, size = 100, filterTotal = 0, total = 0, checkCases = Nil) // I believe this shouldnt be handled here. I think this should return the error it got.
       }
       .map(response => Ok(Json.toJson(response)))
+  }
 
   private def getMyClientsCheckCases(propertyLinkSubmissionId: String)(
-        implicit request: RequestWithPrincipal[_]): Future[Result] =
-    externalCaseManagementApi
-      .getMyClientsCheckCases(propertyLinkSubmissionId)
+        implicit request: RequestWithPrincipal[_]): Future[Result] = {
+    val checkCasesWithClient =
+      if (featureSwitch.isBstDownstreamEnabled) {
+        externalCaseManagementApi.getMyClientsCheckCases(propertyLinkSubmissionId)
+      } else {
+        modernisedExternalCaseManagementApi.getMyClientsCheckCases(propertyLinkSubmissionId)
+      }
+    checkCasesWithClient
       .recover {
         case e: Throwable =>
           logger.warn("get my clients check cases returned unexpected exception", e)
-          CheckCasesWithClient(1, 100, 0, 0, Nil) // I believe this shouldnt be handled here. I think this should return the error it got.
+          CheckCasesWithClient(start = 1, size = 100, filterTotal = 0, total = 0, checkCases = Nil) // I believe this shouldnt be handled here. I think this should return the error it got.
       }
       .map(response => Ok(Json.toJson(response)))
+  }
 
 }

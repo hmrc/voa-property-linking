@@ -33,112 +33,168 @@ import scala.concurrent.Future
 class AssessmentServiceSpec extends BaseUnitSpec {
 
   private trait Setup {
-    val mockExternalPropertyLinkApi: ExternalPropertyLinkApi = mock[ExternalPropertyLinkApi]
-    val mockExternalValuationManagementApi: ExternalValuationManagementApi = mock[ExternalValuationManagementApi]
+    val mockModernisedPropertyLinkApi: ModernisedExternalPropertyLinkApi = mock[ModernisedExternalPropertyLinkApi]
+    val mockModernisedValuationManagementApi: ModernisedExternalValuationManagementApi =
+      mock[ModernisedExternalValuationManagementApi]
 
     val date: LocalDate = LocalDate.parse("2018-09-05")
     val uarn: Long = 33333L
     val submissionId: String = "PL123ABC"
 
-    val propertyLinkWithAgents = PropertyLinkWithAgents(
-      authorisationId = 11111,
-      status = PropertyLinkStatus.APPROVED,
-      startDate = date,
-      endDate = Some(date),
-      submissionId = submissionId,
-      uarn = uarn,
-      address = "1 HIGH STREET, BRIGHTON",
-      localAuthorityRef = "44444",
-      agents = Seq(
-        AgentDetails(
-          authorisedPartyId = 24680,
-          organisationId = 123456,
-          organisationName = "org name",
-          representativeCode = 1111
-        )),
-      capacity = "OWNER"
-    )
-
-    val propertyLinkWithClient = PropertyLinkWithClient(
-      authorisationId = 11111,
-      authorisedPartyId = 11111,
-      status = PropertyLinkStatus.APPROVED,
-      startDate = date,
-      endDate = Some(date),
-      submissionId = submissionId,
-      capacity = "OWNER",
-      uarn = uarn,
-      address = "1 HIGH STREET, BRIGHTON",
-      localAuthorityRef = "44444",
-      client = ClientDetails(55555, "mock org")
-    )
-
-    val ownerPropertyLink = OwnerPropertyLink(propertyLinkWithAgents)
-    val clientPropertyLink = ClientPropertyLink(propertyLinkWithClient)
-
-    val valuationHistory = ValuationHistory(
-      asstRef = 125689,
-      listYear = "2017",
-      uarn = 923411,
-      billingAuthorityReference = "VOA1",
-      address = "1 HIGH STREET, BRIGHTON",
-      description = None,
-      specialCategoryCode = None,
-      compositeProperty = None,
-      effectiveDate = Some(date),
-      listAlterationDate = None,
-      numberOfPreviousProposals = None,
-      settlementCode = None,
-      totalAreaM2 = None,
-      costPerM2 = None,
-      rateableValue = Some(2599),
-      transitionalCertificate = None,
-      deletedIndicator = None,
-      valuationDetailsAvailable = None,
-      billingAuthCode = None,
-      listType = ListType.CURRENT,
-      allowedActions = List(AllowedAction.VIEW_DETAILED_VALUATION)
-    )
-
-    val assessmentService = new AssessmentService(mockExternalPropertyLinkApi, mockExternalValuationManagementApi)
-  }
-
-  "getMyOrganisationsAssessments" should {
-    "return assessments" in new Setup {
-      when(mockExternalPropertyLinkApi.getMyOrganisationsPropertyLink(mEq(submissionId))(any()))
-        .thenReturn(Future.successful(Some(ownerPropertyLink)))
-      when(mockExternalValuationManagementApi.getValuationHistory(mEq(uarn), mEq(submissionId))(any()))
-        .thenReturn(Future.successful(Some(ValuationHistoryResponse(Seq(valuationHistory)))))
-
-      val res: OptionT[Future, Assessments] = assessmentService.getMyOrganisationsAssessments(submissionId)
-
-      val expectedAssessments: Assessments = Assessments(
-        propertyLink = propertyLinkWithAgents,
-        history = Seq(valuationHistory),
-        capacity = Some("OWNER")
+    val propertyLinkWithAgents: PropertyLinkWithAgents =
+      PropertyLinkWithAgents(
+        authorisationId = 11111,
+        status = PropertyLinkStatus.APPROVED,
+        startDate = date,
+        endDate = Some(date),
+        submissionId = submissionId,
+        uarn = uarn,
+        address = "1 HIGH STREET, BRIGHTON",
+        localAuthorityRef = "44444",
+        agents = Seq(
+          AgentDetails(
+            authorisedPartyId = 24680,
+            organisationId = 123456,
+            organisationName = "org name",
+            representativeCode = 1111
+          )),
+        capacity = "OWNER"
       )
 
-      res.value.futureValue shouldBe Some(expectedAssessments)
+    val propertyLinkWithClient: PropertyLinkWithClient =
+      PropertyLinkWithClient(
+        authorisationId = 11111,
+        authorisedPartyId = 11111,
+        status = PropertyLinkStatus.APPROVED,
+        startDate = date,
+        endDate = Some(date),
+        submissionId = submissionId,
+        capacity = "OWNER",
+        uarn = uarn,
+        address = "1 HIGH STREET, BRIGHTON",
+        localAuthorityRef = "44444",
+        client = ClientDetails(55555, "mock org")
+      )
+
+    val ownerPropertyLink: OwnerPropertyLink = OwnerPropertyLink(propertyLinkWithAgents)
+    val clientPropertyLink: ClientPropertyLink = ClientPropertyLink(propertyLinkWithClient)
+
+    val valuationHistory: ValuationHistory =
+      ValuationHistory(
+        asstRef = 125689,
+        listYear = "2017",
+        uarn = 923411,
+        billingAuthorityReference = "VOA1",
+        address = "1 HIGH STREET, BRIGHTON",
+        description = None,
+        specialCategoryCode = None,
+        compositeProperty = None,
+        effectiveDate = Some(date),
+        listAlterationDate = None,
+        numberOfPreviousProposals = None,
+        settlementCode = None,
+        totalAreaM2 = None,
+        costPerM2 = None,
+        rateableValue = Some(2599),
+        transitionalCertificate = None,
+        deletedIndicator = None,
+        valuationDetailsAvailable = None,
+        billingAuthCode = None,
+        listType = ListType.CURRENT,
+        allowedActions = List(AllowedAction.VIEW_DETAILED_VALUATION)
+      )
+
+    val assessmentService: AssessmentService =
+      new AssessmentService(
+        mockModernisedPropertyLinkApi,
+        mockModernisedValuationManagementApi,
+        mockPropertyLinkApi,
+        mockValuationManagementApi,
+        mockFeatureSwitch
+      )
+  }
+
+  "If the bstDownstream feature switch is disabled" when {
+
+    "getMyOrganisationsAssessments" should {
+      "return assessments" in new Setup {
+        when(mockModernisedPropertyLinkApi.getMyOrganisationsPropertyLink(mEq(submissionId))(any()))
+          .thenReturn(Future.successful(Some(ownerPropertyLink)))
+        when(mockModernisedValuationManagementApi.getValuationHistory(mEq(uarn), mEq(submissionId))(any()))
+          .thenReturn(Future.successful(Some(ValuationHistoryResponse(Seq(valuationHistory)))))
+
+        val res: OptionT[Future, Assessments] = assessmentService.getMyOrganisationsAssessments(submissionId)
+
+        val expectedAssessments: Assessments = Assessments(
+          propertyLink = propertyLinkWithAgents,
+          history = Seq(valuationHistory),
+          capacity = Some("OWNER")
+        )
+
+        res.value.futureValue shouldBe Some(expectedAssessments)
+      }
+    }
+
+    "getClientsAssessments" should {
+      "return assessments" in new Setup {
+        when(mockModernisedPropertyLinkApi.getClientsPropertyLink(mEq(submissionId))(any()))
+          .thenReturn(Future.successful(Some(clientPropertyLink)))
+        when(mockModernisedValuationManagementApi.getValuationHistory(mEq(uarn), mEq(submissionId))(any()))
+          .thenReturn(Future.successful(Some(ValuationHistoryResponse(Seq(valuationHistory)))))
+
+        val res: OptionT[Future, Assessments] = assessmentService.getClientsAssessments(submissionId)
+
+        val expectedAssessments: Assessments = Assessments(
+          propertyLink = propertyLinkWithClient,
+          history = Seq(valuationHistory),
+          capacity = Some("OWNER")
+        )
+
+        res.value.futureValue shouldBe Some(expectedAssessments)
+      }
     }
   }
 
-  "getClientsAssessments" should {
-    "return assessments" in new Setup {
-      when(mockExternalPropertyLinkApi.getClientsPropertyLink(mEq(submissionId))(any()))
-        .thenReturn(Future.successful(Some(clientPropertyLink)))
-      when(mockExternalValuationManagementApi.getValuationHistory(mEq(uarn), mEq(submissionId))(any()))
-        .thenReturn(Future.successful(Some(ValuationHistoryResponse(Seq(valuationHistory)))))
+  "If the bstDownstream feature switch is enabled" when {
 
-      val res: OptionT[Future, Assessments] = assessmentService.getClientsAssessments(submissionId)
+    "getMyOrganisationsAssessments" should {
+      "return assessments" in new Setup {
+        when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
+        when(mockPropertyLinkApi.getMyOrganisationsPropertyLink(mEq(submissionId))(any()))
+          .thenReturn(Future.successful(Some(ownerPropertyLink)))
+        when(mockValuationManagementApi.getValuationHistory(mEq(uarn), mEq(submissionId))(any()))
+          .thenReturn(Future.successful(Some(ValuationHistoryResponse(Seq(valuationHistory)))))
 
-      val expectedAssessments: Assessments = Assessments(
-        propertyLink = propertyLinkWithClient,
-        history = Seq(valuationHistory),
-        capacity = Some("OWNER")
-      )
+        val res: OptionT[Future, Assessments] = assessmentService.getMyOrganisationsAssessments(submissionId)
 
-      res.value.futureValue shouldBe Some(expectedAssessments)
+        val expectedAssessments: Assessments = Assessments(
+          propertyLink = propertyLinkWithAgents,
+          history = Seq(valuationHistory),
+          capacity = Some("OWNER")
+        )
+
+        res.value.futureValue shouldBe Some(expectedAssessments)
+      }
+    }
+
+    "getClientsAssessments" should {
+      "return assessments" in new Setup {
+        when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
+        when(mockPropertyLinkApi.getClientsPropertyLink(mEq(submissionId))(any()))
+          .thenReturn(Future.successful(Some(clientPropertyLink)))
+        when(mockValuationManagementApi.getValuationHistory(mEq(uarn), mEq(submissionId))(any()))
+          .thenReturn(Future.successful(Some(ValuationHistoryResponse(Seq(valuationHistory)))))
+
+        val res: OptionT[Future, Assessments] = assessmentService.getClientsAssessments(submissionId)
+
+        val expectedAssessments: Assessments = Assessments(
+          propertyLink = propertyLinkWithClient,
+          history = Seq(valuationHistory),
+          capacity = Some("OWNER")
+        )
+
+        res.value.futureValue shouldBe Some(expectedAssessments)
+      }
     }
   }
-
 }
