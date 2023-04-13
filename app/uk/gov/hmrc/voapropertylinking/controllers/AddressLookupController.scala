@@ -17,12 +17,15 @@
 package uk.gov.hmrc.voapropertylinking.controllers
 
 import cats.data.OptionT
+
 import javax.inject.Inject
 import models.modernised.addressmanagement.SimpleAddress
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
-import uk.gov.hmrc.voapropertylinking.connectors.modernised.AddressManagementApi
+import uk.gov.hmrc.voapropertylinking.config.FeatureSwitch
+import uk.gov.hmrc.voapropertylinking.connectors.bst.AddressManagementApi
+import uk.gov.hmrc.voapropertylinking.connectors.modernised.ModernisedAddressManagementApi
 import uk.gov.hmrc.voapropertylinking.utils.PostcodeValidator
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -30,24 +33,41 @@ import scala.concurrent.{ExecutionContext, Future}
 class AddressLookupController @Inject()(
       controllerComponents: ControllerComponents,
       authenticated: AuthenticatedActionBuilder,
-      addresses: AddressManagementApi
+      modernisedAddresses: ModernisedAddressManagementApi,
+      addresses: AddressManagementApi,
+      featureSwitch: FeatureSwitch
 )(implicit executionContext: ExecutionContext)
     extends PropertyLinkingBaseController(controllerComponents) {
 
   def find(postcode: String): Action[AnyContent] = authenticated.async { implicit request =>
     PostcodeValidator.validateAndFormat(postcode) match {
-      case Some(s) => addresses.find(s).map(r => Ok(Json.toJson(r)))
-      case None    => Future.successful(BadRequest)
+      case Some(s) =>
+        if (featureSwitch.isBstDownstreamEnabled) {
+          addresses.find(s).map(r => Ok(Json.toJson(r)))
+        } else {
+          modernisedAddresses.find(s).map(r => Ok(Json.toJson(r)))
+        }
+      case None => Future.successful(BadRequest)
     }
   }
 
   def get(addressUnitId: Long): Action[AnyContent] = authenticated.async { implicit request =>
-    OptionT(addresses.get(addressUnitId)).fold[Result](NotFound)(a => Ok(Json.toJson(a)))
+    OptionT {
+      if (featureSwitch.isBstDownstreamEnabled) {
+        addresses.get(addressUnitId)
+      } else {
+        modernisedAddresses.get(addressUnitId)
+      }
+    }.fold[Result](NotFound)(a => Ok(Json.toJson(a)))
   }
 
   def create: Action[JsValue] = authenticated.async(parse.json) { implicit request =>
     withJsonBody[SimpleAddress] { address =>
-      addresses.create(address).map(id => Created(Json.obj("id" -> id)))
+      if (featureSwitch.isBstDownstreamEnabled) {
+        addresses.create(address).map(id => Created(Json.obj("id" -> id)))
+      } else {
+        modernisedAddresses.create(address).map(id => Created(Json.obj("id" -> id)))
+      }
     }
   }
 }

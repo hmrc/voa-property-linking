@@ -106,7 +106,7 @@ class ValidationUtilsSpec extends BaseUnitSpec {
       "the component is provided but considered INVALID" in new Setup {
         implicit val key: String = "optionalLong"
         implicit val params: Params = Map("optionalLong" -> Seq("foobar"))
-        (readOption ifPresent asLong) should not be 'valid
+        (readOption ifPresent asLong) should not be Symbol("valid")
       }
     }
   }

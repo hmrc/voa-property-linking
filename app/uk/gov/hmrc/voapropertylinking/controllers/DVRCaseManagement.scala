@@ -16,22 +16,29 @@
 
 package uk.gov.hmrc.voapropertylinking.controllers
 
-import javax.inject.Inject
 import models.modernised.ccacasemanagement.requests.DetailedValuationRequest
+import play.api.Logger
 import play.api.http.HttpEntity
 import play.api.libs.json.{JsValue, Json}
+import play.api.libs.ws.WSResponse
 import play.api.mvc._
 import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
-import uk.gov.hmrc.voapropertylinking.connectors.modernised.{CCACaseManagementApi, ExternalValuationManagementApi}
+import uk.gov.hmrc.voapropertylinking.config.FeatureSwitch
+import uk.gov.hmrc.voapropertylinking.connectors.bst.{CCACaseManagementApi, ExternalValuationManagementApi}
+import uk.gov.hmrc.voapropertylinking.connectors.modernised.{ModernisedCCACaseManagementApi, ModernisedExternalValuationManagementApi}
 import uk.gov.hmrc.voapropertylinking.repositories.DVRRecordRepository
 
-import scala.concurrent.ExecutionContext
+import javax.inject.Inject
+import scala.concurrent.{ExecutionContext, Future}
 
 class DVRCaseManagement @Inject()(
       controllerComponents: ControllerComponents,
       authenticated: AuthenticatedActionBuilder,
-      dvrCaseManagementV2: CCACaseManagementApi,
-      externalValuationManagementApi: ExternalValuationManagementApi,
+      modernisedDvrCaseManagement: ModernisedCCACaseManagementApi,
+      modernisedValuationManagementApi: ModernisedExternalValuationManagementApi,
+      dvrCaseManagement: CCACaseManagementApi,
+      valuationManagementApi: ExternalValuationManagementApi,
+      featureSwitch: FeatureSwitch,
       dvrRecordRepository: DVRRecordRepository
 )(implicit executionContext: ExecutionContext)
     extends PropertyLinkingBaseController(controllerComponents) {
@@ -39,9 +46,14 @@ class DVRCaseManagement @Inject()(
   def requestDetailedValuationV2: Action[JsValue] = authenticated.async(parse.json) { implicit request =>
     withJsonBody[DetailedValuationRequest] { dvrRequest =>
       logger.info(s"detailed valuation request submitted: ${dvrRequest.submissionId}")
+
       for {
         _ <- dvrRecordRepository.create(dvrRequest)
-        _ <- dvrCaseManagementV2.requestDetailedValuation(dvrRequest)
+        _ <- if (featureSwitch.isBstDownstreamEnabled) {
+              dvrCaseManagement.requestDetailedValuation(dvrRequest)
+            } else {
+              modernisedDvrCaseManagement.requestDetailedValuation(dvrRequest)
+            }
       } yield Ok
     }
   }
@@ -51,8 +63,13 @@ class DVRCaseManagement @Inject()(
         uarn: Long,
         propertyLinkId: String
   ): Action[AnyContent] = authenticated.async { implicit request =>
-    externalValuationManagementApi
-      .getDvrDocuments(valuationId, uarn, propertyLinkId)
+    lazy val optDvrDocumentFiles =
+      if (featureSwitch.isBstDownstreamEnabled) {
+        valuationManagementApi.getDvrDocuments(valuationId, uarn, propertyLinkId)
+      } else {
+        modernisedValuationManagementApi.getDvrDocuments(valuationId, uarn, propertyLinkId)
+      }
+    optDvrDocumentFiles
       .map {
         case Some(response) =>
           logger.debug(s"dvr documents response: ${Json.prettyPrint(Json.toJson(response))}")
@@ -67,12 +84,17 @@ class DVRCaseManagement @Inject()(
         propertyLinkId: String,
         fileRef: String
   ): Action[AnyContent] = authenticated.async { implicit request =>
-    externalValuationManagementApi
-      .getDvrDocument(valuationId, uarn, propertyLinkId, fileRef)
+    lazy val response: Future[WSResponse] = {
+      if (featureSwitch.isBstDownstreamEnabled) {
+        valuationManagementApi.getDvrDocument(valuationId, uarn, propertyLinkId, fileRef)
+      } else {
+        modernisedValuationManagementApi.getDvrDocument(valuationId, uarn, propertyLinkId, fileRef)
+      }
+    }
+    response
       .map { document =>
         val contentType =
           document.headers.mapValues(_.mkString(",")).getOrElse(CONTENT_TYPE, "application/octet-stream")
-
         Ok.sendEntity(
           HttpEntity.Streamed(
             document.bodyAsSource,

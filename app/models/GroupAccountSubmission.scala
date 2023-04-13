@@ -29,7 +29,7 @@ case class GroupAccountSubmission(
       isAgent: Boolean,
       individualAccountSubmission: IndividualAccountSubmissionForOrganisation) {
 
-  def toApiAccount: APIGroupAccountSubmission =
+  def toApiAccount(time: Instant = Instant.now): APIGroupAccountSubmission =
     APIGroupAccountSubmission(
       id,
       companyName,
@@ -38,7 +38,7 @@ case class GroupAccountSubmission(
       phone,
       isAgent,
       None,
-      Instant.now(),
+      time,
       APIIndividualAccountForOrganisation(
         individualAccountSubmission.trustId,
         individualAccountSubmission.details.firstName,
@@ -48,7 +48,7 @@ case class GroupAccountSubmission(
         individualAccountSubmission.details.phone2,
         individualAccountSubmission.details.email,
         individualAccountSubmission.externalId,
-        Instant.now()
+        time
       )
     )
 }

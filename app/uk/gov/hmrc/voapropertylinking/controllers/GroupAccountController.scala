@@ -17,21 +17,26 @@
 package uk.gov.hmrc.voapropertylinking.controllers
 
 import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
+
 import javax.inject.Inject
 import models.{GroupAccountSubmission, GroupId, UpdatedOrganisationAccount}
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
+import uk.gov.hmrc.voapropertylinking.config.FeatureSwitch
+import uk.gov.hmrc.voapropertylinking.connectors.bst.CustomerManagementApi
 import uk.gov.hmrc.voapropertylinking.connectors.mdtp.BusinessRatesAuthConnector
-import uk.gov.hmrc.voapropertylinking.connectors.modernised.CustomerManagementApi
+import uk.gov.hmrc.voapropertylinking.connectors.modernised.ModernisedCustomerManagementApi
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class GroupAccountController @Inject()(
       controllerComponents: ControllerComponents,
       authenticated: AuthenticatedActionBuilder,
       auditingService: AuditingService,
+      modernisedCustomerManagementApi: ModernisedCustomerManagementApi,
       customerManagementApi: CustomerManagementApi,
+      featureSwitch: FeatureSwitch,
       brAuth: BusinessRatesAuthConnector
 )(implicit executionContext: ExecutionContext)
     extends PropertyLinkingBaseController(controllerComponents) {
@@ -43,47 +48,71 @@ class GroupAccountController @Inject()(
   }
 
   def get(organisationId: Long): Action[AnyContent] = authenticated.async { implicit request =>
-    customerManagementApi
-      .getDetailedGroupAccount(organisationId)
-      .map {
-        case Some(x) => Ok(Json.toJson(x))
-        case None    => NotFound
+    val optGroupAccount: Future[Option[models.GroupAccount]] =
+      if (featureSwitch.isBstDownstreamEnabled) {
+        customerManagementApi
+          .getDetailedGroupAccount(organisationId)
+      } else {
+        modernisedCustomerManagementApi
+          .getDetailedGroupAccount(organisationId)
       }
+    optGroupAccount.map {
+      case Some(x) => Ok(Json.toJson(x))
+      case None    => NotFound
+    }
   }
 
   def withGroupId(groupId: String): Action[AnyContent] = authenticated.async { implicit request =>
-    customerManagementApi
-      .findDetailedGroupAccountByGGID(groupId)
-      .map {
-        case Some(x) => Ok(Json.toJson(x))
-        case None    => NotFound
+    val optGroupAccount: Future[Option[models.GroupAccount]] =
+      if (featureSwitch.isBstDownstreamEnabled) {
+        customerManagementApi
+          .findDetailedGroupAccountByGGID(groupId)
+      } else {
+        modernisedCustomerManagementApi
+          .findDetailedGroupAccountByGGID(groupId)
       }
+    optGroupAccount.map {
+      case Some(x) => Ok(Json.toJson(x))
+      case None    => NotFound
+    }
   }
 
   def withAgentCode(agentCode: String): Action[AnyContent] = authenticated.async { implicit request =>
-    customerManagementApi
-      .withAgentCode(agentCode)
-      .map {
-        case Some(a) => Ok(Json.toJson(a))
-        case None    => NotFound
+    val optGroupAccount: Future[Option[models.GroupAccount]] =
+      if (featureSwitch.isBstDownstreamEnabled) {
+        customerManagementApi.withAgentCode(agentCode)
+      } else {
+        modernisedCustomerManagementApi.withAgentCode(agentCode)
       }
+    optGroupAccount.map {
+      case Some(a) => Ok(Json.toJson(a))
+      case None    => NotFound
+    }
   }
 
   def create(): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
     withJsonBody[GroupAccountSubmission] { acc =>
-      customerManagementApi
-        .createGroupAccount(acc)
-        .map { groupId =>
-          auditingService.sendEvent("Created", GroupAccount(groupId, acc))
-          Created(Json.toJson(groupId))
+      val createGroupAccountResponse: Future[GroupId] =
+        if (featureSwitch.isBstDownstreamEnabled) {
+          customerManagementApi.createGroupAccount(acc)
+        } else {
+          modernisedCustomerManagementApi.createGroupAccount(acc)
         }
+      createGroupAccountResponse.map { groupId =>
+        auditingService.sendEvent("Created", GroupAccount(groupId, acc))
+        Created(Json.toJson(groupId))
+      }
     }
   }
 
   def update(orgId: Long): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
     withJsonBody[UpdatedOrganisationAccount] { acc =>
       for {
-        _ <- customerManagementApi.updateGroupAccount(orgId, acc)
+        _ <- if (featureSwitch.isBstDownstreamEnabled) {
+              customerManagementApi.updateGroupAccount(orgId, acc)
+            } else {
+              modernisedCustomerManagementApi.updateGroupAccount(orgId, acc)
+            }
         _ <- brAuth.clearCache()
       } yield Ok
     }

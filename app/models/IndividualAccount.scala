@@ -49,7 +49,7 @@ case class IndividualAccountSubmission(
       organisationId: Long,
       details: IndividualDetails) {
 
-  def toAPIIndividualAccount =
+  def toAPIIndividualAccount(time: Instant = Instant.now): APIIndividualAccount =
     APIIndividualAccount(
       PersonData(
         identifyVerificationId = trustId,
@@ -61,7 +61,7 @@ case class IndividualAccountSubmission(
         mobileNumber = details.phone2,
         emailAddress = details.email,
         governmentGatewayExternalId = externalId,
-        effectiveFrom = Instant.now
+        effectiveFrom = time
       ))
 }
 

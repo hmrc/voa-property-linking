@@ -37,132 +37,273 @@ class CheckCaseControllerSpec extends BaseControllerSpec with AllMocks {
     val controller = new CheckCaseController(
       Helpers.stubControllerComponents(),
       preAuthenticatedActionBuilders(),
-      mockExternalCaseManagementApi)
+      mockModernisedExternalCaseManagementApi,
+      mockCaseManagementApi,
+      mockFeatureSwitch)
   }
 
-  "retrieving check cases" when {
-    "the client has check cases" should {
-      "return 200 Ok with correct response" in new Setup {
+  "Using the controller with the bstDownstream feature switch disabled" when {
+    "retrieving check cases" when {
+      "the client has check cases" should {
+        "return 200 Ok with correct response" in new Setup {
 
-        val checkCasesWithClient = CheckCasesWithClient(
-          1,
-          15,
-          1,
-          1,
-          List(
-            CheckCaseWithClient(
-              checkCaseSubmissionId = "CHK-12345",
-              checkCaseReference = "CHK12345",
-              checkCaseStatus = CheckCaseStatus.ASSIGNED,
-              address = "1 Test Road, Acneville",
-              uarn = 1L,
-              originatingAssessmentReference = 1L,
-              createdDateTime = LocalDateTime.now,
-              settledDate = None,
-              client = Client(1L, "test acne"),
-              submittedBy = "test user"
-            ))
-        )
+          val checkCasesWithClient: CheckCasesWithClient =
+            CheckCasesWithClient(
+              start = 1,
+              size = 15,
+              filterTotal = 1,
+              total = 1,
+              checkCases = List(
+                CheckCaseWithClient(
+                  checkCaseSubmissionId = "CHK-12345",
+                  checkCaseReference = "CHK12345",
+                  checkCaseStatus = CheckCaseStatus.ASSIGNED,
+                  address = "1 Test Road, Acneville",
+                  uarn = 1L,
+                  originatingAssessmentReference = 1L,
+                  createdDateTime = LocalDateTime.now,
+                  settledDate = None,
+                  client = Client(1L, "test acne"),
+                  submittedBy = "test user"
+                ))
+            )
 
-        when(mockExternalCaseManagementApi.getMyClientsCheckCases(any())(any()))
-          .thenReturn(Future.successful(checkCasesWithClient))
+          when(mockModernisedExternalCaseManagementApi.getMyClientsCheckCases(any())(any()))
+            .thenReturn(Future.successful(checkCasesWithClient))
 
-        val result: Future[Result] = controller.getCheckCases("PL1", "agent")(request)
+          val result: Future[Result] = controller.getCheckCases("PL1", "agent")(request)
 
-        status(result) shouldBe OK
-        inside(contentAsJson(result).validate[CheckCasesWithClient]) {
-          case JsSuccess(checkcases, _) =>
-            checkcases shouldBe checkCasesWithClient
+          status(result) shouldBe OK
+          inside(contentAsJson(result).validate[CheckCasesWithClient]) {
+            case JsSuccess(checkcases, _) =>
+              checkcases shouldBe checkCasesWithClient
+          }
+
+          verify(mockModernisedExternalCaseManagementApi, times(1)).getMyClientsCheckCases(any())(any())
+          verify(mockModernisedExternalCaseManagementApi, never()).getMyOrganisationCheckCases(any())(any())
+        }
+      }
+
+      "the owner has check cases" should {
+        "return 200 Ok with correct response" in new Setup {
+          val checkCasesWithAgent: CheckCasesWithAgent =
+            CheckCasesWithAgent(
+              start = 1,
+              size = 15,
+              filterTotal = 1,
+              total = 1,
+              checkCases = List(
+                CheckCaseWithAgent(
+                  checkCaseSubmissionId = "CHK-12345",
+                  checkCaseReference = "CHK12345",
+                  checkCaseStatus = CheckCaseStatus.ASSIGNED,
+                  address = "1 Test Road, Acneville",
+                  uarn = 1L,
+                  originatingAssessmentReference = 1L,
+                  createdDateTime = LocalDateTime.now,
+                  settledDate = None,
+                  agent = None,
+                  submittedBy = "test user"
+                ))
+            )
+
+          when(mockModernisedExternalCaseManagementApi.getMyOrganisationCheckCases(any())(any()))
+            .thenReturn(Future.successful(checkCasesWithAgent))
+
+          val result: Future[Result] = controller.getCheckCases("PL1", "client")(request)
+
+          status(result) shouldBe OK
+          inside(contentAsJson(result).validate[CheckCasesWithAgent]) {
+            case JsSuccess(checkcases, _) =>
+              checkcases shouldBe checkCasesWithAgent
+          }
+
+          verify(mockModernisedExternalCaseManagementApi, never()).getMyClientsCheckCases(any())(any())
+          verify(mockModernisedExternalCaseManagementApi, times(1)).getMyOrganisationCheckCases(any())(any())
+        }
+      }
+
+      "their is an error calling modernised the controller" should {
+        "return 200 OK with a defaulted CheckCaseWithAgent" in new Setup {
+
+          when(mockModernisedExternalCaseManagementApi.getMyOrganisationCheckCases(any())(any()))
+            .thenReturn(Future.failed(new Exception))
+
+          val result: Future[Result] = controller.getCheckCases("PL1", "client")(request)
+
+          status(result) shouldBe OK
+          inside(contentAsJson(result).validate[CheckCasesWithAgent]) {
+            case JsSuccess(checkcases, _) =>
+              checkcases shouldBe CheckCasesWithAgent(1, 100, 0, 0, Nil)
+          }
+
+          verify(mockModernisedExternalCaseManagementApi, never()).getMyClientsCheckCases(any())(any())
+          verify(mockModernisedExternalCaseManagementApi, times(1)).getMyOrganisationCheckCases(any())(any())
         }
 
-        verify(mockExternalCaseManagementApi, times(1)).getMyClientsCheckCases(any())(any())
-        verify(mockExternalCaseManagementApi, never()).getMyOrganisationCheckCases(any())(any())
+        "return 200 OK with a defaulted CheckCaseWithClient" in new Setup {
+
+          when(mockModernisedExternalCaseManagementApi.getMyClientsCheckCases(any())(any()))
+            .thenReturn(Future.failed(new Exception))
+
+          val result: Future[Result] = controller.getCheckCases("PL1", "agent")(request)
+
+          status(result) shouldBe OK
+          inside(contentAsJson(result).validate[CheckCasesWithClient]) {
+            case JsSuccess(checkcases, _) =>
+              checkcases shouldBe CheckCasesWithClient(1, 100, 0, 0, Nil)
+          }
+
+          verify(mockModernisedExternalCaseManagementApi, times(1)).getMyClientsCheckCases(any())(any())
+          verify(mockModernisedExternalCaseManagementApi, never()).getMyOrganisationCheckCases(any())(any())
+        }
+      }
+
+      "the party (projection) provided is invalid" should {
+        "return NOT_IMPLEMENTED with error message" in new Setup {
+          val result: Future[Result] = controller.getCheckCases("PL1", "INVALID")(request)
+
+          status(result) shouldBe NOT_IMPLEMENTED
+          contentAsString(result) shouldBe "invalid party (projection) supplied: INVALID"
+
+          verify(mockModernisedExternalCaseManagementApi, never()).getMyClientsCheckCases(any())(any())
+          verify(mockModernisedExternalCaseManagementApi, never()).getMyOrganisationCheckCases(any())(any())
+        }
       }
     }
+  }
 
-    "the owner has check cases" should {
-      "return 200 Ok with correct response" in new Setup {
-        val checkCasesWithAgent = CheckCasesWithAgent(
-          1,
-          15,
-          1,
-          1,
-          List(
-            CheckCaseWithAgent(
-              checkCaseSubmissionId = "CHK-12345",
-              checkCaseReference = "CHK12345",
-              checkCaseStatus = CheckCaseStatus.ASSIGNED,
-              address = "1 Test Road, Acneville",
-              uarn = 1L,
-              originatingAssessmentReference = 1L,
-              createdDateTime = LocalDateTime.now,
-              settledDate = None,
-              agent = None,
-              submittedBy = "test user"
-            ))
-        )
+  "Using the controller with the bstDownstream feature switch enabled" when {
+    "retrieving check cases" when {
+      "the client has check cases" should {
+        "return 200 Ok with correct response" in new Setup {
 
-        when(mockExternalCaseManagementApi.getMyOrganisationCheckCases(any())(any()))
-          .thenReturn(Future.successful(checkCasesWithAgent))
+          val checkCasesWithClient: CheckCasesWithClient =
+            CheckCasesWithClient(
+              start = 1,
+              size = 15,
+              filterTotal = 1,
+              total = 1,
+              checkCases = List(
+                CheckCaseWithClient(
+                  checkCaseSubmissionId = "CHK-12345",
+                  checkCaseReference = "CHK12345",
+                  checkCaseStatus = CheckCaseStatus.ASSIGNED,
+                  address = "1 Test Road, Acneville",
+                  uarn = 1L,
+                  originatingAssessmentReference = 1L,
+                  createdDateTime = LocalDateTime.now,
+                  settledDate = None,
+                  client = Client(1L, "test acne"),
+                  submittedBy = "test user"
+                ))
+            )
 
-        val result: Future[Result] = controller.getCheckCases("PL1", "client")(request)
+          when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
+          when(mockCaseManagementApi.getMyClientsCheckCases(any())(any()))
+            .thenReturn(Future.successful(checkCasesWithClient))
 
-        status(result) shouldBe OK
-        inside(contentAsJson(result).validate[CheckCasesWithAgent]) {
-          case JsSuccess(checkcases, _) =>
-            checkcases shouldBe checkCasesWithAgent
+          val result: Future[Result] = controller.getCheckCases("PL1", "agent")(request)
+
+          status(result) shouldBe OK
+          inside(contentAsJson(result).validate[CheckCasesWithClient]) {
+            case JsSuccess(checkcases, _) =>
+              checkcases shouldBe checkCasesWithClient
+          }
+
+          verify(mockCaseManagementApi, times(1)).getMyClientsCheckCases(any())(any())
+          verify(mockCaseManagementApi, never()).getMyOrganisationCheckCases(any())(any())
         }
-
-        verify(mockExternalCaseManagementApi, never()).getMyClientsCheckCases(any())(any())
-        verify(mockExternalCaseManagementApi, times(1)).getMyOrganisationCheckCases(any())(any())
-      }
-    }
-
-    "their is an error calling modernised the controller" should {
-      "return 200 OK with a defaulted CheckCaseWithAgent" in new Setup {
-
-        when(mockExternalCaseManagementApi.getMyOrganisationCheckCases(any())(any()))
-          .thenReturn(Future.failed(new Exception))
-
-        val result: Future[Result] = controller.getCheckCases("PL1", "client")(request)
-
-        status(result) shouldBe OK
-        inside(contentAsJson(result).validate[CheckCasesWithAgent]) {
-          case JsSuccess(checkcases, _) =>
-            checkcases shouldBe CheckCasesWithAgent(1, 100, 0, 0, Nil)
-        }
-
-        verify(mockExternalCaseManagementApi, never()).getMyClientsCheckCases(any())(any())
-        verify(mockExternalCaseManagementApi, times(1)).getMyOrganisationCheckCases(any())(any())
       }
 
-      "return 200 OK with a defaulted CheckCaseWithClient" in new Setup {
+      "the owner has check cases" should {
+        "return 200 Ok with correct response" in new Setup {
+          val checkCasesWithAgent: CheckCasesWithAgent =
+            CheckCasesWithAgent(
+              start = 1,
+              size = 15,
+              filterTotal = 1,
+              total = 1,
+              checkCases = List(
+                CheckCaseWithAgent(
+                  checkCaseSubmissionId = "CHK-12345",
+                  checkCaseReference = "CHK12345",
+                  checkCaseStatus = CheckCaseStatus.ASSIGNED,
+                  address = "1 Test Road, Acneville",
+                  uarn = 1L,
+                  originatingAssessmentReference = 1L,
+                  createdDateTime = LocalDateTime.now,
+                  settledDate = None,
+                  agent = None,
+                  submittedBy = "test user"
+                ))
+            )
 
-        when(mockExternalCaseManagementApi.getMyClientsCheckCases(any())(any()))
-          .thenReturn(Future.failed(new Exception))
+          when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
+          when(mockCaseManagementApi.getMyOrganisationCheckCases(any())(any()))
+            .thenReturn(Future.successful(checkCasesWithAgent))
 
-        val result: Future[Result] = controller.getCheckCases("PL1", "agent")(request)
+          val result: Future[Result] = controller.getCheckCases("PL1", "client")(request)
 
-        status(result) shouldBe OK
-        inside(contentAsJson(result).validate[CheckCasesWithClient]) {
-          case JsSuccess(checkcases, _) =>
-            checkcases shouldBe CheckCasesWithClient(1, 100, 0, 0, Nil)
+          status(result) shouldBe OK
+          inside(contentAsJson(result).validate[CheckCasesWithAgent]) {
+            case JsSuccess(checkcases, _) =>
+              checkcases shouldBe checkCasesWithAgent
+          }
+
+          verify(mockCaseManagementApi, never()).getMyClientsCheckCases(any())(any())
+          verify(mockCaseManagementApi, times(1)).getMyOrganisationCheckCases(any())(any())
+        }
+      }
+
+      "their is an error calling modernised the controller" should {
+        "return 200 OK with a defaulted CheckCaseWithAgent" in new Setup {
+
+          when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
+          when(mockCaseManagementApi.getMyOrganisationCheckCases(any())(any()))
+            .thenReturn(Future.failed(new Exception))
+
+          val result: Future[Result] = controller.getCheckCases("PL1", "client")(request)
+
+          status(result) shouldBe OK
+          inside(contentAsJson(result).validate[CheckCasesWithAgent]) {
+            case JsSuccess(checkcases, _) =>
+              checkcases shouldBe CheckCasesWithAgent(1, 100, 0, 0, Nil)
+          }
+
+          verify(mockCaseManagementApi, never()).getMyClientsCheckCases(any())(any())
+          verify(mockCaseManagementApi, times(1)).getMyOrganisationCheckCases(any())(any())
         }
 
-        verify(mockExternalCaseManagementApi, times(1)).getMyClientsCheckCases(any())(any())
-        verify(mockExternalCaseManagementApi, never()).getMyOrganisationCheckCases(any())(any())
+        "return 200 OK with a defaulted CheckCaseWithClient" in new Setup {
+
+          when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
+          when(mockCaseManagementApi.getMyClientsCheckCases(any())(any()))
+            .thenReturn(Future.failed(new Exception))
+
+          val result: Future[Result] = controller.getCheckCases("PL1", "agent")(request)
+
+          status(result) shouldBe OK
+          inside(contentAsJson(result).validate[CheckCasesWithClient]) {
+            case JsSuccess(checkcases, _) =>
+              checkcases shouldBe CheckCasesWithClient(1, 100, 0, 0, Nil)
+          }
+
+          verify(mockCaseManagementApi, times(1)).getMyClientsCheckCases(any())(any())
+          verify(mockCaseManagementApi, never()).getMyOrganisationCheckCases(any())(any())
+        }
       }
-    }
 
-    "the party (projection) provided is invalid" should {
-      "return NOT_IMPLEMENTED with error message" in new Setup {
-        val result: Future[Result] = controller.getCheckCases("PL1", "INVALID")(request)
+      "the party (projection) provided is invalid" should {
+        "return NOT_IMPLEMENTED with error message" in new Setup {
+          val result: Future[Result] = controller.getCheckCases("PL1", "INVALID")(request)
 
-        status(result) shouldBe NOT_IMPLEMENTED
-        contentAsString(result) shouldBe "invalid party (projection) supplied: INVALID"
+          status(result) shouldBe NOT_IMPLEMENTED
+          contentAsString(result) shouldBe "invalid party (projection) supplied: INVALID"
 
-        verify(mockExternalCaseManagementApi, never()).getMyClientsCheckCases(any())(any())
-        verify(mockExternalCaseManagementApi, never()).getMyOrganisationCheckCases(any())(any())
+          verify(mockCaseManagementApi, never()).getMyClientsCheckCases(any())(any())
+          verify(mockCaseManagementApi, never()).getMyOrganisationCheckCases(any())(any())
+        }
       }
     }
   }

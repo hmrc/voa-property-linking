@@ -26,6 +26,8 @@ import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
+import uk.gov.hmrc.voapropertylinking.config.FeatureSwitch
+import uk.gov.hmrc.voapropertylinking.connectors.bst._
 import uk.gov.hmrc.voapropertylinking.connectors.mdtp.BusinessRatesAuthConnector
 import uk.gov.hmrc.voapropertylinking.connectors.modernised._
 import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
@@ -33,46 +35,77 @@ import uk.gov.hmrc.voapropertylinking.services.{AssessmentService, PropertyLinki
 
 trait AllMocks extends MockitoSugar { me: BeforeAndAfterEach =>
 
+  //Modernised Connectors
+  val mockModernisedAddressManagementApi: ModernisedAddressManagementApi = mock[ModernisedAddressManagementApi]
+  val mockModernisedAuthorisationManagementApi: ModernisedAuthorisationManagementApi =
+    mock[ModernisedAuthorisationManagementApi]
+  val mockModernisedCustomerManagementApi: ModernisedCustomerManagementApi = mock[ModernisedCustomerManagementApi]
+  val mockModernisedCCACaseManagementApi: ModernisedCCACaseManagementApi = mock[ModernisedCCACaseManagementApi]
+  val mockModernisedExternalCaseManagementApi: ModernisedExternalCaseManagementApi =
+    mock[ModernisedExternalCaseManagementApi]
+  val mockModernisedExternalPropertyLinkApi: ModernisedExternalPropertyLinkApi = mock[ModernisedExternalPropertyLinkApi]
+  val mockModernisedExternalValuationManagementApi: ModernisedExternalValuationManagementApi =
+    mock[ModernisedExternalValuationManagementApi]
+  val mockModernisedOrganisationManagementApi: ModernisedExternalOrganisationManagementApi =
+    mock[ModernisedExternalOrganisationManagementApi]
+
+  //BST Connectors
   val mockAddressManagementApi: AddressManagementApi = mock[AddressManagementApi]
-  val mockAssessmentService: AssessmentService = mock[AssessmentService]
-  val mockAuditingService: AuditingService = mock[AuditingService]
   val mockAuthorisationManagementApi: AuthorisationManagementApi = mock[AuthorisationManagementApi]
-  val mockBusinessRatesAuthConnector: BusinessRatesAuthConnector = mock[BusinessRatesAuthConnector]
   val mockCustomerManagementApi: CustomerManagementApi = mock[CustomerManagementApi]
+  val mockCCACaseManagementApi: CCACaseManagementApi = mock[CCACaseManagementApi]
+  val mockCaseManagementApi: ExternalCaseManagementApi = mock[ExternalCaseManagementApi]
+  val mockPropertyLinkApi: ExternalPropertyLinkApi = mock[ExternalPropertyLinkApi]
+  val mockValuationManagementApi: ExternalValuationManagementApi = mock[ExternalValuationManagementApi]
+  val mockOrganisationManagementApi: ExternalOrganisationManagementApi = mock[ExternalOrganisationManagementApi]
+
+  //MDTP connectors
+  val mockBusinessRatesAuthConnector: BusinessRatesAuthConnector = mock[BusinessRatesAuthConnector]
+
+  val mockAssessmentService: AssessmentService = mock[AssessmentService]
+  val mockPropertyLinkingService: PropertyLinkingService = mock[PropertyLinkingService]
+  val mockAuditingService: AuditingService = mock[AuditingService]
+
   val mockDefaultHttpClient: DefaultHttpClient = mock[DefaultHttpClient]
-  val mockExternalCaseManagementApi: ExternalCaseManagementApi = mock[ExternalCaseManagementApi]
-  val mockExternalPropertyLinkApi: ExternalPropertyLinkApi = mock[ExternalPropertyLinkApi]
-  val mockExternalValuationManagementApi: ExternalValuationManagementApi = mock[ExternalValuationManagementApi]
+  val mockVoaHttpClient: VoaHttpClient = mock[VoaHttpClient]
   val mockHttpResponse: HttpResponse = mock[HttpResponse]
   val mockMeter: Meter = mock[Meter]
   val mockMetricRegistry: MetricRegistry = mock[MetricRegistry]
   val mockMetrics: Metrics = mock[Metrics]
-  val mockOrganisationManagementApi: ExternalOrganisationManagementApi = mock[ExternalOrganisationManagementApi]
-  val mockPropertyLinkingService: PropertyLinkingService = mock[PropertyLinkingService]
   val mockServicesConfig: ServicesConfig = mock[ServicesConfig]
-  val mockVoaHttpClient: VoaHttpClient = mock[VoaHttpClient]
   val mockWSRequest: WSRequest = mock[WSRequest]
+
+  val mockFeatureSwitch: FeatureSwitch = mock[FeatureSwitch]
 
   override protected def beforeEach(): Unit =
     Seq(
+      mockModernisedAddressManagementApi,
+      mockModernisedAuthorisationManagementApi,
+      mockModernisedCustomerManagementApi,
+      mockModernisedExternalCaseManagementApi,
+      mockModernisedExternalPropertyLinkApi,
+      mockModernisedExternalValuationManagementApi,
+      mockModernisedOrganisationManagementApi,
       mockAddressManagementApi,
+      mockAuthorisationManagementApi,
+      mockCustomerManagementApi,
+      mockCCACaseManagementApi,
+      mockCaseManagementApi,
+      mockPropertyLinkApi,
+      mockValuationManagementApi,
+      mockOrganisationManagementApi,
+      mockBusinessRatesAuthConnector,
       mockAssessmentService,
       mockAuditingService,
-      mockAuthorisationManagementApi,
-      mockBusinessRatesAuthConnector,
-      mockCustomerManagementApi,
+      mockPropertyLinkingService,
       mockDefaultHttpClient,
-      mockExternalCaseManagementApi,
-      mockExternalPropertyLinkApi,
-      mockExternalValuationManagementApi,
+      mockVoaHttpClient,
       mockHttpResponse,
       mockMeter,
       mockMetricRegistry,
       mockMetrics,
-      mockOrganisationManagementApi,
-      mockPropertyLinkingService,
       mockServicesConfig,
-      mockVoaHttpClient,
-      mockWSRequest
+      mockWSRequest,
+      mockFeatureSwitch
     ).foreach(Mockito.reset(_))
 }
