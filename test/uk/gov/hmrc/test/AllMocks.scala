@@ -37,8 +37,6 @@ trait AllMocks extends MockitoSugar { me: BeforeAndAfterEach =>
 
   //Modernised Connectors
   val mockModernisedAddressManagementApi: ModernisedAddressManagementApi = mock[ModernisedAddressManagementApi]
-  val mockModernisedAuthorisationManagementApi: ModernisedAuthorisationManagementApi =
-    mock[ModernisedAuthorisationManagementApi]
   val mockModernisedCustomerManagementApi: ModernisedCustomerManagementApi = mock[ModernisedCustomerManagementApi]
   val mockModernisedCCACaseManagementApi: ModernisedCCACaseManagementApi = mock[ModernisedCCACaseManagementApi]
   val mockModernisedExternalCaseManagementApi: ModernisedExternalCaseManagementApi =
@@ -51,7 +49,6 @@ trait AllMocks extends MockitoSugar { me: BeforeAndAfterEach =>
 
   //BST Connectors
   val mockAddressManagementApi: AddressManagementApi = mock[AddressManagementApi]
-  val mockAuthorisationManagementApi: AuthorisationManagementApi = mock[AuthorisationManagementApi]
   val mockCustomerManagementApi: CustomerManagementApi = mock[CustomerManagementApi]
   val mockCCACaseManagementApi: CCACaseManagementApi = mock[CCACaseManagementApi]
   val mockCaseManagementApi: ExternalCaseManagementApi = mock[ExternalCaseManagementApi]
@@ -80,14 +77,12 @@ trait AllMocks extends MockitoSugar { me: BeforeAndAfterEach =>
   override protected def beforeEach(): Unit =
     Seq(
       mockModernisedAddressManagementApi,
-      mockModernisedAuthorisationManagementApi,
       mockModernisedCustomerManagementApi,
       mockModernisedExternalCaseManagementApi,
       mockModernisedExternalPropertyLinkApi,
       mockModernisedExternalValuationManagementApi,
       mockModernisedOrganisationManagementApi,
       mockAddressManagementApi,
-      mockAuthorisationManagementApi,
       mockCustomerManagementApi,
       mockCCACaseManagementApi,
       mockCaseManagementApi,

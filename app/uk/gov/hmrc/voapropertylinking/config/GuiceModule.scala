@@ -79,7 +79,6 @@ class GuiceModule(
         "voa.createPropertyLink"               -> "bst.resources.externalPropertyLink.createPropertyLink.path",
         "voa.createPropertyLinkOnClientBehalf" -> "bst.resources.externalPropertyLink.createPropertyLinkOnClientBehalf.path",
         "voa.revokeClientsPropertyLink"        -> "bst.resources.externalPropertyLink.revokeMyClientsPropertyLink.path",
-        "voa.representationRequestResponse"    -> "bst.resources.authorisationManagementApi.representationRequestResponse.path",
         "voa.agentAppointmentChanges"          -> "bst.resources.organisationManagementApi.agentAppointmentChanges.path",
         "voa.myAgentDetails"                   -> "bst.resources.organisationManagementApi.myAgentDetails.path"
       ),
@@ -102,7 +101,6 @@ class GuiceModule(
         "voa.modernised.createPropertyLink"               -> "voa.resources.externalPropertyLink.createPropertyLink.path",
         "voa.modernised.createPropertyLinkOnClientBehalf" -> "voa.resources.externalPropertyLink.createPropertyLinkOnClientBehalf.path",
         "voa.modernised.revokeClientsPropertyLink"        -> "voa.resources.externalPropertyLink.revokeMyClientsPropertyLink.path",
-        "voa.modernised.representationRequestResponse"    -> "voa.resources.authorisationManagementApi.representationRequestResponse.path",
         "voa.modernised.agentAppointmentChanges"          -> "voa.resources.organisationManagementApi.agentAppointmentChanges.path",
         "voa.modernised.myAgentDetails"                   -> "voa.resources.organisationManagementApi.myAgentDetails.path"
       ),
