@@ -18,7 +18,7 @@ package uk.gov.hmrc.voapropertylinking.controllers
 
 import basespecs.BaseControllerSpec
 import models.searchApi.{OwnerAuthResult => ModernisedOwnerAuthResult}
-import models.{APIRepresentationResponse, PaginationParams}
+import models.PaginationParams
 import org.mockito.ArgumentMatchers.{any, eq => mEq}
 import org.mockito.Mockito._
 import play.api.libs.json.Json
