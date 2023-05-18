@@ -1,7 +1,5 @@
 # microservice specific routes
 
-GET          /property-representations/validate-agent-code/:agentCode/:authorisationId        uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.validateAgentCode(agentCode:Long, authorisationId: Long)
-PUT          /property-representations/response                                               uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.response()
 
 GET          /my-organisation/agent/:agentCode                                                uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.getAgentDetails(agentCode: Long)
 POST         /my-organisation/agent/assign                                                    uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.assignAgent()

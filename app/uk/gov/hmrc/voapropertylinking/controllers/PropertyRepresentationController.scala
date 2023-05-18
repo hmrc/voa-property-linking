@@ -23,7 +23,7 @@ import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
 import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import uk.gov.hmrc.voapropertylinking.config.FeatureSwitch
-import uk.gov.hmrc.voapropertylinking.connectors.bst.{AuthorisationManagementApi, ExternalOrganisationManagementApi, ExternalPropertyLinkApi}
+import uk.gov.hmrc.voapropertylinking.connectors.bst.{ExternalOrganisationManagementApi, ExternalPropertyLinkApi}
 import uk.gov.hmrc.voapropertylinking.connectors.modernised._
 import uk.gov.hmrc.voapropertylinking.errorhandler.models.ErrorResponse
 import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation.AppointmentChangeResponse._
@@ -35,48 +35,14 @@ import scala.concurrent.{ExecutionContext, Future}
 class PropertyRepresentationController @Inject()(
       controllerComponents: ControllerComponents,
       authenticated: AuthenticatedActionBuilder,
-      modernisedAuthorisationManagementApi: ModernisedAuthorisationManagementApi,
       modernisedOrganisationManagementApi: ModernisedExternalOrganisationManagementApi,
       modernisedExternalPropertyLinkApi: ModernisedExternalPropertyLinkApi,
-      authorisationManagementApi: AuthorisationManagementApi,
       organisationManagementApi: ExternalOrganisationManagementApi,
       propertyLinkApi: ExternalPropertyLinkApi,
       featureSwitch: FeatureSwitch,
       auditingService: AuditingService
 )(implicit executionContext: ExecutionContext)
     extends PropertyLinkingBaseController(controllerComponents) {
-
-  def validateAgentCode(agentCode: Long, authorisationId: Long): Action[AnyContent] = authenticated.async {
-    implicit request =>
-      lazy val validateAgentCodeResponse: Future[Either[Long, String]] =
-        if (featureSwitch.isBstDownstreamEnabled) {
-          authorisationManagementApi.validateAgentCode(agentCode, authorisationId)
-        } else {
-          modernisedAuthorisationManagementApi.validateAgentCode(agentCode, authorisationId)
-        }
-      validateAgentCodeResponse
-        .map { errorOrOrganisationId =>
-          errorOrOrganisationId.fold(
-            orgId => Ok(Json.obj("organisationId"    -> orgId)),
-            errorString => Ok(Json.obj("failureCode" -> errorString)))
-        }
-  }
-
-  def response(): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
-    withJsonBody[APIRepresentationResponse] { representationResponse =>
-      lazy val response: Future[HttpResponse] =
-        if (featureSwitch.isBstDownstreamEnabled) {
-          authorisationManagementApi.response(representationResponse)
-        } else {
-          modernisedAuthorisationManagementApi.response(representationResponse)
-        }
-      response
-        .map { _ =>
-          auditingService.sendEvent("agent representation response", representationResponse)
-          Ok("")
-        }
-    }
-  }
 
   def revokeClientProperty(submissionId: String): Action[AnyContent] = authenticated.async { implicit request =>
     if (featureSwitch.isBstDownstreamEnabled) {

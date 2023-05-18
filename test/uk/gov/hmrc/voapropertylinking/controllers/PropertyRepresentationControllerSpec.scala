@@ -18,7 +18,7 @@ package uk.gov.hmrc.voapropertylinking.controllers
 
 import basespecs.BaseControllerSpec
 import models.searchApi.{OwnerAuthResult => ModernisedOwnerAuthResult}
-import models.{APIRepresentationResponse, PaginationParams}
+import models.PaginationParams
 import org.mockito.ArgumentMatchers.{any, eq => mEq}
 import org.mockito.Mockito._
 import play.api.libs.json.Json
@@ -35,10 +35,8 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
       new PropertyRepresentationController(
         controllerComponents = Helpers.stubControllerComponents(),
         authenticated = preAuthenticatedActionBuilders(),
-        modernisedAuthorisationManagementApi = mockModernisedAuthorisationManagementApi,
         modernisedOrganisationManagementApi = mockModernisedOrganisationManagementApi,
         modernisedExternalPropertyLinkApi = mockModernisedExternalPropertyLinkApi,
-        authorisationManagementApi = mockAuthorisationManagementApi,
         organisationManagementApi = mockOrganisationManagementApi,
         propertyLinkApi = mockPropertyLinkApi,
         featureSwitch = mockFeatureSwitch,
@@ -56,52 +54,6 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
   def calling: AfterWord = afterWord("calling")
 
   "If the bstDownstream feature switch is enabled" when {
-
-    "validateAgentCode" should {
-      "return OK 200" when {
-        "the agent code is valid" in new Setup {
-          when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
-          when(mockAuthorisationManagementApi.validateAgentCode(mEq(agentCode), mEq(authorisationId))(any()))
-            .thenReturn(Future.successful(orgId.asLeft[String]))
-
-          val result: Future[Result] = testController.validateAgentCode(agentCode, authorisationId)(FakeRequest())
-
-          status(result) shouldBe OK
-          contentAsJson(result) shouldBe Json.obj("organisationId" -> orgId)
-        }
-
-        "the agent code is NOT valid" in new Setup {
-          when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
-          when(mockAuthorisationManagementApi.validateAgentCode(mEq(agentCode), mEq(authorisationId))(any()))
-            .thenReturn(Future.successful("ERROR".asRight[Long]))
-
-          val result: Future[Result] = testController.validateAgentCode(agentCode, authorisationId)(FakeRequest())
-
-          status(result) shouldBe OK
-          contentAsJson(result) shouldBe Json.obj("failureCode" -> "ERROR")
-        }
-      }
-    }
-
-    "response" should {
-      "return OK 200" when {
-        "a valid representation response is POSTed" in new Setup {
-          val repResp: APIRepresentationResponse = APIRepresentationResponse(submissionId, 1L, "OUTCOME")
-
-          when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
-          when(mockAuthorisationManagementApi.response(mEq(repResp))(any()))
-            .thenReturn(Future.successful(emptyJsonHttpResponse(OK)))
-
-          val result: Future[Result] =
-            testController.response()(FakeRequest().withBody(Json.toJson(repResp)))
-
-          status(result) shouldBe OK
-
-          verify(mockAuditingService).sendEvent(mEq("agent representation response"), mEq(repResp))(any(), any(), any())
-        }
-      }
-    }
-
     "revoke client property" should {
       "return 204 NoContent" when {
         "property link submission id is provided" in new Setup {
@@ -299,48 +251,6 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
   }
 
   "If the bstDownstream feature switch is disabled" when calling {
-    "validateAgentCode" should {
-      "return OK 200" when {
-        "the agent code is valid" in new Setup {
-          when(mockModernisedAuthorisationManagementApi.validateAgentCode(mEq(agentCode), mEq(authorisationId))(any()))
-            .thenReturn(Future.successful(orgId.asLeft[String]))
-
-          val result: Future[Result] = testController.validateAgentCode(agentCode, authorisationId)(FakeRequest())
-
-          status(result) shouldBe OK
-          contentAsJson(result) shouldBe Json.obj("organisationId" -> orgId)
-        }
-
-        "the agent code is NOT valid" in new Setup {
-          when(mockModernisedAuthorisationManagementApi.validateAgentCode(mEq(agentCode), mEq(authorisationId))(any()))
-            .thenReturn(Future.successful("ERROR".asRight[Long]))
-
-          val result: Future[Result] = testController.validateAgentCode(agentCode, authorisationId)(FakeRequest())
-
-          status(result) shouldBe OK
-          contentAsJson(result) shouldBe Json.obj("failureCode" -> "ERROR")
-        }
-
-      }
-    }
-
-    "response" should {
-      "return OK 200" when {
-        "a valid representation response is POSTed" in new Setup {
-          val repResp: APIRepresentationResponse = APIRepresentationResponse(submissionId, 1L, "OUTCOME")
-          when(mockModernisedAuthorisationManagementApi.response(mEq(repResp))(any()))
-            .thenReturn(Future.successful(emptyJsonHttpResponse(OK)))
-
-          val result: Future[Result] =
-            testController.response()(FakeRequest().withBody(Json.toJson(repResp)))
-
-          status(result) shouldBe OK
-
-          verify(mockAuditingService).sendEvent(mEq("agent representation response"), mEq(repResp))(any(), any(), any())
-        }
-      }
-    }
-
     "revoke client property" should {
       "return 204 NoContent" when {
         "property link submission id is provided" in new Setup {
