@@ -48,7 +48,8 @@ class DVRRepository @Inject()(mongo: MongoComponent, @Named("dvrCollectionName")
           IndexOptions()
             .name("ttl")
             .unique(false)
-            .expireAfter(183L, DAYS)))
+            .expireAfter(183L, DAYS))),
+      replaceIndexes = true
     ) with DVRRecordRepository with Logging with MongoFormats {
 
   override def create(request: DetailedValuationRequest): Future[Unit] =
