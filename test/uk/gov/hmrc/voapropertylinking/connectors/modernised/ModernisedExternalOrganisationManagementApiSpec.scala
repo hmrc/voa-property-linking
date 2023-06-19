@@ -49,7 +49,8 @@ class ModernisedExternalOrganisationManagementApiSpec extends BaseUnitSpec {
             agentRepresentativeCode = 12345L,
             action = AppointmentAction.APPOINT,
             scope = AppointmentScope.ALL_PROPERTIES,
-            propertyLinks = None))
+            propertyLinks = None,
+            listYears = None))
         .futureValue shouldBe appointmentChangeResponse
 
     }

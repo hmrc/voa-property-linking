@@ -24,7 +24,8 @@ case class AppointmentChangesRequest(
       agentRepresentativeCode: Long,
       action: AppointmentAction,
       scope: AppointmentScope,
-      propertyLinks: Option[List[String]]
+      propertyLinks: Option[List[String]],
+      listYears: Option[List[String]]
 )
 
 object AppointmentChangesRequest {
@@ -35,7 +36,8 @@ object AppointmentChangesRequest {
       agentRepresentativeCode = appointAgent.agentRepresentativeCode,
       action = AppointmentAction.APPOINT,
       scope = AppointmentScope.withName(appointAgent.scope),
-      propertyLinks = None
+      propertyLinks = None,
+      listYears = None
     )
 
   def apply(appointAgent: AssignAgentToSomeProperties): AppointmentChangesRequest =
@@ -43,7 +45,8 @@ object AppointmentChangesRequest {
       agentRepresentativeCode = appointAgent.agentCode,
       action = AppointmentAction.APPOINT,
       scope = AppointmentScope.PROPERTY_LIST,
-      propertyLinks = Some(appointAgent.propertyLinkIds)
+      propertyLinks = Some(appointAgent.propertyLinkIds),
+      listYears = None
     )
 
   def apply(unassignAgent: UnassignAgent): AppointmentChangesRequest =
@@ -51,7 +54,8 @@ object AppointmentChangesRequest {
       agentRepresentativeCode = unassignAgent.agentRepresentativeCode,
       action = AppointmentAction.REVOKE,
       scope = AppointmentScope.withName(unassignAgent.scope),
-      propertyLinks = None
+      propertyLinks = None,
+      listYears = None
     )
 
   def apply(unassignAgent: UnassignAgentFromSomeProperties): AppointmentChangesRequest =
@@ -59,7 +63,8 @@ object AppointmentChangesRequest {
       agentRepresentativeCode = unassignAgent.agentCode,
       action = AppointmentAction.REVOKE,
       scope = AppointmentScope.PROPERTY_LIST,
-      propertyLinks = Some(unassignAgent.propertyLinkIds)
+      propertyLinks = Some(unassignAgent.propertyLinkIds),
+      listYears = None
     )
 
   def apply(removeAgent: RemoveAgentFromIpOrganisation): AppointmentChangesRequest =
@@ -67,6 +72,7 @@ object AppointmentChangesRequest {
       agentRepresentativeCode = removeAgent.agentRepresentativeCode,
       action = AppointmentAction.REVOKE,
       scope = AppointmentScope.RELATIONSHIP,
-      propertyLinks = None
+      propertyLinks = None,
+      listYears = None
     )
 }
