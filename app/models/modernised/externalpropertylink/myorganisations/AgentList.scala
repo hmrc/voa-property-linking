@@ -25,7 +25,8 @@ case class AgentSummary(
       representativeCode: Long,
       name: String,
       appointedDate: LocalDate,
-      propertyCount: Int
+      propertyCount: Int,
+      listYears: Option[List[String]] = None
 )
 
 object AgentSummary {
