@@ -190,7 +190,8 @@ trait FakeObjects {
     representativeCode = 987L,
     name = "Some Agent Org",
     appointedDate = LocalDate.now().minusDays(1),
-    propertyCount = 2
+    propertyCount = 2,
+    listYears = Some(List("2017"))
   )
   val organisationsAgentsList = AgentList(resultCount = 1, agents = List(agentSummary))
   val emptyOrganisationsAgentsList = AgentList(resultCount = 0, agents = List.empty)

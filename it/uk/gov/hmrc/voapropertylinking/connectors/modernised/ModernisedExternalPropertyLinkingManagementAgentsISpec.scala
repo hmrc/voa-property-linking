@@ -268,6 +268,44 @@ class ModernisedExternalPropertyLinkingManagementAgentsISpec
           |    "representativeCode" : 987,
           |    "name" : "Some Agent Org",
           |    "appointedDate" : "$date",
+          |    "propertyCount" : 2,
+          |    "listYears" : ["2017"]
+          |  } ]
+          |}
+          |""".stripMargin
+      )
+      val agentsList: AgentList = AgentList(
+        resultCount = 1,
+        agents = List(
+          AgentSummary(
+            organisationId = 1L,
+            representativeCode = 987L,
+            name = "Some Agent Org",
+            appointedDate = date,
+            propertyCount = 2,
+            listYears = Some(List("2017"))
+          )
+        )
+      )
+
+      stubGetMyOrganisationsAgents()(OK, responseJson)
+
+      val result: AgentList = await(connector.getMyOrganisationsAgents())
+
+      result shouldBe agentsList
+    }
+
+    "return an AgentsList without listYears if not present on success" in new TestSetup {
+      val date = LocalDate.parse("2023-04-02")
+      val responseJson: JsValue = Json.parse(
+        s"""
+          |{
+          |"resultCount" : 1,
+          |  "agents" : [ {
+          |    "organisationId" : 1,
+          |    "representativeCode" : 987,
+          |    "name" : "Some Agent Org",
+          |    "appointedDate" : "$date",
           |    "propertyCount" : 2
           |  } ]
           |}
@@ -292,6 +330,7 @@ class ModernisedExternalPropertyLinkingManagementAgentsISpec
 
       result shouldBe agentsList
     }
+
     "throw an exception" when {
       "a success code is received but with an invalid body" in new TestSetup {
         stubGetMyOrganisationsAgents()(OK, Json.obj("invalid" -> "body"))
