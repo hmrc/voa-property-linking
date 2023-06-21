@@ -258,13 +258,12 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
 
           val result: Future[Result] =
             testController.submitAppointmentChanges()(
-              FakeRequest().withBody(Json.parse(
-                """{
-                  |  "agentRepresentativeCode" : 123,
-                  |  "action" : "APPOINT",
-                  |  "scope"  : "LIST_YEAR",
-                  |  "listYears": ["2017"]
-                  |}""".stripMargin)))
+              FakeRequest().withBody(Json.parse("""{
+                                                  |  "agentRepresentativeCode" : 123,
+                                                  |  "action" : "APPOINT",
+                                                  |  "scope"  : "LIST_YEAR",
+                                                  |  "listYears": ["2017"]
+                                                  |}""".stripMargin)))
 
           status(result) shouldBe ACCEPTED
         }
@@ -273,11 +272,9 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
         "invalid removeAgentFromOrganisation agent request is POSTed" in new Setup {
 
           val result: Future[Result] =
-            testController.submitAppointmentChanges()(
-              FakeRequest().withBody(Json.parse(
-                """{
-                  |  "agentRepresentativeCode" : 1
-                  |}""".stripMargin)))
+            testController.submitAppointmentChanges()(FakeRequest().withBody(Json.parse("""{
+                                                                                          |  "agentRepresentativeCode" : 1
+                                                                                          |}""".stripMargin)))
 
           status(result) shouldBe BAD_REQUEST
         }
@@ -500,13 +497,12 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
 
           val result: Future[Result] =
             testController.submitAppointmentChanges()(
-              FakeRequest().withBody(Json.parse(
-                """{
-                  |  "agentRepresentativeCode" : 123,
-                  |  "action" : "APPOINT",
-                  |  "scope"  : "LIST_YEAR",
-                  |  "listYears": ["2017"]
-                  |}""".stripMargin)))
+              FakeRequest().withBody(Json.parse("""{
+                                                  |  "agentRepresentativeCode" : 123,
+                                                  |  "action" : "APPOINT",
+                                                  |  "scope"  : "LIST_YEAR",
+                                                  |  "listYears": ["2017"]
+                                                  |}""".stripMargin)))
 
           status(result) shouldBe ACCEPTED
         }
@@ -515,11 +511,9 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
         "invalid removeAgentFromOrganisation agent request is POSTed" in new Setup {
 
           val result: Future[Result] =
-            testController.submitAppointmentChanges()(
-              FakeRequest().withBody(Json.parse(
-                """{
-                  |  "agentRepresentativeCode" : 1
-                  |}""".stripMargin)))
+            testController.submitAppointmentChanges()(FakeRequest().withBody(Json.parse("""{
+                                                                                          |  "agentRepresentativeCode" : 1
+                                                                                          |}""".stripMargin)))
 
           status(result) shouldBe BAD_REQUEST
         }
