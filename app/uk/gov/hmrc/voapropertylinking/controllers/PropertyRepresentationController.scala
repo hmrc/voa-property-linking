@@ -65,6 +65,20 @@ class PropertyRepresentationController @Inject()(
     }
   }
 
+  def submitAppointmentChanges(): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
+    withJsonBody[AppointmentChangesRequest] { appointRequest =>
+      lazy val agentAppointmentChanges: Future[AppointmentChangeResponse] =
+        if (featureSwitch.isBstDownstreamEnabled) {
+          organisationManagementApi.agentAppointmentChanges(appointRequest)
+        } else {
+          modernisedOrganisationManagementApi.agentAppointmentChanges(appointRequest)
+        }
+      agentAppointmentChanges.map { response =>
+        Accepted(Json.toJson(response))
+      }
+    }
+  }
+
   def assignAgent(): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
     withJsonBody[AssignAgent] { appointAgent =>
       lazy val agentAppointmentChanges: Future[AppointmentChangeResponse] =

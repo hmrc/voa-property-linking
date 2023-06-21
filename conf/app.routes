@@ -7,6 +7,7 @@ POST         /my-organisation/agent/assign-to-some-properties                   
 POST         /my-organisation/agent/remove-from-organisation                                  uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.removeAgentFromOrganisation()
 POST         /my-organisation/agent/unassign                                                  uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.unassignAgent()
 POST         /my-organisation/agent/unassign-from-some-properties                             uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.unassignAgentFromSomeProperties()
+POST         /my-organisation/agent/submit-appointment-changes                                uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.submitAppointmentChanges()
 
 DELETE       /property-representations/revoke-client-property/:submissionId                   uk.gov.hmrc.voapropertylinking.controllers.PropertyRepresentationController.revokeClientProperty(submissionId: String)
 
