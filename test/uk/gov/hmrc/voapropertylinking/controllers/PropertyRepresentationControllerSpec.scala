@@ -248,6 +248,38 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
         }
       }
     }
+
+    "submitAppointmentChanges" should {
+      "return 202 Accepted" when {
+        "valid JSON payload is POSTed" in new Setup {
+          when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
+          when(mockOrganisationManagementApi.agentAppointmentChanges(any())(any(), any()))
+            .thenReturn(Future.successful(appointmentChangeResponse))
+
+          val result: Future[Result] =
+            testController.submitAppointmentChanges()(
+              FakeRequest().withBody(Json.parse("""{
+                                                  |  "agentRepresentativeCode" : 123,
+                                                  |  "action" : "APPOINT",
+                                                  |  "scope"  : "LIST_YEAR",
+                                                  |  "listYears": ["2017"]
+                                                  |}""".stripMargin)))
+
+          status(result) shouldBe ACCEPTED
+        }
+      }
+      "return 400 Bad Request" when {
+        "invalid removeAgentFromOrganisation agent request is POSTed" in new Setup {
+
+          val result: Future[Result] =
+            testController.submitAppointmentChanges()(FakeRequest().withBody(Json.parse("""{
+                                                                                          |  "agentRepresentativeCode" : 1
+                                                                                          |}""".stripMargin)))
+
+          status(result) shouldBe BAD_REQUEST
+        }
+      }
+    }
   }
 
   "If the bstDownstream feature switch is disabled" when calling {
@@ -450,6 +482,38 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
               FakeRequest().withBody(Json.parse("""{
                                                   |  "agentRepresentativeCode" : 1
                                                   |}""".stripMargin)))
+
+          status(result) shouldBe BAD_REQUEST
+        }
+      }
+    }
+
+    "submitAppointmentChanges" should {
+      "return 202 Accepted" when {
+        "valid JSON payload is POSTed" in new Setup {
+
+          when(mockModernisedOrganisationManagementApi.agentAppointmentChanges(any())(any(), any()))
+            .thenReturn(Future.successful(appointmentChangeResponse))
+
+          val result: Future[Result] =
+            testController.submitAppointmentChanges()(
+              FakeRequest().withBody(Json.parse("""{
+                                                  |  "agentRepresentativeCode" : 123,
+                                                  |  "action" : "APPOINT",
+                                                  |  "scope"  : "LIST_YEAR",
+                                                  |  "listYears": ["2017"]
+                                                  |}""".stripMargin)))
+
+          status(result) shouldBe ACCEPTED
+        }
+      }
+      "return 400 Bad Request" when {
+        "invalid removeAgentFromOrganisation agent request is POSTed" in new Setup {
+
+          val result: Future[Result] =
+            testController.submitAppointmentChanges()(FakeRequest().withBody(Json.parse("""{
+                                                                                          |  "agentRepresentativeCode" : 1
+                                                                                          |}""".stripMargin)))
 
           status(result) shouldBe BAD_REQUEST
         }

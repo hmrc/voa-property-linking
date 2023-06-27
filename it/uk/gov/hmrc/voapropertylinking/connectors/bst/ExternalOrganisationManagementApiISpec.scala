@@ -10,9 +10,8 @@ import uk.gov.hmrc.voapropertylinking.BaseIntegrationSpec
 import uk.gov.hmrc.voapropertylinking.auth.{Principal, RequestWithPrincipal}
 import uk.gov.hmrc.voapropertylinking.connectors.errorhandler.VoaClientException
 import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation
-import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation.{AgentDetails, AppointmentChangeResponse, AppointmentChangesRequest, AssignAgent}
+import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation.{AgentDetails, AppointmentAction, AppointmentChangeResponse, AppointmentChangesRequest, AppointmentScope, AssignAgent}
 import uk.gov.hmrc.voapropertylinking.stubs.bst.ExternalOrganisationManagementStub
-import uk.gov.hmrc.voapropertylinking.stubs.modernised.ModernisedExternalOrganisationManagementStub
 
 import scala.concurrent.ExecutionContext
 
@@ -105,6 +104,41 @@ class ExternalOrganisationManagementApiISpec extends BaseIntegrationSpec with Ex
           await(connector.getAgentDetails(agentId))
         }
       }
+    }
+  }
+  "agentAppointmentChanges" should {
+    "return a valid response for the complete request " in new TestSetup {
+
+      val agentId = 123456789L
+      val requestJson: JsValue =
+        Json.parse(
+          s"""{
+             |  "agentRepresentativeCode" : $agentId,
+             |  "action": "APPOINT",
+             |  "scope"  : "LIST_YEAR",
+             |  "propertyLinks" : ["PL123FRED", "PL654CARL"],
+             |  "listYears": ["2017", "2023"]
+             |}""".stripMargin)
+
+      val requestModel = AppointmentChangesRequest(
+        agentRepresentativeCode = agentId,
+        action = AppointmentAction.APPOINT,
+        scope = AppointmentScope.LIST_YEAR,
+        propertyLinks = Some(List("PL123FRED", "PL654CARL")),
+        listYears = Some(List("2017", "2023"))
+      )
+
+      val apptChangeId = "change-id"
+      val responseJson: JsObject = Json.obj(
+        "agentAppointmentChangeId" -> apptChangeId
+      )
+      val expectedResponse: AppointmentChangeResponse = AppointmentChangeResponse(appointmentChangeId = apptChangeId)
+
+      stubAgentAppointmentChanges(requestJson)(OK, responseJson)
+
+      val result: AppointmentChangeResponse = await(connector.agentAppointmentChanges(requestModel))
+
+      result shouldBe expectedResponse
     }
   }
 
