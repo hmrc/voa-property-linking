@@ -81,7 +81,7 @@ object AppointmentChangesRequest {
       agentRepresentativeCode = changeRequest.agentRepresentativeCode,
       action = changeRequest.action,
       scope = changeRequest.scope,
-      propertyLinks = None,
+      propertyLinks = changeRequest.propertyLinks,
       listYears = changeRequest.listYears
     )
 }
