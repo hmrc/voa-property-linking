@@ -79,8 +79,8 @@ object AppointmentChangesRequest {
   def apply(changeRequest: AppointmentChangesRequest): AppointmentChangesRequest =
     AppointmentChangesRequest(
       agentRepresentativeCode = changeRequest.agentRepresentativeCode,
-      action = AppointmentAction.REVOKE,
-      scope = AppointmentScope.RELATIONSHIP,
+      action = changeRequest.action,
+      scope = changeRequest.scope,
       propertyLinks = None,
       listYears = changeRequest.listYears
     )
