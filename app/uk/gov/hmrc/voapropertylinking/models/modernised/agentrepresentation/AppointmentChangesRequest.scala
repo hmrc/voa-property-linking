@@ -75,4 +75,13 @@ object AppointmentChangesRequest {
       propertyLinks = None,
       listYears = None
     )
+  //TODO: remove all apply methods/hard coding of action/scope & just proxy the AppointmentChangesRequest through to backend.
+  def apply(changeRequest: AppointmentChangesRequest): AppointmentChangesRequest =
+    AppointmentChangesRequest(
+      agentRepresentativeCode = changeRequest.agentRepresentativeCode,
+      action = AppointmentAction.REVOKE,
+      scope = AppointmentScope.RELATIONSHIP,
+      propertyLinks = None,
+      listYears = changeRequest.listYears
+    )
 }
