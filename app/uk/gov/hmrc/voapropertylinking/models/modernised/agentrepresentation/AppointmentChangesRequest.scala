@@ -37,7 +37,7 @@ object AppointmentChangesRequest {
       action = AppointmentAction.APPOINT,
       scope = AppointmentScope.withName(appointAgent.scope),
       propertyLinks = None,
-      listYears = None
+      listYears = Some(List("2017", "2023"))
     )
 
   def apply(appointAgent: AssignAgentToSomeProperties): AppointmentChangesRequest =
@@ -46,7 +46,7 @@ object AppointmentChangesRequest {
       action = AppointmentAction.APPOINT,
       scope = AppointmentScope.PROPERTY_LIST,
       propertyLinks = Some(appointAgent.propertyLinkIds),
-      listYears = None
+      listYears = Some(List("2017", "2023"))
     )
 
   def apply(unassignAgent: UnassignAgent): AppointmentChangesRequest =
@@ -55,7 +55,7 @@ object AppointmentChangesRequest {
       action = AppointmentAction.REVOKE,
       scope = AppointmentScope.withName(unassignAgent.scope),
       propertyLinks = None,
-      listYears = None
+      listYears = Some(List("2017", "2023"))
     )
 
   def apply(unassignAgent: UnassignAgentFromSomeProperties): AppointmentChangesRequest =
@@ -64,7 +64,7 @@ object AppointmentChangesRequest {
       action = AppointmentAction.REVOKE,
       scope = AppointmentScope.PROPERTY_LIST,
       propertyLinks = Some(unassignAgent.propertyLinkIds),
-      listYears = None
+      listYears = Some(List("2017", "2023"))
     )
 
   def apply(removeAgent: RemoveAgentFromIpOrganisation): AppointmentChangesRequest =
@@ -73,15 +73,15 @@ object AppointmentChangesRequest {
       action = AppointmentAction.REVOKE,
       scope = AppointmentScope.RELATIONSHIP,
       propertyLinks = None,
-      listYears = None
+      listYears = Some(List("2017", "2023"))
     )
   //TODO: remove all apply methods/hard coding of action/scope & just proxy the AppointmentChangesRequest through to backend.
   def apply(changeRequest: AppointmentChangesRequest): AppointmentChangesRequest =
     AppointmentChangesRequest(
       agentRepresentativeCode = changeRequest.agentRepresentativeCode,
-      action = AppointmentAction.REVOKE,
-      scope = AppointmentScope.RELATIONSHIP,
-      propertyLinks = None,
+      action = changeRequest.action,
+      scope = changeRequest.scope,
+      propertyLinks = changeRequest.propertyLinks,
       listYears = changeRequest.listYears
     )
 }
