@@ -26,50 +26,6 @@ class ExternalOrganisationManagementApiISpec extends BaseIntegrationSpec with Ex
     lazy val connector: ExternalOrganisationManagementApi = app.injector.instanceOf[ExternalOrganisationManagementApi]
   }
 
-  "agentAppointmentChanges" should {
-    val agentId = 123456789L
-    val requestJson: JsValue =
-      Json.parse(
-        s"""{
-           |  "agentRepresentativeCode" : $agentId,
-           |  "action": "APPOINT",
-           |  "scope"  : "RELATIONSHIP"
-           |}""".stripMargin)
-    val requestModel = AppointmentChangesRequest.apply(AssignAgent(agentId, "RELATIONSHIP"))
-
-      "return a valid responseModel" in new TestSetup {
-        val apptChangeId = "change-id"
-        val responseJson: JsObject = Json.obj(
-          "agentAppointmentChangeId" -> apptChangeId
-        )
-        val expectedResponseModel: AppointmentChangeResponse = AppointmentChangeResponse(appointmentChangeId = apptChangeId)
-
-        stubAgentAppointmentChanges(requestJson)(OK, responseJson)
-
-        val result: AppointmentChangeResponse = await(connector.agentAppointmentChanges(requestModel))
-
-        result shouldBe expectedResponseModel
-      }
-    "return an exception" when {
-      "it receives a downstream 4xx response" in new TestSetup {
-        stubAgentAppointmentChanges(requestJson)(BAD_REQUEST, Json.obj())
-
-        val result: Exception = intercept[Exception] {
-          await(connector.agentAppointmentChanges(requestModel))        }
-
-        result shouldBe a[VoaClientException]
-      }
-      "it receives a downstream 5xx response" in new TestSetup {
-        stubAgentAppointmentChanges(requestJson)(INTERNAL_SERVER_ERROR, Json.obj())
-
-        val result: Exception = intercept[Exception] {
-          await(connector.agentAppointmentChanges(requestModel))        }
-
-        result shouldBe an[UpstreamErrorResponse]
-      }
-    }
-  }
-
   "getAgentDetails" should {
     val agentId = 123456789L
     "return the correct model on success" in new TestSetup {
@@ -141,5 +97,4 @@ class ExternalOrganisationManagementApiISpec extends BaseIntegrationSpec with Ex
       result shouldBe expectedResponse
     }
   }
-
 }
