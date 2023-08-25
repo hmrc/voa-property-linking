@@ -65,7 +65,7 @@ class CustomHttpErrorHandler @Inject()() extends HttpErrorHandler with EventLogg
     */
   override def onServerError(request: RequestHeader, ex: Throwable): Future[Result] = {
     implicit val unknownPrincipal: Principal = Principal("N/A", "N/A")
-    val exceptionDetails = Seq( //
+    val exceptionDetails = Seq(
       "exceptionType"    -> ex.getClass.getSimpleName,
       "exceptionSummary" -> ErrorHandlingUtils.failureReason(ex),
       "requestMethod"    -> request.method)

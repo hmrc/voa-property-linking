@@ -84,7 +84,7 @@ class ModernisedAddressManagementApiISpec extends BaseIntegrationSpec with Moder
         val responseJson: JsObject = Json.obj("doesnt" -> "matter")
         stubFind(postcode)(NOT_FOUND, responseJson)
 
-        assertThrows[VoaClientException] {
+        assertThrows[Exception] {
           await(connector.find(postcode))
         }
       }
@@ -178,7 +178,7 @@ class ModernisedAddressManagementApiISpec extends BaseIntegrationSpec with Moder
         val responseJson: JsObject = Json.obj("id" -> responseId)
         stubCreate(simpleAddress.toDetailedAddress)(NOT_FOUND, responseJson)
 
-        val result: Exception = intercept[VoaClientException] {
+        val result: Exception = intercept[Exception] {
           await(connector.create(simpleAddress))
         }
 

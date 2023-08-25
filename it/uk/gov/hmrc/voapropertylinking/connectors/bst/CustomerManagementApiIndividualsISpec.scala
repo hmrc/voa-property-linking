@@ -61,7 +61,7 @@ class CustomerManagementApiIndividualsISpec
           await(connector.createIndividualAccount(account, Instant.parse(timeString)))
         }
 
-        result shouldBe a[VoaClientException]
+        result shouldBe an[UpstreamErrorResponse]
       }
       "it receives a downstream 5xx response" in new TestSetup {
         stubCreateIndividualAccount(requestJson)(INTERNAL_SERVER_ERROR, Json.obj())
@@ -140,7 +140,7 @@ class CustomerManagementApiIndividualsISpec
           await(connector.updateIndividualAccount(anyPersonId, account, Instant.parse(timeString)))
         }
 
-        result shouldBe a[VoaClientException]
+        result shouldBe an[UpstreamErrorResponse]
       }
       "it receives a downstream 5xx response" in new TestSetup {
         val anyPersonId = 123456L
@@ -226,7 +226,7 @@ class CustomerManagementApiIndividualsISpec
           await(connector.getDetailedIndividual(personId))
         }
 
-        result shouldBe a[VoaClientException]
+        result shouldBe an[UpstreamErrorResponse]
       }
       "it receives a 5xx response" in new TestSetup {
         stubGetDetailedIndividual(personId)(INTERNAL_SERVER_ERROR, Json.obj())
@@ -308,7 +308,7 @@ class CustomerManagementApiIndividualsISpec
             await(connector.findDetailedIndividualAccountByGGID(ggId))
           }
 
-          result shouldBe a[VoaClientException]
+          result shouldBe an[UpstreamErrorResponse]
         }
         "it receives a 5xx response" in new TestSetup {
           stubFindDetailedIndividualAccountByGGID(ggId)(INTERNAL_SERVER_ERROR, Json.obj())

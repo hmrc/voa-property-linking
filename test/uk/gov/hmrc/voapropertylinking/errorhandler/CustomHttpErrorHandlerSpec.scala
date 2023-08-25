@@ -72,7 +72,8 @@ class CustomHttpErrorHandlerSpec extends BaseUnitSpec with MockitoSugar {
         val errorMessage = "Error message"
 
         val result =
-          customHttpErrorHandler.onServerError(mockRequestHeader, new VoaClientException(errorMessage, BAD_REQUEST))
+          customHttpErrorHandler
+            .onServerError(mockRequestHeader, new VoaClientException(errorMessage, BAD_REQUEST).toUpstreamResponse)
 
         status(result) shouldBe BAD_REQUEST
         (contentAsJson(result) \ "code").as[String] shouldBe "BAD_REQUEST"
