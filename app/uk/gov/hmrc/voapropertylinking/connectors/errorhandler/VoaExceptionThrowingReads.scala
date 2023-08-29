@@ -27,9 +27,9 @@ trait VoaExceptionThrowingReads {
     def mapToException(response: HttpResponse)(e: UpstreamErrorResponse): A =
       e.statusCode match {
         case REQUEST_URI_TOO_LONG.code =>
-          throw VoaClientException("The request URI is too long.", 414)
+          throw VoaClientException("The request URI is too long.", 414).toUpstreamResponse
         case status if is4xx(status) =>
-          throw VoaClientException(response.body, status)
+          throw VoaClientException(response.body, status).toUpstreamResponse
         case _ => throw e
       }
 

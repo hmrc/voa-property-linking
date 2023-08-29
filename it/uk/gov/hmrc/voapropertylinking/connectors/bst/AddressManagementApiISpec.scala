@@ -3,7 +3,7 @@ package uk.gov.hmrc.voapropertylinking.connectors.bst
 import models.modernised.addressmanagement.{DetailedAddress, SimpleAddress}
 import play.api.libs.json.{JsObject, Json}
 import play.api.test.Helpers.await
-import uk.gov.hmrc.http.{HeaderCarrier, JsValidationException}
+import uk.gov.hmrc.http.{HeaderCarrier, JsValidationException, UpstreamErrorResponse}
 import uk.gov.hmrc.voapropertylinking.BaseIntegrationSpec
 import uk.gov.hmrc.voapropertylinking.connectors.errorhandler.VoaClientException
 import uk.gov.hmrc.voapropertylinking.stubs.bst.AddressManagementStub
@@ -84,7 +84,7 @@ class AddressManagementApiISpec extends BaseIntegrationSpec with AddressManageme
         val responseJson: JsObject = Json.obj("doesnt" -> "matter")
         stubFind(postcode)(NOT_FOUND, responseJson)
 
-        assertThrows[VoaClientException] {
+        assertThrows[UpstreamErrorResponse] {
           await(connector.find(postcode))
         }
       }
@@ -178,7 +178,7 @@ class AddressManagementApiISpec extends BaseIntegrationSpec with AddressManageme
         val responseJson: JsObject = Json.obj("id" -> responseId)
         stubCreate(simpleAddress.toDetailedAddress)(NOT_FOUND, responseJson)
 
-        val result: Exception = intercept[VoaClientException] {
+        val result: Exception = intercept[Exception] {
           await(connector.create(simpleAddress))
         }
 

@@ -16,7 +16,9 @@
 
 package uk.gov.hmrc.voapropertylinking.connectors.errorhandler
 
-import uk.gov.hmrc.http.HttpException
+import uk.gov.hmrc.http.{HttpException, UpstreamErrorResponse}
 
-case class VoaClientException(override val message: String, override val responseCode: Int)
-    extends HttpException(message, responseCode)
+case class VoaClientException(message: String, responseCode: Int) {
+
+  def toUpstreamResponse: UpstreamErrorResponse = UpstreamErrorResponse(message, responseCode)
+}

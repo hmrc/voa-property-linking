@@ -57,7 +57,7 @@ class ModernisedCCACaseManagementApiISpec extends BaseIntegrationSpec with Moder
           await(connector.requestDetailedValuation(request))
         }
 
-        result shouldBe a [VoaClientException]
+        result shouldBe an[UpstreamErrorResponse]
       }
       "it receives any 5xx response" in new TestSetup {
         val request: DetailedValuationRequest = DetailedValuationRequest(
