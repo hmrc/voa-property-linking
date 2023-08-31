@@ -18,15 +18,21 @@ package uk.gov.hmrc.voapropertylinking.errorhandler
 
 import basespecs.BaseUnitSpec
 import org.scalatestplus.mockito.MockitoSugar
+import play.api.Configuration
 import play.api.mvc.RequestHeader
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.{BearerTokenExpired, InvalidBearerToken, MissingBearerToken}
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+import uk.gov.hmrc.play.bootstrap.config.HttpAuditEvent
 import uk.gov.hmrc.voapropertylinking.connectors.errorhandler.VoaClientException
 
 class CustomHttpErrorHandlerSpec extends BaseUnitSpec with MockitoSugar {
 
-  val customHttpErrorHandler = new CustomHttpErrorHandler()
+  val mockConnector: AuditConnector = mock[AuditConnector]
+  val mockAuditEvent: HttpAuditEvent = mock[HttpAuditEvent]
+  val mockConfig: Configuration = mock[Configuration]
+  val customHttpErrorHandler = new CustomHttpErrorHandler(mockConnector, mockAuditEvent, mockConfig)(implicitly)
 
   val mockRequestHeader: RequestHeader = FakeRequest()
 
@@ -73,7 +79,7 @@ class CustomHttpErrorHandlerSpec extends BaseUnitSpec with MockitoSugar {
 
         val result =
           customHttpErrorHandler
-            .onServerError(mockRequestHeader, new VoaClientException(errorMessage, BAD_REQUEST).toUpstreamResponse)
+            .onServerError(mockRequestHeader, new VoaClientException(errorMessage, BAD_REQUEST))
 
         status(result) shouldBe BAD_REQUEST
         (contentAsJson(result) \ "code").as[String] shouldBe "BAD_REQUEST"

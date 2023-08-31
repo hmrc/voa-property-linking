@@ -16,23 +16,30 @@
 
 package uk.gov.hmrc.voapropertylinking.errorhandler
 
-import javax.inject.Inject
 import play.api._
-import play.api.http.HttpErrorHandler
 import play.api.http.Status._
 import play.api.libs.json.Json
 import play.api.mvc.Results.Status
 import play.api.mvc.{RequestHeader, Result}
 import uk.gov.hmrc.auth.core.{BearerTokenExpired, InvalidBearerToken, MissingBearerToken}
 import uk.gov.hmrc.http.UpstreamErrorResponse
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+import uk.gov.hmrc.play.bootstrap.backend.http.JsonErrorHandler
+import uk.gov.hmrc.play.bootstrap.config.HttpAuditEvent
 import uk.gov.hmrc.voapropertylinking.auth.Principal
 import uk.gov.hmrc.voapropertylinking.connectors.errorhandler.VoaClientException
 import uk.gov.hmrc.voapropertylinking.errorhandler.models.ErrorResponse
 import uk.gov.hmrc.voapropertylinking.utils.{ErrorHandlingUtils, EventLogging, HttpStatusCodes}
 
-import scala.concurrent.Future
+import javax.inject.Inject
+import scala.concurrent.{ExecutionContext, Future}
 
-class CustomHttpErrorHandler @Inject()() extends HttpErrorHandler with EventLogging {
+class CustomHttpErrorHandler @Inject()(
+      auditConnector: AuditConnector,
+      httpAuditEvent: HttpAuditEvent,
+      config: Configuration
+)(implicit ec: ExecutionContext)
+    extends JsonErrorHandler(auditConnector, httpAuditEvent, config) with EventLogging {
 
   val logger: Logger = Logger(this.getClass)
 
@@ -76,7 +83,7 @@ class CustomHttpErrorHandler @Inject()() extends HttpErrorHandler with EventLogg
         logResponse(VoaErrorOccurred, exceptionDetails: _*)
         ErrorResponse(e.responseCode, HttpStatusCodes.codeName(e.responseCode), e.message)
       case e: UpstreamErrorResponse =>
-        logger.warn(s"UpstreamErrorResponse with status ${e.statusCode}.", e)
+        logger.warn(s"UpstreamErrorResponse with status ${e.statusCode}.")
         ErrorResponse(e.statusCode, HttpStatusCodes.codeName(e.statusCode), e.message)
       case _: MissingBearerToken => ErrorResponse.unauthorized("Missing bearer token.")
       case _: BearerTokenExpired => ErrorResponse.unauthorized("The bearer token has expired.")
@@ -87,8 +94,8 @@ class CustomHttpErrorHandler @Inject()() extends HttpErrorHandler with EventLogg
     }
 
     errorResponse.httpStatusCode match {
-      case INTERNAL_SERVER_ERROR | SERVICE_UNAVAILABLE => logger.error(errorResponse.toString, ex)
-      case _                                           => logger.warn(errorResponse.toString, ex)
+      case INTERNAL_SERVER_ERROR | SERVICE_UNAVAILABLE => logger.error(errorResponse.toString)
+      case _                                           => logger.warn(errorResponse.toString)
     }
 
     Future.successful(Status(errorResponse.httpStatusCode)(Json.toJson(errorResponse)))

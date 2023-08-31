@@ -84,7 +84,7 @@ class AddressManagementApiISpec extends BaseIntegrationSpec with AddressManageme
         val responseJson: JsObject = Json.obj("doesnt" -> "matter")
         stubFind(postcode)(NOT_FOUND, responseJson)
 
-        assertThrows[UpstreamErrorResponse] {
+        assertThrows[VoaClientException] {
           await(connector.find(postcode))
         }
       }
