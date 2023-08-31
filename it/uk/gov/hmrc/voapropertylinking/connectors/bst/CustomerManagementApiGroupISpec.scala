@@ -71,7 +71,7 @@ class CustomerManagementApiGroupISpec
           await(connector.createGroupAccount(account, Instant.parse(timeString)))
         }
 
-        result shouldBe an[UpstreamErrorResponse]
+        result shouldBe a [VoaClientException]
       }
       "it receives a downstream 5xx response" in new TestSetup {
         stubCreateGroupAccount(requestJson)(INTERNAL_SERVER_ERROR, Json.obj())
@@ -130,7 +130,7 @@ class CustomerManagementApiGroupISpec
           await(connector.updateGroupAccount(anyOrgId, requestModel))
         }
 
-        result shouldBe an[UpstreamErrorResponse]
+        result shouldBe a [VoaClientException]
       }
       "it receives a downstream 5xx response" in new TestSetup {
         val anyOrgId = 123456L
@@ -199,7 +199,7 @@ class CustomerManagementApiGroupISpec
           await(connector.getDetailedGroupAccount(orgId))
         }
 
-        result shouldBe an[UpstreamErrorResponse]
+        result shouldBe a [VoaClientException]
       }
       "it receives a 5xx response" in new TestSetup {
         stubGetDetailedGroupAccount(orgId)(INTERNAL_SERVER_ERROR, Json.obj())
@@ -266,7 +266,7 @@ class CustomerManagementApiGroupISpec
           await(connector.findDetailedGroupAccountByGGID(ggId))
         }
 
-        result shouldBe an[UpstreamErrorResponse]
+        result shouldBe a [VoaClientException]
       }
       "it receives a 5xx response" in new TestSetup {
         stubFindDetailedGroupAccountByGGID(ggId)(INTERNAL_SERVER_ERROR, Json.obj())
@@ -334,7 +334,7 @@ class CustomerManagementApiGroupISpec
           await(connector.withAgentCode(agentCode))
         }
 
-        result shouldBe an[UpstreamErrorResponse]
+        result shouldBe a [VoaClientException]
       }
       "it receives a 5xx response" in new TestSetup {
         stubWithAgentCode(agentCode)(INTERNAL_SERVER_ERROR, Json.obj())
