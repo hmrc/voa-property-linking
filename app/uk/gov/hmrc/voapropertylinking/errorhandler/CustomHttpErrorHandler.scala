@@ -16,23 +16,30 @@
 
 package uk.gov.hmrc.voapropertylinking.errorhandler
 
-import javax.inject.Inject
 import play.api._
-import play.api.http.HttpErrorHandler
 import play.api.http.Status._
 import play.api.libs.json.Json
 import play.api.mvc.Results.Status
 import play.api.mvc.{RequestHeader, Result}
 import uk.gov.hmrc.auth.core.{BearerTokenExpired, InvalidBearerToken, MissingBearerToken}
 import uk.gov.hmrc.http.UpstreamErrorResponse
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+import uk.gov.hmrc.play.bootstrap.backend.http.JsonErrorHandler
+import uk.gov.hmrc.play.bootstrap.config.HttpAuditEvent
 import uk.gov.hmrc.voapropertylinking.auth.Principal
 import uk.gov.hmrc.voapropertylinking.connectors.errorhandler.VoaClientException
 import uk.gov.hmrc.voapropertylinking.errorhandler.models.ErrorResponse
 import uk.gov.hmrc.voapropertylinking.utils.{ErrorHandlingUtils, EventLogging, HttpStatusCodes}
 
-import scala.concurrent.Future
+import javax.inject.Inject
+import scala.concurrent.{ExecutionContext, Future}
 
-class CustomHttpErrorHandler @Inject()() extends HttpErrorHandler with EventLogging {
+class CustomHttpErrorHandler @Inject()(
+      auditConnector: AuditConnector,
+      httpAuditEvent: HttpAuditEvent,
+      config: Configuration
+)(implicit ec: ExecutionContext)
+    extends JsonErrorHandler(auditConnector, httpAuditEvent, config) with EventLogging {
 
   val logger: Logger = Logger(this.getClass)
 

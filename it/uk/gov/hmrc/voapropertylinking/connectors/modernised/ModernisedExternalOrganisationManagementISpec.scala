@@ -1,16 +1,15 @@
 package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
-import play.api.http.Status.{BAD_REQUEST, INTERNAL_SERVER_ERROR, OK}
+import play.api.http.Status.{INTERNAL_SERVER_ERROR, OK}
 import play.api.libs.json.{JsObject, JsValue, Json}
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers.await
-import uk.gov.hmrc.http.{HeaderCarrier, JsValidationException, UpstreamErrorResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, JsValidationException}
 import uk.gov.hmrc.voapropertylinking.BaseIntegrationSpec
 import uk.gov.hmrc.voapropertylinking.auth.{Principal, RequestWithPrincipal}
-import uk.gov.hmrc.voapropertylinking.connectors.errorhandler.VoaClientException
 import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation
-import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation.{AgentDetails, AppointmentAction, AppointmentChangeResponse, AppointmentChangesRequest, AppointmentScope, AssignAgent}
+import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation._
 import uk.gov.hmrc.voapropertylinking.stubs.modernised.ModernisedExternalOrganisationManagementStub
 
 import scala.concurrent.ExecutionContext

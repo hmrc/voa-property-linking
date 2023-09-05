@@ -57,7 +57,7 @@ class CCACaseManagementApiISpec extends BaseIntegrationSpec with CCACaseManageme
           await(connector.requestDetailedValuation(request))
         }
 
-        result shouldBe a [UpstreamErrorResponse]
+        result shouldBe a [VoaClientException]
       }
       "it receives any 5xx response" in new TestSetup {
         val request: DetailedValuationRequest = DetailedValuationRequest(
