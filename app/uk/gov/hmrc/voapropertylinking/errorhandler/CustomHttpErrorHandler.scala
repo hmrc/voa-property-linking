@@ -83,7 +83,7 @@ class CustomHttpErrorHandler @Inject()(
         logResponse(VoaErrorOccurred, exceptionDetails: _*)
         ErrorResponse(e.responseCode, HttpStatusCodes.codeName(e.responseCode), e.message)
       case e: UpstreamErrorResponse =>
-        logger.warn(s"UpstreamErrorResponse with status ${e.statusCode}.", e)
+        logger.warn(s"UpstreamErrorResponse with status ${e.statusCode}.")
         ErrorResponse(e.statusCode, HttpStatusCodes.codeName(e.statusCode), e.message)
       case _: MissingBearerToken => ErrorResponse.unauthorized("Missing bearer token.")
       case _: BearerTokenExpired => ErrorResponse.unauthorized("The bearer token has expired.")
@@ -94,8 +94,8 @@ class CustomHttpErrorHandler @Inject()(
     }
 
     errorResponse.httpStatusCode match {
-      case INTERNAL_SERVER_ERROR | SERVICE_UNAVAILABLE => logger.error(errorResponse.toString, ex)
-      case _                                           => logger.warn(errorResponse.toString, ex)
+      case INTERNAL_SERVER_ERROR | SERVICE_UNAVAILABLE => logger.error(errorResponse.toString)
+      case _                                           => logger.warn(errorResponse.toString)
     }
 
     Future.successful(Status(errorResponse.httpStatusCode)(Json.toJson(errorResponse)))
