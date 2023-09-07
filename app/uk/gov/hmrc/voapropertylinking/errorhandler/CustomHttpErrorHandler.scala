@@ -94,7 +94,7 @@ class CustomHttpErrorHandler @Inject()(
     }
 
     errorResponse.httpStatusCode match {
-      case INTERNAL_SERVER_ERROR | SERVICE_UNAVAILABLE => logger.error(errorResponse.toString)
+      case INTERNAL_SERVER_ERROR | SERVICE_UNAVAILABLE => logger.error(errorResponse.toString, ex)
       case _                                           => logger.warn(errorResponse.toString)
     }
 
