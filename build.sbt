@@ -80,7 +80,7 @@ val compileDependencies = Seq(
   "com.typesafe.play"  %% "play-json"                 % "2.8.1",
   "uk.gov.hmrc"        %% "uri-template"              % "1.11.0",
   "ai.x"               %% "play-json-extensions"      % "0.42.0",
-  "org.apache.commons" % "commons-text"               % "1.9"
+  "org.apache.commons" % "commons-text"               % "1.11.0"
 )
 
 val testDependencies = Seq(
