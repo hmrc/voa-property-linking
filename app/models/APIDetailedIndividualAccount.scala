@@ -59,7 +59,7 @@ object APIIndividualDetails {
     override def writes(o: APIIndividualDetails) = Json.writes[APIIndividualDetails].writes(o)
 
     override def reads(json: JsValue) =
-      Json.reads[APIIndividualDetails].compose(withDefault("identifyVerificationId", "")).reads(json)
+      Json.reads[APIIndividualDetails].composeWith(withDefault("identifyVerificationId", "")).reads(json)
   }
 }
 

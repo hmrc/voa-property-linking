@@ -24,7 +24,7 @@ object PropertyAddress {
   implicit val format: OFormat[PropertyAddress] = Json.format[PropertyAddress]
 
   def fromString(address: String) = {
-    val tmp = address.split(",")
+    val tmp = address.split(",").toIndexedSeq
     PropertyAddress(tmp.reverse.tail.reverse, tmp.last)
   }
 }

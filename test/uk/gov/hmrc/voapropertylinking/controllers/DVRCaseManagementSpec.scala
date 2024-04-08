@@ -65,9 +65,9 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
         val dvrJson = Json.toJson(testDvr)
 
         when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
-        when(mockRepo.create(testDvr)).thenReturn(Future.successful())
+        when(mockRepo.create(testDvr)).thenReturn(Future.successful(()))
         when(mockCCACaseManagementApi.requestDetailedValuation(any[DetailedValuationRequest]())(any()))
-          .thenReturn(Future.successful())
+          .thenReturn(Future.successful(()))
 
         val res = testController.requestDetailedValuationV2()(FakeRequest().withBody(dvrJson))
 
@@ -192,7 +192,7 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
         when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(false)
         when(mockRepo.create(testDvr)).thenReturn(Future.successful(()))
         when(mockModernisedCCACaseManagementApi.requestDetailedValuation(any[DetailedValuationRequest]())(any()))
-          .thenReturn(Future.successful())
+          .thenReturn(Future.successful(()))
 
         val res = testController.requestDetailedValuationV2()(FakeRequest().withBody(dvrJson))
 

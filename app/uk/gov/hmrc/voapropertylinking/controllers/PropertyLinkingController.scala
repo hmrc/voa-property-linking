@@ -20,7 +20,7 @@ import models._
 import models.mdtp.propertylink.requests.{APIPropertyLinkRequest, PropertyLinkRequest}
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
-import uk.gov.hmrc.http.Upstream5xxResponse
+import uk.gov.hmrc.http.UpstreamErrorResponse
 import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
 import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import uk.gov.hmrc.voapropertylinking.binders.clients.GetClientsParameters
@@ -51,7 +51,7 @@ class PropertyLinkingController @Inject()(
           Accepted
         }
         .recover {
-          case _: Upstream5xxResponse =>
+          case _: UpstreamErrorResponse =>
             logger.info(s"create property link failure: submissionId ${propertyLinkRequest.submissionId}")
             auditingService.sendEvent("create property link failure", propertyLinkRequest)
             InternalServerError
@@ -69,7 +69,7 @@ class PropertyLinkingController @Inject()(
           Accepted
         }
         .recover {
-          case _: Upstream5xxResponse =>
+          case _: UpstreamErrorResponse =>
             logger.info(
               s"create property link on client behalf failure: submissionId ${propertyLinkRequest.submissionId}")
             auditingService.sendEvent("create property link on client behalf failure", propertyLinkRequest)
