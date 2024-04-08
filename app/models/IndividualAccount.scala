@@ -17,8 +17,7 @@
 package models
 
 import java.time.Instant
-
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class IndividualDetails(
       firstName: String,
@@ -29,7 +28,7 @@ case class IndividualDetails(
       addressId: Long)
 
 object IndividualDetails {
-  implicit val formats = Json.format[IndividualDetails]
+  implicit val formats: OFormat[IndividualDetails] = Json.format[IndividualDetails]
 }
 
 case class IndividualAccount(
@@ -40,7 +39,7 @@ case class IndividualAccount(
       details: IndividualDetails)
 
 object IndividualAccount {
-  implicit val formats = Json.format[IndividualAccount]
+  implicit val formats: OFormat[IndividualAccount] = Json.format[IndividualAccount]
 }
 
 case class IndividualAccountSubmission(
@@ -66,7 +65,7 @@ case class IndividualAccountSubmission(
 }
 
 object IndividualAccountSubmission {
-  implicit val formats = Json.format[IndividualAccountSubmission]
+  implicit val formats: OFormat[IndividualAccountSubmission] = Json.format[IndividualAccountSubmission]
 }
 
 //used as part of POST /organisation - no organisationId is passed here.
@@ -76,5 +75,6 @@ case class IndividualAccountSubmissionForOrganisation(
       details: IndividualDetails)
 
 object IndividualAccountSubmissionForOrganisation {
-  implicit val formats = Json.format[IndividualAccountSubmissionForOrganisation]
+  implicit val formats: OFormat[IndividualAccountSubmissionForOrganisation] =
+    Json.format[IndividualAccountSubmissionForOrganisation]
 }

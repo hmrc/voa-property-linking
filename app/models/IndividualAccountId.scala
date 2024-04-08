@@ -16,10 +16,10 @@
 
 package models
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class IndividualAccountId(id: Long)
 
 object IndividualAccountId {
-  implicit val format = Json.format[IndividualAccountId]
+  implicit val format: OFormat[IndividualAccountId] = Json.format[IndividualAccountId]
 }

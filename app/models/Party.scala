@@ -17,7 +17,7 @@
 package models
 
 import models.modernised.externalpropertylink.myorganisations.AgentDetails
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class Party(
       authorisedPartyId: Long,
@@ -27,7 +27,7 @@ case class Party(
 )
 
 object Party {
-  implicit val format = Json.format[Party]
+  implicit val format: OFormat[Party] = Json.format[Party]
 
   def apply(agentDetails: AgentDetails): Party =
     Party(

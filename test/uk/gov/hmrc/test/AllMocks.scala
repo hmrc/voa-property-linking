@@ -17,7 +17,6 @@
 package uk.gov.hmrc.test
 
 import com.codahale.metrics.{Meter, MetricRegistry}
-import com.kenshoo.play.metrics.Metrics
 import org.mockito.Mockito
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.mockito.MockitoSugar
@@ -25,6 +24,7 @@ import play.api.libs.ws.WSRequest
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
+import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import uk.gov.hmrc.voapropertylinking.config.FeatureSwitch
 import uk.gov.hmrc.voapropertylinking.connectors.bst._

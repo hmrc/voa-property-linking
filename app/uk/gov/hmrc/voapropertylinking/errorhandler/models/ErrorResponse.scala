@@ -44,7 +44,7 @@ object ErrorResponse extends HttpStatusCodes with Results {
   def apply(httpStatusCode: HttpStatusCode, message: String, nestedErrors: Seq[NestedError]): ErrorResponse =
     ErrorResponse(httpStatusCode.code, httpStatusCode.name, message, Some(nestedErrors))
 
-  implicit val writes = new Writes[ErrorResponse] {
+  implicit val writes: Writes[ErrorResponse] = new Writes[ErrorResponse] {
     def writes(e: ErrorResponse): JsValue =
       Json
         .obj("code" -> e.errorCode, "message" -> s"[${e.incidentId}] ${e.message}")

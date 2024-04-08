@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.voapropertylinking.models.modernised.casemanagement.check
 
+import play.api.libs.json.Format
+import uk.gov.hmrc.voapropertylinking.models.modernised.casemanagement.check
 import uk.gov.hmrc.voapropertylinking.utils.JsonUtils
 
 object CheckCaseStatus extends Enumeration {
@@ -31,5 +33,5 @@ object CheckCaseStatus extends Enumeration {
   val OPEN = Value("OPEN")
   val CLOSED = Value("CLOSED")
 
-  implicit val format = JsonUtils.enumFormat(CheckCaseStatus)
+  implicit val format: Format[check.CheckCaseStatus.Value] = JsonUtils.enumFormat(CheckCaseStatus)
 }

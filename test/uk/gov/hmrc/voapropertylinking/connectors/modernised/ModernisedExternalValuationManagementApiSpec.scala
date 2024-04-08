@@ -19,8 +19,8 @@ package uk.gov.hmrc.voapropertylinking.connectors.modernised
 import java.net.URI
 import java.time.LocalDateTime
 
-import akka.stream.scaladsl.Source
-import akka.util.ByteString
+import org.apache.pekko.stream.scaladsl.Source
+import org.apache.pekko.util.ByteString
 import basespecs.BaseUnitSpec
 import models.modernised.ValuationHistoryResponse
 import models.modernised.externalvaluationmanagement.documents.{Document, DocumentSummary, DvrDocumentFiles}

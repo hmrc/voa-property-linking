@@ -23,7 +23,7 @@ import models.modernised.ListType.ListType
 import models.modernised.externalpropertylink.myclients.PropertyLinkWithClient
 import models.modernised.externalpropertylink.myorganisations.PropertyLinkWithAgents
 import models.modernised.{PropertyLinkStatus, ValuationHistory}
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class Assessment(
       authorisationId: Long,
@@ -53,7 +53,7 @@ case class Assessments(
       agents: Seq[Party])
 
 object Assessment {
-  implicit val formats = Json.format[Assessment]
+  implicit val formats: OFormat[Assessment] = Json.format[Assessment]
 
   def fromValuationHistory(valuationHistory: ValuationHistory, authorisationId: Long): Assessment =
     Assessment(
@@ -75,7 +75,7 @@ object Assessment {
 }
 
 object Assessments {
-  implicit val formats = Json.format[Assessments]
+  implicit val formats: OFormat[Assessments] = Json.format[Assessments]
 
   def apply(
         propertyLink: PropertyLinkWithAgents,

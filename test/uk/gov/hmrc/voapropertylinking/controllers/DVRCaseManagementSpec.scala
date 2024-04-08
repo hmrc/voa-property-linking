@@ -16,27 +16,19 @@
 
 package uk.gov.hmrc.voapropertylinking.controllers
 
-import java.net.URI
 import java.time.LocalDateTime
-import akka.stream.scaladsl.Source
-import akka.util.ByteString
 import basespecs.BaseControllerSpec
 import models.modernised.ccacasemanagement.requests.DetailedValuationRequest
 import models.modernised.externalvaluationmanagement.documents.{Document, DocumentSummary, DvrDocumentFiles}
 import org.mockito.ArgumentMatchers.{eq => matching, _}
-import org.mockito.Mockito
 import org.mockito.Mockito._
-import play.api.libs.json.{JsValue, Json}
-import play.api.libs.ws.{WSCookie, WSResponse}
-import play.api.test.Helpers.await
+import play.api.libs.json.Json
+import play.api.libs.ws.WSResponse
 import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.voapropertylinking.connectors.bst.{CCACaseManagementApi, ExternalValuationManagementApi}
-import uk.gov.hmrc.voapropertylinking.connectors.modernised.{ModernisedCCACaseManagementApi, ModernisedExternalValuationManagementApi}
 import uk.gov.hmrc.voapropertylinking.repositories.{DVRRecord, DVRRecordRepository}
 
 import scala.concurrent.Future
-import scala.xml.Elem
 
 class DVRCaseManagementSpec extends BaseControllerSpec {
 

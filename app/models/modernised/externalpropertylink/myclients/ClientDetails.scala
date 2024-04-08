@@ -16,10 +16,10 @@
 
 package models.modernised.externalpropertylink.myclients
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class ClientDetails(organisationId: Long, organisationName: String)
 
 object ClientDetails {
-  implicit val format = Json.format[ClientDetails]
+  implicit val format: OFormat[ClientDetails] = Json.format[ClientDetails]
 }

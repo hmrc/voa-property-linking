@@ -26,6 +26,6 @@ object AppointmentChangeResponse {
       .read[String]
       .map(agentAppointmentChangeId => AppointmentChangeResponse(agentAppointmentChangeId))
 
-  implicit val writes = Json.writes[AppointmentChangeResponse]
+  implicit val writes: OWrites[AppointmentChangeResponse] = Json.writes[AppointmentChangeResponse]
 
 }

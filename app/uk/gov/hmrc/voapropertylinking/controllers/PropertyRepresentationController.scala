@@ -16,10 +16,8 @@
 
 package uk.gov.hmrc.voapropertylinking.controllers
 
-import models._
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
-import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
 import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import uk.gov.hmrc.voapropertylinking.config.FeatureSwitch

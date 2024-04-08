@@ -17,7 +17,7 @@
 package models.mdtp.propertylink.projections
 
 import models.searchApi.{OwnerAuthAgent => ModernisedOwnerAuthAgent}
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class OwnerAuthAgent(
       authorisedPartyId: Long,
@@ -27,7 +27,7 @@ case class OwnerAuthAgent(
 )
 
 object OwnerAuthAgent {
-  implicit val format = Json.format[OwnerAuthAgent]
+  implicit val format: OFormat[OwnerAuthAgent] = Json.format[OwnerAuthAgent]
 
   def apply(agent: ModernisedOwnerAuthAgent): OwnerAuthAgent =
     OwnerAuthAgent(

@@ -17,7 +17,6 @@
 package uk.gov.hmrc.voapropertylinking.controllers
 
 import models.modernised.ccacasemanagement.requests.DetailedValuationRequest
-import play.api.Logger
 import play.api.http.HttpEntity
 import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.WSResponse

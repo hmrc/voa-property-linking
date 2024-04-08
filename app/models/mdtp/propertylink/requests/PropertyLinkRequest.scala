@@ -17,9 +17,8 @@
 package models.mdtp.propertylink.requests
 
 import java.time.Instant
-
 import models.{CapacityDeclaration, FileInfo}
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class PropertyLinkRequest(
       uarn: Long,
@@ -32,5 +31,5 @@ case class PropertyLinkRequest(
       submissionId: String)
 
 object PropertyLinkRequest {
-  implicit val propertyLinkRequest = Json.format[PropertyLinkRequest]
+  implicit val propertyLinkRequest: OFormat[PropertyLinkRequest] = Json.format[PropertyLinkRequest]
 }

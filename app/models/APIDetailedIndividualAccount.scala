@@ -55,7 +55,7 @@ object APIIndividualDetails {
   private def withDefault[A](key: String, default: A)(implicit wrts: Writes[A]): Reads[JsObject] =
     __.json.update((__ \ key).json.copyFrom((__ \ key).json.pick orElse Reads.pure(Json.toJson(default))))
 
-  implicit val format = new Format[APIIndividualDetails] {
+  implicit val format: Format[APIIndividualDetails] = new Format[APIIndividualDetails] {
     override def writes(o: APIIndividualDetails) = Json.writes[APIIndividualDetails].writes(o)
 
     override def reads(json: JsValue) =
@@ -64,5 +64,5 @@ object APIIndividualDetails {
 }
 
 object APIDetailedIndividualAccount {
-  implicit val format = Json.format[APIDetailedIndividualAccount]
+  implicit val format: OFormat[APIDetailedIndividualAccount] = Json.format[APIDetailedIndividualAccount]
 }

@@ -16,6 +16,8 @@
 
 package models.modernised
 
+import models.modernised
+import play.api.libs.json.Format
 import uk.gov.hmrc.voapropertylinking.utils.JsonUtils.enumFormat
 
 object PropertyLinkStatus extends Enumeration {
@@ -27,5 +29,5 @@ object PropertyLinkStatus extends Enumeration {
   val REVOKED = Value("REVOKED")
   val MORE_EVIDENCE_REQUIRED = Value("MORE_EVIDENCE_REQUIRED")
 
-  implicit val format = enumFormat(PropertyLinkStatus)
+  implicit val format: Format[modernised.PropertyLinkStatus.Value] = enumFormat(PropertyLinkStatus)
 }
