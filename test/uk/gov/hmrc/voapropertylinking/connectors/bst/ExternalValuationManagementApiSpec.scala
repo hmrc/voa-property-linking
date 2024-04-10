@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.voapropertylinking.connectors.bst
 
-import akka.stream.scaladsl.Source
-import akka.util.ByteString
+import org.apache.pekko.stream.scaladsl.Source
+import org.apache.pekko.util.ByteString
 import basespecs.BaseUnitSpec
 import models.modernised.ValuationHistoryResponse
 import models.modernised.externalvaluationmanagement.documents.{Document, DocumentSummary, DvrDocumentFiles}

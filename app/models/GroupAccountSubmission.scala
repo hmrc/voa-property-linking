@@ -17,8 +17,7 @@
 package models
 
 import java.time.Instant
-
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class GroupAccountSubmission(
       id: String,
@@ -54,5 +53,5 @@ case class GroupAccountSubmission(
 }
 
 object GroupAccountSubmission {
-  implicit val formats = Json.format[GroupAccountSubmission]
+  implicit val formats: OFormat[GroupAccountSubmission] = Json.format[GroupAccountSubmission]
 }

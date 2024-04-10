@@ -28,7 +28,7 @@ import scala.concurrent.Future
 
 abstract class BaseControllerSpec extends BaseUnitSpec with ResultExtractors with HeaderNames with Status with Results {
 
-  implicit val request = FakeRequest()
+  implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
   val mockWS = mock[WSHttp]
   val mockConf = mockServicesConfig

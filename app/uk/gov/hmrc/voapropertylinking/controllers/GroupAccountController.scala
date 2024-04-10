@@ -20,7 +20,7 @@ import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 
 import javax.inject.Inject
 import models.{GroupAccountSubmission, GroupId, UpdatedOrganisationAccount}
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsValue, Json, OFormat}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
 import uk.gov.hmrc.voapropertylinking.config.FeatureSwitch
@@ -44,7 +44,7 @@ class GroupAccountController @Inject()(
   case class GroupAccount(groupId: GroupId, submission: GroupAccountSubmission)
 
   object GroupAccount {
-    implicit val format = Json.format[GroupAccount]
+    implicit val format: OFormat[GroupAccount] = Json.format[GroupAccount]
   }
 
   def get(organisationId: Long): Action[AnyContent] = authenticated.async { implicit request =>

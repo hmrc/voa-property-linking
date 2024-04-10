@@ -17,9 +17,8 @@
 package models.searchApi
 
 import java.time.LocalDate
-
 import models.PropertyRepresentation
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class AgentAuthorisation(
       authorisationId: Long,
@@ -50,5 +49,5 @@ case class AgentAuthorisation(
 }
 
 object AgentAuthorisation {
-  implicit val agentAuthorisation = Json.format[AgentAuthorisation]
+  implicit val agentAuthorisation: OFormat[AgentAuthorisation] = Json.format[AgentAuthorisation]
 }

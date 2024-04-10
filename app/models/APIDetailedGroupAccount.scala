@@ -16,7 +16,7 @@
 
 package models
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class APIDetailedGroupAccount(
       id: Long,
@@ -50,13 +50,13 @@ case class GroupDetails(
 )
 
 object GroupDetails {
-  implicit val format = Json.format[GroupDetails]
+  implicit val format: OFormat[GroupDetails] = Json.format[GroupDetails]
 }
 
 object IndividualSummary {
-  implicit val format = Json.format[IndividualSummary]
+  implicit val format: OFormat[IndividualSummary] = Json.format[IndividualSummary]
 }
 
 object APIDetailedGroupAccount {
-  implicit val format = Json.format[APIDetailedGroupAccount]
+  implicit val format: OFormat[APIDetailedGroupAccount] = Json.format[APIDetailedGroupAccount]
 }

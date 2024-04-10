@@ -17,11 +17,10 @@
 package models
 
 import java.time.LocalDate
-
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class CapacityDeclaration(capacity: String, fromDate: LocalDate, toDate: Option[LocalDate] = None)
 
 object CapacityDeclaration {
-  implicit val capacityDeclaration = Json.format[CapacityDeclaration]
+  implicit val capacityDeclaration: OFormat[CapacityDeclaration] = Json.format[CapacityDeclaration]
 }

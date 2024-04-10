@@ -27,7 +27,6 @@ import play.api.test.{FakeRequest, Helpers}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import uk.gov.hmrc.voapropertylinking.connectors.mdtp.BusinessRatesAuthConnector
-import uk.gov.hmrc.voapropertylinking.connectors.modernised.ModernisedCustomerManagementApi
 
 import scala.concurrent.Future
 

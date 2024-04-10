@@ -16,15 +16,15 @@
 
 package models
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class PropertyAddress(lines: Seq[String], postcode: String)
 
 object PropertyAddress {
-  implicit val format = Json.format[PropertyAddress]
+  implicit val format: OFormat[PropertyAddress] = Json.format[PropertyAddress]
 
   def fromString(address: String) = {
-    val tmp = address.split(",")
+    val tmp = address.split(",").toIndexedSeq
     PropertyAddress(tmp.reverse.tail.reverse, tmp.last)
   }
 }

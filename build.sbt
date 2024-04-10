@@ -1,12 +1,11 @@
-import _root_.play.core.PlayVersion
-import play.sbt.PlayImport._
+import play.sbt.PlayImport.*
 import play.sbt.routes.RoutesKeys
-import sbt.Keys._
+import sbt.Keys.*
 import sbt.Tests.{Group, SubProcess}
-import sbt._
-import uk.gov.hmrc.DefaultBuildSettings._
+import sbt.*
+import uk.gov.hmrc.DefaultBuildSettings.*
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
-import uk.gov.hmrc.SbtAutoBuildPlugin
+import uk.gov.hmrc.{DefaultBuildSettings, SbtAutoBuildPlugin}
 
 lazy val appName = "voa-property-linking"
 
@@ -21,6 +20,9 @@ lazy val playSettings: Seq[Setting[_]] = Seq(
 )
 
 val defaultPort = 9524
+
+ThisBuild / majorVersion := 0
+ThisBuild / scalaVersion := "2.13.12"
 
 lazy val scoverageSettings: Seq[Def.Setting[_ >: String with Double with Boolean]] = {
   // Semicolon-separated list of regexs matching classes to exclude
@@ -45,19 +47,15 @@ lazy val microservice: Project = Project(appName, file("."))
   .settings(
     libraryDependencies ++= compileDependencies ++ testDependencies,
     retrieveManaged := true,
-    update / evictionWarningOptions := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
     Test / testGrouping := oneForkedJvmPerTest((Test / definedTests).value)
   )
-  .configs(IntegrationTest)
-  .settings(
-    Defaults.itSettings,
-    IntegrationTest / unmanagedSourceDirectories := Seq(baseDirectory.value / "it"),
-    IntegrationTest / dependencyClasspath := {
-      (IntegrationTest / dependencyClasspath).value ++ (Test / exportedProducts).value
-    },
-    IntegrationTest / parallelExecution := false
-  )
-  .settings(scalaVersion := "2.13.8")
+
+lazy val it = project
+  .enablePlugins(PlayScala)
+  .dependsOn(microservice % "test->test") // the "test->test" allows reusing test code and test dependencies
+  .settings(DefaultBuildSettings.itSettings())
+  .settings(libraryDependencies ++= testDependencies)
+  .settings(Test / classLoaderLayeringStrategy := ClassLoaderLayeringStrategy.AllLibraryJars)
 
 def oneForkedJvmPerTest(tests: Seq[TestDefinition]) = tests.map { test =>
   Group(test.name, Seq(test), SubProcess(ForkOptions().withRunJVMOptions(Vector(s"-Dtest.name=${test.name}"))))
@@ -69,32 +67,28 @@ scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature")
 scalacOptions += "-Wconf:src=routes/.*:s"
 scalacOptions += "-Wconf:cat=unused-imports&src=html/.*:s"
 
-val bootstrapPlayVersion = "7.13.0"
+val bootstrapPlayVersion = "8.4.0"
+val hmrcMongoVersion = "1.7.0"
 
 val compileDependencies = Seq(
   ws,
   guice,
-  "uk.gov.hmrc"        %% "bootstrap-backend-play-28" % bootstrapPlayVersion,
-  "uk.gov.hmrc.mongo"  %% "hmrc-mongo-play-28"        % "0.74.0",
-  "org.typelevel"      %% "cats-core"                 % "2.1.0",
-  "com.typesafe.play"  %% "play-json"                 % "2.8.1",
+  "uk.gov.hmrc"        %% "bootstrap-backend-play-30" % bootstrapPlayVersion,
+  "uk.gov.hmrc.mongo"  %% "hmrc-mongo-play-30"        % hmrcMongoVersion,
+  "org.typelevel"      %% "cats-core"                 % "2.10.0",
+  "com.typesafe.play"  %% "play-json"                 % "2.10.4",
   "uk.gov.hmrc"        %% "uri-template"              % "1.11.0",
   "ai.x"               %% "play-json-extensions"      % "0.42.0",
   "org.apache.commons" % "commons-text"               % "1.11.0"
 )
 
 val testDependencies = Seq(
-  "uk.gov.hmrc"            %% "bootstrap-test-play-28"  % bootstrapPlayVersion % "it,test",
-  "org.scalatest"          %% "scalatest"               % "3.0.8"              % "it,test",
-  "org.pegdown"            % "pegdown"                  % "1.6.0"              % "test",
-  "com.typesafe.play"      %% "play-test"               % PlayVersion.current  % "it,test",
-  "org.scalatestplus.play" %% "scalatestplus-play"      % "5.1.0"              % "it,test",
-  "org.mockito"            % "mockito-core"             % "3.4.6"              % "it,test",
-  "org.scalatestplus"      %% "mockito-3-4"             % "3.2.9.0"            % "it,test",
-  "com.vladsch.flexmark"   % "flexmark-all"             % "0.35.10"            % "test",
-  "org.scalacheck"         %% "scalacheck"              % "1.15.4"             % "test",
-  "uk.gov.hmrc.mongo"      %% "hmrc-mongo-test-play-28" % "0.74.0"             % "it",
-  "com.github.tomakehurst" % "wiremock-jre8"            % "2.23.2"             % "test,it"
+  "uk.gov.hmrc"            %% "bootstrap-test-play-30"  % bootstrapPlayVersion  % Test,
+  "org.pegdown"            % "pegdown"                  % "1.6.0"               % Test,
+  "org.mockito"            % "mockito-core"             % "5.10.0"              % Test,
+  "com.vladsch.flexmark"   % "flexmark-all"             % "0.64.8"              % Test,
+  "org.scalacheck"         %% "scalacheck"              % "1.17.0"              % Test,
+  "uk.gov.hmrc.mongo"      %% "hmrc-mongo-test-play-30" % hmrcMongoVersion      % Test
 )
 
-addCommandAlias("precommit", ";scalafmt;test:scalafmt;coverage;test;it:test;coverageReport")
+addCommandAlias("precommit", ";scalafmt;test:scalafmt;it/test:scalafmt;coverage;test;it/test;coverageReport")

@@ -17,7 +17,6 @@
 package uk.gov.hmrc.voapropertylinking.controllers
 
 import models.modernised.ccacasemanagement.requests.DetailedValuationRequest
-import play.api.Logger
 import play.api.http.HttpEntity
 import play.api.libs.json.{JsValue, Json}
 import play.api.libs.ws.WSResponse
@@ -94,11 +93,11 @@ class DVRCaseManagement @Inject()(
     response
       .map { document =>
         val contentType =
-          document.headers.mapValues(_.mkString(",")).getOrElse(CONTENT_TYPE, "application/octet-stream")
+          document.headers.view.mapValues(_.mkString(",")).getOrElse(CONTENT_TYPE, "application/octet-stream")
         Ok.sendEntity(
           HttpEntity.Streamed(
             document.bodyAsSource,
-            document.headers.mapValues(_.mkString(",")).get(CONTENT_LENGTH).map(_.toLong),
+            document.headers.view.mapValues(_.mkString(",")).get(CONTENT_LENGTH).map(_.toLong),
             Some(contentType)))
       }
   }

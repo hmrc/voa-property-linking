@@ -28,7 +28,6 @@ import uk.gov.hmrc.voapropertylinking.connectors.BaseVoaConnector
 import uk.gov.hmrc.voapropertylinking.connectors.bst.PropertyLinkApi
 import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
 
-import java.time.LocalDateTime
 import javax.inject.{Inject, Named}
 import scala.concurrent.{ExecutionContext, Future}
 

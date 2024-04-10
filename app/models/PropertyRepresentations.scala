@@ -16,10 +16,10 @@
 
 package models
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class PropertyRepresentations(totalPendingRequests: Long, propertyRepresentations: Seq[PropertyRepresentation])
 
 object PropertyRepresentations {
-  implicit val format = Json.format[PropertyRepresentations]
+  implicit val format: OFormat[PropertyRepresentations] = Json.format[PropertyRepresentations]
 }

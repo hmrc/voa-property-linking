@@ -16,7 +16,7 @@
 
 package models
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class APIParty(
       id: Long,
@@ -24,7 +24,7 @@ case class APIParty(
 )
 
 object APIParty {
-  implicit val format = Json.format[APIParty]
+  implicit val format: OFormat[APIParty] = Json.format[APIParty]
 }
 
 case class LegacyParty(
@@ -35,5 +35,5 @@ case class LegacyParty(
 )
 
 object LegacyParty {
-  implicit val format = Json.format[LegacyParty]
+  implicit val format: OFormat[LegacyParty] = Json.format[LegacyParty]
 }

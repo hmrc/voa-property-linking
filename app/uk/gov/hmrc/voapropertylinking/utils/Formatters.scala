@@ -25,7 +25,7 @@ object Formatters {
 
   val voaLocalDateTimeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
 
-  implicit val writes = new Writes[LocalDateTime] {
+  implicit val writes: Writes[LocalDateTime] = new Writes[LocalDateTime] {
     def writes(date: LocalDateTime) = JsString(voaLocalDateTimeFormat.format(date))
   }
 

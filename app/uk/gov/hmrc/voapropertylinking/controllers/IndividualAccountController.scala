@@ -20,7 +20,7 @@ import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 
 import javax.inject.Inject
 import models.{IndividualAccountId, IndividualAccountSubmission}
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsValue, Json, OFormat}
 import play.api.mvc.Results.EmptyContent
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
@@ -44,7 +44,7 @@ class IndividualAccountController @Inject()(
   case class IndividualAccount(id: IndividualAccountId, submission: IndividualAccountSubmission)
 
   object IndividualAccount {
-    implicit val format = Json.format[IndividualAccount]
+    implicit val format: OFormat[IndividualAccount] = Json.format[IndividualAccount]
   }
 
   def create(): Action[JsValue] = authenticated.async(parse.json) { implicit request =>

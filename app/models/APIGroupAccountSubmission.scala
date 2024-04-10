@@ -17,8 +17,7 @@
 package models
 
 import java.time.Instant
-
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class APIGroupAccountSubmission(
       governmentGatewayGroupId: String,
@@ -32,5 +31,5 @@ case class APIGroupAccountSubmission(
       personData: APIIndividualAccountForOrganisation)
 
 object APIGroupAccountSubmission {
-  implicit val format = Json.format[APIGroupAccountSubmission]
+  implicit val format: OFormat[APIGroupAccountSubmission] = Json.format[APIGroupAccountSubmission]
 }

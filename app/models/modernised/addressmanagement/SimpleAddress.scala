@@ -16,7 +16,7 @@
 
 package models.modernised.addressmanagement
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class SimpleAddress(
       addressUnitId: Option[Long],
@@ -41,5 +41,5 @@ case class SimpleAddress(
 }
 
 object SimpleAddress {
-  implicit val format = Json.format[SimpleAddress]
+  implicit val format: OFormat[SimpleAddress] = Json.format[SimpleAddress]
 }

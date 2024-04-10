@@ -20,6 +20,7 @@ import basespecs.BaseUnitSpec
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito._
 import play.api.http.ContentTypes
+import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 
@@ -27,7 +28,7 @@ import scala.concurrent.Future
 
 class AuditingServiceSpec extends BaseUnitSpec with ContentTypes {
 
-  implicit val request = FakeRequest()
+  implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
   trait Setup {
     val mockAuditingConnector = mock[AuditConnector]

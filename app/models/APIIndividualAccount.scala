@@ -17,8 +17,7 @@
 package models
 
 import java.time.Instant
-
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class PersonData(
       identifyVerificationId: Option[String],
@@ -34,13 +33,13 @@ case class PersonData(
 )
 
 object PersonData {
-  implicit val format = Json.format[PersonData]
+  implicit val format: OFormat[PersonData] = Json.format[PersonData]
 }
 
 case class APIIndividualAccount(personData: PersonData)
 
 object APIIndividualAccount {
-  implicit val format = Json.format[APIIndividualAccount]
+  implicit val format: OFormat[APIIndividualAccount] = Json.format[APIIndividualAccount]
 }
 
 case class APIIndividualAccountForOrganisation(
@@ -55,5 +54,5 @@ case class APIIndividualAccountForOrganisation(
       effectiveFrom: Instant)
 
 object APIIndividualAccountForOrganisation {
-  implicit val format = Json.format[APIIndividualAccountForOrganisation]
+  implicit val format: OFormat[APIIndividualAccountForOrganisation] = Json.format[APIIndividualAccountForOrganisation]
 }

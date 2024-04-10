@@ -16,7 +16,7 @@
 
 package models.searchApi
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class OwnerAuthAgent(
       authorisedPartyId: Long,
@@ -25,5 +25,5 @@ case class OwnerAuthAgent(
       representativeCode: Long)
 
 object OwnerAuthAgent {
-  implicit val ownerAuthAgent = Json.format[OwnerAuthAgent]
+  implicit val ownerAuthAgent: OFormat[OwnerAuthAgent] = Json.format[OwnerAuthAgent]
 }

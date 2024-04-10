@@ -18,7 +18,7 @@ package models.mdtp.propertylink.projections
 
 import models.searchApi.{OwnerAuthorisation => ModerniedOwnerAuthorisaton}
 import models.modernised.externalpropertylink.myorganisations.SummaryPropertyLinkWithAgents
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class OwnerAuthorisation(
       authorisationId: Long,
@@ -34,7 +34,7 @@ case class OwnerAuthorisation(
 }
 
 object OwnerAuthorisation {
-  implicit val ownerAuthorisation = Json.format[OwnerAuthorisation]
+  implicit val ownerAuthorisation: OFormat[OwnerAuthorisation] = Json.format[OwnerAuthorisation]
 
   def apply(authorisation: ModerniedOwnerAuthorisaton): OwnerAuthorisation =
     OwnerAuthorisation(
