@@ -24,13 +24,12 @@ import org.mongodb.scala.model.Filters._
 import org.mongodb.scala.model.Sorts.ascending
 import org.mongodb.scala.model.{IndexModel, IndexOptions}
 import play.api.Logging
-import play.api.data.format.Formats.localDateTimeFormat
-import play.api.data.format.Formatter
 import play.api.libs.json._
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import uk.gov.hmrc.mongo.play.json.formats.MongoFormats
 import uk.gov.hmrc.play.http.logging.Mdc
+import uk.gov.hmrc.voapropertylinking.utils.Formatters.localDateTimeFormat
 
 import java.time.LocalDateTime
 import javax.inject.Inject
@@ -102,7 +101,7 @@ case class DVRRecord(
 )
 
 object DVRRecord {
-  implicit val dateFormat: Formatter[LocalDateTime] = localDateTimeFormat
+  implicit val dateFormat: Format[LocalDateTime] = localDateTimeFormat
   implicit val mongoFormat: Format[DVRRecord] = Json.format[DVRRecord]
 }
 

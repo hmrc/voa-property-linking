@@ -16,10 +16,9 @@
 
 package uk.gov.hmrc.voapropertylinking.utils
 
-import java.time.LocalDateTime
+import java.time.{Instant, LocalDateTime, ZoneOffset}
 import java.time.format.DateTimeFormatter
-
-import play.api.libs.json.{JsString, Writes}
+import play.api.libs.json.{Format, JsString, Reads, Writes, __}
 
 object Formatters {
 
@@ -28,5 +27,18 @@ object Formatters {
   implicit val writes: Writes[LocalDateTime] = new Writes[LocalDateTime] {
     def writes(date: LocalDateTime) = JsString(voaLocalDateTimeFormat.format(date))
   }
+
+  val localDateTimeReads: Reads[LocalDateTime] =
+    Reads
+      .at[String](__ \ "$date" \ "$numberLong")
+      .map(dateTime => Instant.ofEpochMilli(dateTime.toLong).atZone(ZoneOffset.UTC).toLocalDateTime)
+
+  val localDateTimeWrites: Writes[LocalDateTime] =
+    Writes
+      .at[String](__ \ "$date" \ "$numberLong")
+      .contramap(_.toInstant(ZoneOffset.UTC).toEpochMilli.toString)
+
+  val localDateTimeFormat: Format[LocalDateTime] =
+    Format(localDateTimeReads, localDateTimeWrites)
 
 }
