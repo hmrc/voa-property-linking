@@ -29,11 +29,13 @@ object Formatters {
   }
 
   val localDateTimeReads: Reads[LocalDateTime] =
-    Reads.at[String](__ \ "$date" \ "$numberLong")
+    Reads
+      .at[String](__ \ "$date" \ "$numberLong")
       .map(dateTime => Instant.ofEpochMilli(dateTime.toLong).atZone(ZoneOffset.UTC).toLocalDateTime)
 
   val localDateTimeWrites: Writes[LocalDateTime] =
-    Writes.at[String](__ \ "$date" \ "$numberLong")
+    Writes
+      .at[String](__ \ "$date" \ "$numberLong")
       .contramap(_.toInstant(ZoneOffset.UTC).toEpochMilli.toString)
 
   val localDateTimeFormat: Format[LocalDateTime] =
