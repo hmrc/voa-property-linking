@@ -39,6 +39,6 @@ object Formatters {
       .contramap(_.toInstant(ZoneOffset.UTC).toEpochMilli.toString)
 
   val localDateTimeFormat: Format[LocalDateTime] =
-    Format(localDateTimeReads, localDateTimeWrites)
+    Format(localDateTimeReads.orElse(Reads.of[java.time.LocalDateTime]), localDateTimeWrites)
 
 }
