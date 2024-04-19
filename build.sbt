@@ -83,7 +83,6 @@ val compileDependencies = Seq(
   "uk.gov.hmrc"        %% "bootstrap-backend-play-30" % bootstrapPlayVersion,
   "uk.gov.hmrc.mongo"  %% "hmrc-mongo-play-30"        % hmrcMongoVersion,
   "org.typelevel"      %% "cats-core"                 % "2.10.0",
-  "com.typesafe.play"  %% "play-json"                 % "2.10.4",
   "uk.gov.hmrc"        %% "uri-template"              % "1.11.0",
   "ai.x"               %% "play-json-extensions"      % "0.42.0",
   "org.apache.commons" % "commons-text"               % "1.11.0"
