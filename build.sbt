@@ -7,6 +7,8 @@ import uk.gov.hmrc.DefaultBuildSettings.*
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
 import uk.gov.hmrc.{DefaultBuildSettings, SbtAutoBuildPlugin}
 
+import scala.collection.Seq
+
 lazy val appName = "voa-property-linking"
 
 lazy val playSettings: Seq[Setting[_]] = Seq(
@@ -23,6 +25,11 @@ val defaultPort = 9524
 
 ThisBuild / majorVersion := 0
 ThisBuild / scalaVersion := "2.13.12"
+ThisBuild / excludeDependencies ++= Seq(
+  // As of Play 3.0, groupId has changed to org.playframework; exclude transitive dependencies to the old artifacts
+  // Specifically affects play-json-extensions dependency
+  ExclusionRule(organization = "com.typesafe.play")
+)
 
 lazy val scoverageSettings: Seq[Def.Setting[_ >: String with Double with Boolean]] = {
   // Semicolon-separated list of regexs matching classes to exclude
@@ -76,7 +83,6 @@ val compileDependencies = Seq(
   "uk.gov.hmrc"        %% "bootstrap-backend-play-30" % bootstrapPlayVersion,
   "uk.gov.hmrc.mongo"  %% "hmrc-mongo-play-30"        % hmrcMongoVersion,
   "org.typelevel"      %% "cats-core"                 % "2.10.0",
-  "com.typesafe.play"  %% "play-json"                 % "2.10.4",
   "uk.gov.hmrc"        %% "uri-template"              % "1.11.0",
   "ai.x"               %% "play-json-extensions"      % "0.42.0",
   "org.apache.commons" % "commons-text"               % "1.11.0"
