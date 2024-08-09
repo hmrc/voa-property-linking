@@ -74,8 +74,8 @@ scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature")
 scalacOptions += "-Wconf:src=routes/.*:s"
 scalacOptions += "-Wconf:cat=unused-imports&src=html/.*:s"
 
-val bootstrapPlayVersion = "8.4.0"
-val hmrcMongoVersion = "1.7.0"
+val bootstrapPlayVersion = "9.2.0"
+val hmrcMongoVersion = "2.2.0"
 
 val compileDependencies = Seq(
   ws,
@@ -83,7 +83,7 @@ val compileDependencies = Seq(
   "uk.gov.hmrc"        %% "bootstrap-backend-play-30" % bootstrapPlayVersion,
   "uk.gov.hmrc.mongo"  %% "hmrc-mongo-play-30"        % hmrcMongoVersion,
   "org.typelevel"      %% "cats-core"                 % "2.10.0",
-  "uk.gov.hmrc"        %% "uri-template"              % "1.11.0",
+  "uk.gov.hmrc"        %% "uri-template"              % "1.12.0",
   "ai.x"               %% "play-json-extensions"      % "0.42.0",
   "org.apache.commons" % "commons-text"               % "1.11.0"
 )

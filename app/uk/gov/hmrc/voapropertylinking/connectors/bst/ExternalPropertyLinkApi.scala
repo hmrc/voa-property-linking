@@ -189,5 +189,4 @@ class ExternalPropertyLinkApi @Inject()(
         "requestTotalRowCount" -> "true"
       )
     }
-
 }
