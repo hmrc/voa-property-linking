@@ -53,9 +53,7 @@ lazy val microservice: Project = Project(appName, file("."))
   .settings(majorVersion := 0)
   .settings(
     libraryDependencies ++= compileDependencies ++ testDependencies,
-    retrieveManaged := true,
-    Test / testGrouping := oneForkedJvmPerTest((Test / definedTests).value)
-  )
+    retrieveManaged := true)
 
 lazy val it = project
   .enablePlugins(PlayScala)
