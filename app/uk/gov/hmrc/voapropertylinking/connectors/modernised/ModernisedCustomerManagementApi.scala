@@ -18,8 +18,9 @@ package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
 import models._
 import play.api.libs.json.JsValue
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import uk.gov.hmrc.voapropertylinking.connectors.BaseVoaConnector
 
 import java.time.Instant
@@ -27,7 +28,7 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class ModernisedCustomerManagementApi @Inject()(
-      http: HttpClient,
+      http: DefaultHttpClient,
       servicesConfig: ServicesConfig
 )(implicit executionContext: ExecutionContext)
     extends BaseVoaConnector {

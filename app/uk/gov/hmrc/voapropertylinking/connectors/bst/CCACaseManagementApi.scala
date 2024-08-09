@@ -19,18 +19,17 @@ package uk.gov.hmrc.voapropertylinking.connectors.bst
 import models.modernised.ccacasemanagement.requests.DetailedValuationRequest
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import uk.gov.hmrc.voapropertylinking.connectors.BaseVoaConnector
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class CCACaseManagementApi @Inject()(
-      http: HttpClient,
-      config: ServicesConfig
-)(implicit executionContext: ExecutionContext)
+class CCACaseManagementApi @Inject()(http: DefaultHttpClient, config: ServicesConfig)(
+      implicit executionContext: ExecutionContext)
     extends BaseVoaConnector {
 
-  lazy val url = config.baseUrl("voa-bst") + "/cca-case-management-api"
+  lazy val url: String = config.baseUrl("voa-bst") + "/cca-case-management-api"
 
   def requestDetailedValuation(request: DetailedValuationRequest)(implicit hc: HeaderCarrier): Future[Unit] =
     http
