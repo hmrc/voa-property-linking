@@ -68,7 +68,7 @@ scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature")
 scalacOptions += "-Wconf:src=routes/.*:s"
 scalacOptions += "-Wconf:cat=unused-imports&src=html/.*:s"
 
-val bootstrapPlayVersion = "9.2.0"
+val bootstrapPlayVersion = "9.5.0"
 val hmrcMongoVersion = "2.2.0"
 
 val compileDependencies = Seq(
@@ -76,18 +76,17 @@ val compileDependencies = Seq(
   guice,
   "uk.gov.hmrc"        %% "bootstrap-backend-play-30" % bootstrapPlayVersion,
   "uk.gov.hmrc.mongo"  %% "hmrc-mongo-play-30"        % hmrcMongoVersion,
-  "org.typelevel"      %% "cats-core"                 % "2.10.0",
-  "uk.gov.hmrc"        %% "uri-template"              % "1.12.0",
+  "org.typelevel"      %% "cats-core"                 % "2.12.0",
+  "uk.gov.hmrc"        %% "uri-template"              % "1.14.0",
   "ai.x"               %% "play-json-extensions"      % "0.42.0",
-  "org.apache.commons" % "commons-text"               % "1.11.0"
+  "org.apache.commons" % "commons-text"               % "1.12.0"
 )
 
 val testDependencies = Seq(
   "uk.gov.hmrc"            %% "bootstrap-test-play-30"  % bootstrapPlayVersion  % Test,
   "org.pegdown"            % "pegdown"                  % "1.6.0"               % Test,
-  "org.mockito"            % "mockito-core"             % "5.10.0"              % Test,
-  "com.vladsch.flexmark"   % "flexmark-all"             % "0.64.8"              % Test,
-  "org.scalacheck"         %% "scalacheck"              % "1.17.0"              % Test,
+  "org.mockito"            % "mockito-core"             % "5.14.1"              % Test,
+  "org.scalacheck"         %% "scalacheck"              % "1.18.1"              % Test,
   "uk.gov.hmrc.mongo"      %% "hmrc-mongo-test-play-30" % hmrcMongoVersion      % Test
 )
 
