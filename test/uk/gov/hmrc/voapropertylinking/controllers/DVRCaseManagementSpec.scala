@@ -131,7 +131,10 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
                 DvrDocumentFiles(
                   checkForm = Document(DocumentSummary("1L", "Check Document", now)),
                   detailedValuation = Document(DocumentSummary("2L", "Detailed Valuation Document", now))
-                ))))
+                )
+              )
+            )
+          )
 
         val result = testController.getDvrDocuments(1L, 3L, "PL-12345")(FakeRequest())
 
@@ -249,7 +252,10 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
                 DvrDocumentFiles(
                   checkForm = Document(DocumentSummary("1L", "Check Document", now)),
                   detailedValuation = Document(DocumentSummary("2L", "Detailed Valuation Document", now))
-                ))))
+                )
+              )
+            )
+          )
 
         val result = testController.getDvrDocuments(1L, 3L, "PL-12345")(FakeRequest())
 

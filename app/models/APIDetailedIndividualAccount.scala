@@ -23,7 +23,8 @@ case class APIDetailedIndividualAccount(
       governmentGatewayExternalId: String,
       personLatestDetail: APIIndividualDetails,
       organisationId: Long,
-      organisationLatestDetail: GroupDetails) {
+      organisationLatestDetail: GroupDetails
+) {
 
   def toIndividualAccount =
     IndividualAccount(
@@ -49,7 +50,8 @@ case class APIIndividualDetails(
       emailAddress: String,
       telephoneNumber: Option[String],
       mobileNumber: Option[String],
-      identifyVerificationId: Option[String])
+      identifyVerificationId: Option[String]
+)
 
 object APIIndividualDetails {
   private def withDefault[A](key: String, default: A)(implicit wrts: Writes[A]): Reads[JsObject] =

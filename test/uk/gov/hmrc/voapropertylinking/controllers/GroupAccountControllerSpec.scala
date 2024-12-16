@@ -72,7 +72,8 @@ class GroupAccountControllerSpec extends BaseControllerSpec {
             email = "test@test.com",
             phone = "01233421342",
             isAgent = false,
-            agentCode = Some(1))
+            agentCode = Some(1)
+          )
 
         when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
         when(mockCustomerManagementApi.getDetailedGroupAccount(any())(any[HeaderCarrier]))
@@ -106,7 +107,8 @@ class GroupAccountControllerSpec extends BaseControllerSpec {
             email = "test@test.com",
             phone = "01233421342",
             isAgent = false,
-            agentCode = Some(1))
+            agentCode = Some(1)
+          )
 
         when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
         when(mockCustomerManagementApi.findDetailedGroupAccountByGGID(any())(any[HeaderCarrier]))
@@ -140,7 +142,8 @@ class GroupAccountControllerSpec extends BaseControllerSpec {
             email = "test@test.com",
             phone = "01233421342",
             isAgent = true,
-            agentCode = Some(1))
+            agentCode = Some(1)
+          )
 
         when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
         when(mockCustomerManagementApi.withAgentCode(any())(any[HeaderCarrier]))
@@ -228,7 +231,8 @@ class GroupAccountControllerSpec extends BaseControllerSpec {
             email = "test@test.com",
             phone = "01233421342",
             isAgent = false,
-            agentCode = Some(1))
+            agentCode = Some(1)
+          )
 
         when(mockModernisedCustomerManagementApi.getDetailedGroupAccount(any())(any[HeaderCarrier]))
           .thenReturn(Future.successful(Some(testGroupAccount)))
@@ -260,7 +264,8 @@ class GroupAccountControllerSpec extends BaseControllerSpec {
             email = "test@test.com",
             phone = "01233421342",
             isAgent = false,
-            agentCode = Some(1))
+            agentCode = Some(1)
+          )
 
         when(mockModernisedCustomerManagementApi.findDetailedGroupAccountByGGID(any())(any[HeaderCarrier]))
           .thenReturn(Future.successful(Some(testGroupAccount)))
@@ -292,7 +297,8 @@ class GroupAccountControllerSpec extends BaseControllerSpec {
             email = "test@test.com",
             phone = "01233421342",
             isAgent = true,
-            agentCode = Some(1))
+            agentCode = Some(1)
+          )
 
         when(mockModernisedCustomerManagementApi.withAgentCode(any())(any[HeaderCarrier]))
           .thenReturn(Future.successful(Some(testGroupAccount)))

@@ -113,7 +113,8 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
                                                   |  "action" : "APPOINT",
                                                   |  "scope"  : "LIST_YEAR",
                                                   |  "listYears": ["2017"]
-                                                  |}""".stripMargin)))
+                                                  |}""".stripMargin))
+            )
 
           status(result) shouldBe ACCEPTED
         }
@@ -189,7 +190,8 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
                                                   |  "action" : "APPOINT",
                                                   |  "scope"  : "LIST_YEAR",
                                                   |  "listYears": ["2017"]
-                                                  |}""".stripMargin)))
+                                                  |}""".stripMargin))
+            )
 
           status(result) shouldBe ACCEPTED
         }

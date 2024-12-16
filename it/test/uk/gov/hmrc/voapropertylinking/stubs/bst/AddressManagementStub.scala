@@ -33,7 +33,8 @@ trait AddressManagementStub extends WiremockMethods with WiremockHelper {
         .withQueryParam("searchparams", containing(s"$postcode"))
         .willReturn(
           aResponse().withStatus(status).withBody(body.toString)
-        ))
+        )
+    )
 
   def stubGet(addressUnitId: Long)(status: Int, body: JsValue): StubMapping =
     when(

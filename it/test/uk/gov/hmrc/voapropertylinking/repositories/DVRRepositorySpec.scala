@@ -99,6 +99,7 @@ class DVRRepositorySpec extends MongoSpec {
         dvrRequest.assessmentRef,
         dvrRequest.agents,
         Some(dvrRequest.submissionId),
-        Some(timestamp))
+        Some(timestamp)
+      )
   }
 }

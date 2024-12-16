@@ -57,7 +57,8 @@ class AssessmentServiceSpec extends BaseUnitSpec {
             organisationId = 123456,
             organisationName = "org name",
             representativeCode = 1111
-          )),
+          )
+        ),
         capacity = "OWNER"
       )
 

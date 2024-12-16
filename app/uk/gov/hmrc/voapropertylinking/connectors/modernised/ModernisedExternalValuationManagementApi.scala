@@ -29,7 +29,7 @@ import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
 import javax.inject.{Inject, Named}
 import scala.concurrent.{ExecutionContext, Future}
 
-class ModernisedExternalValuationManagementApi @Inject()(
+class ModernisedExternalValuationManagementApi @Inject() (
       wsClient: WSClient,
       http: VoaHttpClient,
       @Named("voa.modernised.authValuationHistoryUrl") valuationHistoryUrl: String,
@@ -41,22 +41,27 @@ class ModernisedExternalValuationManagementApi @Inject()(
 
   lazy val url = config.baseUrl("voa-modernised-api") + "/external-valuation-management-api"
 
-  def getDvrDocuments(valuationId: Long, uarn: Long, propertyLinkId: String)(
-        implicit request: RequestWithPrincipal[_]): Future[Option[DvrDocumentFiles]] =
+  def getDvrDocuments(valuationId: Long, uarn: Long, propertyLinkId: String)(implicit
+        request: RequestWithPrincipal[_]
+  ): Future[Option[DvrDocumentFiles]] =
     http
       .GET[Option[DvrDocumentFiles]](
         url = s"$url/properties/$uarn/valuations/$valuationId/files",
-        queryParams = Seq("propertyLinkId" -> propertyLinkId))
+        queryParams = Seq("propertyLinkId" -> propertyLinkId)
+      )
 
-  def getValuationHistory(uarn: Long, propertyLinkSubmissionId: String)(
-        implicit request: RequestWithPrincipal[_]): Future[Option[ValuationHistoryResponse]] =
+  def getValuationHistory(uarn: Long, propertyLinkSubmissionId: String)(implicit
+        request: RequestWithPrincipal[_]
+  ): Future[Option[ValuationHistoryResponse]] =
     http
       .GET[Option[ValuationHistoryResponse]](
         valuationHistoryUrl.replace("{uarn}", uarn.toString),
-        modernisedValuationHistoryQueryParameters(propertyLinkSubmissionId))
+        modernisedValuationHistoryQueryParameters(propertyLinkSubmissionId)
+      )
 
-  def getDvrDocument(valuationId: Long, uarn: Long, propertyLinkId: String, fileRef: String)(
-        implicit request: RequestWithPrincipal[_]): Future[WSResponse] =
+  def getDvrDocument(valuationId: Long, uarn: Long, propertyLinkId: String, fileRef: String)(implicit
+        request: RequestWithPrincipal[_]
+  ): Future[WSResponse] =
     wsClient
       .url(s"$url/properties/$uarn/valuations/$valuationId/files/$fileRef?propertyLinkId=$propertyLinkId")
       .withMethod("GET")
@@ -64,7 +69,9 @@ class ModernisedExternalValuationManagementApi @Inject()(
         List(
           "GG-EXTERNAL-ID" -> request.principal.externalId,
           USER_AGENT       -> appName,
-          "GG-GROUP-ID"    -> request.principal.groupId): _*)
+          "GG-GROUP-ID"    -> request.principal.groupId
+        ): _*
+      )
       .stream()
       .flatMap { response =>
         response.status match {

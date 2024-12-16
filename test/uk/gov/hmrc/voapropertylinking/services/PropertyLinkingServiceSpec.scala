@@ -61,12 +61,14 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
           billingAuthorityReference = "VOA1",
           currentFromDate = None,
           currentToDate = None
-        )),
+        )
+      ),
       parties = Seq(
         APIParty(
           id = 24680,
           authorisedPartyOrganisationId = 123456
-        )),
+        )
+      ),
       agents = Some(
         Seq(
           LegacyParty(
@@ -74,7 +76,9 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
             agentCode = 1111,
             organisationName = "org name",
             organisationId = 123456
-          ))),
+          )
+        )
+      ),
       client = None
     )
 
@@ -98,7 +102,8 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
           billingAuthorityReference = "VOA1",
           currentFromDate = None,
           currentToDate = None
-        )),
+        )
+      ),
       parties = Seq(),
       agents = Some(Nil),
       client = None
@@ -121,7 +126,8 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
           organisationId = 123456,
           organisationName = "org name",
           representativeCode = 1111
-        ))
+        )
+      )
     )
 
   val summaryPropertyLinkWithAgents: SummaryPropertyLinkWithAgents =
@@ -140,7 +146,8 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
           organisationId = 123456,
           organisationName = "org name",
           representativeCode = 1111
-        ))
+        )
+      )
     )
   val ownerPropertyLink: OwnerPropertyLink = OwnerPropertyLink(propertyLinkWithAgents)
 
@@ -201,7 +208,9 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
           billingAuthCode = None,
           listType = ListType.CURRENT,
           allowedActions = List(AllowedAction.VIEW_DETAILED_VALUATION)
-        )))
+        )
+      )
+    )
 
   val agentAuthorisation: ModernisedPropertyLinkWithClient = propertyLinkClient
   val agentSummaryAuthorisation: ModernisedPropertyLinkWithClient = propertyLinkClient
@@ -211,7 +220,8 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
       size = 1,
       filterTotal = 1,
       total = 1,
-      authorisations = Seq(PropertyLinkWithClient.apply(summaryPropertyLinkClient)))
+      authorisations = Seq(PropertyLinkWithClient.apply(summaryPropertyLinkClient))
+    )
 
   val ownerAuthorisationAgent: OwnerAuthorisation = OwnerAuthorisation(summaryPropertyLinkWithAgents)
   val ownerAuthResultAgent: OwnerAuthResult = OwnerAuthResult(1, 1, 1, 1, Seq(ownerAuthorisationAgent))
@@ -236,7 +246,8 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
           .thenReturn(Future.successful(Some(ownerPropertyLink)))
 
         service.getMyOrganisationsPropertyLink("11111").value.futureValue shouldBe Some(
-          PropertiesView(ownerPropertyLink.authorisation, Nil))
+          PropertiesView(ownerPropertyLink.authorisation, Nil)
+        )
 
         verify(mockModernisedExternalPropertyLinkApi).getMyOrganisationsPropertyLink("11111")
 
@@ -305,8 +316,8 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
 
         when(
           mockModernisedExternalPropertyLinkApi
-            .getClientsPropertyLinks(getMyClientsSearchParams, Some(paginationParams)))
-          .thenReturn(Future.successful(Some(propertyLinksWithClient)))
+            .getClientsPropertyLinks(getMyClientsSearchParams, Some(paginationParams))
+        ).thenReturn(Future.successful(Some(propertyLinksWithClient)))
 
         val result = service.getClientsPropertyLinks(getMyClientsSearchParams, Some(paginationParams)).value.futureValue
 
@@ -320,8 +331,8 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
 
         when(
           mockModernisedExternalPropertyLinkApi
-            .getClientsPropertyLinks(getMyClientsSearchParams, Some(paginationParams)))
-          .thenReturn(Future.successful(None))
+            .getClientsPropertyLinks(getMyClientsSearchParams, Some(paginationParams))
+        ).thenReturn(Future.successful(None))
 
         val result = service.getClientsPropertyLinks(getMyClientsSearchParams, Some(paginationParams)).value.futureValue
 
@@ -339,8 +350,8 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
 
         when(
           mockModernisedExternalPropertyLinkApi
-            .getClientPropertyLinks(clientId, getClientSearchParams, Some(paginationParams)))
-          .thenReturn(Future.successful(Some(propertyLinksWithClient)))
+            .getClientPropertyLinks(clientId, getClientSearchParams, Some(paginationParams))
+        ).thenReturn(Future.successful(Some(propertyLinksWithClient)))
 
         val result =
           service.getClientPropertyLinks(clientId, getClientSearchParams, Some(paginationParams)).value.futureValue
@@ -357,8 +368,8 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
 
         when(
           mockModernisedExternalPropertyLinkApi
-            .getClientPropertyLinks(clientId, getClientSearchParams, Some(paginationParams)))
-          .thenReturn(Future.successful(None))
+            .getClientPropertyLinks(clientId, getClientSearchParams, Some(paginationParams))
+        ).thenReturn(Future.successful(None))
 
         val result =
           service.getClientPropertyLinks(clientId, getClientSearchParams, Some(paginationParams)).value.futureValue
@@ -375,8 +386,8 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
 
         when(
           mockModernisedExternalPropertyLinkApi
-            .getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, None))
-          .thenReturn(Future.successful(propertyLinksWithAgents))
+            .getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, None)
+        ).thenReturn(Future.successful(propertyLinksWithAgents))
 
         val result = service
           .getMyOrganisationsPropertyLinksCount()
@@ -393,8 +404,8 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
 
         when(
           mockModernisedExternalPropertyLinkApi
-            .getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams)))
-          .thenReturn(Future.successful(propertyLinksWithAgents))
+            .getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams))
+        ).thenReturn(Future.successful(propertyLinksWithAgents))
 
         val result = service
           .getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams))
@@ -413,8 +424,8 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
         val agentCode = 1
         when(
           mockModernisedExternalPropertyLinkApi
-            .getMyAgentPropertyLinks(agentCode, getMyOrganisationSearchParams, paginationParams))
-          .thenReturn(Future.successful(propertyLinksWithAgents))
+            .getMyAgentPropertyLinks(agentCode, getMyOrganisationSearchParams, paginationParams)
+        ).thenReturn(Future.successful(propertyLinksWithAgents))
 
         val result = service
           .getMyAgentPropertyLinks(agentCode, getMyOrganisationSearchParams, paginationParams)
@@ -433,8 +444,8 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
         val agentCode = 1
         when(
           mockModernisedExternalPropertyLinkApi
-            .getMyAgentAvailablePropertyLinks(agentCode, getMyOrganisationSearchParams, Some(paginationParams)))
-          .thenReturn(Future.successful(propertyLinksWithAgents))
+            .getMyAgentAvailablePropertyLinks(agentCode, getMyOrganisationSearchParams, Some(paginationParams))
+        ).thenReturn(Future.successful(propertyLinksWithAgents))
 
         val result = service
           .getMyAgentAvailablePropertyLinks(agentCode, getMyOrganisationSearchParams, Some(paginationParams))
@@ -452,8 +463,8 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
       "call connector and return the list of agents belonging to that organisation" in {
         when(
           mockModernisedExternalPropertyLinkApi
-            .getMyOrganisationsAgents())
-          .thenReturn(Future.successful(organisationsAgentsList))
+            .getMyOrganisationsAgents()
+        ).thenReturn(Future.successful(organisationsAgentsList))
 
         val result = service
           .getMyOrganisationsAgents()
@@ -468,8 +479,8 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
       "return none when nothing is returned from connector" in {
         when(
           mockModernisedExternalPropertyLinkApi
-            .getMyOrganisationsAgents())
-          .thenReturn(Future.successful(emptyOrganisationsAgentsList))
+            .getMyOrganisationsAgents()
+        ).thenReturn(Future.successful(emptyOrganisationsAgentsList))
 
         val result = service
           .getMyOrganisationsAgents()
@@ -487,13 +498,14 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
       "call connector and return the list of clients belonging to that agent organisation" in {
         when(
           mockModernisedExternalPropertyLinkApi
-            .getMyClients(any(), any())(any()))
-          .thenReturn(Future.successful(clientsList))
+            .getMyClients(any(), any())(any())
+        ).thenReturn(Future.successful(clientsList))
 
         val result = service
           .getMyClients(
             GetClientsParameters(),
-            Some(PaginationParams(startPoint = 1, pageSize = 15, requestTotalRowCount = true)))
+            Some(PaginationParams(startPoint = 1, pageSize = 15, requestTotalRowCount = true))
+          )
           .futureValue
 
         result shouldBe clientsList
@@ -505,13 +517,14 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
       "return none when nothing is returned from connector" in {
         when(
           mockModernisedExternalPropertyLinkApi
-            .getMyClients(any(), any())(any()))
-          .thenReturn(Future.successful(emptyClientsList))
+            .getMyClients(any(), any())(any())
+        ).thenReturn(Future.successful(emptyClientsList))
 
         val result = service
           .getMyClients(
             GetClientsParameters(),
-            Some(PaginationParams(startPoint = 1, pageSize = 15, requestTotalRowCount = true)))
+            Some(PaginationParams(startPoint = 1, pageSize = 15, requestTotalRowCount = true))
+          )
           .futureValue
 
         result shouldBe emptyClientsList
@@ -531,7 +544,8 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
           .thenReturn(Future.successful(Some(ownerPropertyLink)))
 
         service.getMyOrganisationsPropertyLink("11111").value.futureValue shouldBe Some(
-          PropertiesView(ownerPropertyLink.authorisation, Nil))
+          PropertiesView(ownerPropertyLink.authorisation, Nil)
+        )
 
         verify(mockPropertyLinkApi).getMyOrganisationsPropertyLink("11111")
 
@@ -636,8 +650,8 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
         when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
         when(
           mockPropertyLinkApi
-            .getClientPropertyLinks(clientId, getClientSearchParams, Some(paginationParams)))
-          .thenReturn(Future.successful(Some(propertyLinksWithClient)))
+            .getClientPropertyLinks(clientId, getClientSearchParams, Some(paginationParams))
+        ).thenReturn(Future.successful(Some(propertyLinksWithClient)))
 
         val result =
           service.getClientPropertyLinks(clientId, getClientSearchParams, Some(paginationParams)).value.futureValue
@@ -655,8 +669,8 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
         when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
         when(
           mockPropertyLinkApi
-            .getClientPropertyLinks(clientId, getClientSearchParams, Some(paginationParams)))
-          .thenReturn(Future.successful(None))
+            .getClientPropertyLinks(clientId, getClientSearchParams, Some(paginationParams))
+        ).thenReturn(Future.successful(None))
 
         val result =
           service.getClientPropertyLinks(clientId, getClientSearchParams, Some(paginationParams)).value.futureValue
@@ -674,8 +688,8 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
         when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
         when(
           mockPropertyLinkApi
-            .getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, None))
-          .thenReturn(Future.successful(propertyLinksWithAgents))
+            .getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, None)
+        ).thenReturn(Future.successful(propertyLinksWithAgents))
 
         val result = service
           .getMyOrganisationsPropertyLinksCount()
@@ -691,8 +705,8 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
         when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
         when(
           mockPropertyLinkApi
-            .getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams)))
-          .thenReturn(Future.successful(propertyLinksWithAgents))
+            .getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams))
+        ).thenReturn(Future.successful(propertyLinksWithAgents))
 
         val result = service
           .getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, Some(paginationParams))
@@ -711,8 +725,8 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
         when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
         when(
           mockPropertyLinkApi
-            .getMyAgentPropertyLinks(agentCode, getMyOrganisationSearchParams, paginationParams))
-          .thenReturn(Future.successful(propertyLinksWithAgents))
+            .getMyAgentPropertyLinks(agentCode, getMyOrganisationSearchParams, paginationParams)
+        ).thenReturn(Future.successful(propertyLinksWithAgents))
 
         val result = service
           .getMyAgentPropertyLinks(agentCode, getMyOrganisationSearchParams, paginationParams)
@@ -732,8 +746,8 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
         when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
         when(
           mockPropertyLinkApi
-            .getMyAgentAvailablePropertyLinks(agentCode, getMyOrganisationSearchParams, Some(paginationParams)))
-          .thenReturn(Future.successful(propertyLinksWithAgents))
+            .getMyAgentAvailablePropertyLinks(agentCode, getMyOrganisationSearchParams, Some(paginationParams))
+        ).thenReturn(Future.successful(propertyLinksWithAgents))
 
         val result = service
           .getMyAgentAvailablePropertyLinks(agentCode, getMyOrganisationSearchParams, Some(paginationParams))
@@ -751,8 +765,8 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
         when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
         when(
           mockPropertyLinkApi
-            .getMyOrganisationsAgents())
-          .thenReturn(Future.successful(organisationsAgentsList))
+            .getMyOrganisationsAgents()
+        ).thenReturn(Future.successful(organisationsAgentsList))
 
         val result = service
           .getMyOrganisationsAgents()
@@ -768,8 +782,8 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
         when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
         when(
           mockPropertyLinkApi
-            .getMyOrganisationsAgents())
-          .thenReturn(Future.successful(emptyOrganisationsAgentsList))
+            .getMyOrganisationsAgents()
+        ).thenReturn(Future.successful(emptyOrganisationsAgentsList))
 
         val result = service
           .getMyOrganisationsAgents()
@@ -787,13 +801,14 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
         when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
         when(
           mockPropertyLinkApi
-            .getMyClients(any(), any())(any()))
-          .thenReturn(Future.successful(clientsList))
+            .getMyClients(any(), any())(any())
+        ).thenReturn(Future.successful(clientsList))
 
         val result = service
           .getMyClients(
             GetClientsParameters(),
-            Some(PaginationParams(startPoint = 1, pageSize = 15, requestTotalRowCount = true)))
+            Some(PaginationParams(startPoint = 1, pageSize = 15, requestTotalRowCount = true))
+          )
           .futureValue
 
         result shouldBe clientsList
@@ -806,13 +821,14 @@ class PropertyLinkingServiceSpec extends BaseUnitSpec {
         when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
         when(
           mockPropertyLinkApi
-            .getMyClients(any(), any())(any()))
-          .thenReturn(Future.successful(emptyClientsList))
+            .getMyClients(any(), any())(any())
+        ).thenReturn(Future.successful(emptyClientsList))
 
         val result = service
           .getMyClients(
             GetClientsParameters(),
-            Some(PaginationParams(startPoint = 1, pageSize = 15, requestTotalRowCount = true)))
+            Some(PaginationParams(startPoint = 1, pageSize = 15, requestTotalRowCount = true))
+          )
           .futureValue
 
         result shouldBe emptyClientsList

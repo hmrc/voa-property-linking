@@ -108,7 +108,8 @@ class ModernisedExternalPropertyLinkingManagementClientsISpec
               organisationId = 123456,
               organisationName = "org name",
               representativeCode = 1111
-            ))
+            )
+          )
         )
       val responseModel: PropertyLinksWithAgents =
         PropertyLinksWithAgents(
@@ -116,11 +117,13 @@ class ModernisedExternalPropertyLinkingManagementClientsISpec
           size = 1,
           filterTotal = 1,
           total = 1,
-          authorisations = Seq(summaryPropertyLinkWithAgents))
+          authorisations = Seq(summaryPropertyLinkWithAgents)
+        )
 
       stubGetMyOrganisationsPropertyLinks(
         searchParams = getMyOrganisationPropertyLinksParameters,
-        params = paginationParams)(OK, responseJson)
+        params = paginationParams
+      )(OK, responseJson)
 
       val result: PropertyLinksWithAgents = await {
         connector.getMyOrganisationsPropertyLinks(getMyOrganisationPropertyLinksParameters, Some(paginationParams))
@@ -133,7 +136,8 @@ class ModernisedExternalPropertyLinkingManagementClientsISpec
       "a success code is received but with an invalid body" in new TestSetup {
         stubGetMyOrganisationsPropertyLinks(
           searchParams = getMyOrganisationPropertyLinksParameters,
-          params = paginationParams)(OK, Json.obj("invalid" -> "body"))
+          params = paginationParams
+        )(OK, Json.obj("invalid" -> "body"))
 
         assertThrows[JsValidationException] {
           await(
@@ -145,7 +149,8 @@ class ModernisedExternalPropertyLinkingManagementClientsISpec
       "any error status code is returned" in new TestSetup {
         stubGetMyOrganisationsPropertyLinks(
           searchParams = getMyOrganisationPropertyLinksParameters,
-          params = paginationParams)(INTERNAL_SERVER_ERROR, Json.obj("doesnt" -> "matter"))
+          params = paginationParams
+        )(INTERNAL_SERVER_ERROR, Json.obj("doesnt" -> "matter"))
 
         assertThrows[Exception] {
           await(
@@ -315,7 +320,8 @@ class ModernisedExternalPropertyLinkingManagementClientsISpec
       "a success code is received but with an invalid body" in new TestSetup {
         stubGetClientsPropertyLinks(getMyClientsPropertyLinksParameters, paginationParams)(
           OK,
-          Json.obj("invalid" -> "body"))
+          Json.obj("invalid" -> "body")
+        )
 
         assertThrows[JsValidationException] {
           await(
@@ -327,7 +333,8 @@ class ModernisedExternalPropertyLinkingManagementClientsISpec
       "any error status code is returned" in new TestSetup {
         stubGetClientsPropertyLinks(getMyClientsPropertyLinksParameters, paginationParams)(
           INTERNAL_SERVER_ERROR,
-          Json.obj("doesnt" -> "matter"))
+          Json.obj("doesnt" -> "matter")
+        )
 
         assertThrows[Exception] {
           await(
@@ -418,7 +425,8 @@ class ModernisedExternalPropertyLinkingManagementClientsISpec
       "a success code is received but with an invalid body" in new TestSetup {
         stubGetClientPropertyLinks(clientOrgID, getClientPropertyLinksParameters, paginationParams)(
           OK,
-          Json.obj("invalid" -> "body"))
+          Json.obj("invalid" -> "body")
+        )
 
         assertThrows[JsValidationException] {
           await(
@@ -430,7 +438,8 @@ class ModernisedExternalPropertyLinkingManagementClientsISpec
       "any error status code is returned" in new TestSetup {
         stubGetClientPropertyLinks(clientOrgID, getClientPropertyLinksParameters, paginationParams)(
           INTERNAL_SERVER_ERROR,
-          Json.obj("doesnt" -> "matter"))
+          Json.obj("doesnt" -> "matter")
+        )
 
         assertThrows[Exception] {
           await(

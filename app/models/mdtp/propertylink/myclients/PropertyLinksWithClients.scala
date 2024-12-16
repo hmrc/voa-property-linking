@@ -30,12 +30,13 @@ case class PropertyLinksWithClients(
 object PropertyLinksWithClients {
   implicit val format: OFormat[PropertyLinksWithClients] = Json.format
 
-  def apply(propertyLinks: ModernisedPropertyLinksWithClient): PropertyLinksWithClients = PropertyLinksWithClients(
-    start = propertyLinks.start,
-    size = propertyLinks.size,
-    filterTotal = propertyLinks.filterTotal,
-    total = propertyLinks.total,
-    authorisations = propertyLinks.authorisations.map(PropertyLinkWithClient.apply)
-  )
+  def apply(propertyLinks: ModernisedPropertyLinksWithClient): PropertyLinksWithClients =
+    PropertyLinksWithClients(
+      start = propertyLinks.start,
+      size = propertyLinks.size,
+      filterTotal = propertyLinks.filterTotal,
+      total = propertyLinks.total,
+      authorisations = propertyLinks.authorisations.map(PropertyLinkWithClient.apply)
+    )
 
 }

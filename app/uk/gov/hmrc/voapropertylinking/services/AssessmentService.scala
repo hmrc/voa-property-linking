@@ -28,7 +28,7 @@ import uk.gov.hmrc.voapropertylinking.utils.Cats
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class AssessmentService @Inject()(
+class AssessmentService @Inject() (
       val modernisedPropertyLinksConnector: ModernisedExternalPropertyLinkApi,
       val modernisedValuationManagementApi: ModernisedExternalValuationManagementApi,
       propertyLinksConnector: ExternalPropertyLinkApi,
@@ -41,42 +41,39 @@ class AssessmentService @Inject()(
         submissionId: String
   )(implicit request: RequestWithPrincipal[_]): OptionT[Future, Assessments] =
     for {
-      propertyLink <- if (featureSwitch.isBstDownstreamEnabled) {
-                       OptionT(propertyLinksConnector.getMyOrganisationsPropertyLink(submissionId))
-                     } else {
-                       OptionT(modernisedPropertyLinksConnector.getMyOrganisationsPropertyLink(submissionId))
-                     }
-      history <- if (featureSwitch.isBstDownstreamEnabled) {
-                  OptionT(valuationManagementApi.getValuationHistory(propertyLink.authorisation.uarn, submissionId))
-                } else {
-                  OptionT(
-                    modernisedValuationManagementApi.getValuationHistory(propertyLink.authorisation.uarn, submissionId))
-                }
-    } yield
-      Assessments(
-        propertyLink.authorisation,
-        history.NDRListValuationHistoryItems,
-        Some(propertyLink.authorisation.capacity))
+      propertyLink <- if (featureSwitch.isBstDownstreamEnabled)
+                        OptionT(propertyLinksConnector.getMyOrganisationsPropertyLink(submissionId))
+                      else
+                        OptionT(modernisedPropertyLinksConnector.getMyOrganisationsPropertyLink(submissionId))
+      history <- if (featureSwitch.isBstDownstreamEnabled)
+                   OptionT(valuationManagementApi.getValuationHistory(propertyLink.authorisation.uarn, submissionId))
+                 else
+                   OptionT(
+                     modernisedValuationManagementApi.getValuationHistory(propertyLink.authorisation.uarn, submissionId)
+                   )
+    } yield Assessments(
+      propertyLink.authorisation,
+      history.NDRListValuationHistoryItems,
+      Some(propertyLink.authorisation.capacity)
+    )
 
   def getClientsAssessments(
         submissionId: String
   )(implicit request: RequestWithPrincipal[_]): OptionT[Future, Assessments] =
     for {
-      propertyLink <- if (featureSwitch.isBstDownstreamEnabled) {
-                       OptionT(propertyLinksConnector.getClientsPropertyLink(submissionId))
-                     } else {
-                       OptionT(modernisedPropertyLinksConnector.getClientsPropertyLink(submissionId))
-                     }
-      history <- if (featureSwitch.isBstDownstreamEnabled) {
-                  OptionT(valuationManagementApi.getValuationHistory(propertyLink.authorisation.uarn, submissionId))
-                } else {
-                  OptionT(
-                    modernisedValuationManagementApi.getValuationHistory(propertyLink.authorisation.uarn, submissionId))
-                }
-    } yield
-      Assessments(
-        propertyLink = propertyLink.authorisation,
-        history = history.NDRListValuationHistoryItems,
-        capacity = Some(propertyLink.authorisation.capacity)
-      )
+      propertyLink <- if (featureSwitch.isBstDownstreamEnabled)
+                        OptionT(propertyLinksConnector.getClientsPropertyLink(submissionId))
+                      else
+                        OptionT(modernisedPropertyLinksConnector.getClientsPropertyLink(submissionId))
+      history <- if (featureSwitch.isBstDownstreamEnabled)
+                   OptionT(valuationManagementApi.getValuationHistory(propertyLink.authorisation.uarn, submissionId))
+                 else
+                   OptionT(
+                     modernisedValuationManagementApi.getValuationHistory(propertyLink.authorisation.uarn, submissionId)
+                   )
+    } yield Assessments(
+      propertyLink = propertyLink.authorisation,
+      history = history.NDRListValuationHistoryItems,
+      capacity = Some(propertyLink.authorisation.capacity)
+    )
 }

@@ -50,7 +50,8 @@ case class Assessments(
       clientOrgName: Option[String],
       capacity: Option[String],
       assessments: Seq[Assessment],
-      agents: Seq[Party])
+      agents: Seq[Party]
+)
 
 object Assessment {
   implicit val formats: OFormat[Assessment] = Json.format[Assessment]
@@ -80,7 +81,8 @@ object Assessments {
   def apply(
         propertyLink: PropertyLinkWithAgents,
         history: Seq[ValuationHistory],
-        capacity: Option[String]): Assessments =
+        capacity: Option[String]
+  ): Assessments =
     Assessments(
       propertyLink.authorisationId,
       propertyLink.submissionId,
@@ -90,20 +92,21 @@ object Assessments {
       clientOrgName = None,
       capacity = capacity,
       assessments = history.map(x => Assessment.fromValuationHistory(x, propertyLink.authorisationId)),
-      agents = propertyLink.agents.map(
-        agent =>
-          Party(
-            agent.authorisedPartyId,
-            agent.representativeCode,
-            agent.organisationName,
-            agent.organisationId
-        ))
+      agents = propertyLink.agents.map(agent =>
+        Party(
+          agent.authorisedPartyId,
+          agent.representativeCode,
+          agent.organisationName,
+          agent.organisationId
+        )
+      )
     )
 
   def apply(
         propertyLink: PropertyLinkWithClient,
         history: Seq[ValuationHistory],
-        capacity: Option[String]): Assessments =
+        capacity: Option[String]
+  ): Assessments =
     Assessments(
       authorisationId = propertyLink.authorisationId,
       submissionId = propertyLink.submissionId,

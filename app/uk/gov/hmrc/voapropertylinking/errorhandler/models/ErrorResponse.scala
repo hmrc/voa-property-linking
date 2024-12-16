@@ -27,7 +27,8 @@ case class ErrorResponse(
       errorCode: String,
       message: String,
       errors: Option[Seq[NestedError]] = None,
-      incidentId: String = UUID.randomUUID().toString) {
+      incidentId: String = UUID.randomUUID().toString
+) {
 
   override def toString: String =
     s"[$incidentId] $httpStatusCode $errorCode - $message"

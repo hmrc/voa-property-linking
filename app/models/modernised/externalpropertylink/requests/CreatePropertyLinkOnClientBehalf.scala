@@ -34,7 +34,8 @@ case class CreatePropertyLinkOnClientBehalf(
       propertyLinkSubmissionId: String,
       createDatetime: LocalDateTime,
       evidence: Seq[Evidence],
-      submissionSource: String)
+      submissionSource: String
+)
 
 object CreatePropertyLinkOnClientBehalf {
 

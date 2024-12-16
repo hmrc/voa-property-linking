@@ -31,7 +31,7 @@ import scala.concurrent.{ExecutionContext, Future}
 /*
   TODO move this to challenge backend.
  */
-class ChallengeController @Inject()(
+class ChallengeController @Inject() (
       controllerComponents: ControllerComponents,
       authenticated: AuthenticatedActionBuilder,
       modernisedExternalCaseManagementApi: ModernisedExternalCaseManagementApi,
@@ -44,18 +44,19 @@ class ChallengeController @Inject()(
         propertyLinkSubmissionId: String,
         checkCaseRef: String,
         valuationId: Long,
-        party: String): Action[AnyContent] = authenticated.async { implicit request =>
-    val canChallengeResponse: Future[Option[CanChallengeResponse]] =
-      if (featureSwitch.isBstDownstreamEnabled) {
-        externalCaseManagementApi
-          .canChallenge(propertyLinkSubmissionId, checkCaseRef, valuationId, party)
-      } else {
-        modernisedExternalCaseManagementApi
-          .canChallenge(propertyLinkSubmissionId, checkCaseRef, valuationId, party)
+        party: String
+  ): Action[AnyContent] =
+    authenticated.async { implicit request =>
+      val canChallengeResponse: Future[Option[CanChallengeResponse]] =
+        if (featureSwitch.isBstDownstreamEnabled)
+          externalCaseManagementApi
+            .canChallenge(propertyLinkSubmissionId, checkCaseRef, valuationId, party)
+        else
+          modernisedExternalCaseManagementApi
+            .canChallenge(propertyLinkSubmissionId, checkCaseRef, valuationId, party)
+      canChallengeResponse.map {
+        case Some(resp) => Ok(Json.toJson(resp))
+        case _          => Forbidden
       }
-    canChallengeResponse.map {
-      case Some(resp) => Ok(Json.toJson(resp))
-      case _          => Forbidden
     }
-  }
 }

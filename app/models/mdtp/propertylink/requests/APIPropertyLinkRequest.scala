@@ -31,7 +31,8 @@ case class APIPropertyLinkRequest(
       submissionId: String,
       authorisationOwnerCapacity: String,
       startDate: LocalDate,
-      endDate: Option[LocalDate] = None)
+      endDate: Option[LocalDate] = None
+)
 
 object APIPropertyLinkRequest {
   implicit val instantReads: Reads[Instant] = Reads.instantReads("yyyy-MM-dd'T'HH:mm:ss.SSS[XXX][X]")

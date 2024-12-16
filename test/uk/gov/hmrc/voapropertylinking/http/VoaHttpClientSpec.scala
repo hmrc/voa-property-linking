@@ -39,7 +39,7 @@ class VoaHttpClientSpec extends BaseUnitSpec {
     val mockUrl = "http://mock-url"
 
     val mockQueryParams = Seq("key" -> "value")
-    val mockHeaders = Seq("key"     -> "value")
+    val mockHeaders = Seq("key" -> "value")
     val mockHttpClient: DefaultHttpClient = mock[DefaultHttpClient]
     val headerCaptor: ArgumentCaptor[HeaderCarrier] = ArgumentCaptor.forClass(classOf[HeaderCarrier])
 
@@ -61,7 +61,8 @@ class VoaHttpClientSpec extends BaseUnitSpec {
         Seq(
           "GG-EXTERNAL-ID" -> principal.externalId,
           "GG-GROUP-ID"    -> principal.groupId
-        ): _*)
+        ): _*
+      )
     }
 
     "enrich the GG headers when calling a GET" in new Setup {
@@ -80,7 +81,8 @@ class VoaHttpClientSpec extends BaseUnitSpec {
         .GET(ArgumentMatchers.eq(mockUrl), ArgumentMatchers.eq(mockQueryParams), any())(
           any(),
           headerCaptor.capture(),
-          any())
+          any()
+        )
 
       checkGovernmentGatewayHeaders(headerCaptor)
     }
@@ -111,7 +113,8 @@ class VoaHttpClientSpec extends BaseUnitSpec {
           any(),
           any(),
           headerCaptor.capture(),
-          any())
+          any()
+        )
 
       checkGovernmentGatewayHeaders(headerCaptor)
     }

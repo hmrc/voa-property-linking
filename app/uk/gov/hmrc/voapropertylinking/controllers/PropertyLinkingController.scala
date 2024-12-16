@@ -32,7 +32,7 @@ import uk.gov.hmrc.voapropertylinking.utils.Cats
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class PropertyLinkingController @Inject()(
+class PropertyLinkingController @Inject() (
       controllerComponents: ControllerComponents,
       authenticated: AuthenticatedActionBuilder,
       propertyLinkService: PropertyLinkingService,
@@ -41,93 +41,104 @@ class PropertyLinkingController @Inject()(
 )(implicit executionContext: ExecutionContext)
     extends PropertyLinkingBaseController(controllerComponents) with Cats {
 
-  def create(): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
-    withJsonBody[PropertyLinkRequest] { propertyLinkRequest =>
-      propertyLinkService
-        .create(APIPropertyLinkRequest.fromPropertyLinkRequest(propertyLinkRequest))
-        .map { _ =>
-          logger.info(s"create property link: submissionId ${propertyLinkRequest.submissionId}")
-          auditingService.sendEvent("create property link", propertyLinkRequest)
-          Accepted
-        }
-        .recover {
-          case _: UpstreamErrorResponse =>
-            logger.info(s"create property link failure: submissionId ${propertyLinkRequest.submissionId}")
-            auditingService.sendEvent("create property link failure", propertyLinkRequest)
-            InternalServerError
-        }
+  def create(): Action[JsValue] =
+    authenticated.async(parse.json) { implicit request =>
+      withJsonBody[PropertyLinkRequest] { propertyLinkRequest =>
+        propertyLinkService
+          .create(APIPropertyLinkRequest.fromPropertyLinkRequest(propertyLinkRequest))
+          .map { _ =>
+            logger.info(s"create property link: submissionId ${propertyLinkRequest.submissionId}")
+            auditingService.sendEvent("create property link", propertyLinkRequest)
+            Accepted
+          }
+          .recover {
+            case _: UpstreamErrorResponse =>
+              logger.info(s"create property link failure: submissionId ${propertyLinkRequest.submissionId}")
+              auditingService.sendEvent("create property link failure", propertyLinkRequest)
+              InternalServerError
+          }
+      }
     }
-  }
 
-  def createOnClientBehalf(clientId: Long): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
-    withJsonBody[PropertyLinkRequest] { propertyLinkRequest =>
-      propertyLinkService
-        .createOnClientBehalf(APIPropertyLinkRequest.fromPropertyLinkRequest(propertyLinkRequest), clientId)
-        .map { _ =>
-          logger.info(s"create property link on client behalf: submissionId ${propertyLinkRequest.submissionId}")
-          auditingService.sendEvent("create property link on client behalf", propertyLinkRequest)
-          Accepted
-        }
-        .recover {
-          case _: UpstreamErrorResponse =>
-            logger.info(
-              s"create property link on client behalf failure: submissionId ${propertyLinkRequest.submissionId}")
-            auditingService.sendEvent("create property link on client behalf failure", propertyLinkRequest)
-            InternalServerError
-        }
+  def createOnClientBehalf(clientId: Long): Action[JsValue] =
+    authenticated.async(parse.json) { implicit request =>
+      withJsonBody[PropertyLinkRequest] { propertyLinkRequest =>
+        propertyLinkService
+          .createOnClientBehalf(APIPropertyLinkRequest.fromPropertyLinkRequest(propertyLinkRequest), clientId)
+          .map { _ =>
+            logger.info(s"create property link on client behalf: submissionId ${propertyLinkRequest.submissionId}")
+            auditingService.sendEvent("create property link on client behalf", propertyLinkRequest)
+            Accepted
+          }
+          .recover {
+            case _: UpstreamErrorResponse =>
+              logger.info(
+                s"create property link on client behalf failure: submissionId ${propertyLinkRequest.submissionId}"
+              )
+              auditingService.sendEvent("create property link on client behalf failure", propertyLinkRequest)
+              InternalServerError
+          }
+      }
     }
-  }
 
-  def getMyOrganisationsPropertyLink(submissionId: String): Action[AnyContent] = authenticated.async {
-    implicit request =>
+  def getMyOrganisationsPropertyLink(submissionId: String): Action[AnyContent] =
+    authenticated.async { implicit request =>
       propertyLinkService
         .getMyOrganisationsPropertyLink(submissionId)
         .fold(NotFound("my organisation property link not found")) { authorisation =>
           Ok(Json.toJson(authorisation))
         }
-  }
+    }
 
-  def getMyOrganisationsPropertyLinksCount: Action[AnyContent] = authenticated.async { implicit request =>
-    propertyLinkService
-      .getMyOrganisationsPropertyLinksCount()
-      .map(propertyLinksCount => Ok(Json.toJson(propertyLinksCount)))
-  }
+  def getMyOrganisationsPropertyLinksCount: Action[AnyContent] =
+    authenticated.async { implicit request =>
+      propertyLinkService
+        .getMyOrganisationsPropertyLinksCount()
+        .map(propertyLinksCount => Ok(Json.toJson(propertyLinksCount)))
+    }
 
   def getMyAgentPropertyLinks(
         agentCode: Long,
         searchParams: GetMyOrganisationPropertyLinksParameters,
         paginationParams: PaginationParams
-  ): Action[AnyContent] = authenticated.async { implicit request =>
-    propertyLinkService
-      .getMyAgentPropertyLinks(agentCode, searchParams, paginationParams)
-      .map(propertyLinks => Ok(Json.toJson(propertyLinks)))
+  ): Action[AnyContent] =
+    authenticated.async { implicit request =>
+      propertyLinkService
+        .getMyAgentPropertyLinks(agentCode, searchParams, paginationParams)
+        .map(propertyLinks => Ok(Json.toJson(propertyLinks)))
 
-  }
+    }
 
   def getMyOrganisationsPropertyLinks(
         searchParams: GetMyOrganisationPropertyLinksParameters,
-        paginationParams: Option[PaginationParams]): Action[AnyContent] = authenticated.async { implicit request =>
-    propertyLinkService
-      .getMyOrganisationsPropertyLinks(searchParams, paginationParams)
-      .map(propertyLinks => Ok(Json.toJson(propertyLinks)))
-  }
+        paginationParams: Option[PaginationParams]
+  ): Action[AnyContent] =
+    authenticated.async { implicit request =>
+      propertyLinkService
+        .getMyOrganisationsPropertyLinks(searchParams, paginationParams)
+        .map(propertyLinks => Ok(Json.toJson(propertyLinks)))
+    }
 
   def getClientsPropertyLinks(
         searchParams: GetMyClientsPropertyLinkParameters,
-        paginationParams: Option[PaginationParams]): Action[AnyContent] = authenticated.async { implicit request =>
-    propertyLinkService
-      .getClientsPropertyLinks(searchParams, paginationParams)
-      .fold(NotFound("clients property links not found"))(propertyLinks => Ok(Json.toJson(propertyLinks)))
-  }
+        paginationParams: Option[PaginationParams]
+  ): Action[AnyContent] =
+    authenticated.async { implicit request =>
+      propertyLinkService
+        .getClientsPropertyLinks(searchParams, paginationParams)
+        .fold(NotFound("clients property links not found"))(propertyLinks => Ok(Json.toJson(propertyLinks)))
+    }
 
   def getClientPropertyLinks(
         clientId: Long,
         searchParams: GetClientPropertyLinksParameters,
-        paginationParams: Option[PaginationParams]): Action[AnyContent] = authenticated.async { implicit request =>
-    propertyLinkService
-      .getClientPropertyLinks(clientId, searchParams, paginationParams)
-      .fold(NotFound("clients property links not found"))(propertyLinks => Ok(Json.toJson(propertyLinks)))
-  }
+        paginationParams: Option[PaginationParams]
+  ): Action[AnyContent] =
+    authenticated.async { implicit request =>
+      propertyLinkService
+        .getClientPropertyLinks(clientId, searchParams, paginationParams)
+        .fold(NotFound("clients property links not found"))(propertyLinks => Ok(Json.toJson(propertyLinks)))
+    }
 
   def getClientsPropertyLink(submissionId: String, projection: String = "propertiesView"): Action[AnyContent] =
     authenticated.async { implicit request =>
@@ -152,40 +163,48 @@ class PropertyLinkingController @Inject()(
 
   def getMyClients(
         clientsParameters: Option[GetClientsParameters],
-        paginationParams: Option[PaginationParams]): Action[AnyContent] = authenticated.async { implicit request =>
-    propertyLinkService
-      .getMyClients(clientsParameters.getOrElse(GetClientsParameters()), paginationParams)
-      .map(clients => Ok(Json.toJson(clients)))
-  }
+        paginationParams: Option[PaginationParams]
+  ): Action[AnyContent] =
+    authenticated.async { implicit request =>
+      propertyLinkService
+        .getMyClients(clientsParameters.getOrElse(GetClientsParameters()), paginationParams)
+        .map(clients => Ok(Json.toJson(clients)))
+    }
 
   def getMyAgentAppointablePropertyLinks(
         agentCode: Long,
         searchParams: GetMyOrganisationPropertyLinksParameters,
         paginationParams: Option[PaginationParams]
-  ): Action[AnyContent] = authenticated.async { implicit request =>
-    propertyLinkService
-      .getMyAgentAvailablePropertyLinks(agentCode, searchParams, paginationParams)
-      .map { response =>
-        Ok(Json.toJson(response))
-      }
-  }
+  ): Action[AnyContent] =
+    authenticated.async { implicit request =>
+      propertyLinkService
+        .getMyAgentAvailablePropertyLinks(agentCode, searchParams, paginationParams)
+        .map { response =>
+          Ok(Json.toJson(response))
+        }
+    }
 
-  def getMyOrganisationsAssessments(submissionId: String): Action[AnyContent] = authenticated.async {
-    implicit request =>
+  def getMyOrganisationsAssessments(submissionId: String): Action[AnyContent] =
+    authenticated.async { implicit request =>
       assessmentService
         .getMyOrganisationsAssessments(submissionId)
         .fold(Ok(Json.toJson(submissionId)))(propertyLinkWithAssessments =>
-          Ok(Json.toJson(propertyLinkWithAssessments)))
-  }
+          Ok(Json.toJson(propertyLinkWithAssessments))
+        )
+    }
 
-  def getClientsAssessments(submissionId: String): Action[AnyContent] = authenticated.async { implicit request =>
-    assessmentService
-      .getClientsAssessments(submissionId)
-      .fold(Ok(Json.toJson(submissionId)))(propertyLinkWithAssessments => Ok(Json.toJson(propertyLinkWithAssessments)))
-  }
+  def getClientsAssessments(submissionId: String): Action[AnyContent] =
+    authenticated.async { implicit request =>
+      assessmentService
+        .getClientsAssessments(submissionId)
+        .fold(Ok(Json.toJson(submissionId)))(propertyLinkWithAssessments =>
+          Ok(Json.toJson(propertyLinkWithAssessments))
+        )
+    }
 
-  def getMyOrganisationsAgents: Action[AnyContent] = authenticated.async { implicit request =>
-    propertyLinkService.getMyOrganisationsAgents().map(agentsList => Ok(Json.toJson(agentsList)))
-  }
+  def getMyOrganisationsAgents: Action[AnyContent] =
+    authenticated.async { implicit request =>
+      propertyLinkService.getMyOrganisationsAgents().map(agentsList => Ok(Json.toJson(agentsList)))
+    }
 
 }

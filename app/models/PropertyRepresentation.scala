@@ -28,7 +28,8 @@ case class PropertyRepresentation(
       organisationName: String,
       address: String,
       createDatetime: LocalDate,
-      status: String) {}
+      status: String
+) {}
 
 object PropertyRepresentation {
   implicit val propertyRepresentationFormat: OFormat[PropertyRepresentation] = Json.format[PropertyRepresentation]

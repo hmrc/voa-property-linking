@@ -42,7 +42,8 @@ abstract class BaseControllerSpec extends BaseUnitSpec with ResultExtractors wit
 
       override def invokeBlock[A](
             request: Request[A],
-            block: RequestWithPrincipal[A] => Future[Result]): Future[Result] =
+            block: RequestWithPrincipal[A] => Future[Result]
+      ): Future[Result] =
         block(RequestWithPrincipal(request, Principal(externalId, groupId)))
     }
 }

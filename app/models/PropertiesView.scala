@@ -35,7 +35,8 @@ case class PropertiesView(
       NDRListValuationHistoryItems: Seq[APIValuationHistory],
       parties: Seq[APIParty],
       agents: Option[Seq[LegacyParty]],
-      client: Option[Client]) {
+      client: Option[Client]
+) {
 
   def upperCase: PropertiesView =
     this.copy(NDRListValuationHistoryItems = NDRListValuationHistoryItems.map(_.capatalise))
@@ -63,7 +64,9 @@ object PropertiesView {
       client = Some(
         Client(
           organisationId = propertyLink.client.organisationId,
-          organisationName = propertyLink.client.organisationName))
+          organisationName = propertyLink.client.organisationName
+        )
+      )
     )
 
   def apply(propertyLink: PropertyLinkWithAgents, history: Seq[ValuationHistory]): PropertiesView =
@@ -76,12 +79,12 @@ object PropertiesView {
       endDate = propertyLink.endDate,
       submissionId = propertyLink.submissionId,
       NDRListValuationHistoryItems = history.map(history => APIValuationHistory(history)).toList,
-      parties = propertyLink.agents.map(
-        agent =>
-          APIParty(
-            id = agent.authorisedPartyId,
-            authorisedPartyOrganisationId = agent.organisationId
-        )),
+      parties = propertyLink.agents.map(agent =>
+        APIParty(
+          id = agent.authorisedPartyId,
+          authorisedPartyOrganisationId = agent.organisationId
+        )
+      ),
       agents = Some(
         propertyLink.agents.map(agent =>
           LegacyParty(
@@ -89,7 +92,9 @@ object PropertiesView {
             agentCode = agent.representativeCode,
             organisationName = agent.organisationName,
             organisationId = agent.organisationId
-        ))),
+          )
+        )
+      ),
       client = None
     )
 

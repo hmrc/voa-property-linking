@@ -25,7 +25,7 @@ import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
 
 import scala.concurrent.ExecutionContext
 
-class AuditingService @Inject()(
+class AuditingService @Inject() (
       auditConnector: AuditConnector
 )(implicit executionContext: ExecutionContext) {
 
@@ -34,9 +34,10 @@ class AuditingService @Inject()(
     auditConnector.sendExtendedEvent(event)
   }
 
-  def eventFor[A: Writes](auditType: String, obj: A)(
-        implicit hc: HeaderCarrier,
-        request: Request[_]): ExtendedDataEvent =
+  def eventFor[A: Writes](auditType: String, obj: A)(implicit
+        hc: HeaderCarrier,
+        request: Request[_]
+  ): ExtendedDataEvent =
     ExtendedDataEvent(
       auditSource = "voa-property-linking",
       auditType = auditType,

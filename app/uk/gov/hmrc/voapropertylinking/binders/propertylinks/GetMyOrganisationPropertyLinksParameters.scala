@@ -41,8 +41,8 @@ object GetMyOrganisationPropertyLinksParameters extends ValidatingBinder[GetMyOr
       validateString("client", params),
       validateString("status", params),
       validateString("sortField", params),
-      validateString("sortOrder", params))
-      .mapN(GetMyOrganisationPropertyLinksParameters.apply)
+      validateString("sortOrder", params)
+    ).mapN(GetMyOrganisationPropertyLinksParameters.apply)
 
   private def validateString(implicit key: String, params: Params): ValidationResult[Option[String]] =
     readOption(key, params)

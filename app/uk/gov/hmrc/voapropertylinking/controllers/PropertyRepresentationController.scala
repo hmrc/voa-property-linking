@@ -30,7 +30,7 @@ import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation._
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class PropertyRepresentationController @Inject()(
+class PropertyRepresentationController @Inject() (
       controllerComponents: ControllerComponents,
       authenticated: AuthenticatedActionBuilder,
       modernisedOrganisationManagementApi: ModernisedExternalOrganisationManagementApi,
@@ -42,38 +42,38 @@ class PropertyRepresentationController @Inject()(
 )(implicit executionContext: ExecutionContext)
     extends PropertyLinkingBaseController(controllerComponents) {
 
-  def revokeClientProperty(submissionId: String): Action[AnyContent] = authenticated.async { implicit request =>
-    if (featureSwitch.isBstDownstreamEnabled) {
-      propertyLinkApi.revokeClientProperty(submissionId).map(_ => NoContent)
-    } else {
-      modernisedExternalPropertyLinkApi.revokeClientProperty(submissionId).map(_ => NoContent)
+  def revokeClientProperty(submissionId: String): Action[AnyContent] =
+    authenticated.async { implicit request =>
+      if (featureSwitch.isBstDownstreamEnabled)
+        propertyLinkApi.revokeClientProperty(submissionId).map(_ => NoContent)
+      else
+        modernisedExternalPropertyLinkApi.revokeClientProperty(submissionId).map(_ => NoContent)
     }
-  }
 
-  def getAgentDetails(agentCode: Long): Action[AnyContent] = authenticated.async { implicit request =>
-    lazy val getAgentDetails: Future[Option[AgentDetails]] =
-      if (featureSwitch.isBstDownstreamEnabled) {
-        organisationManagementApi.getAgentDetails(agentCode)
-      } else {
-        modernisedOrganisationManagementApi.getAgentDetails(agentCode)
+  def getAgentDetails(agentCode: Long): Action[AnyContent] =
+    authenticated.async { implicit request =>
+      lazy val getAgentDetails: Future[Option[AgentDetails]] =
+        if (featureSwitch.isBstDownstreamEnabled)
+          organisationManagementApi.getAgentDetails(agentCode)
+        else
+          modernisedOrganisationManagementApi.getAgentDetails(agentCode)
+      getAgentDetails.map {
+        case None        => ErrorResponse.notFoundJsonResult("Agent does not exist")
+        case Some(agent) => Ok(Json.toJson(agent))
       }
-    getAgentDetails.map {
-      case None        => ErrorResponse.notFoundJsonResult("Agent does not exist")
-      case Some(agent) => Ok(Json.toJson(agent))
     }
-  }
 
-  def submitAppointmentChanges(): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
-    withJsonBody[AppointmentChangesRequest] { appointRequest =>
-      lazy val agentAppointmentChanges: Future[AppointmentChangeResponse] =
-        if (featureSwitch.isBstDownstreamEnabled) {
-          organisationManagementApi.agentAppointmentChanges(appointRequest)
-        } else {
-          modernisedOrganisationManagementApi.agentAppointmentChanges(appointRequest)
+  def submitAppointmentChanges(): Action[JsValue] =
+    authenticated.async(parse.json) { implicit request =>
+      withJsonBody[AppointmentChangesRequest] { appointRequest =>
+        lazy val agentAppointmentChanges: Future[AppointmentChangeResponse] =
+          if (featureSwitch.isBstDownstreamEnabled)
+            organisationManagementApi.agentAppointmentChanges(appointRequest)
+          else
+            modernisedOrganisationManagementApi.agentAppointmentChanges(appointRequest)
+        agentAppointmentChanges.map { response =>
+          Accepted(Json.toJson(response))
         }
-      agentAppointmentChanges.map { response =>
-        Accepted(Json.toJson(response))
       }
     }
-  }
 }

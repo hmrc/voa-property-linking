@@ -32,7 +32,8 @@ trait ModernisedExternalPropertyLinkingStub extends WiremockMethods with Wiremoc
   def stubGetMyAgentPropertyLinks(
         agentCode: Long,
         searchParams: GetMyOrganisationPropertyLinksParameters,
-        params: PaginationParams)(status: Int, body: JsValue): StubMapping =
+        params: PaginationParams
+  )(status: Int, body: JsValue): StubMapping =
     stubFor(
       get(urlPathEqualTo(s"$baseUrl/my-organisation/agents/$agentCode/property-links"))
         .withQueryParam("start", equalTo(params.startPoint.toString))
@@ -47,11 +48,13 @@ trait ModernisedExternalPropertyLinkingStub extends WiremockMethods with Wiremoc
         .withQueryParam("sortorder", optionEqualTo(searchParams.sortOrder))
         .willReturn(
           aResponse().withStatus(status).withBody(body.toString)
-        ))
+        )
+    )
 
   def stubGetMyOrganisationsPropertyLinks(
         searchParams: GetMyOrganisationPropertyLinksParameters,
-        params: PaginationParams)(status: Int, body: JsValue): StubMapping =
+        params: PaginationParams
+  )(status: Int, body: JsValue): StubMapping =
     stubFor(
       get(urlPathEqualTo(s"$baseUrl/my-organisation/property-links"))
         .withQueryParam("start", equalTo(params.startPoint.toString))
@@ -66,12 +69,14 @@ trait ModernisedExternalPropertyLinkingStub extends WiremockMethods with Wiremoc
         .withQueryParam("sortorder", optionEqualTo(searchParams.sortOrder))
         .willReturn(
           aResponse().withStatus(status).withBody(body.toString)
-        ))
+        )
+    )
 
   def stubGetMyAgentAvailablePropertyLinks(
         agentCode: Long,
         searchParams: GetMyOrganisationPropertyLinksParameters,
-        params: PaginationParams)(status: Int, body: JsValue): StubMapping =
+        params: PaginationParams
+  )(status: Int, body: JsValue): StubMapping =
     stubFor(
       get(urlPathEqualTo(s"$baseUrl/my-organisation/agents/$agentCode/available-property-links"))
         .withQueryParam("start", equalTo(params.startPoint.toString))
@@ -83,7 +88,8 @@ trait ModernisedExternalPropertyLinkingStub extends WiremockMethods with Wiremoc
         .withQueryParam("sortorder", optionEqualTo(searchParams.sortOrder))
         .willReturn(
           aResponse().withStatus(status).withBody(body.toString)
-        ))
+        )
+    )
 
   def stubGetMyOrganisationsAgents()(status: Int, body: JsValue): StubMapping =
     when(
@@ -96,9 +102,10 @@ trait ModernisedExternalPropertyLinkingStub extends WiremockMethods with Wiremoc
       uri = s"$baseUrl/my-organisation/property-links/$submissionId"
     ).thenReturn(status, body)
 
-  def stubGetClientsPropertyLinks(searchParams: GetMyClientsPropertyLinkParameters, params: PaginationParams)(
-        status: Int,
-        body: JsValue): StubMapping =
+  def stubGetClientsPropertyLinks(
+        searchParams: GetMyClientsPropertyLinkParameters,
+        params: PaginationParams
+  )(status: Int, body: JsValue): StubMapping =
     stubFor(
       get(urlPathEqualTo(s"$baseUrl/my-organisation/clients/all/property-links"))
         .withQueryParam("start", equalTo(params.startPoint.toString))
@@ -115,12 +122,14 @@ trait ModernisedExternalPropertyLinkingStub extends WiremockMethods with Wiremoc
         .withQueryParam("appointedToDate", optionEqualTo(searchParams.appointedToDate))
         .willReturn(
           aResponse().withStatus(status).withBody(body.toString)
-        ))
+        )
+    )
 
   def stubGetClientPropertyLinks(
         clientOrgId: Long,
         searchParams: GetClientPropertyLinksParameters,
-        params: PaginationParams)(status: Int, body: JsValue): StubMapping =
+        params: PaginationParams
+  )(status: Int, body: JsValue): StubMapping =
     stubFor(
       get(urlPathEqualTo(s"$baseUrl/my-organisation/clients/$clientOrgId/property-links"))
         .withQueryParam("start", equalTo(params.startPoint.toString))
@@ -138,7 +147,8 @@ trait ModernisedExternalPropertyLinkingStub extends WiremockMethods with Wiremoc
         .withQueryParam("uarn", optionEqualTo(searchParams.uarn))
         .willReturn(
           aResponse().withStatus(status).withBody(body.toString)
-        ))
+        )
+    )
 
   def stubGetClientsPropertyLink(submissionId: String)(status: Int, body: JsValue): StubMapping =
     when(
@@ -146,9 +156,10 @@ trait ModernisedExternalPropertyLinkingStub extends WiremockMethods with Wiremoc
       uri = s"$baseUrl/my-organisation/clients/all/property-links/$submissionId"
     ).thenReturn(status, body)
 
-  def stubGetMyClients(searchParams: GetClientsParameters, params: PaginationParams)(
-        status: Int,
-        body: JsValue): StubMapping =
+  def stubGetMyClients(
+        searchParams: GetClientsParameters,
+        params: PaginationParams
+  )(status: Int, body: JsValue): StubMapping =
     stubFor(
       get(urlPathEqualTo(s"$baseUrl/my-organisation/clients"))
         .withQueryParam("name", optionEqualTo(searchParams.name))
@@ -156,7 +167,8 @@ trait ModernisedExternalPropertyLinkingStub extends WiremockMethods with Wiremoc
         .withQueryParam("appointedToDate", optionEqualTo(searchParams.appointedToDate))
         .willReturn(
           aResponse().withStatus(status).withBody(body.toString)
-        ))
+        )
+    )
 
   def stubCreatePropertyLink(propertyLink: JsValue)(httpResponse: HttpResponse): StubMapping =
     when(

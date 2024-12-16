@@ -36,7 +36,7 @@ import uk.gov.hmrc.voapropertylinking.utils.Cats
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class PropertyLinkingService @Inject()(
+class PropertyLinkingService @Inject() (
       val modernisedPropertyLinksConnector: ModernisedExternalPropertyLinkApi,
       propertyLinksConnector: ExternalPropertyLinkApi,
       featureSwitch: FeatureSwitch
@@ -46,24 +46,27 @@ class PropertyLinkingService @Inject()(
   protected def connector: PropertyLinkApi =
     if (featureSwitch.isBstDownstreamEnabled) propertyLinksConnector else modernisedPropertyLinksConnector
 
-  def create(propertyLink: APIPropertyLinkRequest)(
-        implicit hc: HeaderCarrier,
-        request: RequestWithPrincipal[_]): Future[HttpResponse] =
+  def create(
+        propertyLink: APIPropertyLinkRequest
+  )(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[HttpResponse] =
     connector.createPropertyLink(CreatePropertyLink(propertyLink))
 
-  def createOnClientBehalf(propertyLink: APIPropertyLinkRequest, clientId: Long)(
-        implicit hc: HeaderCarrier,
-        request: RequestWithPrincipal[_]): Future[HttpResponse] =
+  def createOnClientBehalf(propertyLink: APIPropertyLinkRequest, clientId: Long)(implicit
+        hc: HeaderCarrier,
+        request: RequestWithPrincipal[_]
+  ): Future[HttpResponse] =
     connector.createOnClientBehalf(CreatePropertyLinkOnClientBehalf(propertyLink), clientId)
 
-  def getClientsPropertyLink(submissionId: String)(
-        implicit request: RequestWithPrincipal[_]): OptionT[Future, ClientPropertyLink] =
+  def getClientsPropertyLink(
+        submissionId: String
+  )(implicit request: RequestWithPrincipal[_]): OptionT[Future, ClientPropertyLink] =
     OptionT(connector.getClientsPropertyLink(submissionId))
 
   def getMyAgentPropertyLinks(
         agentCode: Long,
         searchParams: GetMyOrganisationPropertyLinksParameters,
-        paginationParams: PaginationParams)(implicit request: RequestWithPrincipal[_]): Future[OwnerAuthResult] =
+        paginationParams: PaginationParams
+  )(implicit request: RequestWithPrincipal[_]): Future[OwnerAuthResult] =
     connector
       .getMyAgentPropertyLinks(agentCode, searchParams, paginationParams)
       .map(OwnerAuthResult.apply)
@@ -71,14 +74,15 @@ class PropertyLinkingService @Inject()(
   def getMyAgentAvailablePropertyLinks(
         agentCode: Long,
         searchParams: GetMyOrganisationPropertyLinksParameters,
-        paginationParams: Option[PaginationParams])(
-        implicit request: RequestWithPrincipal[_]): Future[OwnerAuthResult] =
+        paginationParams: Option[PaginationParams]
+  )(implicit request: RequestWithPrincipal[_]): Future[OwnerAuthResult] =
     connector
       .getMyAgentAvailablePropertyLinks(agentCode, searchParams, paginationParams)
       .map(OwnerAuthResult.apply)
 
-  def getMyOrganisationsPropertyLink(submissionId: String)(
-        implicit request: RequestWithPrincipal[_]): OptionT[Future, PropertiesView] =
+  def getMyOrganisationsPropertyLink(
+        submissionId: String
+  )(implicit request: RequestWithPrincipal[_]): OptionT[Future, PropertiesView] =
     OptionT(connector.getMyOrganisationsPropertyLink(submissionId)).map(pl => PropertiesView(pl.authorisation, Nil))
 
   def getClientsPropertyLinks(
@@ -104,8 +108,8 @@ class PropertyLinkingService @Inject()(
 
   def getMyOrganisationsPropertyLinks(
         searchParams: GetMyOrganisationPropertyLinksParameters,
-        paginationParams: Option[PaginationParams])(
-        implicit request: RequestWithPrincipal[_]): Future[OwnerAuthResult] =
+        paginationParams: Option[PaginationParams]
+  )(implicit request: RequestWithPrincipal[_]): Future[OwnerAuthResult] =
     connector
       .getMyOrganisationsPropertyLinks(searchParams, paginationParams)
       .map(OwnerAuthResult.apply)

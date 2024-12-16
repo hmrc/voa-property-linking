@@ -32,11 +32,12 @@ object APIRepresentationRequest {
   implicit val instantReads: Reads[Instant] = Reads.instantReads("yyyy-MM-dd'T'HH:mm:ss.SSS[XXX][X]")
   implicit val format: OFormat[APIRepresentationRequest] = Json.format[APIRepresentationRequest]
 
-  def fromRepresentationRequest(reprRequest: RepresentationRequest) = APIRepresentationRequest(
-    reprRequest.authorisationId,
-    reprRequest.submissionId,
-    reprRequest.agentOrganisationId,
-    reprRequest.individualId,
-    reprRequest.createDatetime
-  )
+  def fromRepresentationRequest(reprRequest: RepresentationRequest) =
+    APIRepresentationRequest(
+      reprRequest.authorisationId,
+      reprRequest.submissionId,
+      reprRequest.agentOrganisationId,
+      reprRequest.individualId,
+      reprRequest.createDatetime
+    )
 }

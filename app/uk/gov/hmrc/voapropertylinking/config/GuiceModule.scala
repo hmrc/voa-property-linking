@@ -112,9 +112,10 @@ class GuiceModule(
       .annotatedWith(named(resolveAnnotationName(path, name)))
       .to(s"$prefix${configuration.get[String](path)}")
 
-  private def resolveAnnotationName(path: String, name: String): String = name match {
-    case "" => path
-    case _  => name
-  }
+  private def resolveAnnotationName(path: String, name: String): String =
+    name match {
+      case "" => path
+      case _  => name
+    }
 
 }

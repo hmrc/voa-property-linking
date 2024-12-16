@@ -37,7 +37,8 @@ class CreatePropertyLinkSpec extends BaseUnitSpec {
       val expectedRequest: CreatePropertyLink = testCreatePropertyLink.copy(
         uploadedFiles = Seq(evidence),
         method = ProvidedEvidence.withName("NO_EVIDENCE"),
-        capacity = Capacity.withName("OCCUPIER"))
+        capacity = Capacity.withName("OCCUPIER")
+      )
 
       val targetRequest: CreatePropertyLink = CreatePropertyLink(apiRequest)
 

@@ -34,7 +34,8 @@ case class CreatePropertyLink(
       PLsubmissionId: String,
       createDatetime: LocalDateTime,
       uploadedFiles: Seq[Evidence],
-      submissionSource: String)
+      submissionSource: String
+)
 
 object CreatePropertyLink {
 

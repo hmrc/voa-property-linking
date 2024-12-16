@@ -189,7 +189,8 @@ class ModernisedCustomerManagementApiGroupISpec
           email = "test@test.com",
           phone = "9876541",
           isAgent = true,
-          agentCode = Some(987654))
+          agentCode = Some(987654)
+        )
 
         stubGetDetailedGroupAccount(orgId)(OK, responseJson)
 
@@ -256,7 +257,8 @@ class ModernisedCustomerManagementApiGroupISpec
           email = "test@test.com",
           phone = "9876541",
           isAgent = true,
-          agentCode = Some(987654))
+          agentCode = Some(987654)
+        )
 
         stubFindDetailedGroupAccountByGGID(ggId)(OK, responseJson)
 
@@ -324,7 +326,8 @@ class ModernisedCustomerManagementApiGroupISpec
           email = "test@test.com",
           phone = "9876541",
           isAgent = true,
-          agentCode = Some(987654L))
+          agentCode = Some(987654L)
+        )
 
         stubWithAgentCode(agentCode)(OK, responseJson)
 

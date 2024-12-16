@@ -32,7 +32,6 @@ object PostcodeValidator {
       val candidateNormalised = candidate.toUpperCase.replaceAll(" ", "")
       val (prefix, suffix) = candidateNormalised.splitAt(candidateNormalised.length - 3)
       Some(prefix + " " + suffix)
-    } else {
+    } else
       None
-    }
 }

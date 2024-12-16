@@ -106,7 +106,8 @@ class ExternalPropertyLinkingManagementAgentsISpec extends BaseIntegrationSpec w
               organisationId = 123456,
               organisationName = "org name",
               representativeCode = 1111
-            ))
+            )
+          )
         )
       val responseModel: PropertyLinksWithAgents =
         PropertyLinksWithAgents(
@@ -114,12 +115,14 @@ class ExternalPropertyLinkingManagementAgentsISpec extends BaseIntegrationSpec w
           size = 1,
           filterTotal = 1,
           total = 1,
-          authorisations = Seq(summaryPropertyLinkWithAgents))
+          authorisations = Seq(summaryPropertyLinkWithAgents)
+        )
 
       stubGetMyAgentPropertyLinks(
         agentCode = agentCode,
         searchParams = getMyOrganisationPropertyLinksParameters,
-        params = paginationParams)(OK, responseJson)
+        params = paginationParams
+      )(OK, responseJson)
 
       val result: PropertyLinksWithAgents = await {
         connector.getMyAgentPropertyLinks(agentCode, getMyOrganisationPropertyLinksParameters, paginationParams)
@@ -133,7 +136,8 @@ class ExternalPropertyLinkingManagementAgentsISpec extends BaseIntegrationSpec w
         stubGetMyAgentPropertyLinks(
           agentCode = agentCode,
           searchParams = getMyOrganisationPropertyLinksParameters,
-          params = paginationParams)(OK, Json.obj("invalid" -> "body"))
+          params = paginationParams
+        )(OK, Json.obj("invalid" -> "body"))
 
         assertThrows[JsValidationException] {
           await(
@@ -146,7 +150,8 @@ class ExternalPropertyLinkingManagementAgentsISpec extends BaseIntegrationSpec w
         stubGetMyAgentPropertyLinks(
           agentCode = agentCode,
           searchParams = getMyOrganisationPropertyLinksParameters,
-          params = paginationParams)(INTERNAL_SERVER_ERROR, Json.obj("doesnt" -> "matter"))
+          params = paginationParams
+        )(INTERNAL_SERVER_ERROR, Json.obj("doesnt" -> "matter"))
 
         assertThrows[Exception] {
           await(
@@ -213,7 +218,8 @@ class ExternalPropertyLinkingManagementAgentsISpec extends BaseIntegrationSpec w
               organisationId = 123456,
               organisationName = "org name",
               representativeCode = 1111
-            ))
+            )
+          )
         )
       val responseModel: PropertyLinksWithAgents =
         PropertyLinksWithAgents(
@@ -221,12 +227,14 @@ class ExternalPropertyLinkingManagementAgentsISpec extends BaseIntegrationSpec w
           size = 1,
           filterTotal = 1,
           total = 1,
-          authorisations = Seq(summaryPropertyLinkWithAgents))
+          authorisations = Seq(summaryPropertyLinkWithAgents)
+        )
 
       stubGetMyAgentAvailablePropertyLinks(
         agentCode = agentCode,
         searchParams = getMyOrganisationPropertyLinksParameters,
-        params = paginationParams)(OK, responseJson)
+        params = paginationParams
+      )(OK, responseJson)
 
       val result: PropertyLinksWithAgents = await {
         connector
@@ -241,14 +249,16 @@ class ExternalPropertyLinkingManagementAgentsISpec extends BaseIntegrationSpec w
         stubGetMyAgentAvailablePropertyLinks(
           agentCode = agentCode,
           searchParams = getMyOrganisationPropertyLinksParameters,
-          params = paginationParams)(OK, Json.obj("invalid" -> "body"))
+          params = paginationParams
+        )(OK, Json.obj("invalid" -> "body"))
 
         assertThrows[JsValidationException] {
           await(
             connector.getMyAgentAvailablePropertyLinks(
               agentCode,
               getMyOrganisationPropertyLinksParameters,
-              Some(paginationParams))
+              Some(paginationParams)
+            )
           )
         }
       }
@@ -257,14 +267,16 @@ class ExternalPropertyLinkingManagementAgentsISpec extends BaseIntegrationSpec w
         stubGetMyAgentAvailablePropertyLinks(
           agentCode = agentCode,
           searchParams = getMyOrganisationPropertyLinksParameters,
-          params = paginationParams)(INTERNAL_SERVER_ERROR, Json.obj("doesnt" -> "matter"))
+          params = paginationParams
+        )(INTERNAL_SERVER_ERROR, Json.obj("doesnt" -> "matter"))
 
         assertThrows[Exception] {
           await(
             connector.getMyAgentAvailablePropertyLinks(
               agentCode,
               getMyOrganisationPropertyLinksParameters,
-              Some(paginationParams))
+              Some(paginationParams)
+            )
           )
         }
       }

@@ -33,13 +33,14 @@ trait BaseIntegrationSpec
     .configure(config)
     .build()
 
-  def config: Map[String, String] = Map(
-    "auditing.enabled"                              -> "false",
-    "microservice.services.voa-modernised-api.host" -> wiremockHost,
-    "microservice.services.voa-modernised-api.port" -> wiremockPort.toString,
-    "microservice.services.voa-bst.host"            -> wiremockHost,
-    "microservice.services.voa-bst.port"            -> wiremockPort.toString
-  )
+  def config: Map[String, String] =
+    Map(
+      "auditing.enabled"                              -> "false",
+      "microservice.services.voa-modernised-api.host" -> wiremockHost,
+      "microservice.services.voa-modernised-api.port" -> wiremockPort.toString,
+      "microservice.services.voa-bst.host"            -> wiremockHost,
+      "microservice.services.voa-bst.port"            -> wiremockPort.toString
+    )
 
   override def beforeAll(): Unit = {
     startWiremock()

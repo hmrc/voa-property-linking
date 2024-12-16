@@ -25,7 +25,8 @@ case class IndividualDetails(
       email: String,
       phone1: String,
       phone2: Option[String],
-      addressId: Long)
+      addressId: Long
+)
 
 object IndividualDetails {
   implicit val formats: OFormat[IndividualDetails] = Json.format[IndividualDetails]
@@ -36,7 +37,8 @@ case class IndividualAccount(
       trustId: Option[String],
       organisationId: Long,
       individualId: Long,
-      details: IndividualDetails)
+      details: IndividualDetails
+)
 
 object IndividualAccount {
   implicit val formats: OFormat[IndividualAccount] = Json.format[IndividualAccount]
@@ -46,7 +48,8 @@ case class IndividualAccountSubmission(
       externalId: String,
       trustId: Option[String],
       organisationId: Long,
-      details: IndividualDetails) {
+      details: IndividualDetails
+) {
 
   def toAPIIndividualAccount(time: Instant = Instant.now): APIIndividualAccount =
     APIIndividualAccount(
@@ -61,7 +64,8 @@ case class IndividualAccountSubmission(
         emailAddress = details.email,
         governmentGatewayExternalId = externalId,
         effectiveFrom = time
-      ))
+      )
+    )
 }
 
 object IndividualAccountSubmission {
@@ -72,7 +76,8 @@ object IndividualAccountSubmission {
 case class IndividualAccountSubmissionForOrganisation(
       externalId: String,
       trustId: Option[String],
-      details: IndividualDetails)
+      details: IndividualDetails
+)
 
 object IndividualAccountSubmissionForOrganisation {
   implicit val formats: OFormat[IndividualAccountSubmissionForOrganisation] =
