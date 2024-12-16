@@ -28,7 +28,8 @@ case class PropertyLinkRequest(
       linkedDate: Instant,
       linkBasis: String,
       fileInfo: Seq[FileInfo],
-      submissionId: String)
+      submissionId: String
+)
 
 object PropertyLinkRequest {
   implicit val propertyLinkRequest: OFormat[PropertyLinkRequest] = Json.format[PropertyLinkRequest]

@@ -34,7 +34,8 @@ class SubmissionIdControllerSpec extends BaseControllerSpec {
     val submissionIdController = new SubmissionIdController(
       Helpers.stubControllerComponents(),
       preAuthenticatedActionBuilders(),
-      mockSequenceGeneratorMongoRepository)
+      mockSequenceGeneratorMongoRepository
+    )
   }
 
   "getting a submission id from the controller" should {

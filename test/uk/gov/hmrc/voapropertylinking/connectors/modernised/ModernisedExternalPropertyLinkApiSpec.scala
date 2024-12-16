@@ -55,7 +55,8 @@ class ModernisedExternalPropertyLinkApiSpec extends BaseUnitSpec {
       client = None,
       status = Some(status),
       Some(sortField),
-      Some(sortOrder))
+      Some(sortOrder)
+    )
 
     val getMyClientsSearchParams = GetMyClientsPropertyLinkParameters(
       address = Some(address),
@@ -105,7 +106,8 @@ class ModernisedExternalPropertyLinkApiSpec extends BaseUnitSpec {
     val queryParams: Seq[(String, String)] = Seq(
       ("start", paginationParams.startPoint.toString),
       ("size", paginationParams.pageSize.toString),
-      ("requestTotalRowCount", "true"))
+      ("requestTotalRowCount", "true")
+    )
   }
 
   "get my organisations property links" should {
@@ -121,7 +123,8 @@ class ModernisedExternalPropertyLinkApiSpec extends BaseUnitSpec {
         .getMyOrganisationsPropertyLinks(getMyOrganisationSearchParams, params = Some(paginationParams))
         .futureValue shouldBe mockReturnedPropertyLinks
 
-      val getMyOrgPropertyLinksQueryParams = queryParams :+ ("address" -> address) :+ ("uarn" -> uarn.toString) :+ ("baref" -> baref) :+ ("agent" -> agent) :+ ("status" -> status) :+ ("sortfield" -> sortField) :+ ("sortorder" -> sortOrder)
+      val getMyOrgPropertyLinksQueryParams =
+        queryParams :+ ("address" -> address) :+ ("uarn" -> uarn.toString) :+ ("baref" -> baref) :+ ("agent" -> agent) :+ ("status" -> status) :+ ("sortfield" -> sortField) :+ ("sortorder" -> sortOrder)
       verify(connector.http)
         .GET(mEq(ownerAuthorisationsUrl), mEq(getMyOrgPropertyLinksQueryParams))(any(), any(), any(), any())
     }
@@ -141,11 +144,13 @@ class ModernisedExternalPropertyLinkApiSpec extends BaseUnitSpec {
         .getMyAgentPropertyLinks(agentCode, getMyOrganisationSearchParams, params = paginationParams)
         .futureValue shouldBe mockReturnedPropertyLinks
 
-      val getMyAgentPropertyLinksQueryParams = queryParams :+ ("address" -> address) :+ ("uarn" -> uarn.toString) :+ ("baref" -> baref) :+ ("agent" -> agent) :+ ("status" -> status) :+ ("sortfield" -> sortField) :+ ("sortorder" -> sortOrder)
+      val getMyAgentPropertyLinksQueryParams =
+        queryParams :+ ("address" -> address) :+ ("uarn" -> uarn.toString) :+ ("baref" -> baref) :+ ("agent" -> agent) :+ ("status" -> status) :+ ("sortfield" -> sortField) :+ ("sortorder" -> sortOrder)
       verify(connector.http)
         .GET(
           mEq(agentAuthorisationsUrl.replace("{agentCode}", agentCode.toString)),
-          mEq(getMyAgentPropertyLinksQueryParams))(any(), any(), any(), any())
+          mEq(getMyAgentPropertyLinksQueryParams)
+        )(any(), any(), any(), any())
     }
 
   }
@@ -163,11 +168,13 @@ class ModernisedExternalPropertyLinkApiSpec extends BaseUnitSpec {
         .getMyAgentAvailablePropertyLinks(agentCode, getMyOrganisationSearchParams, params = Some(paginationParams))
         .futureValue shouldBe mockReturnedPropertyLinks
 
-      val getMyAgentPropertyLinksQueryParams = queryParams :+ ("address" -> address) :+ ("agent" -> agent) :+ ("sortfield" -> sortField) :+ ("sortorder" -> sortOrder)
+      val getMyAgentPropertyLinksQueryParams =
+        queryParams :+ ("address" -> address) :+ ("agent" -> agent) :+ ("sortfield" -> sortField) :+ ("sortorder" -> sortOrder)
       verify(connector.http)
         .GET(
           mEq(agentAvailableAuthorisationsUrl.replace("{agentCode}", agentCode.toString)),
-          mEq(getMyAgentPropertyLinksQueryParams))(any(), any(), any(), any())
+          mEq(getMyAgentPropertyLinksQueryParams)
+        )(any(), any(), any(), any())
     }
 
     "build the correct query params and call the modernised layer - when agent not provided" in new Setup {
@@ -181,14 +188,17 @@ class ModernisedExternalPropertyLinkApiSpec extends BaseUnitSpec {
         .getMyAgentAvailablePropertyLinks(
           agentCode,
           getMyOrganisationSearchParams.copy(agent = None),
-          params = Some(paginationParams))
+          params = Some(paginationParams)
+        )
         .futureValue shouldBe mockReturnedPropertyLinks
 
-      val getMyAgentPropertyLinksQueryParams = queryParams :+ ("address" -> address) :+ ("sortfield" -> sortField) :+ ("sortorder" -> sortOrder)
+      val getMyAgentPropertyLinksQueryParams =
+        queryParams :+ ("address" -> address) :+ ("sortfield" -> sortField) :+ ("sortorder" -> sortOrder)
       verify(connector.http)
         .GET(
           mEq(agentAvailableAuthorisationsUrl.replace("{agentCode}", agentCode.toString)),
-          mEq(getMyAgentPropertyLinksQueryParams))(any(), any(), any(), any())
+          mEq(getMyAgentPropertyLinksQueryParams)
+        )(any(), any(), any(), any())
     }
 
   }
@@ -222,7 +232,8 @@ class ModernisedExternalPropertyLinkApiSpec extends BaseUnitSpec {
         .getClientsPropertyLinks(getMyClientsSearchParams, Some(paginationParams))
         .futureValue shouldBe mockReturnedPropertyLinks
 
-      val clientQueryParams = queryParams :+ ("address" -> address) :+ ("baref" -> baref) :+ ("client" -> agent) :+ ("status" -> status) :+ ("sortfield" -> sortField) :+ ("sortorder" -> sortOrder) :+ ("appointedFromDate" -> appointedFromDate.toString) :+ ("appointedToDate" -> appointedToDate.toString)
+      val clientQueryParams =
+        queryParams :+ ("address" -> address) :+ ("baref" -> baref) :+ ("client" -> agent) :+ ("status" -> status) :+ ("sortfield" -> sortField) :+ ("sortorder" -> sortOrder) :+ ("appointedFromDate" -> appointedFromDate.toString) :+ ("appointedToDate" -> appointedToDate.toString)
       verify(connector.http).GET(mEq(clientAuthorisationsUrl), mEq(clientQueryParams))(any(), any(), any(), any())
     }
 
@@ -256,10 +267,12 @@ class ModernisedExternalPropertyLinkApiSpec extends BaseUnitSpec {
         )
         .futureValue shouldBe mockReturnedPropertyLinks
 
-      val clientQueryParams = queryParams :+ ("address" -> address) :+ ("baref" -> baref) :+ ("status" -> status) :+ ("sortfield" -> sortField) :+ ("sortorder" -> sortOrder) :+ ("appointedFromDate" -> appointedFromDate.toString) :+ ("appointedToDate" -> appointedToDate.toString) :+ ("uarn" -> uarn.toString) :+ ("client" -> clientName)
+      val clientQueryParams =
+        queryParams :+ ("address" -> address) :+ ("baref" -> baref) :+ ("status" -> status) :+ ("sortfield" -> sortField) :+ ("sortorder" -> sortOrder) :+ ("appointedFromDate" -> appointedFromDate.toString) :+ ("appointedToDate" -> appointedToDate.toString) :+ ("uarn" -> uarn.toString) :+ ("client" -> clientName)
       verify(connector.http).GET(
         mEq(myClientPropertyLinksUrl.replace("{clientId}", clientOrgId.toString)),
-        mEq(clientQueryParams))(any(), any(), any(), any())
+        mEq(clientQueryParams)
+      )(any(), any(), any(), any())
     }
 
   }
@@ -291,8 +304,8 @@ class ModernisedExternalPropertyLinkApiSpec extends BaseUnitSpec {
 
       when(
         connector.http
-          .POST[CreatePropertyLink, HttpResponse](any(), any(), any())(any(), any(), any(), any(), any()))
-        .thenReturn(Future.successful(mockHttpResponse))
+          .POST[CreatePropertyLink, HttpResponse](any(), any(), any())(any(), any(), any(), any(), any())
+      ).thenReturn(Future.successful(mockHttpResponse))
 
       connector.createPropertyLink(mockVoaCreatePropertyLink).futureValue shouldBe mockHttpResponse
 
@@ -310,15 +323,16 @@ class ModernisedExternalPropertyLinkApiSpec extends BaseUnitSpec {
       val clientId = 100
       when(
         connector.http
-          .POST[CreatePropertyLinkOnClientBehalf, HttpResponse](any(), any(), any())(any(), any(), any(), any(), any()))
-        .thenReturn(Future.successful(mockHttpResponse))
+          .POST[CreatePropertyLinkOnClientBehalf, HttpResponse](any(), any(), any())(any(), any(), any(), any(), any())
+      ).thenReturn(Future.successful(mockHttpResponse))
       connector.createOnClientBehalf(mockVoaCreatePropertyLink, clientId).futureValue shouldBe mockHttpResponse
 
       verify(connector.http)
         .POST(
           mEq(createPropertyLinkOnClientBehalfUrl.replace("{clientId}", clientId.toString)),
           mEq(mockVoaCreatePropertyLink),
-          mEq(Seq()))(any(), any(), any(), any(), any())
+          mEq(Seq())
+        )(any(), any(), any(), any(), any())
     }
 
   }

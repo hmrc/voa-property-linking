@@ -76,14 +76,18 @@ class ExternalValuationManagementApiSpec extends BaseUnitSpec with ContentTypes 
               DvrDocumentFiles(
                 checkForm = Document(DocumentSummary("1", "Check Document", now)),
                 detailedValuation = Document(DocumentSummary("2", "Detailed Valuation Document", now))
-              ))))
+              )
+            )
+          )
+        )
 
       val result = connector.getDvrDocuments(valuationId, uarn, propertyLinkId).futureValue
       result shouldBe Some(
         DvrDocumentFiles(
           checkForm = Document(DocumentSummary("1", "Check Document", now)),
           detailedValuation = Document(DocumentSummary("2", "Detailed Valuation Document", now))
-        ))
+        )
+      )
     }
 
     "return a None upon a 404 from modernised" in new Setup {

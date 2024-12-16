@@ -37,7 +37,8 @@ trait ModernisedExternalCaseManagementStub extends WiremockMethods with Wiremock
 
   def stubCanChallengeClient(propertyLinkSubmissionId: String, checkCaseRef: String, valuationId: Long)(
         status: Int,
-        body: JsValue): StubMapping =
+        body: JsValue
+  ): StubMapping =
     when(
       method = GET,
       uri =
@@ -46,7 +47,8 @@ trait ModernisedExternalCaseManagementStub extends WiremockMethods with Wiremock
 
   def stubCanChallengeAgent(propertyLinkSubmissionId: String, checkCaseRef: String, valuationId: Long)(
         status: Int,
-        body: JsValue): StubMapping =
+        body: JsValue
+  ): StubMapping =
     when(
       method = GET,
       uri =

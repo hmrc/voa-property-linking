@@ -25,7 +25,7 @@ import uk.gov.hmrc.voapropertylinking.auth.{Principal, RequestWithPrincipal}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class VoaHttpClient @Inject()(httpClient: DefaultHttpClient) {
+class VoaHttpClient @Inject() (httpClient: DefaultHttpClient) {
 
   def buildHeaderCarrier(hc: HeaderCarrier, principal: Principal): HeaderCarrier =
     hc.copy()
@@ -34,63 +34,72 @@ class VoaHttpClient @Inject()(httpClient: DefaultHttpClient) {
         "GG-GROUP-ID"    -> principal.groupId
       )
 
-  def GET[A](url: String)(
-        implicit rds: HttpReads[A],
+  def GET[A](url: String)(implicit
+        rds: HttpReads[A],
         hc: HeaderCarrier,
         ec: ExecutionContext,
-        requestWithPrincipal: RequestWithPrincipal[_]): Future[A] =
+        requestWithPrincipal: RequestWithPrincipal[_]
+  ): Future[A] =
     httpClient.GET[A](url)(implicitly, hc = buildHeaderCarrier(hc, requestWithPrincipal.principal), implicitly)
 
-  def GET[A](url: String, queryParams: Seq[(String, String)])(
-        implicit rds: HttpReads[A],
+  def GET[A](url: String, queryParams: Seq[(String, String)])(implicit
+        rds: HttpReads[A],
         hc: HeaderCarrier,
         ec: ExecutionContext,
-        requestWithPrincipal: RequestWithPrincipal[_]): Future[A] =
+        requestWithPrincipal: RequestWithPrincipal[_]
+  ): Future[A] =
     httpClient
       .GET[A](url, queryParams)(implicitly, hc = buildHeaderCarrier(hc, requestWithPrincipal.principal), implicitly)
 
-  def DELETE[O](url: String)(
-        implicit rds: HttpReads[O],
-        hc: HeaderCarrier,
-        ec: ExecutionContext,
-        requestWithPrincipal: RequestWithPrincipal[_]): Future[O] =
-    httpClient.DELETE[O](url)(implicitly, hc = buildHeaderCarrier(hc, requestWithPrincipal.principal), implicitly)
-
-  def PUT[I, O](url: String, body: I)(
-        implicit wts: Writes[I],
+  def DELETE[O](url: String)(implicit
         rds: HttpReads[O],
         hc: HeaderCarrier,
         ec: ExecutionContext,
-        requestWithPrincipal: RequestWithPrincipal[_]): Future[O] =
+        requestWithPrincipal: RequestWithPrincipal[_]
+  ): Future[O] =
+    httpClient.DELETE[O](url)(implicitly, hc = buildHeaderCarrier(hc, requestWithPrincipal.principal), implicitly)
+
+  def PUT[I, O](url: String, body: I)(implicit
+        wts: Writes[I],
+        rds: HttpReads[O],
+        hc: HeaderCarrier,
+        ec: ExecutionContext,
+        requestWithPrincipal: RequestWithPrincipal[_]
+  ): Future[O] =
     httpClient.PUT[I, O](url, body)(
       implicitly,
       implicitly,
       hc = buildHeaderCarrier(hc, requestWithPrincipal.principal),
-      implicitly)
+      implicitly
+    )
 
-  def POST[I, O](url: String, body: I, headers: Seq[(String, String)])(
-        implicit wts: Writes[I],
+  def POST[I, O](url: String, body: I, headers: Seq[(String, String)])(implicit
+        wts: Writes[I],
         rds: HttpReads[O],
         hc: HeaderCarrier,
         ec: ExecutionContext,
-        requestWithPrincipal: RequestWithPrincipal[_]): Future[O] =
+        requestWithPrincipal: RequestWithPrincipal[_]
+  ): Future[O] =
     httpClient
       .POST[I, O](url, body, headers)(
         implicitly,
         implicitly,
         hc = buildHeaderCarrier(hc, requestWithPrincipal.principal),
-        implicitly)
+        implicitly
+      )
 
-  def PATCH[I, O](url: String, body: I)(
-        implicit wts: Writes[I],
+  def PATCH[I, O](url: String, body: I)(implicit
+        wts: Writes[I],
         rds: HttpReads[O],
         hc: HeaderCarrier,
         ec: ExecutionContext,
-        requestWithPrincipal: RequestWithPrincipal[_]): Future[O] =
+        requestWithPrincipal: RequestWithPrincipal[_]
+  ): Future[O] =
     httpClient
       .PATCH[I, O](url, body)(
         implicitly,
         implicitly,
         hc = buildHeaderCarrier(hc, requestWithPrincipal.principal),
-        implicitly)
+        implicitly
+      )
 }

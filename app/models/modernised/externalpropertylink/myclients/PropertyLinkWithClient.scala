@@ -33,8 +33,8 @@ case class PropertyLinkWithClient(
       uarn: Long,
       address: String,
       localAuthorityRef: String,
-      client: ClientDetails)
-    extends PropertyLink
+      client: ClientDetails
+) extends PropertyLink
 
 object PropertyLinkWithClient {
   implicit val format: OFormat[PropertyLinkWithClient] = Json.format

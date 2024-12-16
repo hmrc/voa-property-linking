@@ -28,7 +28,8 @@ trait ExternalValuationManagementStub extends WiremockMethods with WiremockHelpe
 
   def stubGetDvrDocuments(valuationId: Long, uarn: Long, propertyLinkId: String)(
         status: Int,
-        body: JsValue): StubMapping =
+        body: JsValue
+  ): StubMapping =
     when(
       method = GET,
       uri = s"$baseUrl/properties/$uarn/valuations/$valuationId/files\\?propertyLinkId=$propertyLinkId"
@@ -40,8 +41,9 @@ trait ExternalValuationManagementStub extends WiremockMethods with WiremockHelpe
       uri = s"$baseUrl/properties/$uarn/valuations\\?propertyLinkId=$propertyLinkId"
     ).thenReturn(status, body)
 
-  def stubGetDvrDocument(valuationId: Long, uarn: Long, propertyLinkId: String, fileRef: String)(response: WSResponse)(
-        implicit request: RequestWithPrincipal[_]): StubMapping =
+  def stubGetDvrDocument(valuationId: Long, uarn: Long, propertyLinkId: String, fileRef: String)(
+        response: WSResponse
+  )(implicit request: RequestWithPrincipal[_]): StubMapping =
     when(
       method = GET,
       uri = s"$baseUrl/properties/$uarn/valuations/$valuationId/files/$fileRef\\?propertyLinkId=$propertyLinkId",

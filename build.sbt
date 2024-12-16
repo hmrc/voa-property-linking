@@ -69,7 +69,7 @@ scalacOptions += "-Wconf:src=routes/.*:s"
 scalacOptions += "-Wconf:cat=unused-imports&src=html/.*:s"
 
 val bootstrapPlayVersion = "9.5.0"
-val hmrcMongoVersion = "2.2.0"
+val hmrcMongoVersion = "2.3.0"
 
 val compileDependencies = Seq(
   ws,
@@ -85,7 +85,7 @@ val compileDependencies = Seq(
 val testDependencies = Seq(
   "uk.gov.hmrc"            %% "bootstrap-test-play-30"  % bootstrapPlayVersion  % Test,
   "org.pegdown"            % "pegdown"                  % "1.6.0"               % Test,
-  "org.mockito"            % "mockito-core"             % "5.14.1"              % Test,
+  "org.mockito"            % "mockito-core"             % "5.14.2"              % Test,
   "org.scalacheck"         %% "scalacheck"              % "1.18.1"              % Test,
   "uk.gov.hmrc.mongo"      %% "hmrc-mongo-test-play-30" % hmrcMongoVersion      % Test
 )

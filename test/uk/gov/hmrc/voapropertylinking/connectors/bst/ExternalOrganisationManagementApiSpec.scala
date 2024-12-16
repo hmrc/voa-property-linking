@@ -40,8 +40,9 @@ class ExternalOrganisationManagementApiSpec extends BaseUnitSpec {
           any(),
           any(),
           any(),
-          any()))
-        .thenReturn(Future.successful(appointmentChangeResponse))
+          any()
+        )
+      ).thenReturn(Future.successful(appointmentChangeResponse))
 
       testConnector
         .agentAppointmentChanges(
@@ -50,7 +51,9 @@ class ExternalOrganisationManagementApiSpec extends BaseUnitSpec {
             action = AppointmentAction.APPOINT,
             scope = AppointmentScope.ALL_PROPERTIES,
             propertyLinks = None,
-            listYears = None))
+            listYears = None
+          )
+        )
         .futureValue shouldBe appointmentChangeResponse
 
     }

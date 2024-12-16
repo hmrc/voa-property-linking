@@ -87,12 +87,14 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
         billingAuthorityReference = "VOA1",
         currentFromDate = None,
         currentToDate = None
-      )),
+      )
+    ),
     parties = Seq(
       APIParty(
         id = 24680,
         authorisedPartyOrganisationId = agentOrgId
-      )),
+      )
+    ),
     agents = Some(Nil),
     client = None
   )
@@ -104,7 +106,8 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
     uarn = 11111,
     address = "1 HIGH STREET, BRIGHTON",
     localAuthorityRef = "localAuthRef",
-    agents = Nil)
+    agents = Nil
+  )
 
   val propertyLinksWithClients = PropertyLinksWithClients(1, 1, 1, 1, Seq())
   val modernisedOwnerAuthResult = ModernisedOwnerAuthResult(1, 1, 1, 1, Seq())
@@ -264,7 +267,8 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
           .thenReturn(Future.successful(ownerAuthResult))
         val res = testController.getMyOrganisationsPropertyLinks(
           GetMyOrganisationPropertyLinksParameters(sortField = Some("AGENT")),
-          None)(FakeRequest())
+          None
+        )(FakeRequest())
         status(res) shouldBe OK
       }
 
@@ -299,7 +303,8 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
       val res = testController.getMyAgentPropertyLinks(
         agentCode,
         GetMyOrganisationPropertyLinksParameters(),
-        PaginationParams(1, 10, true))(FakeRequest())
+        PaginationParams(1, 10, true)
+      )(FakeRequest())
 
       status(res) shouldBe OK
       contentAsJson(res) shouldBe Json.toJson(ownerAuthResult)
@@ -314,7 +319,8 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
       val res = testController.getMyAgentAppointablePropertyLinks(
         agentCode,
         GetMyOrganisationPropertyLinksParameters(),
-        Some(PaginationParams(1, 10, true)))(FakeRequest())
+        Some(PaginationParams(1, 10, true))
+      )(FakeRequest())
 
       status(res) shouldBe OK
       contentAsJson(res) shouldBe Json.toJson(ownerAuthResult)
@@ -385,7 +391,8 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
 
       val res = testController.getMyClients(
         Some(GetClientsParameters()),
-        Some(PaginationParams(startPoint = 1, pageSize = 10, requestTotalRowCount = true)))(FakeRequest())
+        Some(PaginationParams(startPoint = 1, pageSize = 10, requestTotalRowCount = true))
+      )(FakeRequest())
 
       status(res) shouldBe OK
       contentAsJson(res) shouldBe Json.toJson(clientsList)
@@ -397,7 +404,8 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
 
       val res = testController.getMyClients(
         Some(GetClientsParameters()),
-        Some(PaginationParams(startPoint = 1, pageSize = 10, requestTotalRowCount = true)))(FakeRequest())
+        Some(PaginationParams(startPoint = 1, pageSize = 10, requestTotalRowCount = true))
+      )(FakeRequest())
 
       status(res) shouldBe OK
       contentAsJson(res) shouldBe Json.toJson(emptyClientsList)
@@ -405,23 +413,25 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
   }
 
   trait ClientPropertySetup {
-    protected def propertiesView(authId: Long): PropertiesView = PropertiesView(
-      authorisationId = authId,
-      uarn = 123456,
-      authorisationStatus = "OPEN",
-      startDate = today,
-      endDate = Some(today.plusDays(2)),
-      submissionId = "PL12345",
-      address = None,
-      NDRListValuationHistoryItems = Seq.empty[APIValuationHistory],
-      parties = Seq(
-        APIParty(
-          1L,
-          agentOrgId
-        )),
-      agents = None,
-      client = None
-    )
+    protected def propertiesView(authId: Long): PropertiesView =
+      PropertiesView(
+        authorisationId = authId,
+        uarn = 123456,
+        authorisationStatus = "OPEN",
+        startDate = today,
+        endDate = Some(today.plusDays(2)),
+        submissionId = "PL12345",
+        address = None,
+        NDRListValuationHistoryItems = Seq.empty[APIValuationHistory],
+        parties = Seq(
+          APIParty(
+            1L,
+            agentOrgId
+          )
+        ),
+        agents = None,
+        client = None
+      )
 
     val groupAccount = GroupAccount(
       id = 100L,

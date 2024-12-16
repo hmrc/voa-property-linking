@@ -86,7 +86,8 @@ class ExternalCaseManagementApiISpec extends BaseIntegrationSpec with ExternalCa
             settledDate = None,
             agent = None,
             submittedBy = "test user"
-          ))
+          )
+        )
       )
       stubGetMyOrganisationCheckCases(propertyLinkSubmissionId)(OK, responseJson)
 
@@ -159,7 +160,8 @@ class ExternalCaseManagementApiISpec extends BaseIntegrationSpec with ExternalCa
               organisationName = "test acne"
             ),
             submittedBy = "test user"
-          ))
+          )
+        )
       )
       stubGetMyClientsCheckCases(propertyLinkSubmissionId)(OK, responseJson)
 
@@ -211,7 +213,8 @@ class ExternalCaseManagementApiISpec extends BaseIntegrationSpec with ExternalCa
                 propertyLinkSubmissionId = propertyLinkSubmissionId,
                 checkCaseRef = testCheckCaseRef,
                 valuationId = testValuationId,
-                party = "client")
+                party = "client"
+              )
             )
 
           result shouldBe Some(expectedModel)
@@ -224,7 +227,8 @@ class ExternalCaseManagementApiISpec extends BaseIntegrationSpec with ExternalCa
 
             stubCanChallengeClient(propertyLinkSubmissionId, testCheckCaseRef, testValuationId)(
               OK,
-              Json.obj("incorrect" -> "body"))
+              Json.obj("incorrect" -> "body")
+            )
 
             val result =
               await(
@@ -232,7 +236,8 @@ class ExternalCaseManagementApiISpec extends BaseIntegrationSpec with ExternalCa
                   propertyLinkSubmissionId = propertyLinkSubmissionId,
                   checkCaseRef = testCheckCaseRef,
                   valuationId = testValuationId,
-                  party = "client")
+                  party = "client"
+                )
               )
 
             result shouldBe None
@@ -243,7 +248,8 @@ class ExternalCaseManagementApiISpec extends BaseIntegrationSpec with ExternalCa
 
             stubCanChallengeClient(propertyLinkSubmissionId, testCheckCaseRef, testValuationId)(
               BAD_REQUEST,
-              Json.obj("doesnt" -> "matter"))
+              Json.obj("doesnt" -> "matter")
+            )
 
             val result =
               await(
@@ -251,7 +257,8 @@ class ExternalCaseManagementApiISpec extends BaseIntegrationSpec with ExternalCa
                   propertyLinkSubmissionId = propertyLinkSubmissionId,
                   checkCaseRef = testCheckCaseRef,
                   valuationId = testValuationId,
-                  party = "client")
+                  party = "client"
+                )
               )
 
             result shouldBe None
@@ -281,7 +288,8 @@ class ExternalCaseManagementApiISpec extends BaseIntegrationSpec with ExternalCa
                 propertyLinkSubmissionId = propertyLinkSubmissionId,
                 checkCaseRef = testCheckCaseRef,
                 valuationId = testValuationId,
-                party = "agent")
+                party = "agent"
+              )
             )
 
           result shouldBe Some(expectedModel)
@@ -294,7 +302,8 @@ class ExternalCaseManagementApiISpec extends BaseIntegrationSpec with ExternalCa
 
             stubCanChallengeAgent(propertyLinkSubmissionId, testCheckCaseRef, testValuationId)(
               OK,
-              Json.obj("incorrect" -> "body"))
+              Json.obj("incorrect" -> "body")
+            )
 
             val result =
               await(
@@ -302,7 +311,8 @@ class ExternalCaseManagementApiISpec extends BaseIntegrationSpec with ExternalCa
                   propertyLinkSubmissionId = propertyLinkSubmissionId,
                   checkCaseRef = testCheckCaseRef,
                   valuationId = testValuationId,
-                  party = "agent")
+                  party = "agent"
+                )
               )
 
             result shouldBe None
@@ -313,7 +323,8 @@ class ExternalCaseManagementApiISpec extends BaseIntegrationSpec with ExternalCa
 
             stubCanChallengeAgent(propertyLinkSubmissionId, testCheckCaseRef, testValuationId)(
               BAD_REQUEST,
-              Json.obj("doesnt" -> "matter"))
+              Json.obj("doesnt" -> "matter")
+            )
 
             val result =
               await(
@@ -321,7 +332,8 @@ class ExternalCaseManagementApiISpec extends BaseIntegrationSpec with ExternalCa
                   propertyLinkSubmissionId = propertyLinkSubmissionId,
                   checkCaseRef = testCheckCaseRef,
                   valuationId = testValuationId,
-                  party = "agent")
+                  party = "agent"
+                )
               )
 
             result shouldBe None
@@ -337,7 +349,8 @@ class ExternalCaseManagementApiISpec extends BaseIntegrationSpec with ExternalCa
                 propertyLinkSubmissionId = propertyLinkSubmissionId,
                 checkCaseRef = testCheckCaseRef,
                 valuationId = testValuationId,
-                party = "INVALID_PARTY")
+                party = "INVALID_PARTY"
+              )
             )
           }
 

@@ -55,7 +55,8 @@ class CustomHttpErrorHandlerSpec extends BaseUnitSpec with MockitoSugar {
         status(result) shouldBe BAD_REQUEST
         (contentAsJson(result) \ "code").as[String] shouldBe "BAD_REQUEST"
         (contentAsJson(result) \ "message").as[String] should endWith(
-          "The request parameters or body are invalid. Missing query parameter.")
+          "The request parameters or body are invalid. Missing query parameter."
+        )
       }
     }
 

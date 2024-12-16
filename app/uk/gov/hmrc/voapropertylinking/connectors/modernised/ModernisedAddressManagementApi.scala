@@ -26,7 +26,7 @@ import uk.gov.hmrc.voapropertylinking.connectors.BaseVoaConnector
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class ModernisedAddressManagementApi @Inject()(
+class ModernisedAddressManagementApi @Inject() (
       http: DefaultHttpClient,
       servicesConfig: ServicesConfig
 )(implicit executionContext: ExecutionContext)

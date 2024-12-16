@@ -32,7 +32,7 @@ import scala.concurrent.{ExecutionContext, Future}
 /*
   TODO this controller will move to check backend after planned migration to external case management api
  */
-class CheckCaseController @Inject()(
+class CheckCaseController @Inject() (
       controllerComponents: ControllerComponents,
       authenticated: AuthenticatedActionBuilder,
       modernisedExternalCaseManagementApi: ModernisedExternalCaseManagementApi,
@@ -41,44 +41,57 @@ class CheckCaseController @Inject()(
 )(implicit executionContext: ExecutionContext)
     extends PropertyLinkingBaseController(controllerComponents) {
 
-  def getCheckCases(submissionId: String, party: String): Action[AnyContent] = authenticated.async { implicit request =>
-    party match {
-      case "agent"  => getMyClientsCheckCases(propertyLinkSubmissionId = submissionId)
-      case "client" => getMyOrganisationCheckCases(propertyLinkSubmissionId = submissionId)
-      case p        => Future.successful(NotImplemented(s"invalid party (projection) supplied: $p"))
-    }
-  }
-
-  private def getMyOrganisationCheckCases(propertyLinkSubmissionId: String)(
-        implicit request: RequestWithPrincipal[_]): Future[Result] = {
-    val checkCasesWithAgent: Future[CheckCasesWithAgent] =
-      if (featureSwitch.isBstDownstreamEnabled) {
-        externalCaseManagementApi.getMyOrganisationCheckCases(propertyLinkSubmissionId)
-      } else {
-        modernisedExternalCaseManagementApi.getMyOrganisationCheckCases(propertyLinkSubmissionId)
+  def getCheckCases(submissionId: String, party: String): Action[AnyContent] =
+    authenticated.async { implicit request =>
+      party match {
+        case "agent"  => getMyClientsCheckCases(propertyLinkSubmissionId = submissionId)
+        case "client" => getMyOrganisationCheckCases(propertyLinkSubmissionId = submissionId)
+        case p        => Future.successful(NotImplemented(s"invalid party (projection) supplied: $p"))
       }
+    }
+
+  private def getMyOrganisationCheckCases(
+        propertyLinkSubmissionId: String
+  )(implicit request: RequestWithPrincipal[_]): Future[Result] = {
+    val checkCasesWithAgent: Future[CheckCasesWithAgent] =
+      if (featureSwitch.isBstDownstreamEnabled)
+        externalCaseManagementApi.getMyOrganisationCheckCases(propertyLinkSubmissionId)
+      else
+        modernisedExternalCaseManagementApi.getMyOrganisationCheckCases(propertyLinkSubmissionId)
     checkCasesWithAgent
       .recover {
         case e: Throwable =>
           logger.warn("get my organisation check cases returned unexpected exception", e)
-          CheckCasesWithAgent(start = 1, size = 100, filterTotal = 0, total = 0, checkCases = Nil) // I believe this shouldnt be handled here. I think this should return the error it got.
+          CheckCasesWithAgent(
+            start = 1,
+            size = 100,
+            filterTotal = 0,
+            total = 0,
+            checkCases = Nil
+          ) // I believe this shouldnt be handled here. I think this should return the error it got.
       }
       .map(response => Ok(Json.toJson(response)))
   }
 
-  private def getMyClientsCheckCases(propertyLinkSubmissionId: String)(
-        implicit request: RequestWithPrincipal[_]): Future[Result] = {
+  private def getMyClientsCheckCases(
+        propertyLinkSubmissionId: String
+  )(implicit request: RequestWithPrincipal[_]): Future[Result] = {
     val checkCasesWithClient =
-      if (featureSwitch.isBstDownstreamEnabled) {
+      if (featureSwitch.isBstDownstreamEnabled)
         externalCaseManagementApi.getMyClientsCheckCases(propertyLinkSubmissionId)
-      } else {
+      else
         modernisedExternalCaseManagementApi.getMyClientsCheckCases(propertyLinkSubmissionId)
-      }
     checkCasesWithClient
       .recover {
         case e: Throwable =>
           logger.warn("get my clients check cases returned unexpected exception", e)
-          CheckCasesWithClient(start = 1, size = 100, filterTotal = 0, total = 0, checkCases = Nil) // I believe this shouldnt be handled here. I think this should return the error it got.
+          CheckCasesWithClient(
+            start = 1,
+            size = 100,
+            filterTotal = 0,
+            total = 0,
+            checkCases = Nil
+          ) // I believe this shouldnt be handled here. I think this should return the error it got.
       }
       .map(response => Ok(Json.toJson(response)))
   }

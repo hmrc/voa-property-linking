@@ -39,7 +39,8 @@ class CheckCaseControllerSpec extends BaseControllerSpec with AllMocks {
       preAuthenticatedActionBuilders(),
       mockModernisedExternalCaseManagementApi,
       mockCaseManagementApi,
-      mockFeatureSwitch)
+      mockFeatureSwitch
+    )
   }
 
   "Using the controller with the bstDownstream feature switch disabled" when {
@@ -65,7 +66,8 @@ class CheckCaseControllerSpec extends BaseControllerSpec with AllMocks {
                   settledDate = None,
                   client = Client(1L, "test acne"),
                   submittedBy = "test user"
-                ))
+                )
+              )
             )
 
           when(mockModernisedExternalCaseManagementApi.getMyClientsCheckCases(any())(any()))
@@ -104,7 +106,8 @@ class CheckCaseControllerSpec extends BaseControllerSpec with AllMocks {
                   settledDate = None,
                   agent = None,
                   submittedBy = "test user"
-                ))
+                )
+              )
             )
 
           when(mockModernisedExternalCaseManagementApi.getMyOrganisationCheckCases(any())(any()))
@@ -196,7 +199,8 @@ class CheckCaseControllerSpec extends BaseControllerSpec with AllMocks {
                   settledDate = None,
                   client = Client(1L, "test acne"),
                   submittedBy = "test user"
-                ))
+                )
+              )
             )
 
           when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
@@ -236,7 +240,8 @@ class CheckCaseControllerSpec extends BaseControllerSpec with AllMocks {
                   settledDate = None,
                   agent = None,
                   submittedBy = "test user"
-                ))
+                )
+              )
             )
 
           when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)

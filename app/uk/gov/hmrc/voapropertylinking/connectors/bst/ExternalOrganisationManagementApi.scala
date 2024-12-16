@@ -25,22 +25,24 @@ import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation.{Age
 import javax.inject.{Inject, Named}
 import scala.concurrent.{ExecutionContext, Future}
 
-class ExternalOrganisationManagementApi @Inject()(
+class ExternalOrganisationManagementApi @Inject() (
       http: VoaHttpClient,
       @Named("voa.agentAppointmentChanges") agentAppointmentChangesUrl: String,
       @Named("voa.myAgentDetails") getAgentDetailsUrl: String
 )(implicit executionContext: ExecutionContext)
     extends BaseVoaConnector {
 
-  def agentAppointmentChanges(appointmentChangesRequest: AppointmentChangesRequest)(
-        implicit hc: HeaderCarrier,
-        request: RequestWithPrincipal[_]): Future[AppointmentChangeResponse] =
+  def agentAppointmentChanges(
+        appointmentChangesRequest: AppointmentChangesRequest
+  )(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[AppointmentChangeResponse] =
     http.POST[AppointmentChangesRequest, AppointmentChangeResponse](
       url = agentAppointmentChangesUrl,
       body = appointmentChangesRequest,
-      headers = Seq.empty)
+      headers = Seq.empty
+    )
 
   def getAgentDetails(
-        agentCode: Long)(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[Option[AgentDetails]] =
+        agentCode: Long
+  )(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[Option[AgentDetails]] =
     http.GET[Option[AgentDetails]](url = getAgentDetailsUrl.templated("representativeCode" -> agentCode))
 }

@@ -55,13 +55,13 @@ object OwnerAuthorisation {
       uarn = propertyLink.uarn,
       address = propertyLink.address,
       localAuthorityRef = propertyLink.localAuthorityRef,
-      agents = propertyLink.agents.map(
-        agent =>
-          OwnerAuthAgent(
-            authorisedPartyId = agent.authorisedPartyId,
-            organisationId = agent.organisationId,
-            organisationName = agent.organisationName,
-            agentCode = agent.representativeCode
-        ))
+      agents = propertyLink.agents.map(agent =>
+        OwnerAuthAgent(
+          authorisedPartyId = agent.authorisedPartyId,
+          organisationId = agent.organisationId,
+          organisationName = agent.organisationName,
+          agentCode = agent.representativeCode
+        )
+      )
     )
 }

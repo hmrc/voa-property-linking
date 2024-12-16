@@ -31,14 +31,15 @@ import uk.gov.hmrc.voapropertylinking.connectors.modernised.ModernisedCustomerMa
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class IndividualAccountController @Inject()(
+class IndividualAccountController @Inject() (
       controllerComponents: ControllerComponents,
       authenticated: AuthenticatedActionBuilder,
       modernisedCustomerManagementApi: ModernisedCustomerManagementApi,
       customerManagementApi: CustomerManagementApi,
       featureSwitch: FeatureSwitch,
       auditingService: AuditingService,
-      brAuth: BusinessRatesAuthConnector)(implicit executionContext: ExecutionContext)
+      brAuth: BusinessRatesAuthConnector
+)(implicit executionContext: ExecutionContext)
     extends PropertyLinkingBaseController(controllerComponents) {
 
   case class IndividualAccount(id: IndividualAccountId, submission: IndividualAccountSubmission)
@@ -47,63 +48,61 @@ class IndividualAccountController @Inject()(
     implicit val format: OFormat[IndividualAccount] = Json.format[IndividualAccount]
   }
 
-  def create(): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
-    withJsonBody[IndividualAccountSubmission] { acc =>
-      val createResponse: Future[IndividualAccountId] =
-        if (featureSwitch.isBstDownstreamEnabled) {
-          customerManagementApi.createIndividualAccount(acc)
-        } else {
-          modernisedCustomerManagementApi.createIndividualAccount(acc)
+  def create(): Action[JsValue] =
+    authenticated.async(parse.json) { implicit request =>
+      withJsonBody[IndividualAccountSubmission] { acc =>
+        val createResponse: Future[IndividualAccountId] =
+          if (featureSwitch.isBstDownstreamEnabled)
+            customerManagementApi.createIndividualAccount(acc)
+          else
+            modernisedCustomerManagementApi.createIndividualAccount(acc)
+        createResponse.map { personId =>
+          auditingService.sendEvent("Created", IndividualAccount(personId, acc))
+          Created(Json.toJson(personId))
         }
-      createResponse.map { personId =>
-        auditingService.sendEvent("Created", IndividualAccount(personId, acc))
-        Created(Json.toJson(personId))
       }
     }
-  }
 
-  def update(personId: Long): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
-    withJsonBody[IndividualAccountSubmission] { account =>
-      for {
-        _ <- if (featureSwitch.isBstDownstreamEnabled) {
-              customerManagementApi.updateIndividualAccount(personId, account)
-            } else {
-              modernisedCustomerManagementApi.updateIndividualAccount(personId, account)
-            }
-        _ <- brAuth.clearCache()
-      } yield {
-        Ok(EmptyContent())
+  def update(personId: Long): Action[JsValue] =
+    authenticated.async(parse.json) { implicit request =>
+      withJsonBody[IndividualAccountSubmission] { account =>
+        for {
+          _ <- if (featureSwitch.isBstDownstreamEnabled)
+                 customerManagementApi.updateIndividualAccount(personId, account)
+               else
+                 modernisedCustomerManagementApi.updateIndividualAccount(personId, account)
+          _ <- brAuth.clearCache()
+        } yield Ok(EmptyContent())
       }
     }
-  }
 
-  def get(personId: Long): Action[AnyContent] = authenticated.async { implicit request =>
-    val detailedIndividualResponse =
-      if (featureSwitch.isBstDownstreamEnabled) {
-        customerManagementApi
-          .getDetailedIndividual(personId)
-      } else {
-        modernisedCustomerManagementApi
-          .getDetailedIndividual(personId)
+  def get(personId: Long): Action[AnyContent] =
+    authenticated.async { implicit request =>
+      val detailedIndividualResponse =
+        if (featureSwitch.isBstDownstreamEnabled)
+          customerManagementApi
+            .getDetailedIndividual(personId)
+        else
+          modernisedCustomerManagementApi
+            .getDetailedIndividual(personId)
+      detailedIndividualResponse.map {
+        case Some(x) => Ok(Json.toJson(x))
+        case None    => NotFound
       }
-    detailedIndividualResponse.map {
-      case Some(x) => Ok(Json.toJson(x))
-      case None    => NotFound
     }
-  }
 
-  def withExternalId(externalId: String): Action[AnyContent] = authenticated.async { implicit request =>
-    val detailedIndividualResponse: Future[Option[models.IndividualAccount]] =
-      if (featureSwitch.isBstDownstreamEnabled) {
-        customerManagementApi
-          .findDetailedIndividualAccountByGGID(externalId)
-      } else {
-        modernisedCustomerManagementApi
-          .findDetailedIndividualAccountByGGID(externalId)
+  def withExternalId(externalId: String): Action[AnyContent] =
+    authenticated.async { implicit request =>
+      val detailedIndividualResponse: Future[Option[models.IndividualAccount]] =
+        if (featureSwitch.isBstDownstreamEnabled)
+          customerManagementApi
+            .findDetailedIndividualAccountByGGID(externalId)
+        else
+          modernisedCustomerManagementApi
+            .findDetailedIndividualAccountByGGID(externalId)
+      detailedIndividualResponse.map {
+        case Some(x) => Ok(Json.toJson(x))
+        case None    => NotFound
       }
-    detailedIndividualResponse.map {
-      case Some(x) => Ok(Json.toJson(x))
-      case None    => NotFound
     }
-  }
 }

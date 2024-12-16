@@ -24,7 +24,8 @@ import uk.gov.hmrc.voapropertylinking.binders.validation.ValidatingBinder
 case class GetClientsParameters(
       name: Option[String] = None,
       appointedFromDate: Option[LocalDate] = None,
-      appointedToDate: Option[LocalDate] = None)
+      appointedToDate: Option[LocalDate] = None
+)
 
 object GetClientsParameters extends ValidatingBinder[GetClientsParameters] {
 

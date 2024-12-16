@@ -24,7 +24,7 @@ import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
 
 import scala.concurrent.ExecutionContext
 
-class SubmissionIdController @Inject()(
+class SubmissionIdController @Inject() (
       controllerComponents: ControllerComponents,
       authenticated: AuthenticatedActionBuilder,
       val sequenceGenerator: SequenceGeneratorMongoRepository
@@ -44,11 +44,12 @@ class SubmissionIdController @Inject()(
     //no mapping for s, t, u as they are not allowed.
   ).withDefault(identity)
 
-  def get(prefix: String): Action[AnyContent] = authenticated.async {
-    sequenceGenerator.getNextSequenceId(prefix).map { id =>
-      Ok(Json.toJson(formatId(prefix, id)))
+  def get(prefix: String): Action[AnyContent] =
+    authenticated.async {
+      sequenceGenerator.getNextSequenceId(prefix).map { id =>
+        Ok(Json.toJson(formatId(prefix, id)))
+      }
     }
-  }
 
   private[controllers] def formatId(prefix: String, id: Long): String =
     s"${prefix.toUpperCase}${BigInt(id).toString(26).map(charMapping).toUpperCase}"

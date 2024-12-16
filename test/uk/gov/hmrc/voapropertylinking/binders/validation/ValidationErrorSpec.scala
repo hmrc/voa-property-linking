@@ -27,16 +27,24 @@ class ValidationErrorSpec extends BaseUnitSpec {
     "show correct text" in {
       val scenarios: TableFor2[ValidationError, String] = Table(
         ("validation error", "expected string representation"),
-        MissingError("key")                           -> """Missing value for parameter "key"""",
-        InvalidTypeError("key", classOf[Long])("Foo") -> """Invalid type for parameter "key". "Foo" is not a valid Integer""",
-        NotAnEnumError("key", Seq("A", "B"))("C")     -> """Invalid value "C" for parameter "key". Allowed values: [A, B]""",
-        OverLimitError("key", 5)(10)                  -> """Value "10" for parameter "key" is over the acceptable limit: 5""",
-        UnderLimitError("key", 5)(1)                  -> """Value "1" for parameter "key" is under the acceptable limit: 5""",
-        OverMaxLengthError("key", 5)("foobar")        -> """Value for parameter "key" is longer than the the acceptable maximum: 5""",
-        UnderMinLengthError("key", 5)("foo")          -> """Value for parameter "key" is shorter than the acceptable minimum: 5""",
-        AllMissingError("key", "key2")                -> """At least one of these parameters must be provided: [key, key2]""",
-        InvalidFormat("key")                          -> """Invalid format for parameter "key"""",
-        BlankQueryParameterError("key")               -> """Missing value for parameter "key""""
+        MissingError("key") -> """Missing value for parameter "key"""",
+        InvalidTypeError("key", classOf[Long])(
+          "Foo"
+        ) -> """Invalid type for parameter "key". "Foo" is not a valid Integer""",
+        NotAnEnumError("key", Seq("A", "B"))(
+          "C"
+        )                            -> """Invalid value "C" for parameter "key". Allowed values: [A, B]""",
+        OverLimitError("key", 5)(10) -> """Value "10" for parameter "key" is over the acceptable limit: 5""",
+        UnderLimitError("key", 5)(1) -> """Value "1" for parameter "key" is under the acceptable limit: 5""",
+        OverMaxLengthError("key", 5)(
+          "foobar"
+        ) -> """Value for parameter "key" is longer than the the acceptable maximum: 5""",
+        UnderMinLengthError("key", 5)(
+          "foo"
+        )                               -> """Value for parameter "key" is shorter than the acceptable minimum: 5""",
+        AllMissingError("key", "key2")  -> """At least one of these parameters must be provided: [key, key2]""",
+        InvalidFormat("key")            -> """Invalid format for parameter "key"""",
+        BlankQueryParameterError("key") -> """Missing value for parameter "key""""
       )
 
       TableDrivenPropertyChecks.forAll(scenarios) {

@@ -35,7 +35,8 @@ class AddressLookupControllerSpec extends BaseControllerSpec {
       preAuthenticatedActionBuilders(),
       mockModernisedAddressManagementApi,
       mockAddressManagementApi,
-      mockFeatureSwitch)
+      mockFeatureSwitch
+    )
 
     val validPostcode = "BN1 1NB"
     val addressUnitId = 1L

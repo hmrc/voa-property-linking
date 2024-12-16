@@ -30,7 +30,7 @@ import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
 import javax.inject.{Inject, Named}
 import scala.concurrent.{ExecutionContext, Future}
 
-class ExternalPropertyLinkApi @Inject()(
+class ExternalPropertyLinkApi @Inject() (
       val http: VoaHttpClient,
       @Named("voa.myAgentPropertyLinks") myAgentPropertyLinksUrl: String,
       @Named("voa.myAgentAvailablePropertyLinks") myAgentAvailablePropertyLinks: String,
@@ -50,7 +50,8 @@ class ExternalPropertyLinkApi @Inject()(
   def getMyAgentPropertyLinks(
         agentCode: Long,
         searchParams: GetMyOrganisationPropertyLinksParameters,
-        params: PaginationParams)(implicit request: RequestWithPrincipal[_]): Future[PropertyLinksWithAgents] =
+        params: PaginationParams
+  )(implicit request: RequestWithPrincipal[_]): Future[PropertyLinksWithAgents] =
     http.GET[PropertyLinksWithAgents](
       myAgentPropertyLinksUrl.replace("{agentCode}", agentCode.toString),
       modernisedPaginationParams(Some(params)) ++
@@ -68,7 +69,8 @@ class ExternalPropertyLinkApi @Inject()(
   def getMyAgentAvailablePropertyLinks(
         agentCode: Long,
         searchParams: GetMyOrganisationPropertyLinksParameters,
-        params: Option[PaginationParams])(implicit request: RequestWithPrincipal[_]): Future[PropertyLinksWithAgents] =
+        params: Option[PaginationParams]
+  )(implicit request: RequestWithPrincipal[_]): Future[PropertyLinksWithAgents] =
     http.GET[PropertyLinksWithAgents](
       myAgentAvailablePropertyLinks.replace("{agentCode}", agentCode.toString),
       modernisedPaginationParams(params) ++
@@ -82,7 +84,8 @@ class ExternalPropertyLinkApi @Inject()(
 
   def getMyOrganisationsPropertyLinks(
         searchParams: GetMyOrganisationPropertyLinksParameters,
-        params: Option[PaginationParams])(implicit request: RequestWithPrincipal[_]): Future[PropertyLinksWithAgents] =
+        params: Option[PaginationParams]
+  )(implicit request: RequestWithPrincipal[_]): Future[PropertyLinksWithAgents] =
     http.GET[PropertyLinksWithAgents](
       myOrganisationsPropertyLinksUrl,
       modernisedPaginationParams(params) ++
@@ -97,12 +100,14 @@ class ExternalPropertyLinkApi @Inject()(
         ).flatten
     )
 
-  def getMyOrganisationsPropertyLink(submissionId: String)(
-        implicit request: RequestWithPrincipal[_]): Future[Option[OwnerPropertyLink]] =
+  def getMyOrganisationsPropertyLink(
+        submissionId: String
+  )(implicit request: RequestWithPrincipal[_]): Future[Option[OwnerPropertyLink]] =
     http.GET[Option[OwnerPropertyLink]](myOrganisationsPropertyLinkUrl.replace("{propertyLinkId}", submissionId))
 
   def getClientsPropertyLinks(searchParams: GetMyClientsPropertyLinkParameters, params: Option[PaginationParams])(
-        implicit request: RequestWithPrincipal[_]): Future[Option[PropertyLinksWithClient]] =
+        implicit request: RequestWithPrincipal[_]
+  ): Future[Option[PropertyLinksWithClient]] =
     http
       .GET[Option[PropertyLinksWithClient]](
         myClientsPropertyLinksUrl,
@@ -123,8 +128,8 @@ class ExternalPropertyLinkApi @Inject()(
   def getClientPropertyLinks(
         clientOrgId: Long,
         searchParams: GetClientPropertyLinksParameters,
-        params: Option[PaginationParams])(
-        implicit request: RequestWithPrincipal[_]): Future[Option[PropertyLinksWithClient]] =
+        params: Option[PaginationParams]
+  )(implicit request: RequestWithPrincipal[_]): Future[Option[PropertyLinksWithClient]] =
     http
       .GET[Option[PropertyLinksWithClient]](
         myClientPropertyLinksUrl.replace("{clientId}", clientOrgId.toString),
@@ -143,12 +148,14 @@ class ExternalPropertyLinkApi @Inject()(
           ).flatten
       )
 
-  def getClientsPropertyLink(submissionId: String)(
-        implicit request: RequestWithPrincipal[_]): Future[Option[ClientPropertyLink]] =
+  def getClientsPropertyLink(
+        submissionId: String
+  )(implicit request: RequestWithPrincipal[_]): Future[Option[ClientPropertyLink]] =
     http.GET[Option[ClientPropertyLink]](myClientsPropertyLinkUrl.replace("{propertyLinkId}", submissionId))
 
-  def getMyClients(searchParams: GetClientsParameters, params: Option[PaginationParams])(
-        implicit request: RequestWithPrincipal[_]): Future[ClientsResponse] =
+  def getMyClients(searchParams: GetClientsParameters, params: Option[PaginationParams])(implicit
+        request: RequestWithPrincipal[_]
+  ): Future[ClientsResponse] =
     http
       .GET[ClientsResponse](
         myClientsUrl,
@@ -160,20 +167,22 @@ class ExternalPropertyLinkApi @Inject()(
           ).flatten
       )
 
-  def createPropertyLink(propertyLink: CreatePropertyLink)(
-        implicit hc: HeaderCarrier,
-        request: RequestWithPrincipal[_]): Future[HttpResponse] =
+  def createPropertyLink(
+        propertyLink: CreatePropertyLink
+  )(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[HttpResponse] =
     http
       .POST[CreatePropertyLink, HttpResponse](createPropertyLinkUrl, propertyLink, Seq())
 
-  def createOnClientBehalf(propertyLink: CreatePropertyLinkOnClientBehalf, clientId: Long)(
-        implicit hc: HeaderCarrier,
-        request: RequestWithPrincipal[_]): Future[HttpResponse] =
+  def createOnClientBehalf(propertyLink: CreatePropertyLinkOnClientBehalf, clientId: Long)(implicit
+        hc: HeaderCarrier,
+        request: RequestWithPrincipal[_]
+  ): Future[HttpResponse] =
     http
       .POST[CreatePropertyLinkOnClientBehalf, HttpResponse](
         createPropertyLinkOnClientBehalfUrl.templated("clientId" -> clientId),
         propertyLink,
-        Seq())
+        Seq()
+      )
 
   def getMyOrganisationsAgents()(implicit request: RequestWithPrincipal[_]): Future[AgentList] =
     http.GET[AgentList](myOrganisationsAgentsUrl, List("requestTotalRowCount" -> "true"))

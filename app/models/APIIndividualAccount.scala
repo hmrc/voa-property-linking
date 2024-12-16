@@ -51,7 +51,8 @@ case class APIIndividualAccountForOrganisation(
       mobileNumber: Option[String],
       emailAddress: String,
       governmentGatewayExternalId: String,
-      effectiveFrom: Instant)
+      effectiveFrom: Instant
+)
 
 object APIIndividualAccountForOrganisation {
   implicit val format: OFormat[APIIndividualAccountForOrganisation] = Json.format[APIIndividualAccountForOrganisation]

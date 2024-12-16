@@ -30,7 +30,7 @@ import uk.gov.hmrc.voapropertylinking.connectors.modernised.ModernisedCustomerMa
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class GroupAccountController @Inject()(
+class GroupAccountController @Inject() (
       controllerComponents: ControllerComponents,
       authenticated: AuthenticatedActionBuilder,
       auditingService: AuditingService,
@@ -47,74 +47,74 @@ class GroupAccountController @Inject()(
     implicit val format: OFormat[GroupAccount] = Json.format[GroupAccount]
   }
 
-  def get(organisationId: Long): Action[AnyContent] = authenticated.async { implicit request =>
-    val optGroupAccount: Future[Option[models.GroupAccount]] =
-      if (featureSwitch.isBstDownstreamEnabled) {
-        customerManagementApi
-          .getDetailedGroupAccount(organisationId)
-      } else {
-        modernisedCustomerManagementApi
-          .getDetailedGroupAccount(organisationId)
+  def get(organisationId: Long): Action[AnyContent] =
+    authenticated.async { implicit request =>
+      val optGroupAccount: Future[Option[models.GroupAccount]] =
+        if (featureSwitch.isBstDownstreamEnabled)
+          customerManagementApi
+            .getDetailedGroupAccount(organisationId)
+        else
+          modernisedCustomerManagementApi
+            .getDetailedGroupAccount(organisationId)
+      optGroupAccount.map {
+        case Some(x) => Ok(Json.toJson(x))
+        case None    => NotFound
       }
-    optGroupAccount.map {
-      case Some(x) => Ok(Json.toJson(x))
-      case None    => NotFound
     }
-  }
 
-  def withGroupId(groupId: String): Action[AnyContent] = authenticated.async { implicit request =>
-    val optGroupAccount: Future[Option[models.GroupAccount]] =
-      if (featureSwitch.isBstDownstreamEnabled) {
-        customerManagementApi
-          .findDetailedGroupAccountByGGID(groupId)
-      } else {
-        modernisedCustomerManagementApi
-          .findDetailedGroupAccountByGGID(groupId)
+  def withGroupId(groupId: String): Action[AnyContent] =
+    authenticated.async { implicit request =>
+      val optGroupAccount: Future[Option[models.GroupAccount]] =
+        if (featureSwitch.isBstDownstreamEnabled)
+          customerManagementApi
+            .findDetailedGroupAccountByGGID(groupId)
+        else
+          modernisedCustomerManagementApi
+            .findDetailedGroupAccountByGGID(groupId)
+      optGroupAccount.map {
+        case Some(x) => Ok(Json.toJson(x))
+        case None    => NotFound
       }
-    optGroupAccount.map {
-      case Some(x) => Ok(Json.toJson(x))
-      case None    => NotFound
     }
-  }
 
-  def withAgentCode(agentCode: String): Action[AnyContent] = authenticated.async { implicit request =>
-    val optGroupAccount: Future[Option[models.GroupAccount]] =
-      if (featureSwitch.isBstDownstreamEnabled) {
-        customerManagementApi.withAgentCode(agentCode)
-      } else {
-        modernisedCustomerManagementApi.withAgentCode(agentCode)
+  def withAgentCode(agentCode: String): Action[AnyContent] =
+    authenticated.async { implicit request =>
+      val optGroupAccount: Future[Option[models.GroupAccount]] =
+        if (featureSwitch.isBstDownstreamEnabled)
+          customerManagementApi.withAgentCode(agentCode)
+        else
+          modernisedCustomerManagementApi.withAgentCode(agentCode)
+      optGroupAccount.map {
+        case Some(a) => Ok(Json.toJson(a))
+        case None    => NotFound
       }
-    optGroupAccount.map {
-      case Some(a) => Ok(Json.toJson(a))
-      case None    => NotFound
     }
-  }
 
-  def create(): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
-    withJsonBody[GroupAccountSubmission] { acc =>
-      val createGroupAccountResponse: Future[GroupId] =
-        if (featureSwitch.isBstDownstreamEnabled) {
-          customerManagementApi.createGroupAccount(acc)
-        } else {
-          modernisedCustomerManagementApi.createGroupAccount(acc)
+  def create(): Action[JsValue] =
+    authenticated.async(parse.json) { implicit request =>
+      withJsonBody[GroupAccountSubmission] { acc =>
+        val createGroupAccountResponse: Future[GroupId] =
+          if (featureSwitch.isBstDownstreamEnabled)
+            customerManagementApi.createGroupAccount(acc)
+          else
+            modernisedCustomerManagementApi.createGroupAccount(acc)
+        createGroupAccountResponse.map { groupId =>
+          auditingService.sendEvent("Created", GroupAccount(groupId, acc))
+          Created(Json.toJson(groupId))
         }
-      createGroupAccountResponse.map { groupId =>
-        auditingService.sendEvent("Created", GroupAccount(groupId, acc))
-        Created(Json.toJson(groupId))
       }
     }
-  }
 
-  def update(orgId: Long): Action[JsValue] = authenticated.async(parse.json) { implicit request =>
-    withJsonBody[UpdatedOrganisationAccount] { acc =>
-      for {
-        _ <- if (featureSwitch.isBstDownstreamEnabled) {
-              customerManagementApi.updateGroupAccount(orgId, acc)
-            } else {
-              modernisedCustomerManagementApi.updateGroupAccount(orgId, acc)
-            }
-        _ <- brAuth.clearCache()
-      } yield Ok
+  def update(orgId: Long): Action[JsValue] =
+    authenticated.async(parse.json) { implicit request =>
+      withJsonBody[UpdatedOrganisationAccount] { acc =>
+        for {
+          _ <- if (featureSwitch.isBstDownstreamEnabled)
+                 customerManagementApi.updateGroupAccount(orgId, acc)
+               else
+                 modernisedCustomerManagementApi.updateGroupAccount(orgId, acc)
+          _ <- brAuth.clearCache()
+        } yield Ok
+      }
     }
-  }
 }

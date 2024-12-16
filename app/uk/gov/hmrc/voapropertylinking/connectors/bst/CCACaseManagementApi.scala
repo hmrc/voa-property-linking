@@ -25,9 +25,9 @@ import uk.gov.hmrc.voapropertylinking.connectors.BaseVoaConnector
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class CCACaseManagementApi @Inject()(http: DefaultHttpClient, config: ServicesConfig)(
-      implicit executionContext: ExecutionContext)
-    extends BaseVoaConnector {
+class CCACaseManagementApi @Inject() (http: DefaultHttpClient, config: ServicesConfig)(implicit
+      executionContext: ExecutionContext
+) extends BaseVoaConnector {
 
   lazy val url: String = config.baseUrl("voa-bst") + "/cca-case-management-api"
 

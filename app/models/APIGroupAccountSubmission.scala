@@ -28,7 +28,8 @@ case class APIGroupAccountSubmission(
       representativeFlag: Boolean,
       representativeCode: Option[Int],
       effectiveFrom: Instant,
-      personData: APIIndividualAccountForOrganisation)
+      personData: APIIndividualAccountForOrganisation
+)
 
 object APIGroupAccountSubmission {
   implicit val format: OFormat[APIGroupAccountSubmission] = Json.format[APIGroupAccountSubmission]

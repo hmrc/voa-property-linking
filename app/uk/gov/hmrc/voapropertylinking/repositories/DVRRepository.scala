@@ -37,9 +37,9 @@ import scala.concurrent.duration.DAYS
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class DVRRepository @Inject()(mongo: MongoComponent, @Named("dvrCollectionName") val dvrCollectionName: String)(
-      implicit executionContext: ExecutionContext)
-    extends PlayMongoRepository[DVRRecord](
+class DVRRepository @Inject() (mongo: MongoComponent, @Named("dvrCollectionName") val dvrCollectionName: String)(
+      implicit executionContext: ExecutionContext
+) extends PlayMongoRepository[DVRRecord](
       collectionName = dvrCollectionName,
       mongoComponent = mongo,
       domainFormat = DVRRecord.mongoFormat,
@@ -49,7 +49,9 @@ class DVRRepository @Inject()(mongo: MongoComponent, @Named("dvrCollectionName")
           IndexOptions()
             .name("ttl")
             .unique(false)
-            .expireAfter(183L, DAYS)))
+            .expireAfter(183L, DAYS)
+        )
+      )
     ) with DVRRecordRepository with Logging with MongoFormats {
 
   override def create(request: DetailedValuationRequest): Future[Unit] =
@@ -61,7 +63,9 @@ class DVRRepository @Inject()(mongo: MongoComponent, @Named("dvrCollectionName")
             request.assessmentRef,
             request.agents,
             Some(request.submissionId),
-            Some(LocalDateTime.now())))
+            Some(LocalDateTime.now())
+          )
+        )
         .toFuture()
         .map(_ => ())
         .recover {

@@ -26,7 +26,8 @@ case class ClientProperty(
       authorisedPartyId: Long,
       authorisationId: Long,
       authorisationStatus: Boolean,
-      address: String)
+      address: String
+)
 
 object ClientProperty {
 

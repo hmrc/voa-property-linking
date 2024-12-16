@@ -26,7 +26,8 @@ case class GroupAccountSubmission(
       email: String,
       phone: String,
       isAgent: Boolean,
-      individualAccountSubmission: IndividualAccountSubmissionForOrganisation) {
+      individualAccountSubmission: IndividualAccountSubmissionForOrganisation
+) {
 
   def toApiAccount(time: Instant = Instant.now): APIGroupAccountSubmission =
     APIGroupAccountSubmission(

@@ -27,7 +27,7 @@ import java.time.Instant
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class ModernisedCustomerManagementApi @Inject()(
+class ModernisedCustomerManagementApi @Inject() (
       http: DefaultHttpClient,
       servicesConfig: ServicesConfig
 )(implicit executionContext: ExecutionContext)
@@ -37,8 +37,9 @@ class ModernisedCustomerManagementApi @Inject()(
   lazy val organisationUrl: String = baseUrl + "/organisation"
   lazy val individualUrl: String = baseUrl + "/person"
 
-  def createGroupAccount(account: GroupAccountSubmission, time: Instant = Instant.now)(
-        implicit hc: HeaderCarrier): Future[GroupId] =
+  def createGroupAccount(account: GroupAccountSubmission, time: Instant = Instant.now)(implicit
+        hc: HeaderCarrier
+  ): Future[GroupId] =
     http.POST[APIGroupAccountSubmission, GroupId](organisationUrl, account.toApiAccount(time))
 
   def updateGroupAccount(orgId: Long, account: UpdatedOrganisationAccount)(implicit hc: HeaderCarrier): Future[Unit] =
@@ -62,12 +63,14 @@ class ModernisedCustomerManagementApi @Inject()(
       .GET[Option[APIDetailedGroupAccount]](s"$organisationUrl?representativeCode=$agentCode")
       .map(_.map(_.toGroupAccount))
 
-  def createIndividualAccount(account: IndividualAccountSubmission, time: Instant = Instant.now)(
-        implicit hc: HeaderCarrier): Future[IndividualAccountId] =
+  def createIndividualAccount(account: IndividualAccountSubmission, time: Instant = Instant.now)(implicit
+        hc: HeaderCarrier
+  ): Future[IndividualAccountId] =
     http.POST[APIIndividualAccount, IndividualAccountId](individualUrl, account.toAPIIndividualAccount(time))
 
   def updateIndividualAccount(personId: Long, account: IndividualAccountSubmission, time: Instant = Instant.now)(
-        implicit hc: HeaderCarrier): Future[JsValue] =
+        implicit hc: HeaderCarrier
+  ): Future[JsValue] =
     http.PUT[APIIndividualAccount, JsValue](individualUrl + s"/$personId", account.toAPIIndividualAccount(time))
 
   def getDetailedIndividual(id: Long)(implicit hc: HeaderCarrier): Future[Option[IndividualAccount]] =

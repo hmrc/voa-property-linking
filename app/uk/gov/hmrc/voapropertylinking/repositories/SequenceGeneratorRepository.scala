@@ -40,7 +40,7 @@ trait SequenceGeneratorRepository extends PlayMongoRepository[Sequence] {
 }
 
 @Singleton
-class SequenceGeneratorMongoRepository @Inject()(mongo: MongoComponent)(implicit executionContext: ExecutionContext)
+class SequenceGeneratorMongoRepository @Inject() (mongo: MongoComponent)(implicit executionContext: ExecutionContext)
     extends PlayMongoRepository[Sequence](
       collectionName = "sequences",
       mongoComponent = mongo,

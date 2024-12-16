@@ -23,12 +23,14 @@ import scala.language.implicitConversions
 
 trait AnswerSugar {
 
-  implicit def toAnswer[T](f: () => T): Answer[T] = new Answer[T] {
-    override def answer(invocation: InvocationOnMock): T = f()
-  }
+  implicit def toAnswer[T](f: () => T): Answer[T] =
+    new Answer[T] {
+      override def answer(invocation: InvocationOnMock): T = f()
+    }
 
-  implicit def toAnswerWithArguments[T](f: (InvocationOnMock) => T): Answer[T] = new Answer[T] {
-    override def answer(invocation: InvocationOnMock): T = f(invocation)
-  }
+  implicit def toAnswerWithArguments[T](f: (InvocationOnMock) => T): Answer[T] =
+    new Answer[T] {
+      override def answer(invocation: InvocationOnMock): T = f(invocation)
+    }
 
 }

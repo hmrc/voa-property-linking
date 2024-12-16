@@ -28,7 +28,7 @@ import uk.gov.hmrc.voapropertylinking.auth.{Principal, RequestWithPrincipal}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class AuthenticatedActionBuilder @Inject()(
+class AuthenticatedActionBuilder @Inject() (
       controllerComponents: ControllerComponents,
       override val authConnector: AuthConnector
 )(implicit override val executionContext: ExecutionContext)

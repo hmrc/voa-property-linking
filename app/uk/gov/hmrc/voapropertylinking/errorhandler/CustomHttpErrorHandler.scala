@@ -34,7 +34,7 @@ import uk.gov.hmrc.voapropertylinking.utils.{ErrorHandlingUtils, EventLogging, H
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class CustomHttpErrorHandler @Inject()(
+class CustomHttpErrorHandler @Inject() (
       auditConnector: AuditConnector,
       httpAuditEvent: HttpAuditEvent,
       config: Configuration
@@ -75,7 +75,8 @@ class CustomHttpErrorHandler @Inject()(
     val exceptionDetails = Seq(
       "exceptionType"    -> ex.getClass.getSimpleName,
       "exceptionSummary" -> ErrorHandlingUtils.failureReason(ex),
-      "requestMethod"    -> request.method)
+      "requestMethod"    -> request.method
+    )
 
     val errorResponse = ex match {
 

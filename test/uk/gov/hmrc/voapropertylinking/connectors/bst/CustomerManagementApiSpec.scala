@@ -65,7 +65,9 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
                   Some("9876541")
                 )
               )
-            )))
+            )
+          )
+        )
 
       testConnector.getDetailedIndividual(id)(hc).futureValue shouldBe expectedGetValidResponse
     }
@@ -109,7 +111,9 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
                   Some("9876541")
                 )
               )
-            )))
+            )
+          )
+        )
 
       testConnector.findDetailedIndividualAccountByGGID(ggId)(hc).futureValue shouldBe expectedGetValidResponse
     }
@@ -128,8 +132,8 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
     "return an individual account id for the individual account submission" in {
       when(
         defaultHttpClient
-          .POST[APIIndividualAccount, IndividualAccountId](any(), any(), any())(any(), any(), any(), any()))
-        .thenReturn(Future.successful(IndividualAccountId(12345)))
+          .POST[APIIndividualAccount, IndividualAccountId](any(), any(), any())(any(), any(), any(), any())
+      ).thenReturn(Future.successful(IndividualAccountId(12345)))
 
       testConnector
         .createIndividualAccount(individualAccountSubmission)(hc)
@@ -142,27 +146,33 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
       val personId = 1234L
 
       when(defaultHttpClient.PUT[APIIndividualAccount, JsValue](any(), any(), any())(any(), any(), any(), any()))
-        .thenReturn(Future.successful(Json.toJson(APIDetailedIndividualAccount(
-          2,
-          "ggEId12",
-          APIIndividualDetails(
-            9876,
-            "anotherFirstName",
-            "anotherLastName",
-            "theFakeDonald@potus.com",
-            Some("24680"),
-            Some("13579"),
-            Some("idv1")
-          ),
-          13579,
-          GroupDetails(
-            345,
-            false,
-            "Fake News Inc",
-            "therealdonald@potus.com",
-            Some("9876541")
+        .thenReturn(
+          Future.successful(
+            Json.toJson(
+              APIDetailedIndividualAccount(
+                2,
+                "ggEId12",
+                APIIndividualDetails(
+                  9876,
+                  "anotherFirstName",
+                  "anotherLastName",
+                  "theFakeDonald@potus.com",
+                  Some("24680"),
+                  Some("13579"),
+                  Some("idv1")
+                ),
+                13579,
+                GroupDetails(
+                  345,
+                  false,
+                  "Fake News Inc",
+                  "therealdonald@potus.com",
+                  Some("9876541")
+                )
+              )
+            )
           )
-        ))))
+        )
 
       testConnector
         .updateIndividualAccount(personId, individualAccountSubmission)(hc)
@@ -191,7 +201,9 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
                 ),
                 Seq()
               )
-            )))
+            )
+          )
+        )
 
       testConnector.getDetailedGroupAccount(groupId)(hc).futureValue shouldBe someGroupAccount
     }
@@ -227,7 +239,9 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
                 ),
                 Seq()
               )
-            )))
+            )
+          )
+        )
 
       testConnector.findDetailedGroupAccountByGGID(ggId)(hc).futureValue shouldBe someGroupAccount
     }
@@ -263,7 +277,9 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
                 ),
                 Seq()
               )
-            )))
+            )
+          )
+        )
 
       testConnector.withAgentCode(agentCode)(hc).futureValue shouldBe someGroupAccount
     }
@@ -305,8 +321,8 @@ class CustomerManagementApiSpec extends BaseUnitSpec {
 
       when(
         defaultHttpClient
-          .PUT[UpdatedOrganisationAccount, HttpResponse](any(), any(), any())(any(), any(), any(), any()))
-        .thenReturn(Future.successful(emptyJsonHttpResponse(200)))
+          .PUT[UpdatedOrganisationAccount, HttpResponse](any(), any(), any())(any(), any(), any(), any())
+      ).thenReturn(Future.successful(emptyJsonHttpResponse(200)))
 
       val result: Unit = testConnector.updateGroupAccount(orgId = orgId, updatedOrgAccount).futureValue
       result should be(())

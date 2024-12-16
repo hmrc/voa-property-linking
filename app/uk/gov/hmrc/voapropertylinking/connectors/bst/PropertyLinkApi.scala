@@ -31,41 +31,49 @@ trait PropertyLinkApi {
   def getMyAgentPropertyLinks(
         agentCode: Long,
         searchParams: GetMyOrganisationPropertyLinksParameters,
-        params: PaginationParams)(implicit request: RequestWithPrincipal[_]): Future[PropertyLinksWithAgents]
+        params: PaginationParams
+  )(implicit request: RequestWithPrincipal[_]): Future[PropertyLinksWithAgents]
 
   def getMyAgentAvailablePropertyLinks(
         agentCode: Long,
         searchParams: GetMyOrganisationPropertyLinksParameters,
-        params: Option[PaginationParams])(implicit request: RequestWithPrincipal[_]): Future[PropertyLinksWithAgents]
+        params: Option[PaginationParams]
+  )(implicit request: RequestWithPrincipal[_]): Future[PropertyLinksWithAgents]
 
   def getMyOrganisationsPropertyLinks(
         searchParams: GetMyOrganisationPropertyLinksParameters,
-        params: Option[PaginationParams])(implicit request: RequestWithPrincipal[_]): Future[PropertyLinksWithAgents]
+        params: Option[PaginationParams]
+  )(implicit request: RequestWithPrincipal[_]): Future[PropertyLinksWithAgents]
 
-  def getMyOrganisationsPropertyLink(submissionId: String)(
-        implicit request: RequestWithPrincipal[_]): Future[Option[OwnerPropertyLink]]
+  def getMyOrganisationsPropertyLink(submissionId: String)(implicit
+        request: RequestWithPrincipal[_]
+  ): Future[Option[OwnerPropertyLink]]
 
   def getClientsPropertyLinks(searchParams: GetMyClientsPropertyLinkParameters, params: Option[PaginationParams])(
-        implicit request: RequestWithPrincipal[_]): Future[Option[PropertyLinksWithClient]]
+        implicit request: RequestWithPrincipal[_]
+  ): Future[Option[PropertyLinksWithClient]]
   def getClientPropertyLinks(
         clientOrgId: Long,
         searchParams: GetClientPropertyLinksParameters,
-        params: Option[PaginationParams])(
-        implicit request: RequestWithPrincipal[_]): Future[Option[PropertyLinksWithClient]]
+        params: Option[PaginationParams]
+  )(implicit request: RequestWithPrincipal[_]): Future[Option[PropertyLinksWithClient]]
 
-  def getClientsPropertyLink(submissionId: String)(
-        implicit request: RequestWithPrincipal[_]): Future[Option[ClientPropertyLink]]
+  def getClientsPropertyLink(submissionId: String)(implicit
+        request: RequestWithPrincipal[_]
+  ): Future[Option[ClientPropertyLink]]
 
-  def getMyClients(searchParams: GetClientsParameters, params: Option[PaginationParams])(
-        implicit request: RequestWithPrincipal[_]): Future[ClientsResponse]
+  def getMyClients(searchParams: GetClientsParameters, params: Option[PaginationParams])(implicit
+        request: RequestWithPrincipal[_]
+  ): Future[ClientsResponse]
 
-  def createPropertyLink(propertyLink: CreatePropertyLink)(
-        implicit hc: HeaderCarrier,
-        request: RequestWithPrincipal[_]): Future[HttpResponse]
+  def createPropertyLink(
+        propertyLink: CreatePropertyLink
+  )(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[HttpResponse]
 
-  def createOnClientBehalf(propertyLink: CreatePropertyLinkOnClientBehalf, clientId: Long)(
-        implicit hc: HeaderCarrier,
-        request: RequestWithPrincipal[_]): Future[HttpResponse]
+  def createOnClientBehalf(propertyLink: CreatePropertyLinkOnClientBehalf, clientId: Long)(implicit
+        hc: HeaderCarrier,
+        request: RequestWithPrincipal[_]
+  ): Future[HttpResponse]
 
   def getMyOrganisationsAgents()(implicit request: RequestWithPrincipal[_]): Future[AgentList]
 

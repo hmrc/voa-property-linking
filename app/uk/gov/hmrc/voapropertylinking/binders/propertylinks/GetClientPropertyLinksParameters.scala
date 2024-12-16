@@ -45,7 +45,8 @@ object GetClientPropertyLinksParameters extends ValidatingBinder[GetClientProper
       validateLocalDate("appointedFromDate", params),
       validateLocalDate("appointedToDate", params),
       validateLong("uarn", params),
-      validateString("client", params)).mapN(GetClientPropertyLinksParameters.apply)
+      validateString("client", params)
+    ).mapN(GetClientPropertyLinksParameters.apply)
 
   def validateString(implicit key: String, params: Params): ValidationResult[Option[String]] =
     readOption(key, params)

@@ -24,7 +24,7 @@ import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class BusinessRatesAuthConnector @Inject()(
+class BusinessRatesAuthConnector @Inject() (
       http: DefaultHttpClient,
       servicesConfig: ServicesConfig
 )(implicit executionContext: ExecutionContext)

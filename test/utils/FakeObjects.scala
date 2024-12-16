@@ -97,7 +97,9 @@ trait FakeObjects {
       email = "therealdonald@potus.com",
       phone = "9876541",
       isAgent = false,
-      agentCode = None))
+      agentCode = None
+    )
+  )
 
   val individualAccountSubmission = IndividualAccountSubmission(
     externalId = "ggEId12",
@@ -127,7 +129,8 @@ trait FakeObjects {
         phone2 = Some("13579"),
         addressId = 9876
       )
-    ))
+    )
+  )
 
   val expectedGetEmptyResponse = None
 
