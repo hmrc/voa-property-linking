@@ -39,7 +39,7 @@ class CustomHttpErrorHandlerSpec extends BaseUnitSpec with MockitoSugar {
   "when a handling a client side error" which {
 
     "is a NOT_FOUND exception" should {
-      "return a 404, a standard message and incident ID and log the error" in { //new Setup {
+      "return a 404, a standard message and incident ID and log the error" in { // new Setup {
         val result = customHttpErrorHandler.onClientError(mockRequestHeader, NOT_FOUND, "Resource not found.")
 
         status(result) shouldBe NOT_FOUND

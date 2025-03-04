@@ -110,10 +110,9 @@ class ExternalCaseManagementApiSpec extends BaseUnitSpec {
 
       "error with an exception" when {
         "unrecognised party" in new CanChallangeSetup {
-          inside(Try(connector.canChallenge(submissionId, checkCaseRef, valuationId, "foobar"))) {
-            case Failure(e) =>
-              e shouldBe an[IllegalArgumentException]
-              e.getMessage shouldBe "Unknown party foobar"
+          inside(Try(connector.canChallenge(submissionId, checkCaseRef, valuationId, "foobar"))) { case Failure(e) =>
+            e shouldBe an[IllegalArgumentException]
+            e.getMessage shouldBe "Unknown party foobar"
           }
         }
       }

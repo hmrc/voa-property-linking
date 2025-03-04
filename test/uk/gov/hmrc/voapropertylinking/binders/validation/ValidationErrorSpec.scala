@@ -47,8 +47,8 @@ class ValidationErrorSpec extends BaseUnitSpec {
         BlankQueryParameterError("key") -> """Missing value for parameter "key""""
       )
 
-      TableDrivenPropertyChecks.forAll(scenarios) {
-        case (e, expectedString) => Show[ValidationError].show(e) shouldBe expectedString
+      TableDrivenPropertyChecks.forAll(scenarios) { case (e, expectedString) =>
+        Show[ValidationError].show(e) shouldBe expectedString
       }
     }
   }

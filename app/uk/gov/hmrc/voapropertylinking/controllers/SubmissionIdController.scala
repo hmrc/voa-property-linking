@@ -41,7 +41,7 @@ class SubmissionIdController @Inject() (
     'i' -> 'x',
     'k' -> 'y',
     'o' -> 'z'
-    //no mapping for s, t, u as they are not allowed.
+    // no mapping for s, t, u as they are not allowed.
   ).withDefault(identity)
 
   def get(prefix: String): Action[AnyContent] =

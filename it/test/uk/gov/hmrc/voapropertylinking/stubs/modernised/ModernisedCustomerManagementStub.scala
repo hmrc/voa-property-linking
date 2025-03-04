@@ -26,7 +26,7 @@ trait ModernisedCustomerManagementStub extends WiremockMethods with WiremockHelp
   private val organisationUrl = "/customer-management-api/organisation"
   private val individualUrl = "/customer-management-api/person"
 
-  //Organisations
+  // Organisations
   def stubCreateGroupAccount(account: JsValue)(status: Int, body: JsValue): StubMapping =
     when(
       method = POST,
@@ -59,7 +59,7 @@ trait ModernisedCustomerManagementStub extends WiremockMethods with WiremockHelp
       uri = s"$organisationUrl\\?representativeCode=$agentCode"
     ).thenReturn(status, body)
 
-  //Individuals
+  // Individuals
   def stubCreateIndividualAccount(account: JsValue)(status: Int, body: JsValue): StubMapping =
     when(
       method = POST,

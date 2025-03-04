@@ -76,9 +76,8 @@ class CheckCaseControllerSpec extends BaseControllerSpec with AllMocks {
           val result: Future[Result] = controller.getCheckCases("PL1", "agent")(request)
 
           status(result) shouldBe OK
-          inside(contentAsJson(result).validate[CheckCasesWithClient]) {
-            case JsSuccess(checkcases, _) =>
-              checkcases shouldBe checkCasesWithClient
+          inside(contentAsJson(result).validate[CheckCasesWithClient]) { case JsSuccess(checkcases, _) =>
+            checkcases shouldBe checkCasesWithClient
           }
 
           verify(mockModernisedExternalCaseManagementApi, times(1)).getMyClientsCheckCases(any())(any())
@@ -116,9 +115,8 @@ class CheckCaseControllerSpec extends BaseControllerSpec with AllMocks {
           val result: Future[Result] = controller.getCheckCases("PL1", "client")(request)
 
           status(result) shouldBe OK
-          inside(contentAsJson(result).validate[CheckCasesWithAgent]) {
-            case JsSuccess(checkcases, _) =>
-              checkcases shouldBe checkCasesWithAgent
+          inside(contentAsJson(result).validate[CheckCasesWithAgent]) { case JsSuccess(checkcases, _) =>
+            checkcases shouldBe checkCasesWithAgent
           }
 
           verify(mockModernisedExternalCaseManagementApi, never()).getMyClientsCheckCases(any())(any())
@@ -135,9 +133,8 @@ class CheckCaseControllerSpec extends BaseControllerSpec with AllMocks {
           val result: Future[Result] = controller.getCheckCases("PL1", "client")(request)
 
           status(result) shouldBe OK
-          inside(contentAsJson(result).validate[CheckCasesWithAgent]) {
-            case JsSuccess(checkcases, _) =>
-              checkcases shouldBe CheckCasesWithAgent(1, 100, 0, 0, Nil)
+          inside(contentAsJson(result).validate[CheckCasesWithAgent]) { case JsSuccess(checkcases, _) =>
+            checkcases shouldBe CheckCasesWithAgent(1, 100, 0, 0, Nil)
           }
 
           verify(mockModernisedExternalCaseManagementApi, never()).getMyClientsCheckCases(any())(any())
@@ -152,9 +149,8 @@ class CheckCaseControllerSpec extends BaseControllerSpec with AllMocks {
           val result: Future[Result] = controller.getCheckCases("PL1", "agent")(request)
 
           status(result) shouldBe OK
-          inside(contentAsJson(result).validate[CheckCasesWithClient]) {
-            case JsSuccess(checkcases, _) =>
-              checkcases shouldBe CheckCasesWithClient(1, 100, 0, 0, Nil)
+          inside(contentAsJson(result).validate[CheckCasesWithClient]) { case JsSuccess(checkcases, _) =>
+            checkcases shouldBe CheckCasesWithClient(1, 100, 0, 0, Nil)
           }
 
           verify(mockModernisedExternalCaseManagementApi, times(1)).getMyClientsCheckCases(any())(any())
@@ -210,9 +206,8 @@ class CheckCaseControllerSpec extends BaseControllerSpec with AllMocks {
           val result: Future[Result] = controller.getCheckCases("PL1", "agent")(request)
 
           status(result) shouldBe OK
-          inside(contentAsJson(result).validate[CheckCasesWithClient]) {
-            case JsSuccess(checkcases, _) =>
-              checkcases shouldBe checkCasesWithClient
+          inside(contentAsJson(result).validate[CheckCasesWithClient]) { case JsSuccess(checkcases, _) =>
+            checkcases shouldBe checkCasesWithClient
           }
 
           verify(mockCaseManagementApi, times(1)).getMyClientsCheckCases(any())(any())
@@ -251,9 +246,8 @@ class CheckCaseControllerSpec extends BaseControllerSpec with AllMocks {
           val result: Future[Result] = controller.getCheckCases("PL1", "client")(request)
 
           status(result) shouldBe OK
-          inside(contentAsJson(result).validate[CheckCasesWithAgent]) {
-            case JsSuccess(checkcases, _) =>
-              checkcases shouldBe checkCasesWithAgent
+          inside(contentAsJson(result).validate[CheckCasesWithAgent]) { case JsSuccess(checkcases, _) =>
+            checkcases shouldBe checkCasesWithAgent
           }
 
           verify(mockCaseManagementApi, never()).getMyClientsCheckCases(any())(any())
@@ -271,9 +265,8 @@ class CheckCaseControllerSpec extends BaseControllerSpec with AllMocks {
           val result: Future[Result] = controller.getCheckCases("PL1", "client")(request)
 
           status(result) shouldBe OK
-          inside(contentAsJson(result).validate[CheckCasesWithAgent]) {
-            case JsSuccess(checkcases, _) =>
-              checkcases shouldBe CheckCasesWithAgent(1, 100, 0, 0, Nil)
+          inside(contentAsJson(result).validate[CheckCasesWithAgent]) { case JsSuccess(checkcases, _) =>
+            checkcases shouldBe CheckCasesWithAgent(1, 100, 0, 0, Nil)
           }
 
           verify(mockCaseManagementApi, never()).getMyClientsCheckCases(any())(any())
@@ -289,9 +282,8 @@ class CheckCaseControllerSpec extends BaseControllerSpec with AllMocks {
           val result: Future[Result] = controller.getCheckCases("PL1", "agent")(request)
 
           status(result) shouldBe OK
-          inside(contentAsJson(result).validate[CheckCasesWithClient]) {
-            case JsSuccess(checkcases, _) =>
-              checkcases shouldBe CheckCasesWithClient(1, 100, 0, 0, Nil)
+          inside(contentAsJson(result).validate[CheckCasesWithClient]) { case JsSuccess(checkcases, _) =>
+            checkcases shouldBe CheckCasesWithClient(1, 100, 0, 0, Nil)
           }
 
           verify(mockCaseManagementApi, times(1)).getMyClientsCheckCases(any())(any())

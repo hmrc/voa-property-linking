@@ -59,16 +59,15 @@ class CheckCaseController @Inject() (
       else
         modernisedExternalCaseManagementApi.getMyOrganisationCheckCases(propertyLinkSubmissionId)
     checkCasesWithAgent
-      .recover {
-        case e: Throwable =>
-          logger.warn("get my organisation check cases returned unexpected exception", e)
-          CheckCasesWithAgent(
-            start = 1,
-            size = 100,
-            filterTotal = 0,
-            total = 0,
-            checkCases = Nil
-          ) // I believe this shouldnt be handled here. I think this should return the error it got.
+      .recover { case e: Throwable =>
+        logger.warn("get my organisation check cases returned unexpected exception", e)
+        CheckCasesWithAgent(
+          start = 1,
+          size = 100,
+          filterTotal = 0,
+          total = 0,
+          checkCases = Nil
+        ) // I believe this shouldnt be handled here. I think this should return the error it got.
       }
       .map(response => Ok(Json.toJson(response)))
   }
@@ -82,16 +81,15 @@ class CheckCaseController @Inject() (
       else
         modernisedExternalCaseManagementApi.getMyClientsCheckCases(propertyLinkSubmissionId)
     checkCasesWithClient
-      .recover {
-        case e: Throwable =>
-          logger.warn("get my clients check cases returned unexpected exception", e)
-          CheckCasesWithClient(
-            start = 1,
-            size = 100,
-            filterTotal = 0,
-            total = 0,
-            checkCases = Nil
-          ) // I believe this shouldnt be handled here. I think this should return the error it got.
+      .recover { case e: Throwable =>
+        logger.warn("get my clients check cases returned unexpected exception", e)
+        CheckCasesWithClient(
+          start = 1,
+          size = 100,
+          filterTotal = 0,
+          total = 0,
+          checkCases = Nil
+        ) // I believe this shouldnt be handled here. I think this should return the error it got.
       }
       .map(response => Ok(Json.toJson(response)))
   }

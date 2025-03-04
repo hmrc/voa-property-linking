@@ -92,7 +92,7 @@ class ModernisedExternalValuationManagementApiSpec extends BaseUnitSpec with Con
       )
     }
 
-    //this doesn't happen
+    // this doesn't happen
     "return a None upon a 404 from modernised" in new Setup {
       val valuationId = 1L
       val propertyLinkId = "PL-123456789"

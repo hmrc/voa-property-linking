@@ -43,8 +43,7 @@ class CustomHttpErrorHandler @Inject() (
 
   val logger: Logger = Logger(this.getClass)
 
-  /**
-    * Handles:
+  /** Handles:
     *   - 4xx series exception thrown directly by Play
     */
   override def onClientError(request: RequestHeader, statusCode: Int, message: String = ""): Future[Result] = {
@@ -64,11 +63,10 @@ class CustomHttpErrorHandler @Inject() (
     Future.successful(Status(errorResponse.httpStatusCode)(Json.toJson(errorResponse)))
   }
 
-  /**
-    * Handles:
-    *  - 5xx series exceptions that are thrown directly by Play
-    *  - 4xx series exceptions thrown from the downstream modernised layer
-    *  - All other exceptions that were not handled by application logic
+  /** Handles:
+    *   - 5xx series exceptions that are thrown directly by Play
+    *   - 4xx series exceptions thrown from the downstream modernised layer
+    *   - All other exceptions that were not handled by application logic
     */
   override def onServerError(request: RequestHeader, ex: Throwable): Future[Result] = {
     implicit val unknownPrincipal: Principal = Principal("N/A", "N/A")

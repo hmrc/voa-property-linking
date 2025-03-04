@@ -51,11 +51,10 @@ class PropertyLinkingController @Inject() (
             auditingService.sendEvent("create property link", propertyLinkRequest)
             Accepted
           }
-          .recover {
-            case _: UpstreamErrorResponse =>
-              logger.info(s"create property link failure: submissionId ${propertyLinkRequest.submissionId}")
-              auditingService.sendEvent("create property link failure", propertyLinkRequest)
-              InternalServerError
+          .recover { case _: UpstreamErrorResponse =>
+            logger.info(s"create property link failure: submissionId ${propertyLinkRequest.submissionId}")
+            auditingService.sendEvent("create property link failure", propertyLinkRequest)
+            InternalServerError
           }
       }
     }
@@ -70,13 +69,12 @@ class PropertyLinkingController @Inject() (
             auditingService.sendEvent("create property link on client behalf", propertyLinkRequest)
             Accepted
           }
-          .recover {
-            case _: UpstreamErrorResponse =>
-              logger.info(
-                s"create property link on client behalf failure: submissionId ${propertyLinkRequest.submissionId}"
-              )
-              auditingService.sendEvent("create property link on client behalf failure", propertyLinkRequest)
-              InternalServerError
+          .recover { case _: UpstreamErrorResponse =>
+            logger.info(
+              s"create property link on client behalf failure: submissionId ${propertyLinkRequest.submissionId}"
+            )
+            auditingService.sendEvent("create property link on client behalf failure", propertyLinkRequest)
+            InternalServerError
           }
       }
     }

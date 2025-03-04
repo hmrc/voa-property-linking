@@ -68,8 +68,8 @@ class DVRRepository @Inject() (mongo: MongoComponent, @Named("dvrCollectionName"
         )
         .toFuture()
         .map(_ => ())
-        .recover {
-          case e: Exception => logger.debug(e.getMessage())
+        .recover { case e: Exception =>
+          logger.debug(e.getMessage())
         }
     }
 
@@ -86,8 +86,8 @@ class DVRRepository @Inject() (mongo: MongoComponent, @Named("dvrCollectionName"
         .findOneAndDelete(query(organisationId))
         .toFuture()
         .map(_ => ())
-        .recover {
-          case e: Exception => logger.debug(e.getMessage())
+        .recover { case e: Exception =>
+          logger.debug(e.getMessage())
         }
     }
 

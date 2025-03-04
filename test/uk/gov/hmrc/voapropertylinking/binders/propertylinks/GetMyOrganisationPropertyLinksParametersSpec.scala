@@ -32,8 +32,8 @@ class GetMyOrganisationPropertyLinksParametersSpec extends BaseUnitSpec {
 
         validate(params) shouldBe Valid(theExpectedValidThing)
 
-        inside(binder.bind("", params)) {
-          case Some(Right(ps)) => ps shouldBe theExpectedValidThing
+        inside(binder.bind("", params)) { case Some(Right(ps)) =>
+          ps shouldBe theExpectedValidThing
         }
       }
     }

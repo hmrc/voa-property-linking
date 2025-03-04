@@ -56,11 +56,11 @@ class ExternalPropertyLinkApi @Inject() (
       myAgentPropertyLinksUrl.replace("{agentCode}", agentCode.toString),
       modernisedPaginationParams(Some(params)) ++
         List(
-          searchParams.address.map("address"     -> _),
-          searchParams.uarn.map("uarn"           -> _.toString),
-          searchParams.baref.map("baref"         -> _),
-          searchParams.agent.map("agent"         -> _),
-          searchParams.status.map("status"       -> _),
+          searchParams.address.map("address" -> _),
+          searchParams.uarn.map("uarn" -> _.toString),
+          searchParams.baref.map("baref" -> _),
+          searchParams.agent.map("agent" -> _),
+          searchParams.status.map("status" -> _),
           searchParams.sortField.map("sortfield" -> _),
           searchParams.sortOrder.map("sortorder" -> _)
         ).flatten
@@ -75,8 +75,8 @@ class ExternalPropertyLinkApi @Inject() (
       myAgentAvailablePropertyLinks.replace("{agentCode}", agentCode.toString),
       modernisedPaginationParams(params) ++
         List(
-          searchParams.address.map("address"     -> _),
-          searchParams.agent.map("agent"         -> _),
+          searchParams.address.map("address" -> _),
+          searchParams.agent.map("agent" -> _),
           searchParams.sortField.map("sortfield" -> _),
           searchParams.sortOrder.map("sortorder" -> _)
         ).flatten
@@ -90,11 +90,11 @@ class ExternalPropertyLinkApi @Inject() (
       myOrganisationsPropertyLinksUrl,
       modernisedPaginationParams(params) ++
         List(
-          searchParams.address.map("address"     -> _),
-          searchParams.uarn.map("uarn"           -> _.toString),
-          searchParams.baref.map("baref"         -> _),
-          searchParams.agent.map("agent"         -> _),
-          searchParams.status.map("status"       -> _),
+          searchParams.address.map("address" -> _),
+          searchParams.uarn.map("uarn" -> _.toString),
+          searchParams.baref.map("baref" -> _),
+          searchParams.agent.map("agent" -> _),
+          searchParams.status.map("status" -> _),
           searchParams.sortField.map("sortfield" -> _),
           searchParams.sortOrder.map("sortorder" -> _)
         ).flatten
@@ -113,15 +113,15 @@ class ExternalPropertyLinkApi @Inject() (
         myClientsPropertyLinksUrl,
         modernisedPaginationParams(params) ++
           List(
-            searchParams.address.map("address"                           -> _),
-            searchParams.baref.map("baref"                               -> _),
-            searchParams.client.map("client"                             -> _),
-            searchParams.status.map("status"                             -> _),
-            searchParams.sortField.map("sortfield"                       -> _),
-            searchParams.sortOrder.map("sortorder"                       -> _),
+            searchParams.address.map("address" -> _),
+            searchParams.baref.map("baref" -> _),
+            searchParams.client.map("client" -> _),
+            searchParams.status.map("status" -> _),
+            searchParams.sortField.map("sortfield" -> _),
+            searchParams.sortOrder.map("sortorder" -> _),
             searchParams.representationStatus.map("representationStatus" -> _),
-            searchParams.appointedFromDate.map("appointedFromDate"       -> _.toString),
-            searchParams.appointedToDate.map("appointedToDate"           -> _.toString)
+            searchParams.appointedFromDate.map("appointedFromDate" -> _.toString),
+            searchParams.appointedToDate.map("appointedToDate" -> _.toString)
           ).flatten
       )
 
@@ -135,16 +135,16 @@ class ExternalPropertyLinkApi @Inject() (
         myClientPropertyLinksUrl.replace("{clientId}", clientOrgId.toString),
         modernisedPaginationParams(params) ++
           List(
-            searchParams.address.map("address"                           -> _),
-            searchParams.baref.map("baref"                               -> _),
-            searchParams.status.map("status"                             -> _),
-            searchParams.sortField.map("sortfield"                       -> _),
-            searchParams.sortOrder.map("sortorder"                       -> _),
+            searchParams.address.map("address" -> _),
+            searchParams.baref.map("baref" -> _),
+            searchParams.status.map("status" -> _),
+            searchParams.sortField.map("sortfield" -> _),
+            searchParams.sortOrder.map("sortorder" -> _),
             searchParams.representationStatus.map("representationStatus" -> _),
-            searchParams.appointedFromDate.map("appointedFromDate"       -> _.toString),
-            searchParams.appointedToDate.map("appointedToDate"           -> _.toString),
-            searchParams.uarn.map("uarn"                                 -> _.toString),
-            searchParams.client.map("client"                             -> _)
+            searchParams.appointedFromDate.map("appointedFromDate" -> _.toString),
+            searchParams.appointedToDate.map("appointedToDate" -> _.toString),
+            searchParams.uarn.map("uarn" -> _.toString),
+            searchParams.client.map("client" -> _)
           ).flatten
       )
 
@@ -161,9 +161,9 @@ class ExternalPropertyLinkApi @Inject() (
         myClientsUrl,
         modernisedPaginationParams(params) ++
           List(
-            searchParams.name.map("name"                           -> _),
+            searchParams.name.map("name" -> _),
             searchParams.appointedFromDate.map("appointedFromDate" -> _.toString),
-            searchParams.appointedToDate.map("appointedToDate"     -> _.toString)
+            searchParams.appointedToDate.map("appointedToDate" -> _.toString)
           ).flatten
       )
 
