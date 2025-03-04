@@ -44,7 +44,7 @@ case class AgentAuthorisation(
       this.client.organisationName,
       this.address,
       LocalDate
-        .now(), //TODO This is not being shown on the frontend for now, once the modernised API changes to return this correctly, we will display it again
+        .now(), // TODO This is not being shown on the frontend for now, once the modernised API changes to return this correctly, we will display it again
       this.status
     )
 }

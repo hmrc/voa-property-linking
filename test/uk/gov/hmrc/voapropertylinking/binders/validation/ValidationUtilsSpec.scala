@@ -44,12 +44,11 @@ class ValidationUtilsSpec extends BaseUnitSpec {
     "reject values that are not mappable to the enum" in new Setup {
       val invalidValues = Seq("blue", "greenish", "mixed_shade", "")
       forAll(invalidValues) { v =>
-        inside(enumValue(Colour)(v)("colour")) {
-          case Invalid(errors) =>
-            val e = errors.head
-            e.value shouldBe v
-            e.key shouldBe "colour"
-            e.acceptableValues should contain theSameElementsAs Seq("red", "green", "mixedShade")
+        inside(enumValue(Colour)(v)("colour")) { case Invalid(errors) =>
+          val e = errors.head
+          e.value shouldBe v
+          e.key shouldBe "colour"
+          e.acceptableValues should contain theSameElementsAs Seq("red", "green", "mixedShade")
         }
       }
     }
@@ -62,9 +61,8 @@ class ValidationUtilsSpec extends BaseUnitSpec {
     }
     "fail validation" in new Setup {
       val params: Params = Map("somethingElse" -> Seq("foo"))
-      inside(read("mandatory", params)) {
-        case Invalid(errors) =>
-          errors.head.key shouldBe "mandatory"
+      inside(read("mandatory", params)) { case Invalid(errors) =>
+        errors.head.key shouldBe "mandatory"
       }
     }
   }
@@ -138,10 +136,9 @@ class ValidationUtilsSpec extends BaseUnitSpec {
       "string of yyyy-mm-dd format is provided but date is nonsense" in new Setup {
         implicit val params: Params = Map("date" -> Seq("2019-50-60"))
         implicit val key: String = "date"
-        inside(read andThen asLocalDate) {
-          case Invalid(NonEmptyList(InvalidTypeError(k, clazz), _)) =>
-            k shouldBe key
-            clazz.getSimpleName shouldBe "LocalDate"
+        inside(read andThen asLocalDate) { case Invalid(NonEmptyList(InvalidTypeError(k, clazz), _)) =>
+          k shouldBe key
+          clazz.getSimpleName shouldBe "LocalDate"
         }
       }
     }
@@ -152,15 +149,13 @@ class ValidationUtilsSpec extends BaseUnitSpec {
       nonBlankString("foobar")("key") shouldBe Symbol("valid")
     }
     "reject a string containing only blanks" in new Setup {
-      inside(nonBlankString("    ")("key")) {
-        case Invalid(NonEmptyList(BlankQueryParameterError(k), _)) =>
-          k shouldBe "key"
+      inside(nonBlankString("    ")("key")) { case Invalid(NonEmptyList(BlankQueryParameterError(k), _)) =>
+        k shouldBe "key"
       }
     }
     "reject an empty string" in new Setup {
-      inside(nonBlankString("")("key")) {
-        case Invalid(NonEmptyList(BlankQueryParameterError(k), _)) =>
-          k shouldBe "key"
+      inside(nonBlankString("")("key")) { case Invalid(NonEmptyList(BlankQueryParameterError(k), _)) =>
+        k shouldBe "key"
       }
     }
   }
@@ -175,16 +170,14 @@ class ValidationUtilsSpec extends BaseUnitSpec {
     "reject strings outside valid range" in new Setup {
       val s = "foo"
       implicit val key: String = "key"
-      inside(minLength(4)(s) andThen maxLength(5)) {
-        case Invalid(NonEmptyList(UnderMinLengthError(k, limit), _)) =>
-          k shouldBe key
-          limit shouldBe 4
+      inside(minLength(4)(s) andThen maxLength(5)) { case Invalid(NonEmptyList(UnderMinLengthError(k, limit), _)) =>
+        k shouldBe key
+        limit shouldBe 4
       }
 
-      inside(minLength(1)(s) andThen maxLength(2)) {
-        case Invalid(NonEmptyList(OverMaxLengthError(k, limit), _)) =>
-          k shouldBe key
-          limit shouldBe 2
+      inside(minLength(1)(s) andThen maxLength(2)) { case Invalid(NonEmptyList(OverMaxLengthError(k, limit), _)) =>
+        k shouldBe key
+        limit shouldBe 2
       }
     }
   }
@@ -206,13 +199,13 @@ class ValidationUtilsSpec extends BaseUnitSpec {
     }
     "work as expected around boundaries" in new IntRangeTest {
       rangeTest(min.toString) shouldBe Valid(min)
-      inside(rangeTest((min - 1).toString)) {
-        case Invalid(errors) => errors.head shouldBe UnderLimitError(key, min)(min - 1)
+      inside(rangeTest((min - 1).toString)) { case Invalid(errors) =>
+        errors.head shouldBe UnderLimitError(key, min)(min - 1)
       }
 
       rangeTest(max.toString) shouldBe Valid(max)
-      inside(rangeTest((max + 1).toString)) {
-        case Invalid(errors) => errors.head shouldBe OverLimitError(key, max)(max + 1)
+      inside(rangeTest((max + 1).toString)) { case Invalid(errors) =>
+        errors.head shouldBe OverLimitError(key, max)(max + 1)
       }
     }
   }
@@ -238,8 +231,8 @@ class ValidationUtilsSpec extends BaseUnitSpec {
       val values: Seq[String] = Seq("A1", "A1", "bb", "Ca123", "dD 23", " dD23", "dD23 ")
 
       values foreach { value =>
-        inside(regExpTest(value)) {
-          case Invalid(errors) => errors.head shouldBe InvalidFormat(key)
+        inside(regExpTest(value)) { case Invalid(errors) =>
+          errors.head shouldBe InvalidFormat(key)
         }
       }
     }
@@ -270,8 +263,8 @@ class ValidationUtilsSpec extends BaseUnitSpec {
       val badInwardCodes: Seq[String] = Seq("N1 A1A", "N1 12A", "N1 AAA", "N1 1A", "N1 1AAA", "N1 12AA")
 
       badOutwardCodes ++ badStartAndEndValues ++ incorrectSpaceValues ++ badInwardCodes foreach { value =>
-        inside(postcodeTest(value)) {
-          case Invalid(errors) => errors.head shouldBe InvalidFormat(key)
+        inside(postcodeTest(value)) { case Invalid(errors) =>
+          errors.head shouldBe InvalidFormat(key)
         }
       }
     }
@@ -298,8 +291,8 @@ class ValidationUtilsSpec extends BaseUnitSpec {
         Seq("P", ".P", "P P", ".", "..", "FAILON46CHARACTERS_FAILON46CHARACTERS_12345678", "INVALID%PROPERTY%%")
 
       invalid foreach { value =>
-        inside(propertyLinkIdTest(value)) {
-          case Invalid(errors) => errors.head shouldBe InvalidFormat(key)
+        inside(propertyLinkIdTest(value)) { case Invalid(errors) =>
+          errors.head shouldBe InvalidFormat(key)
         }
       }
     }

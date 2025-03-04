@@ -52,8 +52,8 @@ class ChallengeControllerSpec extends BaseControllerSpec {
             controller.canChallenge(plSubmissionId, "CHK123ABC", 123L, "partyID")(FakeRequest())
 
           status(result) shouldBe OK
-          inside(contentAsJson(result) \ "result") {
-            case JsDefined(JsBoolean(canChallenge)) => canChallenge shouldBe canChallengeResponse.result
+          inside(contentAsJson(result) \ "result") { case JsDefined(JsBoolean(canChallenge)) =>
+            canChallenge shouldBe canChallengeResponse.result
           }
         }
       }
@@ -72,8 +72,8 @@ class ChallengeControllerSpec extends BaseControllerSpec {
             controller.canChallenge(plSubmissionId, "CHK123ABC", 123L, "partyID")(FakeRequest())
 
           status(result) shouldBe OK
-          inside(contentAsJson(result) \ "result") {
-            case JsDefined(JsBoolean(canChallenge)) => canChallenge shouldBe canChallengeResponse.result
+          inside(contentAsJson(result) \ "result") { case JsDefined(JsBoolean(canChallenge)) =>
+            canChallenge shouldBe canChallengeResponse.result
           }
         }
       }

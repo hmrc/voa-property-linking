@@ -53,7 +53,10 @@ lazy val microservice: Project = Project(appName, file("."))
   .settings(majorVersion := 0)
   .settings(
     libraryDependencies ++= compileDependencies ++ testDependencies,
-    retrieveManaged := true)
+    retrieveManaged := true,
+    dependencyOverrides ++= Seq(
+      "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.2",
+    ))
 
 lazy val it = project
   .enablePlugins(PlayScala)
@@ -68,16 +71,16 @@ scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature")
 scalacOptions += "-Wconf:src=routes/.*:s"
 scalacOptions += "-Wconf:cat=unused-imports&src=html/.*:s"
 
-val bootstrapPlayVersion = "9.5.0"
-val hmrcMongoVersion = "2.3.0"
+val bootstrapPlayVersion = "9.11.0"
+val hmrcMongoVersion = "2.5.0"
 
 val compileDependencies = Seq(
   ws,
   guice,
   "uk.gov.hmrc"        %% "bootstrap-backend-play-30" % bootstrapPlayVersion,
   "uk.gov.hmrc.mongo"  %% "hmrc-mongo-play-30"        % hmrcMongoVersion,
-  "org.typelevel"      %% "cats-core"                 % "2.12.0",
-  "uk.gov.hmrc"        %% "uri-template"              % "1.14.0",
+  "org.typelevel"      %% "cats-core"                 % "2.13.0",
+  "uk.gov.hmrc"        %% "uri-template"              % "1.16.0",
   "ai.x"               %% "play-json-extensions"      % "0.42.0",
   "org.apache.commons" % "commons-text"               % "1.12.0"
 )

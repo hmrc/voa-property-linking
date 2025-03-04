@@ -34,8 +34,8 @@ trait EventLogging {
     Try {
       val pairs = data.toList :+ ("grpId" -> principal.groupId) :+ ("extId" -> principal.externalId)
       val dataString = SortedMap[String, Any](pairs: _*)
-        .collect {
-          case (k, v) => s"$k = ${v.toString}"
+        .collect { case (k, v) =>
+          s"$k = ${v.toString}"
         }
         .mkString("[ ", " , ", " ]")
       logger.info(s"${logEvent.toString} - $dataString")

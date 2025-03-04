@@ -84,12 +84,11 @@ class DVRCaseManagement @Inject() (
         fileRef: String
   ): Action[AnyContent] =
     authenticated.async { implicit request =>
-      lazy val response: Future[WSResponse] = {
+      lazy val response: Future[WSResponse] =
         if (featureSwitch.isBstDownstreamEnabled)
           valuationManagementApi.getDvrDocument(valuationId, uarn, propertyLinkId, fileRef)
         else
           modernisedValuationManagementApi.getDvrDocument(valuationId, uarn, propertyLinkId, fileRef)
-      }
       response
         .map { document =>
           val contentType =

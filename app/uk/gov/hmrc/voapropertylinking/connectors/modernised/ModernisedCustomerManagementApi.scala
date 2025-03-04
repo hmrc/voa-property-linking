@@ -47,17 +47,17 @@ class ModernisedCustomerManagementApi @Inject() (
       ()
     }
 
-  //should never return none
+  // should never return none
   def getDetailedGroupAccount(id: Long)(implicit hc: HeaderCarrier): Future[Option[GroupAccount]] =
     http.GET[Option[APIDetailedGroupAccount]](s"$organisationUrl?organisationId=$id").map(_.map(_.toGroupAccount))
 
-  //should never return none
+  // should never return none
   def findDetailedGroupAccountByGGID(ggId: String)(implicit hc: HeaderCarrier): Future[Option[GroupAccount]] =
     http
       .GET[Option[APIDetailedGroupAccount]](s"$organisationUrl?governmentGatewayGroupId=$ggId")
       .map(_.map(_.toGroupAccount))
 
-  //should never return none
+  // should never return none
   def withAgentCode(agentCode: String)(implicit hc: HeaderCarrier): Future[Option[GroupAccount]] =
     http
       .GET[Option[APIDetailedGroupAccount]](s"$organisationUrl?representativeCode=$agentCode")

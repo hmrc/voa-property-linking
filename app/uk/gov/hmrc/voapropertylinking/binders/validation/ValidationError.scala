@@ -26,7 +26,7 @@ object ValidationError {
   def translateClass(expectedClass: Class[_]): String =
     expectedClass.getSimpleName match {
       case "int" | "long" => "Integer"
-      case simpleName     => WordUtils.capitalize(simpleName) //to uppercase first letter of primitive types
+      case simpleName     => WordUtils.capitalize(simpleName) // to uppercase first letter of primitive types
     }
 
   implicit val showInstance: Show[ValidationError] = Show.show[ValidationError] {

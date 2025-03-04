@@ -18,9 +18,7 @@ package uk.gov.hmrc.voapropertylinking.utils
 
 import scala.language.implicitConversions
 
-/**
-  * Official HTTP 1.1 status codes as defined in W3C RFC2616
-  * https://www.w3.org/Protocols/rfc2616/rfc2616.html
+/** Official HTTP 1.1 status codes as defined in W3C RFC2616 https://www.w3.org/Protocols/rfc2616/rfc2616.html
   */
 trait HttpStatusCodes {
 

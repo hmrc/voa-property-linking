@@ -22,7 +22,7 @@ import uk.gov.hmrc.voapropertylinking.utils.HttpStatusCodes
 
 abstract class BaseVoaConnector
     extends BaseConnector with VoaExceptionThrowingReads with HttpStatusCodes with UriTemplateSyntax {
-  def toNone[T]: PartialFunction[T, None.type] = {
-    case _ => None
+  def toNone[T]: PartialFunction[T, None.type] = { case _ =>
+    None
   }
 }

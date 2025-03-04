@@ -70,9 +70,8 @@ class AddressLookupControllerSpec extends BaseControllerSpec {
             controller.find(validPostcode)(request)
 
           status(result) shouldBe OK
-          inside(contentAsJson(result).validate[Seq[DetailedAddress]]) {
-            case JsSuccess(addresses, _) =>
-              addresses.loneElement shouldBe detailedAddress
+          inside(contentAsJson(result).validate[Seq[DetailedAddress]]) { case JsSuccess(addresses, _) =>
+            addresses.loneElement shouldBe detailedAddress
           }
         }
       }
@@ -97,8 +96,8 @@ class AddressLookupControllerSpec extends BaseControllerSpec {
             controller.get(addressUnitId)(request)
 
           status(result) shouldBe OK
-          inside(contentAsJson(result).validate[SimpleAddress]) {
-            case JsSuccess(a, _) => a shouldBe simpleAddress
+          inside(contentAsJson(result).validate[SimpleAddress]) { case JsSuccess(a, _) =>
+            a shouldBe simpleAddress
           }
         }
       }
@@ -128,8 +127,8 @@ class AddressLookupControllerSpec extends BaseControllerSpec {
             controller.create(request.withBody(toJson(simpleAddress)))
 
           status(result) shouldBe CREATED
-          inside(contentAsJson(result) \ "id") {
-            case JsDefined(JsNumber(value)) => value shouldBe 123L
+          inside(contentAsJson(result) \ "id") { case JsDefined(JsNumber(value)) =>
+            value shouldBe 123L
           }
         }
       }
@@ -155,9 +154,8 @@ class AddressLookupControllerSpec extends BaseControllerSpec {
             controller.find(validPostcode)(request)
 
           status(result) shouldBe OK
-          inside(contentAsJson(result).validate[Seq[DetailedAddress]]) {
-            case JsSuccess(addresses, _) =>
-              addresses.loneElement shouldBe detailedAddress
+          inside(contentAsJson(result).validate[Seq[DetailedAddress]]) { case JsSuccess(addresses, _) =>
+            addresses.loneElement shouldBe detailedAddress
           }
         }
       }
@@ -183,8 +181,8 @@ class AddressLookupControllerSpec extends BaseControllerSpec {
             controller.get(addressUnitId)(request)
 
           status(result) shouldBe OK
-          inside(contentAsJson(result).validate[SimpleAddress]) {
-            case JsSuccess(a, _) => a shouldBe simpleAddress
+          inside(contentAsJson(result).validate[SimpleAddress]) { case JsSuccess(a, _) =>
+            a shouldBe simpleAddress
           }
         }
       }
@@ -212,8 +210,8 @@ class AddressLookupControllerSpec extends BaseControllerSpec {
             controller.create(request.withBody(toJson(simpleAddress)))
 
           status(result) shouldBe CREATED
-          inside(contentAsJson(result) \ "id") {
-            case JsDefined(JsNumber(value)) => value shouldBe 123L
+          inside(contentAsJson(result) \ "id") { case JsDefined(JsNumber(value)) =>
+            value shouldBe 123L
           }
         }
       }

@@ -35,7 +35,7 @@ import uk.gov.hmrc.voapropertylinking.services.{AssessmentService, PropertyLinki
 
 trait AllMocks extends MockitoSugar { me: BeforeAndAfterEach =>
 
-  //Modernised Connectors
+  // Modernised Connectors
   val mockModernisedAddressManagementApi: ModernisedAddressManagementApi = mock[ModernisedAddressManagementApi]
   val mockModernisedCustomerManagementApi: ModernisedCustomerManagementApi = mock[ModernisedCustomerManagementApi]
   val mockModernisedCCACaseManagementApi: ModernisedCCACaseManagementApi = mock[ModernisedCCACaseManagementApi]
@@ -47,7 +47,7 @@ trait AllMocks extends MockitoSugar { me: BeforeAndAfterEach =>
   val mockModernisedOrganisationManagementApi: ModernisedExternalOrganisationManagementApi =
     mock[ModernisedExternalOrganisationManagementApi]
 
-  //BST Connectors
+  // BST Connectors
   val mockAddressManagementApi: AddressManagementApi = mock[AddressManagementApi]
   val mockCustomerManagementApi: CustomerManagementApi = mock[CustomerManagementApi]
   val mockCCACaseManagementApi: CCACaseManagementApi = mock[CCACaseManagementApi]
@@ -56,7 +56,7 @@ trait AllMocks extends MockitoSugar { me: BeforeAndAfterEach =>
   val mockValuationManagementApi: ExternalValuationManagementApi = mock[ExternalValuationManagementApi]
   val mockOrganisationManagementApi: ExternalOrganisationManagementApi = mock[ExternalOrganisationManagementApi]
 
-  //MDTP connectors
+  // MDTP connectors
   val mockBusinessRatesAuthConnector: BusinessRatesAuthConnector = mock[BusinessRatesAuthConnector]
 
   val mockAssessmentService: AssessmentService = mock[AssessmentService]

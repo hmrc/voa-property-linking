@@ -59,28 +59,28 @@ class GuiceModule(
   }
 
   private def bindEndpoints(endpoints: Map[String, String], baseUrl: String): Unit =
-    endpoints.toList.foreach {
-      case (boundName, configPath) => bindStringWithPrefix(configPath, baseUrl, boundName)
+    endpoints.toList.foreach { case (boundName, configPath) =>
+      bindStringWithPrefix(configPath, baseUrl, boundName)
     }
 
   private def bindBstEndpoints(): Unit =
     bindEndpoints(
       Map(
-        "voa.authValuationHistoryUrl"          -> "bst.resources.externalValuationManagement.valuationHistory.path",
-        "voa.myAgentPropertyLinks"             -> "bst.resources.externalPropertyLink.myAgentPropertyLinks.path",
-        "voa.myAgentAvailablePropertyLinks"    -> "bst.resources.externalPropertyLink.myAgentAvailablePropertyLinks.path",
-        "voa.myOrganisationsPropertyLinks"     -> "bst.resources.externalPropertyLink.myOrganisationsPropertyLinks.path",
-        "voa.myOrganisationsPropertyLink"      -> "bst.resources.externalPropertyLink.myOrganisationsPropertyLink.path",
-        "voa.myOrganisationsAgents"            -> "bst.resources.externalPropertyLink.myOrganisationsAgents.path",
-        "voa.myClientsPropertyLink"            -> "bst.resources.externalPropertyLink.myClientsPropertyLink.path",
-        "voa.myClientsPropertyLinks"           -> "bst.resources.externalPropertyLink.myClientsPropertyLinks.path",
-        "voa.myClientPropertyLinks"            -> "bst.resources.externalPropertyLink.myClientPropertyLinks.path",
-        "voa.myClients"                        -> "bst.resources.externalPropertyLink.myClients.path",
-        "voa.createPropertyLink"               -> "bst.resources.externalPropertyLink.createPropertyLink.path",
+        "voa.authValuationHistoryUrl"       -> "bst.resources.externalValuationManagement.valuationHistory.path",
+        "voa.myAgentPropertyLinks"          -> "bst.resources.externalPropertyLink.myAgentPropertyLinks.path",
+        "voa.myAgentAvailablePropertyLinks" -> "bst.resources.externalPropertyLink.myAgentAvailablePropertyLinks.path",
+        "voa.myOrganisationsPropertyLinks"  -> "bst.resources.externalPropertyLink.myOrganisationsPropertyLinks.path",
+        "voa.myOrganisationsPropertyLink"   -> "bst.resources.externalPropertyLink.myOrganisationsPropertyLink.path",
+        "voa.myOrganisationsAgents"         -> "bst.resources.externalPropertyLink.myOrganisationsAgents.path",
+        "voa.myClientsPropertyLink"         -> "bst.resources.externalPropertyLink.myClientsPropertyLink.path",
+        "voa.myClientsPropertyLinks"        -> "bst.resources.externalPropertyLink.myClientsPropertyLinks.path",
+        "voa.myClientPropertyLinks"         -> "bst.resources.externalPropertyLink.myClientPropertyLinks.path",
+        "voa.myClients"                     -> "bst.resources.externalPropertyLink.myClients.path",
+        "voa.createPropertyLink"            -> "bst.resources.externalPropertyLink.createPropertyLink.path",
         "voa.createPropertyLinkOnClientBehalf" -> "bst.resources.externalPropertyLink.createPropertyLinkOnClientBehalf.path",
-        "voa.revokeClientsPropertyLink"        -> "bst.resources.externalPropertyLink.revokeMyClientsPropertyLink.path",
-        "voa.agentAppointmentChanges"          -> "bst.resources.organisationManagementApi.agentAppointmentChanges.path",
-        "voa.myAgentDetails"                   -> "bst.resources.organisationManagementApi.myAgentDetails.path"
+        "voa.revokeClientsPropertyLink" -> "bst.resources.externalPropertyLink.revokeMyClientsPropertyLink.path",
+        "voa.agentAppointmentChanges"   -> "bst.resources.organisationManagementApi.agentAppointmentChanges.path",
+        "voa.myAgentDetails"            -> "bst.resources.organisationManagementApi.myAgentDetails.path"
       ),
       servicesConfig.baseUrl("voa-bst")
     )
@@ -88,21 +88,21 @@ class GuiceModule(
   private def bindModernisedEndpoints(): Unit =
     bindEndpoints(
       Map(
-        "voa.modernised.authValuationHistoryUrl"          -> "voa.resources.externalValuationManagement.valuationHistory.path",
-        "voa.modernised.myAgentPropertyLinks"             -> "voa.resources.externalPropertyLink.myAgentPropertyLinks.path",
-        "voa.modernised.myAgentAvailablePropertyLinks"    -> "voa.resources.externalPropertyLink.myAgentAvailablePropertyLinks.path",
-        "voa.modernised.myOrganisationsPropertyLinks"     -> "voa.resources.externalPropertyLink.myOrganisationsPropertyLinks.path",
-        "voa.modernised.myOrganisationsPropertyLink"      -> "voa.resources.externalPropertyLink.myOrganisationsPropertyLink.path",
-        "voa.modernised.myOrganisationsAgents"            -> "voa.resources.externalPropertyLink.myOrganisationsAgents.path",
-        "voa.modernised.myClientsPropertyLink"            -> "voa.resources.externalPropertyLink.myClientsPropertyLink.path",
-        "voa.modernised.myClientsPropertyLinks"           -> "voa.resources.externalPropertyLink.myClientsPropertyLinks.path",
-        "voa.modernised.myClientPropertyLinks"            -> "voa.resources.externalPropertyLink.myClientPropertyLinks.path",
-        "voa.modernised.myClients"                        -> "voa.resources.externalPropertyLink.myClients.path",
-        "voa.modernised.createPropertyLink"               -> "voa.resources.externalPropertyLink.createPropertyLink.path",
+        "voa.modernised.authValuationHistoryUrl" -> "voa.resources.externalValuationManagement.valuationHistory.path",
+        "voa.modernised.myAgentPropertyLinks"    -> "voa.resources.externalPropertyLink.myAgentPropertyLinks.path",
+        "voa.modernised.myAgentAvailablePropertyLinks" -> "voa.resources.externalPropertyLink.myAgentAvailablePropertyLinks.path",
+        "voa.modernised.myOrganisationsPropertyLinks" -> "voa.resources.externalPropertyLink.myOrganisationsPropertyLinks.path",
+        "voa.modernised.myOrganisationsPropertyLink" -> "voa.resources.externalPropertyLink.myOrganisationsPropertyLink.path",
+        "voa.modernised.myOrganisationsAgents"  -> "voa.resources.externalPropertyLink.myOrganisationsAgents.path",
+        "voa.modernised.myClientsPropertyLink"  -> "voa.resources.externalPropertyLink.myClientsPropertyLink.path",
+        "voa.modernised.myClientsPropertyLinks" -> "voa.resources.externalPropertyLink.myClientsPropertyLinks.path",
+        "voa.modernised.myClientPropertyLinks"  -> "voa.resources.externalPropertyLink.myClientPropertyLinks.path",
+        "voa.modernised.myClients"              -> "voa.resources.externalPropertyLink.myClients.path",
+        "voa.modernised.createPropertyLink"     -> "voa.resources.externalPropertyLink.createPropertyLink.path",
         "voa.modernised.createPropertyLinkOnClientBehalf" -> "voa.resources.externalPropertyLink.createPropertyLinkOnClientBehalf.path",
-        "voa.modernised.revokeClientsPropertyLink"        -> "voa.resources.externalPropertyLink.revokeMyClientsPropertyLink.path",
-        "voa.modernised.agentAppointmentChanges"          -> "voa.resources.organisationManagementApi.agentAppointmentChanges.path",
-        "voa.modernised.myAgentDetails"                   -> "voa.resources.organisationManagementApi.myAgentDetails.path"
+        "voa.modernised.revokeClientsPropertyLink" -> "voa.resources.externalPropertyLink.revokeMyClientsPropertyLink.path",
+        "voa.modernised.agentAppointmentChanges" -> "voa.resources.organisationManagementApi.agentAppointmentChanges.path",
+        "voa.modernised.myAgentDetails" -> "voa.resources.organisationManagementApi.myAgentDetails.path"
       ),
       servicesConfig.baseUrl("voa-modernised-api")
     )
