@@ -51,7 +51,7 @@ class GroupAccountControllerSpec extends BaseControllerSpec {
         val groupJson = Json.toJson(testGroupAccountSubmission)
 
         when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
-        when(mockCustomerManagementApi.createGroupAccount(any(), any())(any[HeaderCarrier]))
+        when(mockCustomerManagementApi.createGroupAccount(any(), any())(any()))
           .thenReturn(Future.successful(GroupId(1, "test", 23)))
 
         val res = testController.create()(FakeRequest().withBody(groupJson))
@@ -76,7 +76,7 @@ class GroupAccountControllerSpec extends BaseControllerSpec {
           )
 
         when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
-        when(mockCustomerManagementApi.getDetailedGroupAccount(any())(any[HeaderCarrier]))
+        when(mockCustomerManagementApi.getDetailedGroupAccount(any())(any()))
           .thenReturn(Future.successful(Some(testGroupAccount)))
 
         val res = testController.get(1)(FakeRequest())
@@ -87,7 +87,7 @@ class GroupAccountControllerSpec extends BaseControllerSpec {
 
       "return NotFound if the account does not exist in modernised" in {
         when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
-        when(mockCustomerManagementApi.getDetailedGroupAccount(any())(any[HeaderCarrier]))
+        when(mockCustomerManagementApi.getDetailedGroupAccount(any())(any()))
           .thenReturn(Future.successful(None))
 
         val res = testController.get(1)(FakeRequest())
@@ -111,7 +111,7 @@ class GroupAccountControllerSpec extends BaseControllerSpec {
           )
 
         when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
-        when(mockCustomerManagementApi.findDetailedGroupAccountByGGID(any())(any[HeaderCarrier]))
+        when(mockCustomerManagementApi.findDetailedGroupAccountByGGID(any())(any()))
           .thenReturn(Future.successful(Some(testGroupAccount)))
 
         val res = testController.withGroupId("test-group-id")(FakeRequest())
@@ -122,7 +122,7 @@ class GroupAccountControllerSpec extends BaseControllerSpec {
 
       "return NotFound if the account does not exist in modernised" in {
         when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
-        when(mockCustomerManagementApi.findDetailedGroupAccountByGGID(any())(any[HeaderCarrier]))
+        when(mockCustomerManagementApi.findDetailedGroupAccountByGGID(any())(any()))
           .thenReturn(Future.successful(None))
 
         val res = testController.withGroupId("test-group-id")(FakeRequest())
@@ -146,7 +146,7 @@ class GroupAccountControllerSpec extends BaseControllerSpec {
           )
 
         when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
-        when(mockCustomerManagementApi.withAgentCode(any())(any[HeaderCarrier]))
+        when(mockCustomerManagementApi.withAgentCode(any())(any()))
           .thenReturn(Future.successful(Some(testGroupAccount)))
 
         val res = testController.withAgentCode("test-agent-code")(FakeRequest())
@@ -157,7 +157,7 @@ class GroupAccountControllerSpec extends BaseControllerSpec {
 
       "return NotFound if the account does not exist in modernised" in {
         when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
-        when(mockCustomerManagementApi.withAgentCode(any())(any[HeaderCarrier])).thenReturn(Future.successful(None))
+        when(mockCustomerManagementApi.withAgentCode(any())(any())).thenReturn(Future.successful(None))
 
         val res = testController.withAgentCode("test-agent-code")(FakeRequest())
 
@@ -181,7 +181,7 @@ class GroupAccountControllerSpec extends BaseControllerSpec {
         val testUpdatedOrgAccountJson = Json.toJson(testUpdatedOrgAccount)
 
         when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
-        when(mockCustomerManagementApi.updateGroupAccount(any(), any())(any[HeaderCarrier]))
+        when(mockCustomerManagementApi.updateGroupAccount(any(), any())(any()))
           .thenReturn(Future.successful(()))
         when(mockBrAuth.clearCache()(any[HeaderCarrier])).thenReturn(Future.successful(()))
 
@@ -210,7 +210,7 @@ class GroupAccountControllerSpec extends BaseControllerSpec {
 
         val groupJson = Json.toJson(testGroupAccountSubmission)
 
-        when(mockModernisedCustomerManagementApi.createGroupAccount(any(), any())(any[HeaderCarrier]))
+        when(mockModernisedCustomerManagementApi.createGroupAccount(any(), any())(any()))
           .thenReturn(Future.successful(GroupId(1, "test", 23)))
 
         val res = testController.create()(FakeRequest().withBody(groupJson))
@@ -234,7 +234,7 @@ class GroupAccountControllerSpec extends BaseControllerSpec {
             agentCode = Some(1)
           )
 
-        when(mockModernisedCustomerManagementApi.getDetailedGroupAccount(any())(any[HeaderCarrier]))
+        when(mockModernisedCustomerManagementApi.getDetailedGroupAccount(any())(any()))
           .thenReturn(Future.successful(Some(testGroupAccount)))
 
         val res = testController.get(1)(FakeRequest())
@@ -244,7 +244,7 @@ class GroupAccountControllerSpec extends BaseControllerSpec {
       }
 
       "return NotFound if the account does not exist in modernised" in {
-        when(mockModernisedCustomerManagementApi.getDetailedGroupAccount(any())(any[HeaderCarrier]))
+        when(mockModernisedCustomerManagementApi.getDetailedGroupAccount(any())(any()))
           .thenReturn(Future.successful(None))
 
         val res = testController.get(1)(FakeRequest())
@@ -267,7 +267,7 @@ class GroupAccountControllerSpec extends BaseControllerSpec {
             agentCode = Some(1)
           )
 
-        when(mockModernisedCustomerManagementApi.findDetailedGroupAccountByGGID(any())(any[HeaderCarrier]))
+        when(mockModernisedCustomerManagementApi.findDetailedGroupAccountByGGID(any())(any()))
           .thenReturn(Future.successful(Some(testGroupAccount)))
 
         val res = testController.withGroupId("test-group-id")(FakeRequest())
@@ -277,7 +277,7 @@ class GroupAccountControllerSpec extends BaseControllerSpec {
       }
 
       "return NotFound if the account does not exist in modernised" in {
-        when(mockModernisedCustomerManagementApi.findDetailedGroupAccountByGGID(any())(any[HeaderCarrier]))
+        when(mockModernisedCustomerManagementApi.findDetailedGroupAccountByGGID(any())(any()))
           .thenReturn(Future.successful(None))
 
         val res = testController.withGroupId("test-group-id")(FakeRequest())
@@ -300,7 +300,7 @@ class GroupAccountControllerSpec extends BaseControllerSpec {
             agentCode = Some(1)
           )
 
-        when(mockModernisedCustomerManagementApi.withAgentCode(any())(any[HeaderCarrier]))
+        when(mockModernisedCustomerManagementApi.withAgentCode(any())(any()))
           .thenReturn(Future.successful(Some(testGroupAccount)))
 
         val res = testController.withAgentCode("test-agent-code")(FakeRequest())
@@ -310,7 +310,7 @@ class GroupAccountControllerSpec extends BaseControllerSpec {
       }
 
       "return NotFound if the account does not exist in modernised" in {
-        when(mockModernisedCustomerManagementApi.withAgentCode(any())(any[HeaderCarrier]))
+        when(mockModernisedCustomerManagementApi.withAgentCode(any())(any()))
           .thenReturn(Future.successful(None))
 
         val res = testController.withAgentCode("test-agent-code")(FakeRequest())
@@ -334,7 +334,7 @@ class GroupAccountControllerSpec extends BaseControllerSpec {
 
         val testUpdatedOrgAccountJson = Json.toJson(testUpdatedOrgAccount)
 
-        when(mockModernisedCustomerManagementApi.updateGroupAccount(any(), any())(any[HeaderCarrier]))
+        when(mockModernisedCustomerManagementApi.updateGroupAccount(any(), any())(any()))
           .thenReturn(Future.successful(()))
         when(mockBrAuth.clearCache()(any[HeaderCarrier])).thenReturn(Future.successful(()))
 

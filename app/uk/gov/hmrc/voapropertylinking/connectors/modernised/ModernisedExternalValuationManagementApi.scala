@@ -23,6 +23,7 @@ import play.api.libs.ws.{WSClient, WSResponse}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
+import uk.gov.hmrc.voapropertylinking.config.AppConfig
 import uk.gov.hmrc.voapropertylinking.connectors.BaseVoaConnector
 import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
 
@@ -31,32 +32,31 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class ModernisedExternalValuationManagementApi @Inject() (
       wsClient: WSClient,
-      http: VoaHttpClient,
+      httpClient: VoaHttpClient,
       @Named("voa.modernised.authValuationHistoryUrl") valuationHistoryUrl: String,
-      config: ServicesConfig
+      config: ServicesConfig,
+      appConfig: AppConfig
 )(implicit executionContext: ExecutionContext)
     extends BaseVoaConnector {
 
-  lazy val appName = config.getConfString("appName", "voa-property-linking")
+  lazy val appName: String = config.getConfString("appName", "voa-property-linking")
 
-  lazy val url = config.baseUrl("voa-modernised-api") + "/external-valuation-management-api"
+  lazy val url: String = s"${appConfig.modernisedBase}/external-valuation-management-api"
 
   def getDvrDocuments(valuationId: Long, uarn: Long, propertyLinkId: String)(implicit
         request: RequestWithPrincipal[_]
   ): Future[Option[DvrDocumentFiles]] =
-    http
-      .GET[Option[DvrDocumentFiles]](
-        url = s"$url/properties/$uarn/valuations/$valuationId/files",
-        queryParams = Seq("propertyLinkId" -> propertyLinkId)
+    httpClient
+      .getWithGGHeaders[Option[DvrDocumentFiles]](
+        url = s"$url/properties/$uarn/valuations/$valuationId/files?propertyLinkId=$propertyLinkId"
       )
 
   def getValuationHistory(uarn: Long, propertyLinkSubmissionId: String)(implicit
         request: RequestWithPrincipal[_]
   ): Future[Option[ValuationHistoryResponse]] =
-    http
-      .GET[Option[ValuationHistoryResponse]](
-        valuationHistoryUrl.replace("{uarn}", uarn.toString),
-        modernisedValuationHistoryQueryParameters(propertyLinkSubmissionId)
+    httpClient
+      .getWithGGHeaders[Option[ValuationHistoryResponse]](
+        s"${valuationHistoryUrl.replace("{uarn}", uarn.toString)}?propertyLinkId=$propertyLinkSubmissionId"
       )
 
   def getDvrDocument(valuationId: Long, uarn: Long, propertyLinkId: String, fileRef: String)(implicit
@@ -80,7 +80,4 @@ class ModernisedExternalValuationManagementApi @Inject() (
           case _ => Future.successful(response)
         }
       }
-
-  private def modernisedValuationHistoryQueryParameters(propertyLinkSubmissionId: String) =
-    Seq("propertyLinkId" -> propertyLinkSubmissionId)
 }

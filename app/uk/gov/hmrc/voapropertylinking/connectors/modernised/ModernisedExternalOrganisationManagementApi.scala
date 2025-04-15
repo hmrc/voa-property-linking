@@ -16,17 +16,18 @@
 
 package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
-import javax.inject.{Inject, Named}
+import play.api.libs.json.Json
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
 import uk.gov.hmrc.voapropertylinking.connectors.BaseVoaConnector
 import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
 import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation.{AgentDetails, AppointmentChangeResponse, AppointmentChangesRequest}
 
+import javax.inject.{Inject, Named}
 import scala.concurrent.{ExecutionContext, Future}
 
 class ModernisedExternalOrganisationManagementApi @Inject() (
-      http: VoaHttpClient,
+      httpClient: VoaHttpClient,
       @Named("voa.modernised.agentAppointmentChanges") agentAppointmentChangesUrl: String,
       @Named("voa.modernised.myAgentDetails") getAgentDetailsUrl: String
 )(implicit executionContext: ExecutionContext)
@@ -35,14 +36,15 @@ class ModernisedExternalOrganisationManagementApi @Inject() (
   def agentAppointmentChanges(
         appointmentChangesRequest: AppointmentChangesRequest
   )(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[AppointmentChangeResponse] =
-    http.POST[AppointmentChangesRequest, AppointmentChangeResponse](
+    httpClient.postWithGgHeaders[AppointmentChangeResponse](
       url = agentAppointmentChangesUrl,
-      body = appointmentChangesRequest,
-      headers = Seq.empty
+      body = Json.toJsObject(appointmentChangesRequest)
     )
 
   def getAgentDetails(
         agentCode: Long
   )(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[Option[AgentDetails]] =
-    http.GET[Option[AgentDetails]](url = getAgentDetailsUrl.templated("representativeCode" -> agentCode))
+    httpClient.getWithGGHeaders[Option[AgentDetails]](url =
+      getAgentDetailsUrl.templated("representativeCode" -> agentCode)
+    )
 }

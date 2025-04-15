@@ -17,25 +17,30 @@
 package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
 import models.modernised.ccacasemanagement.requests.DetailedValuationRequest
+import play.api.libs.json.Json
 import uk.gov.hmrc.http._
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
+import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
+import uk.gov.hmrc.voapropertylinking.config.AppConfig
 import uk.gov.hmrc.voapropertylinking.connectors.BaseVoaConnector
+import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class ModernisedCCACaseManagementApi @Inject() (
-      http: DefaultHttpClient,
-      config: ServicesConfig
+      httpClient: VoaHttpClient,
+      appConfig: AppConfig
 )(implicit executionContext: ExecutionContext)
     extends BaseVoaConnector {
 
-  lazy val url = config.baseUrl("voa-modernised-api") + "/cca-case-management-api"
+  lazy val url = s"${appConfig.modernisedBase}/cca-case-management-api"
 
-  def requestDetailedValuation(request: DetailedValuationRequest)(implicit hc: HeaderCarrier): Future[Unit] =
-    http
-      .POST[DetailedValuationRequest, HttpResponse](url + "/cca_case/dvrSubmission", request) map { _ =>
-      ()
-    }
+  def requestDetailedValuation(
+        request: DetailedValuationRequest
+  )(implicit requestWithPrincipal: RequestWithPrincipal[_]): Future[Unit] =
+    httpClient
+      .postWithGgHeaders[HttpResponse](url + "/cca_case/dvrSubmission", Json.toJsObject(request))
+      .map { _ =>
+        ()
+      }
 }

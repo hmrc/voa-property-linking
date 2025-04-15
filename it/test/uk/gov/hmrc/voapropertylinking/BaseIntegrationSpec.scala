@@ -22,8 +22,9 @@ import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.test.DefaultAwaitTimeout
+import play.api.test.{DefaultAwaitTimeout, FakeRequest}
 import uk.gov.hmrc.voapropertylinking.WiremockHelper.{wiremockHost, wiremockPort}
+import uk.gov.hmrc.voapropertylinking.auth.{Principal, RequestWithPrincipal}
 
 trait BaseIntegrationSpec
     extends AnyWordSpec with Matchers with GuiceOneAppPerSuite with BeforeAndAfterEach with BeforeAndAfterAll
@@ -41,6 +42,9 @@ trait BaseIntegrationSpec
       "microservice.services.voa-bst.host"            -> wiremockHost,
       "microservice.services.voa-bst.port"            -> wiremockPort.toString
     )
+
+  implicit val requestWithPrincipal: RequestWithPrincipal[_] =
+    RequestWithPrincipal(FakeRequest(), principal = Principal("externalId", "groupId"))
 
   override def beforeAll(): Unit = {
     startWiremock()

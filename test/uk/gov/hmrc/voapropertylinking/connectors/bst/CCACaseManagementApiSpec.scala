@@ -21,21 +21,21 @@ import models.modernised.ccacasemanagement.requests.DetailedValuationRequest
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import uk.gov.hmrc.http.HttpResponse
-import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
+import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
 
 import scala.concurrent.Future
 
 class CCACaseManagementApiSpec extends BaseUnitSpec {
 
-  val http = mock[DefaultHttpClient]
-  val connector = new CCACaseManagementApi(http, mockServicesConfig) {
+  val http: VoaHttpClient = mock[VoaHttpClient]
+  val connector: CCACaseManagementApi = new CCACaseManagementApi(http, mockAppConfig) {
     override lazy val url: String = "http://some-url"
   }
 
   "request detailed valuation" should {
     "update the valuation with the detailed valuation request" in {
 
-      when(http.POST[DetailedValuationRequest, HttpResponse](any(), any(), any())(any(), any(), any(), any()))
+      when(http.postWithGgHeaders[HttpResponse](any(), any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(emptyJsonHttpResponse(200)))
 
       val dvr = DetailedValuationRequest(

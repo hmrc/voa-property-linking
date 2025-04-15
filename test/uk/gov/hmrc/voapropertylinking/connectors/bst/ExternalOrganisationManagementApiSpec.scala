@@ -26,7 +26,7 @@ import scala.concurrent.Future
 class ExternalOrganisationManagementApiSpec extends BaseUnitSpec {
 
   val testConnector = new ExternalOrganisationManagementApi(
-    http = mockVoaHttpClient,
+    httpClient = mockVoaHttpClient,
     agentAppointmentChangesUrl = "agentAppointmentChangesUrl",
     getAgentDetailsUrl = "getAgentDetailsUrl/{representativeCode}"
   )
@@ -35,8 +35,7 @@ class ExternalOrganisationManagementApiSpec extends BaseUnitSpec {
     "return appointmentChangeResponse for a valid appointment change request" in {
 
       when(
-        mockVoaHttpClient.POST[AppointmentChangesRequest, AppointmentChangeResponse](any(), any(), any())(
-          any(),
+        mockVoaHttpClient.postWithGgHeaders[AppointmentChangeResponse](any(), any())(
           any(),
           any(),
           any(),
@@ -63,25 +62,25 @@ class ExternalOrganisationManagementApiSpec extends BaseUnitSpec {
     "return AgentDetails with the provided agentCode" in {
       val agentCode = 123432L
 
-      when(mockVoaHttpClient.GET[Option[AgentDetails]](any())(any(), any(), any(), any()))
+      when(mockVoaHttpClient.getWithGGHeaders[Option[AgentDetails]](any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(Some(agentDetails)))
 
       testConnector.getAgentDetails(agentCode)(hc, requestWithPrincipal).futureValue shouldBe Some(agentDetails)
 
       verify(mockVoaHttpClient, times(1))
-        .GET[Option[AgentDetails]](matching("getAgentDetailsUrl/123432"))(any(), any(), any(), any())
+        .getWithGGHeaders[Option[AgentDetails]](matching("getAgentDetailsUrl/123432"))(any(), any(), any(), any())
     }
 
     "return an None if no AgentDetails can be found for the provided agentCode" in {
       val agentCode = 123432L
 
-      when(mockVoaHttpClient.GET[Option[AgentDetails]](any())(any(), any(), any(), any()))
+      when(mockVoaHttpClient.getWithGGHeaders[Option[AgentDetails]](any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(None))
 
       testConnector.getAgentDetails(agentCode)(hc, requestWithPrincipal).futureValue shouldBe None
 
       verify(mockVoaHttpClient, times(1))
-        .GET[Option[AgentDetails]](matching("getAgentDetailsUrl/123432"))(any(), any(), any(), any())
+        .getWithGGHeaders[Option[AgentDetails]](matching("getAgentDetailsUrl/123432"))(any(), any(), any(), any())
     }
   }
 

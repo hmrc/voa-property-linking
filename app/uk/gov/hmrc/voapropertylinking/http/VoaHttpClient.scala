@@ -16,90 +16,136 @@
 
 package uk.gov.hmrc.voapropertylinking.http
 
-import javax.inject.{Inject, Singleton}
-import play.api.libs.json.Writes
+import play.api.libs.json.JsObject
+import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads}
-import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
-import uk.gov.hmrc.voapropertylinking.auth.{Principal, RequestWithPrincipal}
+import uk.gov.hmrc.voapropertylinking.auth.Principal
+import uk.gov.hmrc.voapropertylinking.config.AppConfig
 
+import java.net.URL
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class VoaHttpClient @Inject() (httpClient: DefaultHttpClient) {
+class VoaHttpClient @Inject() (
+      httpClient: HttpClientV2,
+      appConfig: AppConfig
+) {
 
-  def buildHeaderCarrier(hc: HeaderCarrier, principal: Principal): HeaderCarrier =
-    hc.copy()
-      .withExtraHeaders(
-        "GG-EXTERNAL-ID" -> principal.externalId,
-        "GG-GROUP-ID"    -> principal.groupId
-      )
+  def getWithGGHeaders[T](
+        url: String
+  )(implicit hc: HeaderCarrier, principal: Principal, httpReads: HttpReads[T], ec: ExecutionContext): Future[T] = {
+    val urlEndpoint: URL = new URL(s"$url")
+    val additionalHeaders: Seq[(String, String)] = buildHeadersWithGG(principal)
+    val sanitizedHeaderCarrier: HeaderCarrier = removeDisallowedHeaders(hc, outboundHeaderNotAllowedList)
+    val updatedHeaderCarrier: HeaderCarrier = sanitizedHeaderCarrier.withExtraHeaders(additionalHeaders: _*)
 
-  def GET[A](url: String)(implicit
-        rds: HttpReads[A],
+    httpClient.get(urlEndpoint).setHeader(updatedHeaderCarrier.extraHeaders: _*).withProxy.execute[T]
+  }
+
+  def get[T](url: String)(implicit hc: HeaderCarrier, httpReads: HttpReads[T], ec: ExecutionContext): Future[T] = {
+    val urlEndpoint = new URL(s"$url")
+    httpClient.get(urlEndpoint).execute[T]
+  }
+
+  def patch[T](url: String, body: JsObject)(implicit
         hc: HeaderCarrier,
-        ec: ExecutionContext,
-        requestWithPrincipal: RequestWithPrincipal[_]
-  ): Future[A] =
-    httpClient.GET[A](url)(implicitly, hc = buildHeaderCarrier(hc, requestWithPrincipal.principal), implicitly)
+        principal: Principal,
+        httpReads: HttpReads[T],
+        ec: ExecutionContext
+  ): Future[T] = {
+    val urlEndpoint: URL = new URL(s"$url")
+    val additionalHeaders: Seq[(String, String)] = buildHeadersWithGG(principal)
+    val sanitizedHeaderCarrier: HeaderCarrier = removeDisallowedHeaders(hc, outboundHeaderNotAllowedList)
+    val updatedHeaderCarrier: HeaderCarrier = sanitizedHeaderCarrier.withExtraHeaders(additionalHeaders: _*)
 
-  def GET[A](url: String, queryParams: Seq[(String, String)])(implicit
-        rds: HttpReads[A],
-        hc: HeaderCarrier,
-        ec: ExecutionContext,
-        requestWithPrincipal: RequestWithPrincipal[_]
-  ): Future[A] =
     httpClient
-      .GET[A](url, queryParams)(implicitly, hc = buildHeaderCarrier(hc, requestWithPrincipal.principal), implicitly)
+      .patch(urlEndpoint)
+      .setHeader(updatedHeaderCarrier.extraHeaders: _*)
+      .withBody(body)
+      .withProxy
+      .execute[T]
+  }
 
-  def DELETE[O](url: String)(implicit
-        rds: HttpReads[O],
+  def postWithGgHeaders[T](url: String, body: JsObject)(implicit
         hc: HeaderCarrier,
-        ec: ExecutionContext,
-        requestWithPrincipal: RequestWithPrincipal[_]
-  ): Future[O] =
-    httpClient.DELETE[O](url)(implicitly, hc = buildHeaderCarrier(hc, requestWithPrincipal.principal), implicitly)
+        principal: Principal,
+        httpReads: HttpReads[T],
+        ec: ExecutionContext
+  ): Future[T] = {
+    val urlEndpoint: URL = new URL(s"$url")
+    val additionalHeaders: Seq[(String, String)] = buildHeadersWithGG(principal)
+    val sanitizedHeaderCarrier: HeaderCarrier = removeDisallowedHeaders(hc, outboundHeaderNotAllowedList)
+    val updatedHeaderCarrier: HeaderCarrier = sanitizedHeaderCarrier.withExtraHeaders(additionalHeaders: _*)
 
-  def PUT[I, O](url: String, body: I)(implicit
-        wts: Writes[I],
-        rds: HttpReads[O],
+    httpClient
+      .post(urlEndpoint)
+      .setHeader(updatedHeaderCarrier.extraHeaders: _*)
+      .withBody(body)
+      .withProxy
+      .execute[T]
+  }
+
+  def putWithGgHeaders[T](url: String, body: JsObject)(implicit
         hc: HeaderCarrier,
-        ec: ExecutionContext,
-        requestWithPrincipal: RequestWithPrincipal[_]
-  ): Future[O] =
-    httpClient.PUT[I, O](url, body)(
-      implicitly,
-      implicitly,
-      hc = buildHeaderCarrier(hc, requestWithPrincipal.principal),
-      implicitly
+        principal: Principal,
+        httpReads: HttpReads[T],
+        ec: ExecutionContext
+  ): Future[T] = {
+    val urlEndpoint: URL = new URL(s"$url")
+    val additionalHeaders: Seq[(String, String)] = buildHeadersWithGG(principal)
+    val sanitizedHeaderCarrier: HeaderCarrier = removeDisallowedHeaders(hc, outboundHeaderNotAllowedList)
+    val updatedHeaderCarrier: HeaderCarrier = sanitizedHeaderCarrier.withExtraHeaders(additionalHeaders: _*)
+
+    httpClient
+      .put(urlEndpoint)
+      .setHeader(updatedHeaderCarrier.extraHeaders: _*)
+      .withBody(body)
+      .withProxy
+      .execute[T]
+  }
+
+  def deleteWithGgHeaders[T](url: String)(implicit
+        hc: HeaderCarrier,
+        principal: Principal,
+        httpReads: HttpReads[T],
+        ec: ExecutionContext
+  ): Future[T] = {
+    val urlEndpoint: URL = new URL(s"$url")
+    val additionalHeaders: Seq[(String, String)] = buildHeadersWithGG(principal)
+    val sanitizedHeaderCarrier: HeaderCarrier = removeDisallowedHeaders(hc, outboundHeaderNotAllowedList)
+    val updatedHeaderCarrier: HeaderCarrier = sanitizedHeaderCarrier.withExtraHeaders(additionalHeaders: _*)
+
+    httpClient
+      .delete(urlEndpoint)
+      .setHeader(updatedHeaderCarrier.extraHeaders: _*)
+      .withProxy
+      .execute[T]
+  }
+
+  def buildHeadersWithGG(principal: Principal): Seq[(String, String)] =
+    Seq(
+      "GG-EXTERNAL-ID"            -> principal.externalId,
+      "GG-GROUP-ID"               -> principal.groupId,
+      "Ocp-Apim-Subscription-Key" -> appConfig.apimSubscriptionKeyValue
     )
 
-  def POST[I, O](url: String, body: I, headers: Seq[(String, String)])(implicit
-        wts: Writes[I],
-        rds: HttpReads[O],
-        hc: HeaderCarrier,
-        ec: ExecutionContext,
-        requestWithPrincipal: RequestWithPrincipal[_]
-  ): Future[O] =
-    httpClient
-      .POST[I, O](url, body, headers)(
-        implicitly,
-        implicitly,
-        hc = buildHeaderCarrier(hc, requestWithPrincipal.principal),
-        implicitly
-      )
+  val outboundHeaderNotAllowedList: Set[String] = Set(
+    "Connection",
+    "Content-Length",
+    "Host",
+    "Proxy-Authenticate",
+    "Proxy-Authorization",
+    "TE",
+    "Transfer-Encoding",
+    "Trailer",
+    "Upgrade",
+    "User-Agent"
+  )
 
-  def PATCH[I, O](url: String, body: I)(implicit
-        wts: Writes[I],
-        rds: HttpReads[O],
-        hc: HeaderCarrier,
-        ec: ExecutionContext,
-        requestWithPrincipal: RequestWithPrincipal[_]
-  ): Future[O] =
-    httpClient
-      .PATCH[I, O](url, body)(
-        implicitly,
-        implicitly,
-        hc = buildHeaderCarrier(hc, requestWithPrincipal.principal),
-        implicitly
-      )
+  def removeDisallowedHeaders(hc: HeaderCarrier, disallowedHeaders: Set[String]): HeaderCarrier = {
+    val filteredExtraHeaders = hc.extraHeaders.filterNot { case (key, _) => disallowedHeaders.contains(key) }
+    val filteredOtherHeaders = hc.otherHeaders.filterNot { case (key, _) => disallowedHeaders.contains(key) }
+    hc.copy(extraHeaders = filteredExtraHeaders, otherHeaders = filteredOtherHeaders)
+  }
 }

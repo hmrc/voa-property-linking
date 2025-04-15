@@ -46,8 +46,9 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
     protected val agentCode = 12345L
     protected val authorisationId = 54321L
     protected val orgId = 1L
-    protected val paginationParams = PaginationParams(startPoint = 1, pageSize = 1, requestTotalRowCount = false)
-    protected val ownerAuthResult = ModernisedOwnerAuthResult(1, 1, 1, 1, Seq())
+    protected val paginationParams: PaginationParams =
+      PaginationParams(startPoint = 1, pageSize = 1, requestTotalRowCount = false)
+    protected val ownerAuthResult: ModernisedOwnerAuthResult = ModernisedOwnerAuthResult(1, 1, 1, 1, Seq())
 
   }
 

@@ -22,14 +22,14 @@ import uk.gov.hmrc.voapropertylinking.utils.JsonUtils.enumFormat
 object EvidenceType extends Enumeration {
   type EvidenceType = Value
 
-  val LEASE = Value("lease")
-  val LICENSE = Value("license")
-  val SERVICE_CHARGE = Value("serviceCharge")
-  val STAMP_DUTY_LAND_TAX_FORM = Value("stampDutyLandTaxForm")
-  val WATER_RATE_DEMAND = Value("waterRateDemand")
-  val OTHER_UTILITY_BILL = Value("otherUtilityBill")
-  val RATES_BILL = Value("ratesBill")
-  val LAND_REGISTRY_TITLE = Value("landRegistryTitle")
+  val LEASE: EvidenceType.Value = Value("lease")
+  val LICENSE: EvidenceType.Value = Value("license")
+  val SERVICE_CHARGE: EvidenceType.Value = Value("serviceCharge")
+  val STAMP_DUTY_LAND_TAX_FORM: EvidenceType.Value = Value("stampDutyLandTaxForm")
+  val WATER_RATE_DEMAND: EvidenceType.Value = Value("waterRateDemand")
+  val OTHER_UTILITY_BILL: EvidenceType.Value = Value("otherUtilityBill")
+  val RATES_BILL: EvidenceType.Value = Value("ratesBill")
+  val LAND_REGISTRY_TITLE: EvidenceType.Value = Value("landRegistryTitle")
 
   implicit val format: Format[EvidenceType] = enumFormat(EvidenceType)
 

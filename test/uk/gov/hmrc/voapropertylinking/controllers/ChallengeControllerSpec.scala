@@ -38,7 +38,8 @@ class ChallengeControllerSpec extends BaseControllerSpec {
       mockFeatureSwitch
     )
     val plSubmissionId = "PL12AB34"
-    val canChallengeResponse = CanChallengeResponse(result = true, reasonCode = None, reason = None)
+    val canChallengeResponse: CanChallengeResponse =
+      CanChallengeResponse(result = true, reasonCode = None, reason = None)
   }
 
   "Using the controller with the bstDownstream feature switch disabled" when {

@@ -19,9 +19,14 @@ package uk.gov.hmrc.voapropertylinking.connectors
 import play.api.mvc.Request
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
+import uk.gov.hmrc.voapropertylinking.auth.{Principal, RequestWithPrincipal}
 
 trait BaseConnector {
 
   implicit def hc(implicit request: Request[_]): HeaderCarrier =
     HeaderCarrierConverter.fromRequestAndSession(request, request.session)
+
+  implicit def principal[A](implicit request: RequestWithPrincipal[A]): Principal =
+    request.principal
+
 }

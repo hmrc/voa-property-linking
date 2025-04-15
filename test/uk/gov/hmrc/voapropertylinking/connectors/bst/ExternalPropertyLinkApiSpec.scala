@@ -18,17 +18,21 @@ package uk.gov.hmrc.voapropertylinking.connectors.bst
 
 import basespecs.BaseUnitSpec
 import models.PaginationParams
+import models.modernised.{Capacity, Evidence, EvidenceType, ProvidedEvidence}
 import models.modernised.externalpropertylink.myclients.{ClientPropertyLink, ClientsResponse, PropertyLinksWithClient}
 import models.modernised.externalpropertylink.myorganisations.{AgentList, PropertyLinkWithAgents, PropertyLinksWithAgents}
 import models.modernised.externalpropertylink.requests.{CreatePropertyLink, CreatePropertyLinkOnClientBehalf}
 import org.mockito.ArgumentMatchers.{any, eq => mEq}
-import org.mockito.Mockito._
+import org.mockito.Mockito.{when, _}
+import play.api.libs.json.Json
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.voapropertylinking.binders.clients.GetClientsParameters
 import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetClientPropertyLinksParameters, GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
 import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
 
-import java.time.LocalDate
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
+import java.time.{LocalDate, LocalDateTime}
 import scala.concurrent.Future
 
 class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
@@ -42,22 +46,23 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
     val status = "mock status"
     val sortField = "mock sort field"
     val sortOrder = "mock sort order"
-    val appointedFromDate = LocalDate.parse("2020-01-01")
-    val appointedToDate = LocalDate.parse("2020-03-01")
+    val appointedFromDate: LocalDate = LocalDate.parse("2020-01-01")
+    val appointedToDate: LocalDate = LocalDate.parse("2020-03-01")
     val clientName = "ABC-LTD"
 
-    val getMyOrganisationSearchParams = GetMyOrganisationPropertyLinksParameters(
-      address = Some(address),
-      uarn = Some(uarn),
-      baref = Some(baref),
-      agent = Some(agent),
-      client = None,
-      status = Some(status),
-      Some(sortField),
-      Some(sortOrder)
-    )
+    val getMyOrganisationSearchParams: GetMyOrganisationPropertyLinksParameters =
+      GetMyOrganisationPropertyLinksParameters(
+        address = Some(address),
+        uarn = Some(uarn),
+        baref = Some(baref),
+        agent = Some(agent),
+        client = None,
+        status = Some(status),
+        Some(sortField),
+        Some(sortOrder)
+      )
 
-    val getMyClientsSearchParams = GetMyClientsPropertyLinkParameters(
+    val getMyClientsSearchParams: GetMyClientsPropertyLinkParameters = GetMyClientsPropertyLinkParameters(
       address = Some(address),
       baref = Some(baref),
       client = Some(agent),
@@ -86,7 +91,7 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
     val httpstring = "VoaAuthedBackendHttp"
 
     val connector = new ExternalPropertyLinkApi(
-      http = mock[VoaHttpClient],
+      httpClient = mock[VoaHttpClient],
       myAgentPropertyLinksUrl = agentAuthorisationsUrl,
       myAgentAvailablePropertyLinks = agentAvailableAuthorisationsUrl,
       myOrganisationsPropertyLinksUrl = ownerAuthorisationsUrl,
@@ -101,13 +106,25 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
       myClientsUrl = myClientsUrl
     )
 
-    val paginationParams = PaginationParams(1, 1, true)
+    val paginationParams: PaginationParams = PaginationParams(1, 1, true)
     val queryParams: Seq[(String, String)] = Seq(
       ("start", paginationParams.startPoint.toString),
       ("size", paginationParams.pageSize.toString),
       ("requestTotalRowCount", "true")
     )
+
+    when(mockAppConfig.proxyEnabled).thenReturn(false)
+    when(mockAppConfig.apimSubscriptionKeyValue).thenReturn("subscriptionId")
+    when(mockAppConfig.voaApiBaseUrl).thenReturn("http://some/url/voa")
+    when(mockServicesConfig.baseUrl(any())).thenReturn("http://localhost:9949/")
   }
+
+  def encodeParams(params: Seq[(String, String)]): String =
+    params
+      .map { case (k, v) =>
+        s"${URLEncoder.encode(k, StandardCharsets.UTF_8)}=${URLEncoder.encode(v, StandardCharsets.UTF_8)}"
+      }
+      .mkString("&")
 
   "get my organisations property links" should {
 
@@ -115,7 +132,7 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
 
       val mockReturnedPropertyLinks: PropertyLinksWithAgents = mock[PropertyLinksWithAgents]
 
-      when(connector.http.GET[PropertyLinksWithAgents](any(), any())(any(), any(), any(), any()))
+      when(connector.httpClient.getWithGGHeaders[PropertyLinksWithAgents](any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(mockReturnedPropertyLinks))
 
       connector
@@ -124,8 +141,11 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
 
       val getMyOrgPropertyLinksQueryParams =
         queryParams :+ ("address" -> address) :+ ("uarn" -> uarn.toString) :+ ("baref" -> baref) :+ ("agent" -> agent) :+ ("status" -> status) :+ ("sortfield" -> sortField) :+ ("sortorder" -> sortOrder)
-      verify(connector.http)
-        .GET(mEq(ownerAuthorisationsUrl), mEq(getMyOrgPropertyLinksQueryParams))(any(), any(), any(), any())
+
+      val params = encodeParams(getMyOrgPropertyLinksQueryParams)
+
+      verify(connector.httpClient)
+        .getWithGGHeaders(mEq(s"$ownerAuthorisationsUrl?$params"))(any(), any(), any(), any())
     }
 
   }
@@ -136,7 +156,7 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
       val agentCode = 1
       val mockReturnedPropertyLinks: PropertyLinksWithAgents = mock[PropertyLinksWithAgents]
 
-      when(connector.http.GET[PropertyLinksWithAgents](any(), any())(any(), any(), any(), any()))
+      when(connector.httpClient.getWithGGHeaders[PropertyLinksWithAgents](any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(mockReturnedPropertyLinks))
 
       connector
@@ -145,10 +165,12 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
 
       val getMyAgentPropertyLinksQueryParams =
         queryParams :+ ("address" -> address) :+ ("uarn" -> uarn.toString) :+ ("baref" -> baref) :+ ("agent" -> agent) :+ ("status" -> status) :+ ("sortfield" -> sortField) :+ ("sortorder" -> sortOrder)
-      verify(connector.http)
-        .GET(
-          mEq(agentAuthorisationsUrl.replace("{agentCode}", agentCode.toString)),
-          mEq(getMyAgentPropertyLinksQueryParams)
+
+      val params = encodeParams(getMyAgentPropertyLinksQueryParams)
+
+      verify(connector.httpClient)
+        .getWithGGHeaders(
+          mEq(s"${agentAuthorisationsUrl.replace("{agentCode}", agentCode.toString)}?$params")
         )(any(), any(), any(), any())
     }
 
@@ -160,7 +182,7 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
       val agentCode = 1
       val mockReturnedPropertyLinks: PropertyLinksWithAgents = mock[PropertyLinksWithAgents]
 
-      when(connector.http.GET[PropertyLinksWithAgents](any(), any())(any(), any(), any(), any()))
+      when(connector.httpClient.getWithGGHeaders[PropertyLinksWithAgents](any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(mockReturnedPropertyLinks))
 
       connector
@@ -169,10 +191,12 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
 
       val getMyAgentPropertyLinksQueryParams =
         queryParams :+ ("address" -> address) :+ ("agent" -> agent) :+ ("sortfield" -> sortField) :+ ("sortorder" -> sortOrder)
-      verify(connector.http)
-        .GET(
-          mEq(agentAvailableAuthorisationsUrl.replace("{agentCode}", agentCode.toString)),
-          mEq(getMyAgentPropertyLinksQueryParams)
+
+      val params = encodeParams(getMyAgentPropertyLinksQueryParams)
+
+      verify(connector.httpClient)
+        .getWithGGHeaders(
+          mEq(s"${agentAvailableAuthorisationsUrl.replace("{agentCode}", agentCode.toString)}?$params")
         )(any(), any(), any(), any())
     }
 
@@ -180,7 +204,7 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
       val agentCode = 1
       val mockReturnedPropertyLinks: PropertyLinksWithAgents = mock[PropertyLinksWithAgents]
 
-      when(connector.http.GET[PropertyLinksWithAgents](any(), any())(any(), any(), any(), any()))
+      when(connector.httpClient.getWithGGHeaders[PropertyLinksWithAgents](any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(mockReturnedPropertyLinks))
 
       connector
@@ -193,13 +217,14 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
 
       val getMyAgentPropertyLinksQueryParams =
         queryParams :+ ("address" -> address) :+ ("sortfield" -> sortField) :+ ("sortorder" -> sortOrder)
-      verify(connector.http)
-        .GET(
-          mEq(agentAvailableAuthorisationsUrl.replace("{agentCode}", agentCode.toString)),
-          mEq(getMyAgentPropertyLinksQueryParams)
+
+      val params = encodeParams(getMyAgentPropertyLinksQueryParams)
+
+      verify(connector.httpClient)
+        .getWithGGHeaders(
+          mEq(s"${agentAvailableAuthorisationsUrl.replace("{agentCode}", agentCode.toString)}?$params")
         )(any(), any(), any(), any())
     }
-
   }
 
   "get my organisations single property link with submissionId" should {
@@ -208,13 +233,13 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
 
       val mockReturnedPropertyLink: PropertyLinkWithAgents = mock[PropertyLinkWithAgents]
 
-      when(connector.http.GET[Option[PropertyLinkWithAgents]](any())(any(), any(), any(), any()))
+      when(connector.httpClient.getWithGGHeaders[Option[PropertyLinkWithAgents]](any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(Some(mockReturnedPropertyLink)))
 
       connector.getMyOrganisationsPropertyLink("PL1").futureValue shouldBe Some(mockReturnedPropertyLink)
 
-      verify(connector.http)
-        .GET(mEq(ownerAuthorisationUrl.replace("{propertyLinkId}", "PL1")))(any(), any(), any(), any())
+      verify(connector.httpClient)
+        .getWithGGHeaders(mEq(ownerAuthorisationUrl.replace("{propertyLinkId}", "PL1")))(any(), any(), any(), any())
     }
   }
 
@@ -224,7 +249,7 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
 
       val mockReturnedPropertyLinks: PropertyLinksWithClient = mock[PropertyLinksWithClient]
 
-      when(connector.http.GET[PropertyLinksWithClient](any(), any())(any(), any(), any(), any()))
+      when(connector.httpClient.getWithGGHeaders[PropertyLinksWithClient](any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(mockReturnedPropertyLinks))
 
       connector
@@ -233,7 +258,11 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
 
       val clientQueryParams =
         queryParams :+ ("address" -> address) :+ ("baref" -> baref) :+ ("client" -> agent) :+ ("status" -> status) :+ ("sortfield" -> sortField) :+ ("sortorder" -> sortOrder) :+ ("appointedFromDate" -> appointedFromDate.toString) :+ ("appointedToDate" -> appointedToDate.toString)
-      verify(connector.http).GET(mEq(clientAuthorisationsUrl), mEq(clientQueryParams))(any(), any(), any(), any())
+
+      val params = encodeParams(clientQueryParams)
+
+      verify(connector.httpClient)
+        .getWithGGHeaders(mEq(s"$clientAuthorisationsUrl?$params"))(any(), any(), any(), any())
     }
 
   }
@@ -244,7 +273,7 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
 
       val mockReturnedPropertyLinks: PropertyLinksWithClient = mock[PropertyLinksWithClient]
 
-      when(connector.http.GET[PropertyLinksWithClient](any(), any())(any(), any(), any(), any()))
+      when(connector.httpClient.getWithGGHeaders[PropertyLinksWithClient](any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(mockReturnedPropertyLinks))
 
       private val clientOrgId = 111L
@@ -268,9 +297,11 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
 
       val clientQueryParams =
         queryParams :+ ("address" -> address) :+ ("baref" -> baref) :+ ("status" -> status) :+ ("sortfield" -> sortField) :+ ("sortorder" -> sortOrder) :+ ("appointedFromDate" -> appointedFromDate.toString) :+ ("appointedToDate" -> appointedToDate.toString) :+ ("uarn" -> uarn.toString) :+ ("client" -> clientName)
-      verify(connector.http).GET(
-        mEq(myClientPropertyLinksUrl.replace("{clientId}", clientOrgId.toString)),
-        mEq(clientQueryParams)
+
+      val params = encodeParams(clientQueryParams)
+
+      verify(connector.httpClient).getWithGGHeaders(
+        mEq(s"${myClientPropertyLinksUrl.replace("{clientId}", clientOrgId.toString)}?$params")
       )(any(), any(), any(), any())
     }
 
@@ -282,13 +313,13 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
 
       val mockReturnedPropertyLink: ClientPropertyLink = mock[ClientPropertyLink]
 
-      when(connector.http.GET[ClientPropertyLink](any())(any(), any(), any(), any()))
+      when(connector.httpClient.getWithGGHeaders[ClientPropertyLink](any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(mockReturnedPropertyLink))
 
       connector.getClientsPropertyLink("PL1").futureValue shouldBe mockReturnedPropertyLink
 
-      verify(connector.http)
-        .GET(mEq(clientAuthorisationUrl.replace("{propertyLinkId}", "PL1")))(any(), any(), any(), any())
+      verify(connector.httpClient)
+        .getWithGGHeaders(mEq(clientAuthorisationUrl.replace("{propertyLinkId}", "PL1")))(any(), any(), any(), any())
     }
   }
 
@@ -302,14 +333,19 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
       when(mockVoaCreatePropertyLink.PLsubmissionId).thenReturn("PL123")
 
       when(
-        connector.http
-          .POST[CreatePropertyLink, HttpResponse](any(), any(), any())(any(), any(), any(), any(), any())
+        connector.httpClient
+          .postWithGgHeaders[HttpResponse](any(), any())(any(), any(), any(), any())
       ).thenReturn(Future.successful(mockHttpResponse))
 
-      connector.createPropertyLink(mockVoaCreatePropertyLink).futureValue shouldBe mockHttpResponse
+      connector.createPropertyLink(testCreatePropertyLink).futureValue shouldBe mockHttpResponse
 
-      verify(connector.http)
-        .POST(mEq(createPropertyLinkUrl), mEq(mockVoaCreatePropertyLink), mEq(Seq()))(any(), any(), any(), any(), any())
+      verify(connector.httpClient)
+        .postWithGgHeaders(mEq(createPropertyLinkUrl), mEq(Json.toJsObject(testCreatePropertyLink)))(
+          any(),
+          any(),
+          any(),
+          any()
+        )
     }
 
   }
@@ -320,18 +356,33 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
       val mockHttpResponse: HttpResponse = mock[HttpResponse]
       val mockVoaCreatePropertyLink: CreatePropertyLinkOnClientBehalf = mock[CreatePropertyLinkOnClientBehalf]
       val clientId = 100
-      when(
-        connector.http
-          .POST[CreatePropertyLinkOnClientBehalf, HttpResponse](any(), any(), any())(any(), any(), any(), any(), any())
-      ).thenReturn(Future.successful(mockHttpResponse))
-      connector.createOnClientBehalf(mockVoaCreatePropertyLink, clientId).futureValue shouldBe mockHttpResponse
 
-      verify(connector.http)
-        .POST(
+      val date: String = "2018-09-05"
+      val localDate: LocalDate = LocalDate.parse(date)
+
+      val createPropertyLink: CreatePropertyLinkOnClientBehalf = CreatePropertyLinkOnClientBehalf(
+        uarn = clientId,
+        capacity = Capacity.withName("OWNER"),
+        startDate = localDate,
+        endDate = Some(localDate),
+        method = ProvidedEvidence.withName("RATES_BILL"),
+        propertyLinkSubmissionId = "44444",
+        createDatetime = LocalDateTime.parse("2007-12-03T10:15:30"),
+        evidence = Seq(Evidence("FILE_NAME", EvidenceType.RATES_BILL)),
+        submissionSource = "DFE_UI"
+      )
+
+      when(
+        connector.httpClient
+          .postWithGgHeaders[HttpResponse](any(), any())(any(), any(), any(), any())
+      ).thenReturn(Future.successful(mockHttpResponse))
+      connector.createOnClientBehalf(createPropertyLink, clientId).futureValue shouldBe mockHttpResponse
+
+      verify(connector.httpClient)
+        .postWithGgHeaders(
           mEq(createPropertyLinkOnClientBehalfUrl.replace("{clientId}", clientId.toString)),
-          mEq(mockVoaCreatePropertyLink),
-          mEq(Seq())
-        )(any(), any(), any(), any(), any())
+          mEq(Json.toJsObject(createPropertyLink))
+        )(any(), any(), any(), any())
     }
 
   }
@@ -341,15 +392,15 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
 
       val mockReturnedAgentList: AgentList = mock[AgentList]
 
-      when(connector.http.GET[AgentList](any(), any())(any(), any(), any(), any()))
+      when(connector.httpClient.getWithGGHeaders[AgentList](any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(mockReturnedAgentList))
 
       connector
         .getMyOrganisationsAgents()
         .futureValue shouldBe mockReturnedAgentList
 
-      verify(connector.http)
-        .GET(mEq(myOrganisationsAgentsUrl), mEq(List("requestTotalRowCount" -> "true")))(any(), any(), any(), any())
+      verify(connector.httpClient)
+        .getWithGGHeaders(mEq(s"$myOrganisationsAgentsUrl?requestTotalRowCount=true"))(any(), any(), any(), any())
     }
 
   }
@@ -360,15 +411,15 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
 
       val mockReturnedClientsResponse: ClientsResponse = mock[ClientsResponse]
 
-      when(connector.http.GET[ClientsResponse](any(), any())(any(), any(), any(), any()))
+      when(connector.httpClient.getWithGGHeaders[ClientsResponse](any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(mockReturnedClientsResponse))
 
       connector
         .getMyClients(GetClientsParameters(), None)
         .futureValue shouldBe mockReturnedClientsResponse
 
-      verify(connector.http)
-        .GET(mEq(myClientsUrl), mEq(List()))(any(), any(), any(), any())
+      verify(connector.httpClient)
+        .getWithGGHeaders(mEq(myClientsUrl))(any(), any(), any(), any())
     }
 
   }
@@ -379,15 +430,15 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
 
       val mockHttpResponse: HttpResponse = mock[HttpResponse]
 
-      when(connector.http.DELETE[HttpResponse](any())(any(), any(), any(), any()))
+      when(connector.httpClient.deleteWithGgHeaders[HttpResponse](any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(mockHttpResponse))
 
       connector
         .revokeClientProperty("some-submissionId")
         .futureValue shouldBe ((): Unit)
 
-      verify(connector.http)
-        .DELETE(any())(any(), any(), any(), any())
+      verify(connector.httpClient)
+        .deleteWithGgHeaders(any())(any(), any(), any(), any())
     }
 
   }

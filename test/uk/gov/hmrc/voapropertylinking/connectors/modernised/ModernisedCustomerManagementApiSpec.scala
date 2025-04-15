@@ -22,17 +22,19 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.http.HttpResponse
-import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
 
 import scala.concurrent.Future
 
 class ModernisedCustomerManagementApiSpec extends BaseUnitSpec {
 
-  val defaultHttpClient = mock[DefaultHttpClient]
-  val config = mockServicesConfig
-  val testConnector = new ModernisedCustomerManagementApi(defaultHttpClient, config) {
-    override lazy val baseUrl = "http://some-uri"
-  }
+  val defaultHttpClient: VoaHttpClient = mock[VoaHttpClient]
+  val config: ServicesConfig = mockServicesConfig
+  val testConnector: ModernisedCustomerManagementApi =
+    new ModernisedCustomerManagementApi(defaultHttpClient, mockAppConfig) {
+      override lazy val baseUrl = "http://some-uri"
+    }
 
   val url = s"/customer-management-api/person"
 
@@ -40,7 +42,7 @@ class ModernisedCustomerManagementApiSpec extends BaseUnitSpec {
     "return the individual account associated with the provided person id" in {
       val id = 1234L
 
-      when(defaultHttpClient.GET[Option[APIDetailedIndividualAccount]](any(), any(), any())(any(), any(), any()))
+      when(defaultHttpClient.getWithGGHeaders[Option[APIDetailedIndividualAccount]](any())(any(), any(), any(), any()))
         .thenReturn(
           Future.successful(
             Some(
@@ -69,16 +71,16 @@ class ModernisedCustomerManagementApiSpec extends BaseUnitSpec {
           )
         )
 
-      testConnector.getDetailedIndividual(id)(hc).futureValue shouldBe expectedGetValidResponse
+      testConnector.getDetailedIndividual(id)(requestWithPrincipal).futureValue shouldBe expectedGetValidResponse
     }
 
     "return an empty response if the provided id cannot be found" in {
       val id = 1234L
 
-      when(defaultHttpClient.GET[Option[APIDetailedIndividualAccount]](any(), any(), any())(any(), any(), any()))
+      when(defaultHttpClient.getWithGGHeaders[Option[APIDetailedIndividualAccount]](any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(None))
 
-      testConnector.getDetailedIndividual(id)(hc).futureValue shouldBe expectedGetEmptyResponse
+      testConnector.getDetailedIndividual(id)(requestWithPrincipal).futureValue shouldBe expectedGetEmptyResponse
     }
   }
 
@@ -86,7 +88,7 @@ class ModernisedCustomerManagementApiSpec extends BaseUnitSpec {
     "return the individual account associated with the provided GGID" in {
       val ggId = "1234"
 
-      when(defaultHttpClient.GET[Option[APIDetailedIndividualAccount]](any(), any(), any())(any(), any(), any()))
+      when(defaultHttpClient.getWithGGHeaders[Option[APIDetailedIndividualAccount]](any())(any(), any(), any(), any()))
         .thenReturn(
           Future.successful(
             Some(
@@ -115,16 +117,20 @@ class ModernisedCustomerManagementApiSpec extends BaseUnitSpec {
           )
         )
 
-      testConnector.findDetailedIndividualAccountByGGID(ggId)(hc).futureValue shouldBe expectedGetValidResponse
+      testConnector
+        .findDetailedIndividualAccountByGGID(ggId)(requestWithPrincipal)
+        .futureValue shouldBe expectedGetValidResponse
     }
 
     "return an empty response if the provided GGID cannot be found" in {
       val ggId = "1234"
 
-      when(defaultHttpClient.GET[Option[APIDetailedIndividualAccount]](any(), any(), any())(any(), any(), any()))
+      when(defaultHttpClient.getWithGGHeaders[Option[APIDetailedIndividualAccount]](any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(None))
 
-      testConnector.findDetailedIndividualAccountByGGID(ggId)(hc).futureValue shouldBe expectedGetEmptyResponse
+      testConnector
+        .findDetailedIndividualAccountByGGID(ggId)(requestWithPrincipal)
+        .futureValue shouldBe expectedGetEmptyResponse
     }
   }
 
@@ -132,11 +138,11 @@ class ModernisedCustomerManagementApiSpec extends BaseUnitSpec {
     "return an individual account id for the individual account submission" in {
       when(
         defaultHttpClient
-          .POST[APIIndividualAccount, IndividualAccountId](any(), any(), any())(any(), any(), any(), any())
+          .postWithGgHeaders[IndividualAccountId](any(), any())(any(), any(), any(), any())
       ).thenReturn(Future.successful(IndividualAccountId(12345)))
 
       testConnector
-        .createIndividualAccount(individualAccountSubmission)(hc)
+        .createIndividualAccount(individualAccountSubmission)(requestWithPrincipal)
         .futureValue shouldBe expectedCreateResponseValid
     }
   }
@@ -145,7 +151,7 @@ class ModernisedCustomerManagementApiSpec extends BaseUnitSpec {
     "update the person id with the individual account submission" in {
       val personId = 1234L
 
-      when(defaultHttpClient.PUT[APIIndividualAccount, JsValue](any(), any(), any())(any(), any(), any(), any()))
+      when(defaultHttpClient.putWithGgHeaders[JsValue](any(), any())(any(), any(), any(), any()))
         .thenReturn(
           Future.successful(
             Json.toJson(
@@ -175,7 +181,7 @@ class ModernisedCustomerManagementApiSpec extends BaseUnitSpec {
         )
 
       testConnector
-        .updateIndividualAccount(personId, individualAccountSubmission)(hc)
+        .updateIndividualAccount(personId, individualAccountSubmission)(requestWithPrincipal)
         .futureValue shouldBe expectedUpdateValidResponse
     }
   }
@@ -184,7 +190,7 @@ class ModernisedCustomerManagementApiSpec extends BaseUnitSpec {
     "return the group accounts associated with the provided id" in {
       val groupId = 1234L
 
-      when(defaultHttpClient.GET[Option[APIDetailedGroupAccount]](any(), any(), any())(any(), any(), any()))
+      when(defaultHttpClient.getWithGGHeaders[Option[APIDetailedGroupAccount]](any())(any(), any(), any(), any()))
         .thenReturn(
           Future.successful(
             Some(
@@ -205,16 +211,16 @@ class ModernisedCustomerManagementApiSpec extends BaseUnitSpec {
           )
         )
 
-      testConnector.getDetailedGroupAccount(groupId)(hc).futureValue shouldBe someGroupAccount
+      testConnector.getDetailedGroupAccount(groupId)(requestWithPrincipal).futureValue shouldBe someGroupAccount
     }
 
     "return an empty response if the provided id cannot be found" in {
       val groupId = 1234L
 
-      when(defaultHttpClient.GET[Option[APIDetailedGroupAccount]](any(), any(), any())(any(), any(), any()))
+      when(defaultHttpClient.getWithGGHeaders[Option[APIDetailedGroupAccount]](any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(None))
 
-      testConnector.getDetailedGroupAccount(groupId)(hc).futureValue shouldBe expectedGetEmptyResponse
+      testConnector.getDetailedGroupAccount(groupId)(requestWithPrincipal).futureValue shouldBe expectedGetEmptyResponse
     }
   }
 
@@ -222,7 +228,7 @@ class ModernisedCustomerManagementApiSpec extends BaseUnitSpec {
     "return the group accounts associated with the provided GGID" in {
       val ggId = "1234"
 
-      when(defaultHttpClient.GET[Option[APIDetailedGroupAccount]](any(), any(), any())(any(), any(), any()))
+      when(defaultHttpClient.getWithGGHeaders[Option[APIDetailedGroupAccount]](any())(any(), any(), any(), any()))
         .thenReturn(
           Future.successful(
             Some(
@@ -243,16 +249,18 @@ class ModernisedCustomerManagementApiSpec extends BaseUnitSpec {
           )
         )
 
-      testConnector.findDetailedGroupAccountByGGID(ggId)(hc).futureValue shouldBe someGroupAccount
+      testConnector.findDetailedGroupAccountByGGID(ggId)(requestWithPrincipal).futureValue shouldBe someGroupAccount
     }
 
     "return an empty response if the provided GGID cannot be found" in {
       val ggId = "1234"
 
-      when(defaultHttpClient.GET[Option[APIDetailedGroupAccount]](any(), any(), any())(any(), any(), any()))
+      when(defaultHttpClient.getWithGGHeaders[Option[APIDetailedGroupAccount]](any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(None))
 
-      testConnector.findDetailedGroupAccountByGGID(ggId)(hc).futureValue shouldBe expectedGetEmptyResponse
+      testConnector
+        .findDetailedGroupAccountByGGID(ggId)(requestWithPrincipal)
+        .futureValue shouldBe expectedGetEmptyResponse
     }
   }
 
@@ -260,7 +268,7 @@ class ModernisedCustomerManagementApiSpec extends BaseUnitSpec {
     "return the group accounts associated with the provided agent code" in {
       val agentCode = "ac234"
 
-      when(defaultHttpClient.GET[Option[APIDetailedGroupAccount]](any(), any(), any())(any(), any(), any()))
+      when(defaultHttpClient.getWithGGHeaders[Option[APIDetailedGroupAccount]](any())(any(), any(), any(), any()))
         .thenReturn(
           Future.successful(
             Some(
@@ -281,26 +289,26 @@ class ModernisedCustomerManagementApiSpec extends BaseUnitSpec {
           )
         )
 
-      testConnector.withAgentCode(agentCode)(hc).futureValue shouldBe someGroupAccount
+      testConnector.withAgentCode(agentCode)(requestWithPrincipal).futureValue shouldBe someGroupAccount
     }
 
     "return an empty response if the provided agent code cannot be found" in {
       val agentCode = "ac234"
 
-      when(defaultHttpClient.GET[Option[APIDetailedGroupAccount]](any(), any(), any())(any(), any(), any()))
+      when(defaultHttpClient.getWithGGHeaders[Option[APIDetailedGroupAccount]](any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(None))
 
-      testConnector.withAgentCode(agentCode)(hc).futureValue shouldBe expectedGetEmptyResponse
+      testConnector.withAgentCode(agentCode)(requestWithPrincipal).futureValue shouldBe expectedGetEmptyResponse
     }
   }
 
   "CustomerManagementApi.createGroupAccount" should {
     "return the created account's group id" in {
 
-      when(defaultHttpClient.POST[APIGroupAccountSubmission, GroupId](any(), any(), any())(any(), any(), any(), any()))
+      when(defaultHttpClient.postWithGgHeaders[GroupId](any(), any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(models.GroupId(654321, "valid group id", 45678)))
 
-      testConnector.createGroupAccount(groupAccountSubmission)(hc).futureValue shouldBe groupId
+      testConnector.createGroupAccount(groupAccountSubmission)(requestWithPrincipal).futureValue shouldBe groupId
     }
   }
 
@@ -321,7 +329,7 @@ class ModernisedCustomerManagementApiSpec extends BaseUnitSpec {
 
       when(
         defaultHttpClient
-          .PUT[UpdatedOrganisationAccount, HttpResponse](any(), any(), any())(any(), any(), any(), any())
+          .putWithGgHeaders[HttpResponse](any(), any())(any(), any(), any(), any())
       ).thenReturn(Future.successful(emptyJsonHttpResponse(200)))
 
       val result: Unit = testConnector.updateGroupAccount(orgId = orgId, updatedOrgAccount).futureValue

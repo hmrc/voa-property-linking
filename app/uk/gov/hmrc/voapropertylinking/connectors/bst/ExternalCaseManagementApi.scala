@@ -19,8 +19,8 @@ package uk.gov.hmrc.voapropertylinking.connectors.bst
 import models._
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.HttpResponse
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
+import uk.gov.hmrc.voapropertylinking.config.AppConfig
 import uk.gov.hmrc.voapropertylinking.connectors.BaseVoaConnector
 import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
 import uk.gov.hmrc.voapropertylinking.models.modernised.casemanagement.check.myclients.CheckCasesWithClient
@@ -33,27 +33,24 @@ import scala.concurrent.{ExecutionContext, Future}
   TODO this connector should be moved to check backend after the planned migration to external-case-management-api
  */
 class ExternalCaseManagementApi @Inject() (
-      http: VoaHttpClient,
-      servicesConfig: ServicesConfig
+      httpClient: VoaHttpClient,
+      appConfig: AppConfig
 )(implicit executionContext: ExecutionContext)
     extends BaseVoaConnector {
 
-  lazy val voaModernisedApiStubBaseUrl: String = servicesConfig.baseUrl("voa-bst")
-
+  val queryParams = "?start=1&size=100"
   def getMyOrganisationCheckCases(
         propertyLinkSubmissionId: String
   )(implicit request: RequestWithPrincipal[_]): Future[CheckCasesWithAgent] =
-    http.GET[CheckCasesWithAgent](
-      s"$voaModernisedApiStubBaseUrl/external-case-management-api/my-organisation/property-links/$propertyLinkSubmissionId/check-cases",
-      Seq("start" -> "1", "size" -> "100")
+    httpClient.getWithGGHeaders[CheckCasesWithAgent](
+      s"${appConfig.bstBase}/external-case-management-api/my-organisation/property-links/$propertyLinkSubmissionId/check-cases$queryParams"
     )
 
   def getMyClientsCheckCases(
         propertyLinkSubmissionId: String
   )(implicit request: RequestWithPrincipal[_]): Future[CheckCasesWithClient] =
-    http.GET[CheckCasesWithClient](
-      s"$voaModernisedApiStubBaseUrl/external-case-management-api/my-organisation/clients/all/property-links/$propertyLinkSubmissionId/check-cases",
-      Seq("start" -> "1", "size" -> "100")
+    httpClient.getWithGGHeaders[CheckCasesWithClient](
+      s"${appConfig.bstBase}/external-case-management-api/my-organisation/clients/all/property-links/$propertyLinkSubmissionId/check-cases$queryParams"
     )
 
   def canChallenge(propertyLinkSubmissionId: String, checkCaseRef: String, valuationId: Long, party: String)(implicit
@@ -61,15 +58,15 @@ class ExternalCaseManagementApi @Inject() (
   ): Future[Option[CanChallengeResponse]] =
     party match {
       case "client" =>
-        http
-          .GET[HttpResponse](
-            s"$voaModernisedApiStubBaseUrl/external-case-management-api/my-organisation/property-links/$propertyLinkSubmissionId/check-cases/$checkCaseRef/canChallenge?valuationId=$valuationId"
+        httpClient
+          .getWithGGHeaders[HttpResponse](
+            s"${appConfig.bstBase}/external-case-management-api/my-organisation/property-links/$propertyLinkSubmissionId/check-cases/$checkCaseRef/canChallenge?valuationId=$valuationId"
           )
           .map(handleCanChallengeResponse) recover toNone
       case "agent" =>
-        http
-          .GET[HttpResponse](
-            s"$voaModernisedApiStubBaseUrl/external-case-management-api/my-organisation/clients/all/property-links/$propertyLinkSubmissionId/check-cases/$checkCaseRef/canChallenge?valuationId=$valuationId"
+        httpClient
+          .getWithGGHeaders[HttpResponse](
+            s"${appConfig.bstBase}/external-case-management-api/my-organisation/clients/all/property-links/$propertyLinkSubmissionId/check-cases/$checkCaseRef/canChallenge?valuationId=$valuationId"
           )
           .map(handleCanChallengeResponse) recover toNone
       case _ => throw new IllegalArgumentException(s"Unknown party $party")

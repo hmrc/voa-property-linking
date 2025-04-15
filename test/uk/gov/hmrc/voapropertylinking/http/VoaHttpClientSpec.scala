@@ -17,107 +17,175 @@
 package uk.gov.hmrc.voapropertylinking.http
 
 import basespecs.BaseUnitSpec
+import izumi.reflect.Tag
+import models.modernised.externalpropertylink.requests.CreatePropertyLink
+import models.searchApi.Agent
+import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito._
-import org.mockito.{ArgumentCaptor, ArgumentMatchers}
+import play.api.libs.json.{JsObject, Json}
+import play.api.libs.ws.BodyWritable
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http._
-import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
+import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 import uk.gov.hmrc.voapropertylinking.auth.Principal
+
+import java.net.URL
+import scala.concurrent.{ExecutionContext, Future}
 
 class VoaHttpClientSpec extends BaseUnitSpec {
 
-  val authorization = Authorization("authorization")
-  val forwarded = ForwardedFor("ipAdress")
-  val sessionId = SessionId("1234567890")
-  val requestId = RequestId("0987654321")
+  val mockBody: CreatePropertyLink = mock[CreatePropertyLink]
+  val authorization: Authorization = Authorization("authorization")
+  val forwarded: ForwardedFor = ForwardedFor("ipAdress")
+  val sessionId: SessionId = SessionId("1234567890")
+  val requestId: RequestId = RequestId("0987654321")
   val deviceId = "testDeviceId"
-  val akamaiReputation = AkamaiReputation("foo")
+  val akamaiReputation: AkamaiReputation = AkamaiReputation("foo")
 
   trait Setup {
 
-    val mockUrl = "http://mock-url"
+    val mockUrl = new URL("http://mock-url")
+    val withBodyMocks: Boolean = false
 
-    val mockQueryParams = Seq("key" -> "value")
-    val mockHeaders = Seq("key" -> "value")
-    val mockHttpClient: DefaultHttpClient = mock[DefaultHttpClient]
+    val mockQueryParams: Seq[(String, String)] = Seq("key" -> "value")
+    val mockHeaders: Seq[(String, String)] = Seq("key" -> "value")
+    val mockHttpClient: HttpClientV2 = mock[HttpClientV2]
     val headerCaptor: ArgumentCaptor[HeaderCarrier] = ArgumentCaptor.forClass(classOf[HeaderCarrier])
+    val headersCaptor: ArgumentCaptor[Seq[(String, String)]] = ArgumentCaptor.forClass(classOf[Seq[(String, String)]])
 
-    val voaHttpClient = new VoaHttpClient(mockHttpClient)
+    val mockRequestBuilder: RequestBuilder = mock[RequestBuilder]
+    val mockRequestBuilderWithHeaders: RequestBuilder = mock[RequestBuilder]
+    val mockRequestBuilderWithBody: RequestBuilder = mock[RequestBuilder]
+
+    val mockRequestBuilderWithProxy: RequestBuilder = mock[RequestBuilder]
+    val voaHttpClient = new VoaHttpClient(mockHttpClient, mockAppConfig)
+
+    when(mockAppConfig.apimSubscriptionKeyValue).thenReturn("dummy-key")
   }
 
   "using the VOA HTTP Client" should {
 
-    def checkGovernmentGatewayHeaders(headerCaptor: ArgumentCaptor[HeaderCarrier])(implicit principal: Principal) =
-      headerCaptor.getValue.extraHeaders shouldBe Seq(
-        "GG-EXTERNAL-ID" -> principal.externalId,
-        "GG-GROUP-ID"    -> principal.groupId
-      )
+    def checkGovernmentGatewayHeaders(headers: Map[String, String])(implicit principal: Principal): Unit = {
+      headers("GG-EXTERNAL-ID") shouldBe principal.externalId
+      headers("GG-GROUP-ID") shouldBe principal.groupId
+      headers should contain key "Ocp-Apim-Subscription-Key"
+    }
 
     "preserve the existing headers when adding the extra GG headers" in new Setup {
-      val voaHc: HeaderCarrier = voaHttpClient.buildHeaderCarrier(hc, principal)
-
-      voaHc shouldBe hc.withExtraHeaders(
-        Seq(
-          "GG-EXTERNAL-ID" -> principal.externalId,
-          "GG-GROUP-ID"    -> principal.groupId
-        ): _*
-      )
+      val voaHc: Seq[(String, String)] = voaHttpClient.buildHeadersWithGG(principal)
+      checkGovernmentGatewayHeaders(voaHc.toMap)
     }
 
     "enrich the GG headers when calling a GET" in new Setup {
-      voaHttpClient.GET[HttpResponse](mockUrl)
+      when(mockHttpClient.get(any())(any())).thenReturn(mockRequestBuilder)
+      when(mockRequestBuilder.setHeader(any())).thenReturn(mockRequestBuilderWithHeaders)
+      when(mockRequestBuilderWithHeaders.withProxy).thenReturn(mockRequestBuilderWithProxy)
+      when(mockRequestBuilderWithProxy.execute[HttpResponse](any(), any()))
+        .thenReturn(Future.successful(mock[HttpResponse]))
 
-      verify(mockHttpClient)
-        .GET(ArgumentMatchers.eq(mockUrl), any(), any())(any(), headerCaptor.capture(), any())
+      val captor = ArgumentCaptor.forClass(classOf[List[(String, String)]])
 
-      checkGovernmentGatewayHeaders(headerCaptor)
-    }
+      voaHttpClient.getWithGGHeaders[HttpResponse](mockUrl.toString)
 
-    "enrich the GG headers when calling a GET with query params" in new Setup {
-      voaHttpClient.GET[HttpResponse](mockUrl, mockQueryParams)
+      verify(mockRequestBuilder).setHeader(captor.capture(): _*)
 
-      verify(mockHttpClient)
-        .GET(ArgumentMatchers.eq(mockUrl), ArgumentMatchers.eq(mockQueryParams), any())(
-          any(),
-          headerCaptor.capture(),
-          any()
-        )
+      val capturedHeaders: List[(String, String)] = captor.getValue
 
-      checkGovernmentGatewayHeaders(headerCaptor)
+      capturedHeaders should contain("GG-EXTERNAL-ID" -> "external-id")
+      capturedHeaders should contain("GG-GROUP-ID" -> "group-id")
+      capturedHeaders should contain("Ocp-Apim-Subscription-Key" -> "dummy-key")
     }
 
     "enrich the GG headers when calling a DELETE" in new Setup {
-      voaHttpClient.DELETE[HttpResponse](mockUrl)
+      when(mockHttpClient.delete(any())(any())).thenReturn(mockRequestBuilder)
+      when(mockRequestBuilder.setHeader(any())).thenReturn(mockRequestBuilderWithHeaders)
+      when(mockRequestBuilderWithHeaders.withProxy).thenReturn(mockRequestBuilderWithProxy)
+      when(mockRequestBuilderWithProxy.execute[HttpResponse](any(), any()))
+        .thenReturn(Future.successful(mock[HttpResponse]))
 
-      verify(mockHttpClient)
-        .DELETE(ArgumentMatchers.eq(mockUrl), any())(any(), headerCaptor.capture(), any())
+      val captor = ArgumentCaptor.forClass(classOf[List[(String, String)]])
 
-      checkGovernmentGatewayHeaders(headerCaptor)
+      voaHttpClient.deleteWithGgHeaders[HttpResponse](mockUrl.toString)
+
+      verify(mockRequestBuilder).setHeader(captor.capture(): _*)
+
+      val capturedHeaders: List[(String, String)] = captor.getValue
+
+      capturedHeaders should contain("GG-EXTERNAL-ID" -> "external-id")
+      capturedHeaders should contain("GG-GROUP-ID" -> "group-id")
+      capturedHeaders should contain("Ocp-Apim-Subscription-Key" -> "dummy-key")
     }
 
     "enrich the GG headers when calling a PUT" in new Setup {
-      voaHttpClient.PUT[String, HttpResponse](mockUrl, "")
+      val exampleBody: Agent = Agent(
+        ref = 123L,
+        name = "test org"
+      )
+      val jsBody: JsObject = Json.toJsObject(exampleBody)
 
-      verify(mockHttpClient)
-        .PUT(ArgumentMatchers.eq(mockUrl), ArgumentMatchers.eq(""), any())(any(), any(), headerCaptor.capture(), any())
+      when(mockHttpClient.put(any())(any())).thenReturn(mockRequestBuilder)
+      when(mockRequestBuilder.setHeader(any())).thenReturn(mockRequestBuilderWithHeaders)
 
-      checkGovernmentGatewayHeaders(headerCaptor)
+      when(
+        mockRequestBuilderWithHeaders.withBody(
+          any[JsObject]
+        )(
+          any[BodyWritable[JsObject]],
+          any[Tag[JsObject]],
+          any[ExecutionContext]
+        )
+      ).thenAnswer(_ => mockRequestBuilderWithBody)
+
+      when(mockRequestBuilderWithBody.withProxy).thenReturn(mockRequestBuilderWithProxy)
+      when(mockRequestBuilderWithProxy.execute[HttpResponse](any(), any()))
+        .thenReturn(Future.successful(mock[HttpResponse]))
+
+      override val withBodyMocks: Boolean = true
+
+      val captor = ArgumentCaptor.forClass(classOf[List[(String, String)]])
+
+      voaHttpClient.putWithGgHeaders[HttpResponse](mockUrl.toString, jsBody)
+
+      verify(mockRequestBuilder).setHeader(captor.capture(): _*)
+
+      val capturedHeaders: List[(String, String)] = captor.getValue
+
+      capturedHeaders should contain("GG-EXTERNAL-ID" -> "external-id")
+      capturedHeaders should contain("GG-GROUP-ID" -> "group-id")
+      capturedHeaders should contain("Ocp-Apim-Subscription-Key" -> "dummy-key")
     }
 
     "enrich the GG headers when calling a POST" in new Setup {
-      voaHttpClient.POST[String, HttpResponse](mockUrl, "", mockHeaders)
+      val exampleBody: Agent = Agent(ref = 123L, name = "test org")
 
-      verify(mockHttpClient)
-        .POST(ArgumentMatchers.eq(mockUrl), ArgumentMatchers.eq(""), ArgumentMatchers.eq(mockHeaders))(
-          any(),
-          any(),
-          headerCaptor.capture(),
-          any()
+      override val withBodyMocks: Boolean = true
+
+      when(mockHttpClient.post(any())(any())).thenReturn(mockRequestBuilder)
+      when(mockRequestBuilder.setHeader(any())).thenReturn(mockRequestBuilderWithHeaders)
+      when(
+        mockRequestBuilderWithHeaders.withBody(any[JsObject])(
+          any[BodyWritable[JsObject]],
+          any[Tag[JsObject]],
+          any[ExecutionContext]
         )
+      ).thenAnswer(_ => mockRequestBuilderWithBody)
 
-      checkGovernmentGatewayHeaders(headerCaptor)
+      when(mockRequestBuilderWithBody.withProxy).thenReturn(mockRequestBuilderWithProxy)
+      when(mockRequestBuilderWithProxy.execute[HttpResponse](any(), any()))
+        .thenReturn(Future.successful(mock[HttpResponse]))
+
+      val captor = ArgumentCaptor.forClass(classOf[List[(String, String)]])
+
+      voaHttpClient.postWithGgHeaders[HttpResponse](mockUrl.toString, Json.toJsObject(exampleBody))
+
+      verify(mockRequestBuilder).setHeader(captor.capture(): _*)
+
+      val capturedHeaders: List[(String, String)] = captor.getValue
+
+      capturedHeaders should contain("GG-EXTERNAL-ID" -> "external-id")
+      capturedHeaders should contain("GG-GROUP-ID" -> "group-id")
+      capturedHeaders should contain("Ocp-Apim-Subscription-Key" -> "dummy-key")
     }
   }
-
 }

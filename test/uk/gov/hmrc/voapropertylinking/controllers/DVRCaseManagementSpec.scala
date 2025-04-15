@@ -74,7 +74,7 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
         status(res) shouldBe OK
 
         verify(mockRepo).create(matching(testDvr))
-        verify(mockCCACaseManagementApi).requestDetailedValuation(matching(testDvr))(any[HeaderCarrier])
+        verify(mockCCACaseManagementApi).requestDetailedValuation(matching(testDvr))(any())
       }
       "return a 400 (Bad Request) if the body supplied is invalid" in {
         val res =
@@ -202,7 +202,7 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
         status(res) shouldBe OK
 
         verify(mockRepo).create(matching(testDvr))
-        verify(mockModernisedCCACaseManagementApi).requestDetailedValuation(matching(testDvr))(any[HeaderCarrier])
+        verify(mockModernisedCCACaseManagementApi).requestDetailedValuation(matching(testDvr))(any())
       }
     }
 
@@ -316,7 +316,7 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
     dvrRecordRepository = mockRepo
   )
 
-  lazy val mockRepo = {
+  lazy val mockRepo: DVRRecordRepository = {
     val m = mock[DVRRecordRepository]
     when(m.create(any[DetailedValuationRequest])) thenReturn Future.successful(())
     m
