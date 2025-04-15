@@ -17,36 +17,47 @@
 package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
 import models.modernised.addressmanagement.{Addresses, DetailedAddress, SimpleAddress}
-import play.api.libs.json.{JsDefined, JsNumber, JsValue}
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
+import play.api.libs.json._
+import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
+import uk.gov.hmrc.voapropertylinking.config.AppConfig
 import uk.gov.hmrc.voapropertylinking.connectors.BaseVoaConnector
+import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
 
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class ModernisedAddressManagementApi @Inject() (
-      http: DefaultHttpClient,
-      servicesConfig: ServicesConfig
+      httpClient: VoaHttpClient,
+      appConfig: AppConfig
 )(implicit executionContext: ExecutionContext)
     extends BaseVoaConnector {
 
-  lazy val url: String = servicesConfig.baseUrl("voa-modernised-api") + "/address-management-api/address"
+  private val url = s"${appConfig.modernisedBase}/address-management-api/address"
 
-  def find(postcode: String)(implicit hc: HeaderCarrier): Future[Seq[DetailedAddress]] =
-    http
-      .GET[Addresses](s"""$url?pageSize=100&startPoint=1&searchparams={"postcode": "$postcode"}""")
+  def find(postcode: String)(implicit requestWithPrincipal: RequestWithPrincipal[_]): Future[Seq[DetailedAddress]] = {
+    val encodedParams = URLEncoder.encode(s"""{"postcode":"$postcode"}""", StandardCharsets.UTF_8.toString)
+    val fullUrl = s"$url?pageSize=100&startPoint=1&searchparams=$encodedParams"
+    httpClient
+      .getWithGGHeaders[Addresses](fullUrl)
       .map(_.addressDetails)
+  }
 
-  def get(addressUnitId: Long)(implicit hc: HeaderCarrier): Future[Option[SimpleAddress]] =
-    http.GET[Addresses](s"$url/$addressUnitId").map(_.addressDetails.headOption.map(_.simplify)) recover toNone
+  def get(addressUnitId: Long)(implicit request: RequestWithPrincipal[_]): Future[Option[SimpleAddress]] =
+    httpClient
+      .getWithGGHeaders[Addresses](s"$url/$addressUnitId")
+      .map(_.addressDetails.headOption.map(_.simplify)) recover toNone
 
-  def create(address: SimpleAddress)(implicit hc: HeaderCarrier): Future[Long] =
-    http.POST[DetailedAddress, JsValue](s"$url/non_standard_address", address.toDetailedAddress) map { js =>
-      js \ "id" match {
-        case JsDefined(JsNumber(n)) => n.toLong
-        case _                      => throw new Exception(s"Failed to create record for address $address")
+  def create(address: SimpleAddress)(implicit request: RequestWithPrincipal[_]): Future[Long] =
+    httpClient
+      .postWithGgHeaders[JsValue](
+        s"$url/non_standard_address",
+        Json.toJsObject(address.toDetailedAddress)
+      )
+      .map { json =>
+        (json \ "id").asOpt[Long].getOrElse {
+          throw new Exception(s"Failed to create record for address $address: Missing or invalid 'id'")
+        }
       }
-    }
 }

@@ -43,18 +43,24 @@ class ExternalValuationManagementApiSpec extends BaseUnitSpec with ContentTypes 
     val plSubmissionId: String = "PL12AB34"
     val valuationHistoryResponse: ValuationHistoryResponse = ValuationHistoryResponse(Seq.empty)
 
-    val wsClient = mock[WSClient]
-    val config = mock[ServicesConfig]
+    val wsClient: WSClient = mock[WSClient]
+    val config: ServicesConfig = mock[ServicesConfig]
 
-    val connector = new ExternalValuationManagementApi(wsClient, mockVoaHttpClient, valuationHistoryUrl, config) {
-      override lazy val url: String = "http://localhost:9555"
-    }
+    val connector: ExternalValuationManagementApi =
+      new ExternalValuationManagementApi(wsClient, mockVoaHttpClient, valuationHistoryUrl, config, mockAppConfig) {
+        override lazy val url: String = "http://localhost:9555"
+      }
+    when(mockAppConfig.proxyEnabled).thenReturn(false)
+    when(mockAppConfig.apimSubscriptionKeyValue).thenReturn("subscriptionId")
+    when(mockAppConfig.voaApiBaseUrl).thenReturn("http://some/url/voa")
+    when(mockServicesConfig.baseUrl(any())).thenReturn("http://localhost:9949/")
+
   }
 
   "getting a valuation history" should {
     "return the history from modernised" when {
       "there is one for the specified UARN" in new Setup {
-        when(mockVoaHttpClient.GET[Option[ValuationHistoryResponse]](any(), any())(any(), any(), any(), any()))
+        when(mockVoaHttpClient.getWithGGHeaders[Option[ValuationHistoryResponse]](any())(any(), any(), any(), any()))
           .thenReturn(Future.successful(Some(valuationHistoryResponse)))
 
         connector.getValuationHistory(uarn, plSubmissionId).futureValue shouldBe Some(valuationHistoryResponse)
@@ -69,7 +75,7 @@ class ExternalValuationManagementApiSpec extends BaseUnitSpec with ContentTypes 
 
       val now = LocalDateTime.now()
 
-      when(mockVoaHttpClient.GET[Option[DvrDocumentFiles]](any(), any())(any(), any(), any(), any()))
+      when(mockVoaHttpClient.getWithGGHeaders[Option[DvrDocumentFiles]](any())(any(), any(), any(), any()))
         .thenReturn(
           Future.successful(
             Some(
@@ -81,7 +87,7 @@ class ExternalValuationManagementApiSpec extends BaseUnitSpec with ContentTypes 
           )
         )
 
-      val result = connector.getDvrDocuments(valuationId, uarn, propertyLinkId).futureValue
+      val result: Option[DvrDocumentFiles] = connector.getDvrDocuments(valuationId, uarn, propertyLinkId).futureValue
       result shouldBe Some(
         DvrDocumentFiles(
           checkForm = Document(DocumentSummary("1", "Check Document", now)),
@@ -94,10 +100,10 @@ class ExternalValuationManagementApiSpec extends BaseUnitSpec with ContentTypes 
       val valuationId = 1L
       val propertyLinkId = "PL-123456789"
 
-      when(mockVoaHttpClient.GET[Option[DvrDocumentFiles]](any(), any())(any(), any(), any(), any()))
+      when(mockVoaHttpClient.getWithGGHeaders[Option[DvrDocumentFiles]](any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(None))
 
-      val result = connector.getDvrDocuments(valuationId, uarn, propertyLinkId).futureValue
+      val result: Option[DvrDocumentFiles] = connector.getDvrDocuments(valuationId, uarn, propertyLinkId).futureValue
       result shouldBe None
     }
   }
@@ -108,7 +114,7 @@ class ExternalValuationManagementApiSpec extends BaseUnitSpec with ContentTypes 
       val propertyLinkId = "PL-123456789"
       val fileRef = "1L"
 
-      val mockWsResponse = {
+      val mockWsResponse: WSResponse = {
         val m = new WSResponse {
           override def status: Int = 200
 
@@ -139,13 +145,13 @@ class ExternalValuationManagementApiSpec extends BaseUnitSpec with ContentTypes 
         m
       }
 
-      val mockWsRequest = mock[WSRequest]
+      val mockWsRequest: WSRequest = mock[WSRequest]
       when(wsClient.url(any())).thenReturn(mockWsRequest)
       when(mockWsRequest.withHttpHeaders(any())).thenReturn(mockWsRequest)
       when(mockWsRequest.withMethod(any())).thenReturn(mockWsRequest)
       when(mockWsRequest.stream()).thenReturn(Future.successful(mockWsResponse))
 
-      val result = connector.getDvrDocument(valuationId, uarn, propertyLinkId, fileRef).futureValue
+      val result: WSResponse = connector.getDvrDocument(valuationId, uarn, propertyLinkId, fileRef).futureValue
       result shouldBe a[WSResponse]
     }
   }

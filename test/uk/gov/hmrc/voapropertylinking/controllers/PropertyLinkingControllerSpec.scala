@@ -52,7 +52,7 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
   val clientOrgId: Long = 222L
   val agentOrgId: Long = 333L
 
-  val propertyLinkWithClient = PropertyLinkWithClient(
+  val propertyLinkWithClient: PropertyLinkWithClient = PropertyLinkWithClient(
     authorisationId = 11111L,
     authorisedPartyId = 1234567L,
     uarn = 33333L,
@@ -66,9 +66,9 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
     client = ClientDetails(123L, "Org Name")
   )
 
-  val clientPropertyLink = ClientPropertyLink(propertyLinkWithClient)
+  val clientPropertyLink: ClientPropertyLink = ClientPropertyLink(propertyLinkWithClient)
 
-  val validPropertiesView = PropertiesView(
+  val validPropertiesView: PropertiesView = PropertiesView(
     authorisationId = 11111,
     uarn = 33333,
     address = Some("1 HIGH STREET, BRIGHTON"),
@@ -99,7 +99,7 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
     client = None
   )
 
-  val ownerAuthorisation = OwnerAuthorisation(
+  val ownerAuthorisation: OwnerAuthorisation = OwnerAuthorisation(
     authorisationId = 1111,
     status = "APPROVED",
     submissionId = "11111",
@@ -109,12 +109,12 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
     agents = Nil
   )
 
-  val propertyLinksWithClients = PropertyLinksWithClients(1, 1, 1, 1, Seq())
-  val modernisedOwnerAuthResult = ModernisedOwnerAuthResult(1, 1, 1, 1, Seq())
-  val ownerAuthResult = OwnerAuthResult(1, 1, 1, 1, Seq())
+  val propertyLinksWithClients: PropertyLinksWithClients = PropertyLinksWithClients(1, 1, 1, 1, Seq())
+  val modernisedOwnerAuthResult: ModernisedOwnerAuthResult = ModernisedOwnerAuthResult(1, 1, 1, 1, Seq())
+  val ownerAuthResult: OwnerAuthResult = OwnerAuthResult(1, 1, 1, 1, Seq())
   val propertyLinksCount = 5
 
-  val assessments = Assessments(
+  val assessments: Assessments = Assessments(
     authorisationId = 1L,
     submissionId = "11111",
     uarn = 111111,
@@ -433,7 +433,7 @@ class PropertyLinkingControllerSpec extends BaseControllerSpec with FakeObjects 
         client = None
       )
 
-    val groupAccount = GroupAccount(
+    val groupAccount: GroupAccount = GroupAccount(
       id = 100L,
       groupId = "grpId",
       companyName = "ACME",

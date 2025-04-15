@@ -27,11 +27,11 @@ import scala.concurrent.Future
 class AddressManagementApiSpec extends BaseUnitSpec {
 
   trait Setup {
-    val connector = new AddressManagementApi(mockDefaultHttpClient, mockServicesConfig)
+    val connector = new AddressManagementApi(mockVoaHttpClient, mockAppConfig)
     val url = s"/address-management-api/address"
     val addressUnitId = 1234L
     val postcode = "L4 0TH"
-    val simpleAddress = SimpleAddress(
+    val simpleAddress: SimpleAddress = SimpleAddress(
       addressUnitId = Some(addressUnitId),
       line1 = "Liverpool FC, First team",
       line2 = "Anfield Stadium",
@@ -39,7 +39,7 @@ class AddressManagementApiSpec extends BaseUnitSpec {
       line4 = "Liverpool",
       postcode = postcode
     )
-    val detailedAddress = DetailedAddress(
+    val detailedAddress: DetailedAddress = DetailedAddress(
       addressUnitId = Some(addressUnitId),
       nonAbpAddressId = Some(1234),
       organisationName = Some("Liverpool FC"),
@@ -49,13 +49,17 @@ class AddressManagementApiSpec extends BaseUnitSpec {
       postTown = "Liverpool",
       postcode = postcode
     )
-    val addressLookupResult = Addresses(Seq(detailedAddress))
+    val addressLookupResult: Addresses = Addresses(Seq(detailedAddress))
+    when(mockAppConfig.proxyEnabled).thenReturn(false)
+    when(mockAppConfig.apimSubscriptionKeyValue).thenReturn("subscriptionId")
+    when(mockAppConfig.voaApiBaseUrl).thenReturn("http://some/url/voa")
+    when(mockServicesConfig.baseUrl(any())).thenReturn("http://localhost:9949/")
   }
 
   "AddressConnector.get" should {
     "return the address associated with the address unit id" when {
       "it's returned from modernised" in new Setup {
-        when(mockDefaultHttpClient.GET[Addresses](any(), any(), any())(any(), any(), any()))
+        when(mockVoaHttpClient.getWithGGHeaders[Addresses](any())(any(), any(), any(), any()))
           .thenReturn(Future.successful(addressLookupResult))
 
         connector.get(addressUnitId).futureValue shouldBe Some(simpleAddress)
@@ -63,7 +67,7 @@ class AddressManagementApiSpec extends BaseUnitSpec {
     }
     "return None" when {
       "the call to modernised fails for whatever reason" in new Setup {
-        when(mockDefaultHttpClient.GET[Addresses](any(), any(), any())(any(), any(), any()))
+        when(mockVoaHttpClient.getWithGGHeaders[Addresses](any())(any(), any(), any(), any()))
           .thenReturn(Future.failed(new RuntimeException()))
 
         connector.get(addressUnitId).futureValue shouldBe None
@@ -74,7 +78,7 @@ class AddressManagementApiSpec extends BaseUnitSpec {
   "find an address by postcode" should {
     "return a detailed address" when {
       "it's returned from modernised" in new Setup {
-        when(mockDefaultHttpClient.GET[Addresses](any(), any(), any())(any(), any(), any()))
+        when(mockVoaHttpClient.getWithGGHeaders[Addresses](any())(any(), any(), any(), any()))
           .thenReturn(Future.successful(addressLookupResult))
 
         connector.find(postcode).futureValue.loneElement shouldBe detailedAddress
@@ -86,7 +90,7 @@ class AddressManagementApiSpec extends BaseUnitSpec {
     "return the ID of the newly created address" when {
       "the POST is successful and an ID is returned in the response body" in new Setup {
         val newAddressId = 123L
-        when(mockDefaultHttpClient.POST[DetailedAddress, JsValue](any(), any(), any())(any(), any(), any(), any()))
+        when(mockVoaHttpClient.postWithGgHeaders[JsValue](any(), any())(any(), any(), any(), any()))
           .thenReturn(Future.successful(Json.obj("id" -> newAddressId)))
 
         connector.create(simpleAddress).futureValue shouldBe newAddressId
@@ -94,7 +98,7 @@ class AddressManagementApiSpec extends BaseUnitSpec {
     }
     "fail with an exception" when {
       "the POST is successful but no ID can be extracted from the response body" in new Setup {
-        when(mockDefaultHttpClient.POST[DetailedAddress, JsValue](any(), any(), any())(any(), any(), any(), any()))
+        when(mockVoaHttpClient.postWithGgHeaders[JsValue](any(), any())(any(), any(), any(), any()))
           .thenReturn(Future.successful(Json.obj("foo" -> "bar")))
 
         whenReady(connector.create(simpleAddress).failed) { e =>
@@ -104,5 +108,4 @@ class AddressManagementApiSpec extends BaseUnitSpec {
       }
     }
   }
-
 }

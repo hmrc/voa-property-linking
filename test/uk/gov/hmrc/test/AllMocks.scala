@@ -26,7 +26,7 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
-import uk.gov.hmrc.voapropertylinking.config.FeatureSwitch
+import uk.gov.hmrc.voapropertylinking.config.{AppConfig, FeatureSwitch}
 import uk.gov.hmrc.voapropertylinking.connectors.bst._
 import uk.gov.hmrc.voapropertylinking.connectors.mdtp.BusinessRatesAuthConnector
 import uk.gov.hmrc.voapropertylinking.connectors.modernised._
@@ -71,6 +71,7 @@ trait AllMocks extends MockitoSugar { me: BeforeAndAfterEach =>
   val mockMetrics: Metrics = mock[Metrics]
   val mockServicesConfig: ServicesConfig = mock[ServicesConfig]
   val mockWSRequest: WSRequest = mock[WSRequest]
+  val mockAppConfig: AppConfig = mock[AppConfig]
 
   val mockFeatureSwitch: FeatureSwitch = mock[FeatureSwitch]
 
@@ -101,6 +102,7 @@ trait AllMocks extends MockitoSugar { me: BeforeAndAfterEach =>
       mockMetrics,
       mockServicesConfig,
       mockWSRequest,
-      mockFeatureSwitch
+      mockFeatureSwitch,
+      mockAppConfig
     ).foreach(Mockito.reset(_))
 }

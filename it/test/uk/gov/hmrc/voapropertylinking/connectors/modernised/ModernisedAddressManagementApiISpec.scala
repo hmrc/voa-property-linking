@@ -187,7 +187,7 @@ class ModernisedAddressManagementApiISpec extends BaseIntegrationSpec with Moder
           await(connector.create(simpleAddress))
         }
 
-        result.getMessage shouldBe s"Failed to create record for address $simpleAddress"
+        result.getMessage shouldBe s"Failed to create record for address $simpleAddress: Missing or invalid 'id'"
       }
       "the response status is anything but 200 (OK)" in new TestSetup {
         val responseId: Long = 54321L

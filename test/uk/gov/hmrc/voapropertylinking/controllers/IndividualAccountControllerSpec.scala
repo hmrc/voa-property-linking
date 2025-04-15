@@ -40,7 +40,7 @@ class IndividualAccountControllerSpec extends BaseControllerSpec {
         val individualJson = Json.toJson(testIndividualAccountSubmission)
 
         when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
-        when(mockCustomerManagementApi.createIndividualAccount(any(), any())(any[HeaderCarrier]))
+        when(mockCustomerManagementApi.createIndividualAccount(any(), any())(any()))
           .thenReturn(Future.successful(IndividualAccountId(1)))
 
         val res = testController.create()(FakeRequest().withBody(individualJson))
@@ -60,7 +60,7 @@ class IndividualAccountControllerSpec extends BaseControllerSpec {
         val testJsonResponse = """{ "some": "json" }"""
 
         when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
-        when(mockCustomerManagementApi.updateIndividualAccount(any(), any(), any())(any[HeaderCarrier]))
+        when(mockCustomerManagementApi.updateIndividualAccount(any(), any(), any())(any()))
           .thenReturn(Future.successful(Json.parse(testJsonResponse)))
         when(mockBrAuth.clearCache()(any[HeaderCarrier])).thenReturn(Future.successful(()))
 
@@ -79,7 +79,7 @@ class IndividualAccountControllerSpec extends BaseControllerSpec {
         val individualJson = Json.toJson(testIndividualAccount)
 
         when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
-        when(mockCustomerManagementApi.getDetailedIndividual(any())(any[HeaderCarrier]))
+        when(mockCustomerManagementApi.getDetailedIndividual(any())(any()))
           .thenReturn(Future.successful(Some(testIndividualAccount)))
 
         val res = testController.get(1)(FakeRequest())
@@ -90,7 +90,7 @@ class IndividualAccountControllerSpec extends BaseControllerSpec {
 
       "return NotFound for if the individual does not exist in modernised" in {
         when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
-        when(mockCustomerManagementApi.getDetailedIndividual(any())(any[HeaderCarrier]))
+        when(mockCustomerManagementApi.getDetailedIndividual(any())(any()))
           .thenReturn(Future.successful(None))
 
         val res = testController.get(1)(FakeRequest())
@@ -108,7 +108,7 @@ class IndividualAccountControllerSpec extends BaseControllerSpec {
         val individualJson = Json.toJson(testIndividualAccount)
 
         when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
-        when(mockCustomerManagementApi.findDetailedIndividualAccountByGGID(any())(any[HeaderCarrier]))
+        when(mockCustomerManagementApi.findDetailedIndividualAccountByGGID(any())(any()))
           .thenReturn(Future.successful(Some(testIndividualAccount)))
 
         val res = testController.withExternalId("test-external-id")(FakeRequest())
@@ -119,7 +119,7 @@ class IndividualAccountControllerSpec extends BaseControllerSpec {
 
       "return NotFound for if the individual does not exist in modernised using the GG external ID" in {
         when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
-        when(mockCustomerManagementApi.findDetailedIndividualAccountByGGID(any())(any[HeaderCarrier]))
+        when(mockCustomerManagementApi.findDetailedIndividualAccountByGGID(any())(any()))
           .thenReturn(Future.successful(None))
 
         val res = testController.withExternalId("test-external-id")(FakeRequest())
@@ -138,7 +138,7 @@ class IndividualAccountControllerSpec extends BaseControllerSpec {
 
         val individualJson = Json.toJson(testIndividualAccountSubmission)
 
-        when(mockModernisedCustomerManagementApi.createIndividualAccount(any(), any())(any[HeaderCarrier]))
+        when(mockModernisedCustomerManagementApi.createIndividualAccount(any(), any())(any()))
           .thenReturn(Future.successful(IndividualAccountId(1)))
 
         val res = testController.create()(FakeRequest().withBody(individualJson))
@@ -157,7 +157,7 @@ class IndividualAccountControllerSpec extends BaseControllerSpec {
         val individualJson = Json.toJson(testIndividualAccountSubmission)
         val testJsonResponse = """{ "some": "json" }"""
 
-        when(mockModernisedCustomerManagementApi.updateIndividualAccount(any(), any(), any())(any[HeaderCarrier]))
+        when(mockModernisedCustomerManagementApi.updateIndividualAccount(any(), any(), any())(any()))
           .thenReturn(Future.successful(Json.parse(testJsonResponse)))
         when(mockBrAuth.clearCache()(any[HeaderCarrier])).thenReturn(Future.successful(()))
 
@@ -175,7 +175,7 @@ class IndividualAccountControllerSpec extends BaseControllerSpec {
 
         val individualJson = Json.toJson(testIndividualAccount)
 
-        when(mockModernisedCustomerManagementApi.getDetailedIndividual(any())(any[HeaderCarrier]))
+        when(mockModernisedCustomerManagementApi.getDetailedIndividual(any())(any()))
           .thenReturn(Future.successful(Some(testIndividualAccount)))
 
         val res = testController.get(1)(FakeRequest())
@@ -185,7 +185,7 @@ class IndividualAccountControllerSpec extends BaseControllerSpec {
       }
 
       "return NotFound for if the individual does not exist in modernised" in {
-        when(mockModernisedCustomerManagementApi.getDetailedIndividual(any())(any[HeaderCarrier]))
+        when(mockModernisedCustomerManagementApi.getDetailedIndividual(any())(any()))
           .thenReturn(Future.successful(None))
 
         val res = testController.get(1)(FakeRequest())
@@ -202,7 +202,7 @@ class IndividualAccountControllerSpec extends BaseControllerSpec {
 
         val individualJson = Json.toJson(testIndividualAccount)
 
-        when(mockModernisedCustomerManagementApi.findDetailedIndividualAccountByGGID(any())(any[HeaderCarrier]))
+        when(mockModernisedCustomerManagementApi.findDetailedIndividualAccountByGGID(any())(any()))
           .thenReturn(Future.successful(Some(testIndividualAccount)))
 
         val res = testController.withExternalId("test-external-id")(FakeRequest())
@@ -212,7 +212,7 @@ class IndividualAccountControllerSpec extends BaseControllerSpec {
       }
 
       "return NotFound for if the individual does not exist in modernised using the GG external ID" in {
-        when(mockModernisedCustomerManagementApi.findDetailedIndividualAccountByGGID(any())(any[HeaderCarrier]))
+        when(mockModernisedCustomerManagementApi.findDetailedIndividualAccountByGGID(any())(any()))
           .thenReturn(Future.successful(None))
 
         val res = testController.withExternalId("test-external-id")(FakeRequest())

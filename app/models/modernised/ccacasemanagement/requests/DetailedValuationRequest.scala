@@ -16,7 +16,7 @@
 
 package models.modernised.ccacasemanagement.requests
 
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.{Json, OFormat}
 
 case class DetailedValuationRequest(
       authorisationId: Long,
@@ -29,5 +29,5 @@ case class DetailedValuationRequest(
 )
 
 object DetailedValuationRequest {
-  implicit val format: Format[DetailedValuationRequest] = Json.format[DetailedValuationRequest]
+  implicit val format: OFormat[DetailedValuationRequest] = Json.format[DetailedValuationRequest]
 }

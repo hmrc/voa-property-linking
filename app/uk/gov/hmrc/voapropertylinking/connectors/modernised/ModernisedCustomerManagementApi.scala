@@ -17,69 +17,86 @@
 package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
 import models._
-import play.api.libs.json.JsValue
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
+import play.api.libs.json.{JsValue, Json}
+import uk.gov.hmrc.http.HttpResponse
+import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
+import uk.gov.hmrc.voapropertylinking.config.AppConfig
 import uk.gov.hmrc.voapropertylinking.connectors.BaseVoaConnector
+import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
 
 import java.time.Instant
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class ModernisedCustomerManagementApi @Inject() (
-      http: DefaultHttpClient,
-      servicesConfig: ServicesConfig
+      httpClient: VoaHttpClient,
+      appConfig: AppConfig
 )(implicit executionContext: ExecutionContext)
     extends BaseVoaConnector {
 
-  lazy val baseUrl: String = servicesConfig.baseUrl("voa-modernised-api") + "/customer-management-api"
+  lazy val baseUrl: String = s"${appConfig.modernisedBase}/customer-management-api"
   lazy val organisationUrl: String = baseUrl + "/organisation"
   lazy val individualUrl: String = baseUrl + "/person"
 
   def createGroupAccount(account: GroupAccountSubmission, time: Instant = Instant.now)(implicit
-        hc: HeaderCarrier
+        requestWithPrincipal: RequestWithPrincipal[_]
   ): Future[GroupId] =
-    http.POST[APIGroupAccountSubmission, GroupId](organisationUrl, account.toApiAccount(time))
+    httpClient.postWithGgHeaders[GroupId](organisationUrl, Json.toJsObject(account.toApiAccount(time)))
 
-  def updateGroupAccount(orgId: Long, account: UpdatedOrganisationAccount)(implicit hc: HeaderCarrier): Future[Unit] =
-    http.PUT[UpdatedOrganisationAccount, HttpResponse](s"$organisationUrl/$orgId", account) map { _ =>
+  def updateGroupAccount(orgId: Long, account: UpdatedOrganisationAccount)(implicit
+        requestWithPrincipal: RequestWithPrincipal[_]
+  ): Future[Unit] =
+    httpClient.putWithGgHeaders[HttpResponse](s"$organisationUrl/$orgId", Json.toJsObject(account)).map { _ =>
       ()
     }
 
   // should never return none
-  def getDetailedGroupAccount(id: Long)(implicit hc: HeaderCarrier): Future[Option[GroupAccount]] =
-    http.GET[Option[APIDetailedGroupAccount]](s"$organisationUrl?organisationId=$id").map(_.map(_.toGroupAccount))
-
-  // should never return none
-  def findDetailedGroupAccountByGGID(ggId: String)(implicit hc: HeaderCarrier): Future[Option[GroupAccount]] =
-    http
-      .GET[Option[APIDetailedGroupAccount]](s"$organisationUrl?governmentGatewayGroupId=$ggId")
+  def getDetailedGroupAccount(
+        id: Long
+  )(implicit requestWithPrincipal: RequestWithPrincipal[_]): Future[Option[GroupAccount]] =
+    httpClient
+      .getWithGGHeaders[Option[APIDetailedGroupAccount]](s"$organisationUrl?organisationId=$id")
       .map(_.map(_.toGroupAccount))
 
   // should never return none
-  def withAgentCode(agentCode: String)(implicit hc: HeaderCarrier): Future[Option[GroupAccount]] =
-    http
-      .GET[Option[APIDetailedGroupAccount]](s"$organisationUrl?representativeCode=$agentCode")
+  def findDetailedGroupAccountByGGID(
+        ggId: String
+  )(implicit requestWithPrincipal: RequestWithPrincipal[_]): Future[Option[GroupAccount]] =
+    httpClient
+      .getWithGGHeaders[Option[APIDetailedGroupAccount]](s"$organisationUrl?governmentGatewayGroupId=$ggId")
+      .map(_.map(_.toGroupAccount))
+
+  // should never return none
+  def withAgentCode(
+        agentCode: String
+  )(implicit requestWithPrincipal: RequestWithPrincipal[_]): Future[Option[GroupAccount]] =
+    httpClient
+      .getWithGGHeaders[Option[APIDetailedGroupAccount]](s"$organisationUrl?representativeCode=$agentCode")
       .map(_.map(_.toGroupAccount))
 
   def createIndividualAccount(account: IndividualAccountSubmission, time: Instant = Instant.now)(implicit
-        hc: HeaderCarrier
+        requestWithPrincipal: RequestWithPrincipal[_]
   ): Future[IndividualAccountId] =
-    http.POST[APIIndividualAccount, IndividualAccountId](individualUrl, account.toAPIIndividualAccount(time))
+    httpClient
+      .postWithGgHeaders[IndividualAccountId](individualUrl, Json.toJsObject(account.toAPIIndividualAccount(time)))
 
   def updateIndividualAccount(personId: Long, account: IndividualAccountSubmission, time: Instant = Instant.now)(
-        implicit hc: HeaderCarrier
+        implicit requestWithPrincipal: RequestWithPrincipal[_]
   ): Future[JsValue] =
-    http.PUT[APIIndividualAccount, JsValue](individualUrl + s"/$personId", account.toAPIIndividualAccount(time))
+    httpClient
+      .putWithGgHeaders[JsValue](individualUrl + s"/$personId", Json.toJsObject(account.toAPIIndividualAccount(time)))
 
-  def getDetailedIndividual(id: Long)(implicit hc: HeaderCarrier): Future[Option[IndividualAccount]] =
-    http
-      .GET[Option[APIDetailedIndividualAccount]](s"$individualUrl?personId=$id")
+  def getDetailedIndividual(
+        id: Long
+  )(implicit requestWithPrincipal: RequestWithPrincipal[_]): Future[Option[IndividualAccount]] =
+    httpClient
+      .getWithGGHeaders[Option[APIDetailedIndividualAccount]](s"$individualUrl?personId=$id")
       .map(_.map(a => a.toIndividualAccount))
 
-  def findDetailedIndividualAccountByGGID(ggId: String)(implicit hc: HeaderCarrier): Future[Option[IndividualAccount]] =
-    http
-      .GET[Option[APIDetailedIndividualAccount]](s"$individualUrl?governmentGatewayExternalId=$ggId")
+  def findDetailedIndividualAccountByGGID(
+        ggId: String
+  )(implicit requestWithPrincipal: RequestWithPrincipal[_]): Future[Option[IndividualAccount]] =
+    httpClient
+      .getWithGGHeaders[Option[APIDetailedIndividualAccount]](s"$individualUrl?governmentGatewayExternalId=$ggId")
       .map(_.map(_.toIndividualAccount))
 }

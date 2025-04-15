@@ -30,22 +30,24 @@ import scala.util.{Failure, Try}
 class ModernisedExternalCaseManagementApiSpec extends BaseUnitSpec {
 
   val connector: ModernisedExternalCaseManagementApi =
-    new ModernisedExternalCaseManagementApi(mockVoaHttpClient, mockServicesConfig) {
-      override lazy val voaModernisedApiStubBaseUrl: String = "http://some-uri"
-    }
+    new ModernisedExternalCaseManagementApi(mockVoaHttpClient, mockAppConfig)
 
   trait Setup {
     val submissionId: String = "PL123AB"
     val checkCaseRef: String = "CHK123ABC"
     val valuationId: Long = 123456L
+    when(mockAppConfig.proxyEnabled).thenReturn(false)
+    when(mockAppConfig.apimSubscriptionKeyValue).thenReturn("subscriptionId")
+    when(mockAppConfig.voaApiBaseUrl).thenReturn("http://some/url/voa")
+    when(mockServicesConfig.baseUrl(any())).thenReturn("http://localhost:9949/")
   }
 
   "get my organisation check cases" when {
     "check cases exist under a property link" should {
       "return the my organisation check case response" in new Setup {
-        val mockCheckCase = mock[CheckCaseWithAgent]
+        val mockCheckCase: CheckCaseWithAgent = mock[CheckCaseWithAgent]
 
-        when(mockVoaHttpClient.GET[CheckCasesWithAgent](any(), any())(any(), any(), any(), any()))
+        when(mockVoaHttpClient.getWithGGHeaders[CheckCasesWithAgent](any())(any(), any(), any(), any()))
           .thenReturn(Future.successful(CheckCasesWithAgent(1, 15, 4, 4, List(mockCheckCase))))
 
         val result: CheckCasesWithAgent =
@@ -63,9 +65,9 @@ class ModernisedExternalCaseManagementApiSpec extends BaseUnitSpec {
   "get my clients check cases" when {
     "check cases exist under a property link" should {
       "return the my clients check case response" in new Setup {
-        val mockCheckCase = mock[CheckCaseWithClient]
+        val mockCheckCase: CheckCaseWithClient = mock[CheckCaseWithClient]
 
-        when(mockVoaHttpClient.GET[CheckCasesWithClient](any(), any())(any(), any(), any(), any()))
+        when(mockVoaHttpClient.getWithGGHeaders[CheckCasesWithClient](any())(any(), any(), any(), any()))
           .thenReturn(Future.successful(CheckCasesWithClient(1, 15, 4, 4, List(mockCheckCase))))
 
         val result: CheckCasesWithClient =
@@ -85,7 +87,7 @@ class ModernisedExternalCaseManagementApiSpec extends BaseUnitSpec {
     trait CanChallangeSetup extends Setup {
       when(mockHttpResponse.status).thenReturn(200)
       when(mockHttpResponse.body).thenReturn("""{"result": true}""")
-      when(mockVoaHttpClient.GET[HttpResponse](any())(any(), any(), any(), any()))
+      when(mockVoaHttpClient.getWithGGHeaders[HttpResponse](any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(mockHttpResponse))
     }
 
