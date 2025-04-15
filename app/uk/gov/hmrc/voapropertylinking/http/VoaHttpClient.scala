@@ -27,14 +27,14 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class VoaHttpClient @Inject()(
-                                httpClient: HttpClientV2,
-                                appConfig: AppConfig
-                              ) {
+class VoaHttpClient @Inject() (
+      httpClient: HttpClientV2,
+      appConfig: AppConfig
+) {
 
   def getWithGGHeaders[T](
-                           url: String
-                         )(implicit hc: HeaderCarrier, principal: Principal, httpReads: HttpReads[T], ec: ExecutionContext): Future[T] = {
+        url: String
+  )(implicit hc: HeaderCarrier, principal: Principal, httpReads: HttpReads[T], ec: ExecutionContext): Future[T] = {
     val urlEndpoint: URL = new URL(s"$url")
     val additionalHeaders: Seq[(String, String)] = buildHeadersWithGG(principal)
     val sanitizedHeaderCarrier: HeaderCarrier = removeDisallowedHeaders(hc, outboundHeaderNotAllowedList)
@@ -49,10 +49,10 @@ class VoaHttpClient @Inject()(
   }
 
   def patch[T](url: String, body: JsObject)(implicit
-                                            hc: HeaderCarrier,
-                                            principal: Principal,
-                                            httpReads: HttpReads[T],
-                                            ec: ExecutionContext
+        hc: HeaderCarrier,
+        principal: Principal,
+        httpReads: HttpReads[T],
+        ec: ExecutionContext
   ): Future[T] = {
     val urlEndpoint: URL = new URL(s"$url")
     val additionalHeaders: Seq[(String, String)] = buildHeadersWithGG(principal)
@@ -68,10 +68,10 @@ class VoaHttpClient @Inject()(
   }
 
   def postWithGgHeaders[T](url: String, body: JsObject)(implicit
-                                            hc: HeaderCarrier,
-                                            principal: Principal,
-                                            httpReads: HttpReads[T],
-                                            ec: ExecutionContext
+        hc: HeaderCarrier,
+        principal: Principal,
+        httpReads: HttpReads[T],
+        ec: ExecutionContext
   ): Future[T] = {
     val urlEndpoint: URL = new URL(s"$url")
     val additionalHeaders: Seq[(String, String)] = buildHeadersWithGG(principal)
@@ -87,10 +87,10 @@ class VoaHttpClient @Inject()(
   }
 
   def putWithGgHeaders[T](url: String, body: JsObject)(implicit
-                                                        hc: HeaderCarrier,
-                                                        principal: Principal,
-                                                        httpReads: HttpReads[T],
-                                                        ec: ExecutionContext
+        hc: HeaderCarrier,
+        principal: Principal,
+        httpReads: HttpReads[T],
+        ec: ExecutionContext
   ): Future[T] = {
     val urlEndpoint: URL = new URL(s"$url")
     val additionalHeaders: Seq[(String, String)] = buildHeadersWithGG(principal)
@@ -106,10 +106,10 @@ class VoaHttpClient @Inject()(
   }
 
   def deleteWithGgHeaders[T](url: String)(implicit
-                                                       hc: HeaderCarrier,
-                                                       principal: Principal,
-                                                       httpReads: HttpReads[T],
-                                                       ec: ExecutionContext
+        hc: HeaderCarrier,
+        principal: Principal,
+        httpReads: HttpReads[T],
+        ec: ExecutionContext
   ): Future[T] = {
     val urlEndpoint: URL = new URL(s"$url")
     val additionalHeaders: Seq[(String, String)] = buildHeadersWithGG(principal)

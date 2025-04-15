@@ -22,7 +22,7 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import java.net.URL
 import javax.inject.Inject
 
-class AppConfig @Inject()(configuration: Configuration, servicesConfig: ServicesConfig) {
+class AppConfig @Inject() (configuration: Configuration, servicesConfig: ServicesConfig) {
 
   val proxyEnabled: Boolean = configuration.get[Boolean]("http-verbs.proxy.enabled")
 
