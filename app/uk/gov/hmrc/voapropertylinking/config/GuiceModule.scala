@@ -48,9 +48,15 @@ class GuiceModule(
 
   val proxyEnabled: Boolean = configuration.get[Boolean]("http-verbs.proxy.enabled")
 
-  val baseUrl: String =
-    if (proxyEnabled) configuration.get[String]("voaApiUrl")
+  lazy val voaApiBaseUrl: String = configuration.get[String]("voaApiUrl")
+
+  lazy val baseUrl: String =
+    if (proxyEnabled) voaApiBaseUrl
     else servicesConfig.baseUrl("voa-modernised-api")
+
+  lazy val bstBaseUrl: String =
+    if (proxyEnabled) voaApiBaseUrl
+    else servicesConfig.baseUrl("voa-bst")
 
   override def configure(): Unit = {
 
@@ -88,7 +94,7 @@ class GuiceModule(
         "voa.agentAppointmentChanges"   -> "bst.resources.organisationManagementApi.agentAppointmentChanges.path",
         "voa.myAgentDetails"            -> "bst.resources.organisationManagementApi.myAgentDetails.path"
       ),
-      baseUrl
+      bstBaseUrl
     )
 
   private def bindModernisedEndpoints(): Unit =
