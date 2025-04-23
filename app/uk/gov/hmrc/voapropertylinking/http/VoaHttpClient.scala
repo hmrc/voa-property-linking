@@ -106,22 +106,31 @@ class VoaHttpClient @Inject() (
   }
 
   def deleteWithGgHeaders[T](url: String)(implicit
-        hc: HeaderCarrier,
-        principal: Principal,
-        httpReads: HttpReads[T],
-        ec: ExecutionContext
+                                          hc: HeaderCarrier,
+                                          principal: Principal,
+                                          httpReads: HttpReads[T],
+                                          ec: ExecutionContext
   ): Future[T] = {
-    val urlEndpoint: URL = new URL(s"$url")
-    val additionalHeaders: Seq[(String, String)] = buildHeadersWithGG(principal)
-    val sanitizedHeaderCarrier: HeaderCarrier = removeDisallowedHeaders(hc, outboundHeaderNotAllowedList)
-    val updatedHeaderCarrier: HeaderCarrier = sanitizedHeaderCarrier.withExtraHeaders(additionalHeaders: _*)
+    val urlEndpoint = new URL(url)
+
+    val ggHeaders = buildHeadersWithGG(principal)
+    val baseHc = removeDisallowedHeaders(hc, outboundHeaderNotAllowedList)
+
+    val commonHeaders = Seq(
+      "Accept"        -> "application/json",
+      "Content-Type"  -> "application/json",
+      "Content-Length"-> "0"
+    )
+
+    val finalHc = baseHc.withExtraHeaders((ggHeaders ++ commonHeaders): _*)
 
     httpClient
       .delete(urlEndpoint)
-      .setHeader(updatedHeaderCarrier.extraHeaders: _*)
+      .setHeader(finalHc.extraHeaders: _*)
       .withProxy
       .execute[T]
   }
+
 
   def buildHeadersWithGG(principal: Principal): Seq[(String, String)] =
     Seq(
