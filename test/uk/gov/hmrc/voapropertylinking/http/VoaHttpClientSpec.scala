@@ -56,6 +56,7 @@ class VoaHttpClientSpec extends BaseUnitSpec {
 
     val mockRequestBuilder: RequestBuilder = mock[RequestBuilder]
     val mockRequestBuilderWithHeaders: RequestBuilder = mock[RequestBuilder]
+    val mockRequestBuilderWithAdditionalHeaders: RequestBuilder = mock[RequestBuilder]
     val mockRequestBuilderWithBody: RequestBuilder = mock[RequestBuilder]
 
     val mockRequestBuilderWithProxy: RequestBuilder = mock[RequestBuilder]
@@ -100,10 +101,21 @@ class VoaHttpClientSpec extends BaseUnitSpec {
     "enrich the GG headers when calling a DELETE" in new Setup {
       when(mockHttpClient.delete(any())(any())).thenReturn(mockRequestBuilder)
       when(mockRequestBuilder.setHeader(any())).thenReturn(mockRequestBuilderWithHeaders)
-      when(mockRequestBuilderWithHeaders.withProxy).thenReturn(mockRequestBuilderWithProxy)
+      when(mockRequestBuilderWithHeaders.setHeader(any())).thenReturn(mockRequestBuilderWithAdditionalHeaders)
+
+      when(
+        mockRequestBuilderWithAdditionalHeaders.withBody(
+          any[JsObject]
+        )(
+          any[BodyWritable[JsObject]],
+          any[Tag[JsObject]],
+          any[ExecutionContext]
+        )
+      ).thenAnswer(_ => mockRequestBuilderWithBody)
+
+      when(mockRequestBuilderWithBody.withProxy).thenReturn(mockRequestBuilderWithProxy)
       when(mockRequestBuilderWithProxy.execute[HttpResponse](any(), any()))
         .thenReturn(Future.successful(mock[HttpResponse]))
-
       val captor = ArgumentCaptor.forClass(classOf[List[(String, String)]])
 
       voaHttpClient.deleteWithGgHeaders[HttpResponse](mockUrl.toString)
