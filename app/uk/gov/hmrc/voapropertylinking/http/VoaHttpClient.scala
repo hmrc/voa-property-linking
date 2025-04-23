@@ -100,7 +100,7 @@ class VoaHttpClient @Inject() (
     httpClient
       .delete(urlEndpoint)
       .setHeader(updatedHeaderCarrier.extraHeaders: _*)
-      .setHeader(HeaderNames.CONTENT_LENGTH -> "0")
+      .setHeader(HeaderNames.CONTENT_LENGTH -> "0", HeaderNames.CONTENT_TYPE -> "application/json")
       .withProxy
       .execute[T]
   }
