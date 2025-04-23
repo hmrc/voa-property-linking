@@ -102,18 +102,7 @@ class VoaHttpClientSpec extends BaseUnitSpec {
       when(mockHttpClient.delete(any())(any())).thenReturn(mockRequestBuilder)
       when(mockRequestBuilder.setHeader(any())).thenReturn(mockRequestBuilderWithHeaders)
       when(mockRequestBuilderWithHeaders.setHeader(any())).thenReturn(mockRequestBuilderWithAdditionalHeaders)
-
-      when(
-        mockRequestBuilderWithAdditionalHeaders.withBody(
-          any[JsObject]
-        )(
-          any[BodyWritable[JsObject]],
-          any[Tag[JsObject]],
-          any[ExecutionContext]
-        )
-      ).thenAnswer(_ => mockRequestBuilderWithBody)
-
-      when(mockRequestBuilderWithBody.withProxy).thenReturn(mockRequestBuilderWithProxy)
+      when(mockRequestBuilderWithAdditionalHeaders.withProxy).thenReturn(mockRequestBuilderWithProxy)
       when(mockRequestBuilderWithProxy.execute[HttpResponse](any(), any()))
         .thenReturn(Future.successful(mock[HttpResponse]))
       val captor = ArgumentCaptor.forClass(classOf[List[(String, String)]])

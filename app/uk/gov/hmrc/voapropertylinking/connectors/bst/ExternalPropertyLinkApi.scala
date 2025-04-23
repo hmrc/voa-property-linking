@@ -225,11 +225,10 @@ class ExternalPropertyLinkApi @Inject() (
   def getMyOrganisationsAgents()(implicit request: RequestWithPrincipal[_]): Future[AgentList] =
     httpClient.getWithGGHeaders[AgentList](s"$myOrganisationsAgentsUrl?requestTotalRowCount=true")
 
-  def revokeClientProperty(plSubmissionId: String)(implicit request: RequestWithPrincipal[_]): Future[Unit] = {
+  def revokeClientProperty(plSubmissionId: String)(implicit request: RequestWithPrincipal[_]): Future[Unit] =
     httpClient
       .deleteWithGgHeaders[HttpResponse](revokeClientsPropertyLinkUrl.templated("submissionId" -> plSubmissionId))
       .map(_ => ())
-  }
 
   private def modernisedPaginationParams(params: Option[PaginationParams]): Seq[(String, String)] =
     params.fold(Seq.empty[(String, String)]) { p =>
