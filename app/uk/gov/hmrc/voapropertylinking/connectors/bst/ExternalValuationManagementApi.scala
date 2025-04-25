@@ -19,19 +19,20 @@ package uk.gov.hmrc.voapropertylinking.connectors.bst
 import models.modernised.ValuationHistoryResponse
 import models.modernised.externalvaluationmanagement.documents.DvrDocumentFiles
 import play.api.http.HeaderNames._
-import play.api.libs.ws.{WSClient, WSResponse}
 import uk.gov.hmrc.http._
+import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
 import uk.gov.hmrc.voapropertylinking.config.AppConfig
 import uk.gov.hmrc.voapropertylinking.connectors.BaseVoaConnector
 import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
 
+import java.net.URL
 import javax.inject.{Inject, Named}
 import scala.concurrent.{ExecutionContext, Future}
 
 class ExternalValuationManagementApi @Inject() (
-      wsClient: WSClient,
+      httpClientV2: HttpClientV2,
       httpClient: VoaHttpClient,
       @Named("voa.authValuationHistoryUrl") valuationHistoryUrl: String,
       servicesConfig: ServicesConfig,
@@ -61,18 +62,18 @@ class ExternalValuationManagementApi @Inject() (
 
   def getDvrDocument(valuationId: Long, uarn: Long, propertyLinkId: String, fileRef: String)(implicit
         request: RequestWithPrincipal[_]
-  ): Future[WSResponse] =
-    wsClient
-      .url(s"$url/properties/$uarn/valuations/$valuationId/files/$fileRef?propertyLinkId=$propertyLinkId")
-      .withMethod("GET")
-      .withHttpHeaders(
-        List(
+  ): Future[HttpResponse] =
+    httpClientV2
+      .get(new URL(s"$url/properties/$uarn/valuations/$valuationId/files/$fileRef?propertyLinkId=$propertyLinkId"))
+      .setHeader(
+        Seq(
           "GG-EXTERNAL-ID" -> request.principal.externalId,
           USER_AGENT       -> appName,
           "GG-GROUP-ID"    -> request.principal.groupId
         ): _*
       )
-      .stream()
+      .withProxy
+      .stream
       .flatMap { response =>
         response.status match {
           case s if is4xx(s) || is5xx(s) =>

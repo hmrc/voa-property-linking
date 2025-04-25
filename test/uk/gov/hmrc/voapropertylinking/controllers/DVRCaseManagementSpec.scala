@@ -16,18 +16,17 @@
 
 package uk.gov.hmrc.voapropertylinking.controllers
 
-import java.time.LocalDateTime
 import basespecs.BaseControllerSpec
 import models.modernised.ccacasemanagement.requests.DetailedValuationRequest
 import models.modernised.externalvaluationmanagement.documents.{Document, DocumentSummary, DvrDocumentFiles}
 import org.mockito.ArgumentMatchers.{eq => matching, _}
 import org.mockito.Mockito._
 import play.api.libs.json.Json
-import play.api.libs.ws.WSResponse
 import play.api.test.{FakeRequest, Helpers}
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.voapropertylinking.repositories.{DVRRecord, DVRRecordRepository}
 
+import java.time.LocalDateTime
 import scala.concurrent.Future
 
 class DVRCaseManagementSpec extends BaseControllerSpec {
@@ -173,12 +172,12 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
 
     "get dvr document" should {
       "return 200 Ok with the file chunked" in {
-        val mockWsResponse: WSResponse = mock[WSResponse]
+        val mockHttpResponse: HttpResponse = mock[HttpResponse]
 
         when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
         when(mockValuationManagementApi.getDvrDocument(any(), any(), any(), any())(any()))
-          .thenReturn(Future.successful(mockWsResponse))
-        when(mockWsResponse.headers).thenReturn(Map("header" -> Seq("value")))
+          .thenReturn(Future.successful(mockHttpResponse))
+        when(mockHttpResponse.headers).thenReturn(Map("header" -> Seq("value")))
 
         val result = testController.getDvrDocument(1L, 3L, "PL-12345", "1L")(FakeRequest())
 
@@ -292,11 +291,11 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
 
     "get dvr document" should {
       "return 200 Ok with the file chunked" in {
-        val mockWsResponse: WSResponse = mock[WSResponse]
+        val mockHttpResponse: HttpResponse = mock[HttpResponse]
 
         when(mockModernisedExternalValuationManagementApi.getDvrDocument(any(), any(), any(), any())(any()))
-          .thenReturn(Future.successful(mockWsResponse))
-        when(mockWsResponse.headers).thenReturn(Map("header" -> Seq("value")))
+          .thenReturn(Future.successful(mockHttpResponse))
+        when(mockHttpResponse.headers).thenReturn(Map("header" -> Seq("value")))
 
         val result = testController.getDvrDocument(1L, 3L, "PL-12345", "1L")(FakeRequest())
 

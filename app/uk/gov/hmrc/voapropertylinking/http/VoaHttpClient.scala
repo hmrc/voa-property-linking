@@ -18,8 +18,7 @@ package uk.gov.hmrc.voapropertylinking.http
 
 import play.api.Logging
 import play.api.http.HeaderNames
-import play.api.libs.json.{JsObject, Json}
-import play.api.mvc.Headers
+import play.api.libs.json.JsObject
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads}
 import uk.gov.hmrc.voapropertylinking.auth.Principal

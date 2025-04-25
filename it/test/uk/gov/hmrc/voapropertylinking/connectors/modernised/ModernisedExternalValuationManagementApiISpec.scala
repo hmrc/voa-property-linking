@@ -22,11 +22,10 @@ import org.mockito.Mockito
 import org.scalatestplus.mockito.MockitoSugar.mock
 import play.api.http.Status.{BAD_REQUEST, NOT_FOUND, OK}
 import play.api.libs.json.{JsValue, Json}
-import play.api.libs.ws.WSResponse
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers.await
-import uk.gov.hmrc.http.{HeaderCarrier, UpstreamErrorResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, UpstreamErrorResponse}
 import uk.gov.hmrc.voapropertylinking.BaseIntegrationSpec
 import uk.gov.hmrc.voapropertylinking.auth.{Principal, RequestWithPrincipal}
 import uk.gov.hmrc.voapropertylinking.stubs.modernised.ModernisedExternalValuationManagementStub
@@ -191,20 +190,20 @@ class ModernisedExternalValuationManagementApiISpec
     val fileRef: String = "test-fileref"
 
     "return a WsResponse on success" in new TestSetup {
-      val response: WSResponse = mock[WSResponse]
+      val response: HttpResponse = mock[HttpResponse]
       Mockito.when(response.status).thenReturn(OK)
 
       stubGetDvrDocument(valuationId, uarn, propertyLinkId, fileRef)(response)
 
-      val result: WSResponse = await(connector.getDvrDocument(valuationId, uarn, propertyLinkId, fileRef))
+      val result: HttpResponse = await(connector.getDvrDocument(valuationId, uarn, propertyLinkId, fileRef))
 
       result.status shouldBe OK
-      result shouldBe a[WSResponse]
+      result shouldBe a[HttpResponse]
     }
 
     "return an upstream error response" when {
       "a 4xx status is returned" in new TestSetup {
-        val response: WSResponse = mock[WSResponse]
+        val response: HttpResponse = mock[HttpResponse]
         Mockito.when(response.status).thenReturn(BAD_REQUEST)
 
         stubGetDvrDocument(valuationId, uarn, propertyLinkId, fileRef)(response)
@@ -214,7 +213,7 @@ class ModernisedExternalValuationManagementApiISpec
         }
       }
       "a 5xx status is returned" in new TestSetup {
-        val response: WSResponse = mock[WSResponse]
+        val response: HttpResponse = mock[HttpResponse]
         Mockito.when(response.status).thenReturn(INTERNAL_SERVER_ERROR)
 
         stubGetDvrDocument(valuationId, uarn, propertyLinkId, fileRef)(response)
@@ -225,5 +224,4 @@ class ModernisedExternalValuationManagementApiISpec
       }
     }
   }
-
 }
