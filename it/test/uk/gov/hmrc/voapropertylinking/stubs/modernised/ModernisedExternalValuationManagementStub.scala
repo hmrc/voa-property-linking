@@ -18,7 +18,7 @@ package uk.gov.hmrc.voapropertylinking.stubs.modernised
 
 import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import play.api.libs.json.JsValue
-import play.api.libs.ws.WSResponse
+import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
 import uk.gov.hmrc.voapropertylinking.{WiremockHelper, WiremockMethods}
 
@@ -42,7 +42,7 @@ trait ModernisedExternalValuationManagementStub extends WiremockMethods with Wir
     ).thenReturn(status, body)
 
   def stubGetDvrDocument(valuationId: Long, uarn: Long, propertyLinkId: String, fileRef: String)(
-        response: WSResponse
+        response: HttpResponse
   )(implicit request: RequestWithPrincipal[_]): StubMapping =
     when(
       method = GET,

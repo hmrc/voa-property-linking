@@ -19,8 +19,8 @@ package uk.gov.hmrc.voapropertylinking.controllers
 import models.modernised.ccacasemanagement.requests.DetailedValuationRequest
 import play.api.http.HttpEntity
 import play.api.libs.json.{JsValue, Json}
-import play.api.libs.ws.WSResponse
 import play.api.mvc._
+import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
 import uk.gov.hmrc.voapropertylinking.config.FeatureSwitch
 import uk.gov.hmrc.voapropertylinking.connectors.bst.{CCACaseManagementApi, ExternalValuationManagementApi}
@@ -84,7 +84,7 @@ class DVRCaseManagement @Inject() (
         fileRef: String
   ): Action[AnyContent] =
     authenticated.async { implicit request =>
-      lazy val response: Future[WSResponse] =
+      lazy val response: Future[HttpResponse] =
         if (featureSwitch.isBstDownstreamEnabled)
           valuationManagementApi.getDvrDocument(valuationId, uarn, propertyLinkId, fileRef)
         else

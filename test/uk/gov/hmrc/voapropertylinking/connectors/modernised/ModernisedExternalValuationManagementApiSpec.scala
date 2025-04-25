@@ -16,23 +16,18 @@
 
 package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
-import java.net.URI
-import java.time.LocalDateTime
-
-import org.apache.pekko.stream.scaladsl.Source
-import org.apache.pekko.util.ByteString
 import basespecs.BaseUnitSpec
 import models.modernised.ValuationHistoryResponse
 import models.modernised.externalvaluationmanagement.documents.{Document, DocumentSummary, DvrDocumentFiles}
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import play.api.http.ContentTypes
-import play.api.libs.json.JsValue
-import play.api.libs.ws.{WSClient, WSCookie, WSRequest, WSResponse}
+import uk.gov.hmrc.http.HttpResponse
+import uk.gov.hmrc.http.client.{HttpClientV2, RequestBuilder}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
+import java.time.LocalDateTime
 import scala.concurrent.Future
-import scala.xml.Elem
 
 class ModernisedExternalValuationManagementApiSpec extends BaseUnitSpec with ContentTypes {
 
@@ -44,12 +39,12 @@ class ModernisedExternalValuationManagementApiSpec extends BaseUnitSpec with Con
     val plSubmissionId: String = "PL12AB34"
     val valuationHistoryResponse: ValuationHistoryResponse = ValuationHistoryResponse(Seq.empty)
 
-    val wsClient: WSClient = mock[WSClient]
+    val httpClientV2: HttpClientV2 = mock[HttpClientV2]
     val config: ServicesConfig = mock[ServicesConfig]
 
     val connector: ModernisedExternalValuationManagementApi =
       new ModernisedExternalValuationManagementApi(
-        wsClient,
+        httpClientV2,
         mockVoaHttpClient,
         valuationHistoryUrl,
         config,
@@ -117,45 +112,17 @@ class ModernisedExternalValuationManagementApiSpec extends BaseUnitSpec with Con
       val propertyLinkId = "PL-123456789"
       val fileRef = "1L"
 
-      val mockWsResponse: WSResponse = {
-        val m = new WSResponse {
-          override def status: Int = 200
+      val mockRequestBuilder: RequestBuilder = mock[RequestBuilder]
+      val mockRequestBuilderWithHeaders: RequestBuilder = mock[RequestBuilder]
+      val mockRequestBuilderWithProxy: RequestBuilder = mock[RequestBuilder]
+      when(httpClientV2.get(any())(any())).thenReturn(mockRequestBuilder)
+      when(mockRequestBuilder.setHeader(any())).thenReturn(mockRequestBuilderWithHeaders)
+      when(mockRequestBuilderWithHeaders.withProxy).thenReturn(mockRequestBuilderWithProxy)
+      when(mockRequestBuilderWithProxy.stream[HttpResponse](any(), any()))
+        .thenReturn(Future.successful(mock[HttpResponse]))
 
-          override def statusText: String = ???
-
-          override def headers: Map[String, Seq[String]] = Map()
-
-          override def underlying[T]: T = ???
-
-          override def cookies: Seq[WSCookie] = ???
-
-          override def cookie(name: String): Option[WSCookie] = ???
-
-          override def body: String = ???
-
-          override def bodyAsBytes: ByteString = ???
-
-          override def bodyAsSource: Source[ByteString, _] = Source.empty[ByteString]
-
-          override def allHeaders: Map[String, Seq[String]] = ???
-
-          override def xml: Elem = ???
-
-          override def json: JsValue = ???
-
-          override def uri: URI = ???
-        }
-        m
-      }
-
-      val mockWsRequest: WSRequest = mock[WSRequest]
-      when(wsClient.url(any())).thenReturn(mockWsRequest)
-      when(mockWsRequest.withHttpHeaders(any())).thenReturn(mockWsRequest)
-      when(mockWsRequest.withMethod(any())).thenReturn(mockWsRequest)
-      when(mockWsRequest.stream()).thenReturn(Future.successful(mockWsResponse))
-
-      val result: WSResponse = connector.getDvrDocument(valuationId, uarn, propertyLinkId, fileRef).futureValue
-      result shouldBe a[WSResponse]
+      val result: HttpResponse = connector.getDvrDocument(valuationId, uarn, propertyLinkId, fileRef).futureValue
+      result shouldBe a[HttpResponse]
     }
   }
 }
