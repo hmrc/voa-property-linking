@@ -69,7 +69,8 @@ class ExternalValuationManagementApi @Inject() (
         Seq(
           "GG-EXTERNAL-ID" -> request.principal.externalId,
           USER_AGENT       -> appName,
-          "GG-GROUP-ID"    -> request.principal.groupId
+          "GG-GROUP-ID"    -> request.principal.groupId,
+          "Ocp-Apim-Subscription-Key" -> appConfig.apimSubscriptionKeyValue
         ): _*
       )
       .withProxy
