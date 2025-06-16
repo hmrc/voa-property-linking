@@ -24,7 +24,7 @@ lazy val playSettings: Seq[Setting[_]] = Seq(
 val defaultPort = 9524
 
 ThisBuild / majorVersion := 0
-ThisBuild / scalaVersion := "2.13.12"
+ThisBuild / scalaVersion := "2.13.16"
 ThisBuild / excludeDependencies ++= Seq(
   // As of Play 3.0, groupId has changed to org.playframework; exclude transitive dependencies to the old artifacts
   // Specifically affects play-json-extensions dependency
@@ -71,8 +71,8 @@ scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature")
 scalacOptions += "-Wconf:src=routes/.*:s"
 scalacOptions += "-Wconf:cat=unused-imports&src=html/.*:s"
 
-val bootstrapPlayVersion = "9.11.0"
-val hmrcMongoVersion = "2.5.0"
+val bootstrapPlayVersion = "9.13.0"
+val hmrcMongoVersion = "2.6.0"
 
 val compileDependencies = Seq(
   ws,
@@ -80,15 +80,14 @@ val compileDependencies = Seq(
   "uk.gov.hmrc"        %% "bootstrap-backend-play-30" % bootstrapPlayVersion,
   "uk.gov.hmrc.mongo"  %% "hmrc-mongo-play-30"        % hmrcMongoVersion,
   "org.typelevel"      %% "cats-core"                 % "2.13.0",
-  "uk.gov.hmrc"        %% "uri-template"              % "1.16.0",
+  "uk.gov.hmrc"        %% "uri-template"              % "1.17.0",
   "ai.x"               %% "play-json-extensions"      % "0.42.0",
-  "org.apache.commons" % "commons-text"               % "1.12.0"
+  "org.apache.commons" % "commons-text"               % "1.13.1"
 )
 
 val testDependencies = Seq(
   "uk.gov.hmrc"            %% "bootstrap-test-play-30"  % bootstrapPlayVersion  % Test,
-  "org.pegdown"            % "pegdown"                  % "1.6.0"               % Test,
-  "org.mockito"            % "mockito-core"             % "5.14.2"              % Test,
+  "org.mockito"            % "mockito-core"             % "5.18.0"              % Test,
   "org.scalacheck"         %% "scalacheck"              % "1.18.1"              % Test,
   "uk.gov.hmrc.mongo"      %% "hmrc-mongo-test-play-30" % hmrcMongoVersion      % Test
 )
