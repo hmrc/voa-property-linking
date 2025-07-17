@@ -71,7 +71,7 @@ scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature")
 scalacOptions += "-Wconf:src=routes/.*:s"
 scalacOptions += "-Wconf:cat=unused-imports&src=html/.*:s"
 
-val bootstrapPlayVersion = "9.13.0"
+val bootstrapPlayVersion = "9.16.0"
 val hmrcMongoVersion = "2.6.0"
 
 val compileDependencies = Seq(
