@@ -28,7 +28,6 @@ import play.api.libs.json._
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import uk.gov.hmrc.mongo.play.json.formats.MongoFormats
-import uk.gov.hmrc.play.http.logging.Mdc
 import uk.gov.hmrc.voapropertylinking.utils.Formatters.localDateTimeFormat
 
 import java.time.LocalDateTime
@@ -55,7 +54,6 @@ class DVRRepository @Inject() (mongo: MongoComponent, @Named("dvrCollectionName"
     ) with DVRRecordRepository with Logging with MongoFormats {
 
   override def create(request: DetailedValuationRequest): Future[Unit] =
-    Mdc.preservingMdc {
       collection
         .insertOne(
           DVRRecord(
@@ -71,17 +69,13 @@ class DVRRepository @Inject() (mongo: MongoComponent, @Named("dvrCollectionName"
         .recover { case e: Exception =>
           logger.debug(e.getMessage())
         }
-    }
 
   override def find(organisationId: Long, assessmentRef: Long): Future[Option[DVRRecord]] =
-    Mdc.preservingMdc {
       collection
         .find(and(query(organisationId), equal("assessmentRef", assessmentRef)))
         .headOption()
-    }
 
   override def clear(organisationId: Long): Future[Unit] =
-    Mdc.preservingMdc {
       collection
         .findOneAndDelete(query(organisationId))
         .toFuture()
@@ -89,7 +83,6 @@ class DVRRepository @Inject() (mongo: MongoComponent, @Named("dvrCollectionName"
         .recover { case e: Exception =>
           logger.debug(e.getMessage())
         }
-    }
 
   private def query(organisationId: Long): Bson =
     or(equal("organisationId", organisationId), in("agents", Seq(organisationId)))
