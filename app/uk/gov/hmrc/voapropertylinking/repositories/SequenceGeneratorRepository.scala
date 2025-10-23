@@ -24,7 +24,6 @@ import org.mongodb.scala.model.Updates._
 import play.api.libs.json._
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import uk.gov.hmrc.mongo.MongoComponent
-import uk.gov.hmrc.play.http.logging.Md
 import org.mongodb.scala.model.{FindOneAndUpdateOptions, IndexModel, IndexOptions, ReturnDocument}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -51,12 +50,12 @@ class SequenceGeneratorMongoRepository @Inject() (mongo: MongoComponent)(implici
   override def getNextSequenceId(key: String): Future[Long] =
     // get latest from sequence, if none - then set next number to 600_000_000, else inc by one
     // if num=999_999_999 throw error
-      findLatestSequence(key).flatMap {
-        case Some(sequence) if sequence.sequence >= 999999999 =>
-          throw new IllegalStateException("Reached upper limit of id on generating sequence number")
-        case Some(_) => update(key = key, value = 1)
-        case None    => update(key = key, value = 600000000)
-      }
+    findLatestSequence(key).flatMap {
+      case Some(sequence) if sequence.sequence >= 999999999 =>
+        throw new IllegalStateException("Reached upper limit of id on generating sequence number")
+      case Some(_) => update(key = key, value = 1)
+      case None    => update(key = key, value = 600000000)
+    }
 
   private def update(key: String, value: Int): Future[Long] =
     collection
