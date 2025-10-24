@@ -24,7 +24,7 @@ lazy val playSettings: Seq[Setting[_]] = Seq(
 val defaultPort = 9524
 
 ThisBuild / majorVersion := 0
-ThisBuild / scalaVersion := "2.13.16"
+ThisBuild / scalaVersion := "2.13.17"
 ThisBuild / excludeDependencies ++= Seq(
   // As of Play 3.0, groupId has changed to org.playframework; exclude transitive dependencies to the old artifacts
   // Specifically affects play-json-extensions dependency
@@ -78,7 +78,7 @@ val compileDependencies = Seq(
   ws,
   guice,
   "uk.gov.hmrc"        %% "bootstrap-backend-play-30" % bootstrapPlayVersion,
-  "uk.gov.hmrc"        %% "uri-template"              % "1.17.0",
+  "uk.gov.hmrc"        %% "uri-template"              % "1.18.0",
   "uk.gov.hmrc.mongo"  %% "hmrc-mongo-play-30"        % hmrcMongoVersion,
   "org.typelevel"      %% "cats-core"                 % "2.13.0",
   "ai.x"               %% "play-json-extensions"      % "0.42.0",
