@@ -92,4 +92,4 @@ val testDependencies = Seq(
   "uk.gov.hmrc.mongo"      %% "hmrc-mongo-test-play-30" % hmrcMongoVersion      % Test
 )
 
-addCommandAlias("precommit", ";scalafmt;test:scalafmt;it/test:scalafmt;coverage;test;it/test;coverageReport")
+addCommandAlias("precommit", ";reload;scalafmt;test:scalafmt;it/test:scalafmt;coverage;test;it/test;coverageReport")
