@@ -21,8 +21,6 @@ import cats.data.OptionT
 import javax.inject.Inject
 import models._
 import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
-import uk.gov.hmrc.voapropertylinking.config.FeatureSwitch
-import uk.gov.hmrc.voapropertylinking.connectors.bst.{ExternalPropertyLinkApi, ExternalValuationManagementApi}
 import uk.gov.hmrc.voapropertylinking.connectors.modernised.{ModernisedExternalPropertyLinkApi, ModernisedExternalValuationManagementApi}
 import uk.gov.hmrc.voapropertylinking.utils.Cats
 
@@ -30,10 +28,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class AssessmentService @Inject() (
       val modernisedPropertyLinksConnector: ModernisedExternalPropertyLinkApi,
-      val modernisedValuationManagementApi: ModernisedExternalValuationManagementApi,
-      propertyLinksConnector: ExternalPropertyLinkApi,
-      valuationManagementApi: ExternalValuationManagementApi,
-      featureSwitch: FeatureSwitch
+      val modernisedValuationManagementApi: ModernisedExternalValuationManagementApi
 )(implicit executionContext: ExecutionContext)
     extends Cats {
 
@@ -41,16 +36,10 @@ class AssessmentService @Inject() (
         submissionId: String
   )(implicit request: RequestWithPrincipal[_]): OptionT[Future, Assessments] =
     for {
-      propertyLink <- if (featureSwitch.isBstDownstreamEnabled)
-                        OptionT(propertyLinksConnector.getMyOrganisationsPropertyLink(submissionId))
-                      else
-                        OptionT(modernisedPropertyLinksConnector.getMyOrganisationsPropertyLink(submissionId))
-      history <- if (featureSwitch.isBstDownstreamEnabled)
-                   OptionT(valuationManagementApi.getValuationHistory(propertyLink.authorisation.uarn, submissionId))
-                 else
-                   OptionT(
-                     modernisedValuationManagementApi.getValuationHistory(propertyLink.authorisation.uarn, submissionId)
-                   )
+      propertyLink <- OptionT(modernisedPropertyLinksConnector.getMyOrganisationsPropertyLink(submissionId))
+      history <- OptionT(
+        modernisedValuationManagementApi.getValuationHistory(propertyLink.authorisation.uarn, submissionId)
+      )
     } yield Assessments(
       propertyLink.authorisation,
       history.NDRListValuationHistoryItems,
@@ -61,16 +50,10 @@ class AssessmentService @Inject() (
         submissionId: String
   )(implicit request: RequestWithPrincipal[_]): OptionT[Future, Assessments] =
     for {
-      propertyLink <- if (featureSwitch.isBstDownstreamEnabled)
-                        OptionT(propertyLinksConnector.getClientsPropertyLink(submissionId))
-                      else
-                        OptionT(modernisedPropertyLinksConnector.getClientsPropertyLink(submissionId))
-      history <- if (featureSwitch.isBstDownstreamEnabled)
-                   OptionT(valuationManagementApi.getValuationHistory(propertyLink.authorisation.uarn, submissionId))
-                 else
-                   OptionT(
-                     modernisedValuationManagementApi.getValuationHistory(propertyLink.authorisation.uarn, submissionId)
-                   )
+      propertyLink <- OptionT(modernisedPropertyLinksConnector.getClientsPropertyLink(submissionId))
+      history <- OptionT(
+        modernisedValuationManagementApi.getValuationHistory(propertyLink.authorisation.uarn, submissionId)
+      )
     } yield Assessments(
       propertyLink = propertyLink.authorisation,
       history = history.NDRListValuationHistoryItems,

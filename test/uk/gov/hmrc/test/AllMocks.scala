@@ -26,8 +26,7 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
-import uk.gov.hmrc.voapropertylinking.config.{AppConfig, FeatureSwitch}
-import uk.gov.hmrc.voapropertylinking.connectors.bst._
+import uk.gov.hmrc.voapropertylinking.config.AppConfig
 import uk.gov.hmrc.voapropertylinking.connectors.mdtp.BusinessRatesAuthConnector
 import uk.gov.hmrc.voapropertylinking.connectors.modernised._
 import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
@@ -45,16 +44,7 @@ trait AllMocks extends MockitoSugar { me: BeforeAndAfterEach =>
   val mockModernisedExternalValuationManagementApi: ModernisedExternalValuationManagementApi =
     mock[ModernisedExternalValuationManagementApi]
   val mockModernisedOrganisationManagementApi: ModernisedExternalOrganisationManagementApi =
-    mock[ModernisedExternalOrganisationManagementApi]
-
-  // BST Connectors
-  val mockAddressManagementApi: AddressManagementApi = mock[AddressManagementApi]
-  val mockCustomerManagementApi: CustomerManagementApi = mock[CustomerManagementApi]
-  val mockCCACaseManagementApi: CCACaseManagementApi = mock[CCACaseManagementApi]
-  val mockCaseManagementApi: ExternalCaseManagementApi = mock[ExternalCaseManagementApi]
-  val mockPropertyLinkApi: ExternalPropertyLinkApi = mock[ExternalPropertyLinkApi]
-  val mockValuationManagementApi: ExternalValuationManagementApi = mock[ExternalValuationManagementApi]
-  val mockOrganisationManagementApi: ExternalOrganisationManagementApi = mock[ExternalOrganisationManagementApi]
+  // ...existing code...
 
   // MDTP connectors
   val mockBusinessRatesAuthConnector: BusinessRatesAuthConnector = mock[BusinessRatesAuthConnector]
@@ -73,8 +63,6 @@ trait AllMocks extends MockitoSugar { me: BeforeAndAfterEach =>
   val mockWSRequest: WSRequest = mock[WSRequest]
   val mockAppConfig: AppConfig = mock[AppConfig]
 
-  val mockFeatureSwitch: FeatureSwitch = mock[FeatureSwitch]
-
   override protected def beforeEach(): Unit =
     Seq(
       mockModernisedAddressManagementApi,
@@ -83,13 +71,6 @@ trait AllMocks extends MockitoSugar { me: BeforeAndAfterEach =>
       mockModernisedExternalPropertyLinkApi,
       mockModernisedExternalValuationManagementApi,
       mockModernisedOrganisationManagementApi,
-      mockAddressManagementApi,
-      mockCustomerManagementApi,
-      mockCCACaseManagementApi,
-      mockCaseManagementApi,
-      mockPropertyLinkApi,
-      mockValuationManagementApi,
-      mockOrganisationManagementApi,
       mockBusinessRatesAuthConnector,
       mockAssessmentService,
       mockAuditingService,
@@ -102,7 +83,6 @@ trait AllMocks extends MockitoSugar { me: BeforeAndAfterEach =>
       mockMetrics,
       mockServicesConfig,
       mockWSRequest,
-      mockFeatureSwitch,
       mockAppConfig
     ).foreach(Mockito.reset(_))
 }

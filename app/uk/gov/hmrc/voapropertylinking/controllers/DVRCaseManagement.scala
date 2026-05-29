@@ -22,8 +22,6 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
 import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
-import uk.gov.hmrc.voapropertylinking.config.FeatureSwitch
-import uk.gov.hmrc.voapropertylinking.connectors.bst.{CCACaseManagementApi, ExternalValuationManagementApi}
 import uk.gov.hmrc.voapropertylinking.connectors.modernised.{ModernisedCCACaseManagementApi, ModernisedExternalValuationManagementApi}
 import uk.gov.hmrc.voapropertylinking.repositories.DVRRecordRepository
 
@@ -35,9 +33,6 @@ class DVRCaseManagement @Inject() (
       authenticated: AuthenticatedActionBuilder,
       modernisedDvrCaseManagement: ModernisedCCACaseManagementApi,
       modernisedValuationManagementApi: ModernisedExternalValuationManagementApi,
-      dvrCaseManagement: CCACaseManagementApi,
-      valuationManagementApi: ExternalValuationManagementApi,
-      featureSwitch: FeatureSwitch,
       dvrRecordRepository: DVRRecordRepository
 )(implicit executionContext: ExecutionContext)
     extends PropertyLinkingBaseController(controllerComponents) {
@@ -49,10 +44,7 @@ class DVRCaseManagement @Inject() (
 
         for {
           _ <- dvrRecordRepository.create(dvrRequest)
-          _ <- if (featureSwitch.isBstDownstreamEnabled)
-                 dvrCaseManagement.requestDetailedValuation(dvrRequest)
-               else
-                 modernisedDvrCaseManagement.requestDetailedValuation(dvrRequest)
+          _ <- modernisedDvrCaseManagement.requestDetailedValuation(dvrRequest)
         } yield Ok
       }
     }
@@ -63,12 +55,7 @@ class DVRCaseManagement @Inject() (
         propertyLinkId: String
   ): Action[AnyContent] =
     authenticated.async { implicit request =>
-      lazy val optDvrDocumentFiles =
-        if (featureSwitch.isBstDownstreamEnabled)
-          valuationManagementApi.getDvrDocuments(valuationId, uarn, propertyLinkId)
-        else
-          modernisedValuationManagementApi.getDvrDocuments(valuationId, uarn, propertyLinkId)
-      optDvrDocumentFiles
+      modernisedValuationManagementApi.getDvrDocuments(valuationId, uarn, propertyLinkId)
         .map {
           case Some(response) =>
             logger.debug(s"dvr documents response: ${Json.prettyPrint(Json.toJson(response))}")
@@ -84,12 +71,7 @@ class DVRCaseManagement @Inject() (
         fileRef: String
   ): Action[AnyContent] =
     authenticated.async { implicit request =>
-      lazy val response: Future[HttpResponse] =
-        if (featureSwitch.isBstDownstreamEnabled)
-          valuationManagementApi.getDvrDocument(valuationId, uarn, propertyLinkId, fileRef)
-        else
-          modernisedValuationManagementApi.getDvrDocument(valuationId, uarn, propertyLinkId, fileRef)
-      response
+      modernisedValuationManagementApi.getDvrDocument(valuationId, uarn, propertyLinkId, fileRef)
         .map { document =>
           val contentType =
             document.headers.view.mapValues(_.mkString(",")).getOrElse(CONTENT_TYPE, "application/octet-stream")

@@ -28,8 +28,6 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
 import uk.gov.hmrc.voapropertylinking.binders.clients.GetClientsParameters
 import uk.gov.hmrc.voapropertylinking.binders.propertylinks.{GetClientPropertyLinksParameters, GetMyClientsPropertyLinkParameters, GetMyOrganisationPropertyLinksParameters}
-import uk.gov.hmrc.voapropertylinking.config.FeatureSwitch
-import uk.gov.hmrc.voapropertylinking.connectors.bst.{ExternalPropertyLinkApi, PropertyLinkApi}
 import uk.gov.hmrc.voapropertylinking.connectors.modernised.ModernisedExternalPropertyLinkApi
 import uk.gov.hmrc.voapropertylinking.utils.Cats
 
@@ -37,14 +35,12 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class PropertyLinkingService @Inject() (
-      val modernisedPropertyLinksConnector: ModernisedExternalPropertyLinkApi,
-      propertyLinksConnector: ExternalPropertyLinkApi,
-      featureSwitch: FeatureSwitch
+      val modernisedPropertyLinksConnector: ModernisedExternalPropertyLinkApi
 )(implicit executionContext: ExecutionContext)
     extends Cats {
 
-  protected def connector: PropertyLinkApi =
-    if (featureSwitch.isBstDownstreamEnabled) propertyLinksConnector else modernisedPropertyLinksConnector
+  protected def connector: ModernisedExternalPropertyLinkApi =
+    modernisedPropertyLinksConnector
 
   def create(
         propertyLink: APIPropertyLinkRequest

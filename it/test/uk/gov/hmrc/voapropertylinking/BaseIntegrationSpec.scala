@@ -38,9 +38,7 @@ trait BaseIntegrationSpec
     Map(
       "auditing.enabled"                              -> "false",
       "microservice.services.voa-modernised-api.host" -> wiremockHost,
-      "microservice.services.voa-modernised-api.port" -> wiremockPort.toString,
-      "microservice.services.voa-bst.host"            -> wiremockHost,
-      "microservice.services.voa-bst.port"            -> wiremockPort.toString
+      "microservice.services.voa-modernised-api.port" -> wiremockPort.toString
     )
 
   implicit val requestWithPrincipal: RequestWithPrincipal[_] =

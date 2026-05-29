@@ -22,8 +22,6 @@ import javax.inject.Inject
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
-import uk.gov.hmrc.voapropertylinking.config.FeatureSwitch
-import uk.gov.hmrc.voapropertylinking.connectors.bst.ExternalCaseManagementApi
 import uk.gov.hmrc.voapropertylinking.connectors.modernised.ModernisedExternalCaseManagementApi
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -34,9 +32,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class ChallengeController @Inject() (
       controllerComponents: ControllerComponents,
       authenticated: AuthenticatedActionBuilder,
-      modernisedExternalCaseManagementApi: ModernisedExternalCaseManagementApi,
-      externalCaseManagementApi: ExternalCaseManagementApi,
-      featureSwitch: FeatureSwitch
+      modernisedExternalCaseManagementApi: ModernisedExternalCaseManagementApi
 )(implicit executionContext: ExecutionContext)
     extends PropertyLinkingBaseController(controllerComponents) {
 
@@ -47,16 +43,11 @@ class ChallengeController @Inject() (
         party: String
   ): Action[AnyContent] =
     authenticated.async { implicit request =>
-      val canChallengeResponse: Future[Option[CanChallengeResponse]] =
-        if (featureSwitch.isBstDownstreamEnabled)
-          externalCaseManagementApi
-            .canChallenge(propertyLinkSubmissionId, checkCaseRef, valuationId, party)
-        else
-          modernisedExternalCaseManagementApi
-            .canChallenge(propertyLinkSubmissionId, checkCaseRef, valuationId, party)
-      canChallengeResponse.map {
-        case Some(resp) => Ok(Json.toJson(resp))
-        case _          => Forbidden
-      }
+      modernisedExternalCaseManagementApi
+        .canChallenge(propertyLinkSubmissionId, checkCaseRef, valuationId, party)
+        .map {
+          case Some(resp) => Ok(Json.toJson(resp))
+          case _          => Forbidden
+        }
     }
 }
