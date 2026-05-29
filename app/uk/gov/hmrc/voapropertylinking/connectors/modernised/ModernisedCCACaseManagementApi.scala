@@ -22,6 +22,7 @@ import uk.gov.hmrc.http._
 import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
 import uk.gov.hmrc.voapropertylinking.config.AppConfig
 import uk.gov.hmrc.voapropertylinking.connectors.BaseVoaConnector
+import uk.gov.hmrc.voapropertylinking.connectors.errorhandler.ModernisedRequestErrorLogging
 import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
 
 import javax.inject.Inject
@@ -31,16 +32,19 @@ class ModernisedCCACaseManagementApi @Inject() (
       httpClient: VoaHttpClient,
       appConfig: AppConfig
 )(implicit executionContext: ExecutionContext)
-    extends BaseVoaConnector {
+    extends BaseVoaConnector with ModernisedRequestErrorLogging {
 
   lazy val url = s"${appConfig.modernisedBase}/cca-case-management-api"
 
   def requestDetailedValuation(
         request: DetailedValuationRequest
-  )(implicit requestWithPrincipal: RequestWithPrincipal[_]): Future[Unit] =
-    httpClient
-      .postWithGgHeaders[HttpResponse](url + "/cca_case/dvrSubmission", Json.toJsObject(request))
+  )(implicit requestWithPrincipal: RequestWithPrincipal[_]): Future[Unit] = {
+    val dvrUrl = url + "/cca_case/dvrSubmission"
+    val response = httpClient
+      .postWithGgHeaders[HttpResponse](dvrUrl, Json.toJsObject(request))
       .map { _ =>
         ()
       }
+    logModernisedErrorResponse(response, Seq.empty, dvrUrl)(requestWithPrincipal.principal, executionContext)
+  }
 }
