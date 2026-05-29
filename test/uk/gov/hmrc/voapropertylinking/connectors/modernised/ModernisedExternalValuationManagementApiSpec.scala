@@ -31,8 +31,8 @@ import scala.concurrent.Future
 
 class ModernisedExternalValuationManagementApiSpec extends BaseUnitSpec with ContentTypes {
 
-  val voaApiUrl = "http://voa-modernised-api/external-valuation-management-api"
-  val valuationHistoryUrl = s"$voaApiUrl/properties/{uarn}/valuations"
+  val modernisedApiBaseUrl = "http://voa-modernised-api/external-valuation-management-api"
+  val valuationHistoryUrl = s"$modernisedApiBaseUrl/properties/{uarn}/valuations"
 
   trait Setup {
     val uarn: Long = 123456L

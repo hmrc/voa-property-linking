@@ -22,6 +22,7 @@ import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
 import uk.gov.hmrc.voapropertylinking.config.AppConfig
 import uk.gov.hmrc.voapropertylinking.connectors.BaseVoaConnector
+import uk.gov.hmrc.voapropertylinking.connectors.errorhandler.ModernisedRequestErrorLogging
 import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
 
 import java.time.Instant
@@ -32,7 +33,7 @@ class ModernisedCustomerManagementApi @Inject() (
       httpClient: VoaHttpClient,
       appConfig: AppConfig
 )(implicit executionContext: ExecutionContext)
-    extends BaseVoaConnector {
+    extends BaseVoaConnector with ModernisedRequestErrorLogging {
 
   lazy val baseUrl: String = s"${appConfig.modernisedBase}/customer-management-api"
   lazy val organisationUrl: String = baseUrl + "/organisation"
@@ -40,63 +41,85 @@ class ModernisedCustomerManagementApi @Inject() (
 
   def createGroupAccount(account: GroupAccountSubmission, time: Instant = Instant.now)(implicit
         requestWithPrincipal: RequestWithPrincipal[_]
-  ): Future[GroupId] =
-    httpClient.postWithGgHeaders[GroupId](organisationUrl, Json.toJsObject(account.toApiAccount(time)))
+  ): Future[GroupId] = {
+    val response = httpClient.postWithGgHeaders[GroupId](organisationUrl, Json.toJsObject(account.toApiAccount(time)))
+    logModernisedErrorResponse(response, Seq.empty, organisationUrl)(requestWithPrincipal.principal, executionContext)
+  }
 
   def updateGroupAccount(orgId: Long, account: UpdatedOrganisationAccount)(implicit
         requestWithPrincipal: RequestWithPrincipal[_]
-  ): Future[Unit] =
-    httpClient.putWithGgHeaders[HttpResponse](s"$organisationUrl/$orgId", Json.toJsObject(account)).map { _ =>
+  ): Future[Unit] = {
+    val orgUrl = s"$organisationUrl/$orgId"
+    val response = httpClient.putWithGgHeaders[HttpResponse](orgUrl, Json.toJsObject(account)).map { _ =>
       ()
     }
+    logModernisedErrorResponse(response, Seq("orgId" -> orgId.toString), orgUrl)(requestWithPrincipal.principal, executionContext)
+  }
 
-  // should never return none
   def getDetailedGroupAccount(
         id: Long
-  )(implicit requestWithPrincipal: RequestWithPrincipal[_]): Future[Option[GroupAccount]] =
-    httpClient
-      .getWithGGHeaders[Option[APIDetailedGroupAccount]](s"$organisationUrl?organisationId=$id")
+  )(implicit requestWithPrincipal: RequestWithPrincipal[_]): Future[Option[GroupAccount]] = {
+    val url = s"$organisationUrl?organisationId=$id"
+    val response = httpClient
+      .getWithGGHeaders[Option[APIDetailedGroupAccount]](url)
       .map(_.map(_.toGroupAccount))
+    logModernisedErrorResponse(response, Seq("organisationId" -> id.toString), url)(requestWithPrincipal.principal, executionContext)
+  }
 
-  // should never return none
   def findDetailedGroupAccountByGGID(
         ggId: String
-  )(implicit requestWithPrincipal: RequestWithPrincipal[_]): Future[Option[GroupAccount]] =
-    httpClient
-      .getWithGGHeaders[Option[APIDetailedGroupAccount]](s"$organisationUrl?governmentGatewayGroupId=$ggId")
+  )(implicit requestWithPrincipal: RequestWithPrincipal[_]): Future[Option[GroupAccount]] = {
+    val url = s"$organisationUrl?governmentGatewayGroupId=$ggId"
+    val response = httpClient
+      .getWithGGHeaders[Option[APIDetailedGroupAccount]](url)
       .map(_.map(_.toGroupAccount))
+    logModernisedErrorResponse(response, Seq("ggId" -> ggId), url)(requestWithPrincipal.principal, executionContext)
+  }
 
-  // should never return none
   def withAgentCode(
         agentCode: String
-  )(implicit requestWithPrincipal: RequestWithPrincipal[_]): Future[Option[GroupAccount]] =
-    httpClient
-      .getWithGGHeaders[Option[APIDetailedGroupAccount]](s"$organisationUrl?representativeCode=$agentCode")
+  )(implicit requestWithPrincipal: RequestWithPrincipal[_]): Future[Option[GroupAccount]] = {
+    val url = s"$organisationUrl?representativeCode=$agentCode"
+    val response = httpClient
+      .getWithGGHeaders[Option[APIDetailedGroupAccount]](url)
       .map(_.map(_.toGroupAccount))
+    logModernisedErrorResponse(response, Seq("agentCode" -> agentCode), url)(requestWithPrincipal.principal, executionContext)
+  }
 
   def createIndividualAccount(account: IndividualAccountSubmission, time: Instant = Instant.now)(implicit
         requestWithPrincipal: RequestWithPrincipal[_]
-  ): Future[IndividualAccountId] =
-    httpClient
+  ): Future[IndividualAccountId] = {
+    val response = httpClient
       .postWithGgHeaders[IndividualAccountId](individualUrl, Json.toJsObject(account.toAPIIndividualAccount(time)))
+    logModernisedErrorResponse(response, Seq.empty, individualUrl)(requestWithPrincipal.principal, executionContext)
+  }
 
   def updateIndividualAccount(personId: Long, account: IndividualAccountSubmission, time: Instant = Instant.now)(
         implicit requestWithPrincipal: RequestWithPrincipal[_]
-  ): Future[JsValue] =
-    httpClient
-      .putWithGgHeaders[JsValue](individualUrl + s"/$personId", Json.toJsObject(account.toAPIIndividualAccount(time)))
+  ): Future[JsValue] = {
+    val personUrl = individualUrl + s"/$personId"
+    val response = httpClient
+      .putWithGgHeaders[JsValue](personUrl, Json.toJsObject(account.toAPIIndividualAccount(time)))
+    logModernisedErrorResponse(response, Seq("personId" -> personId.toString), personUrl)(requestWithPrincipal.principal, executionContext)
+  }
 
   def getDetailedIndividual(
         id: Long
-  )(implicit requestWithPrincipal: RequestWithPrincipal[_]): Future[Option[IndividualAccount]] =
-    httpClient
-      .getWithGGHeaders[Option[APIDetailedIndividualAccount]](s"$individualUrl?personId=$id")
+  )(implicit requestWithPrincipal: RequestWithPrincipal[_]): Future[Option[IndividualAccount]] = {
+    val url = s"$individualUrl?personId=$id"
+    val response = httpClient
+      .getWithGGHeaders[Option[APIDetailedIndividualAccount]](url)
       .map(_.map(a => a.toIndividualAccount))
+    logModernisedErrorResponse(response, Seq("personId" -> id.toString), url)(requestWithPrincipal.principal, executionContext)
+  }
 
   def findDetailedIndividualAccountByGGID(
         ggId: String
-  )(implicit requestWithPrincipal: RequestWithPrincipal[_]): Future[Option[IndividualAccount]] =
-    httpClient
-      .getWithGGHeaders[Option[APIDetailedIndividualAccount]](s"$individualUrl?governmentGatewayExternalId=$ggId")
+  )(implicit requestWithPrincipal: RequestWithPrincipal[_]): Future[Option[IndividualAccount]] = {
+    val url = s"$individualUrl?governmentGatewayExternalId=$ggId"
+    val response = httpClient
+      .getWithGGHeaders[Option[APIDetailedIndividualAccount]](url)
       .map(_.map(_.toIndividualAccount))
+    logModernisedErrorResponse(response, Seq("ggId" -> ggId), url)(requestWithPrincipal.principal, executionContext)
+  }
 }

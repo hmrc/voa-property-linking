@@ -27,7 +27,11 @@ import uk.gov.hmrc.voapropertylinking.utils.HttpStatusCodes.{NOT_FOUND, OK}
 
 import scala.concurrent.ExecutionContext
 
-class ModernisedAddressManagementApiISpec extends BaseIntegrationSpec with ModernisedAddressManagementStub {
+import ch.qos.logback.classic.Level
+import play.api.Logger
+import uk.gov.hmrc.play.bootstrap.tools.LogCapturing
+
+class ModernisedAddressManagementApiISpec extends BaseIntegrationSpec with ModernisedAddressManagementStub with LogCapturing {
 
   trait TestSetup {
     lazy val connector: ModernisedAddressManagementApi = app.injector.instanceOf[ModernisedAddressManagementApi]
@@ -100,8 +104,24 @@ class ModernisedAddressManagementApiISpec extends BaseIntegrationSpec with Moder
         val responseJson: JsObject = Json.obj("doesnt" -> "matter")
         stubFind(postcode)(NOT_FOUND, responseJson)
 
-        assertThrows[Exception] {
-          await(connector.find(postcode))
+        withCaptureOfLoggingFrom(Logger(classOf[ModernisedAddressManagementApi])) { logs =>
+          val result: VoaClientException = intercept[VoaClientException] {
+            await(connector.find(postcode))
+          }
+
+          result.responseCode shouldBe NOT_FOUND.code
+
+          val warnLogs = logs.filter(_.getLevel == Level.WARN)
+          warnLogs should have size 1
+
+          val message = warnLogs.head.getMessage
+          message should include("ModernisedError")
+          message should include(s"statusCode=${NOT_FOUND.code}")
+          message should include("grpId=groupId")
+          message should include("extId=externalId")
+          message should include(s"postcode=$postcode")
+          message should include("url=http://localhost:")
+          message should include("/address-management-api/address")
         }
       }
     }

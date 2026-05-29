@@ -22,6 +22,7 @@ import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
 import uk.gov.hmrc.voapropertylinking.config.AppConfig
 import uk.gov.hmrc.voapropertylinking.connectors.BaseVoaConnector
+import uk.gov.hmrc.voapropertylinking.connectors.errorhandler.ModernisedRequestErrorLogging
 import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
 import uk.gov.hmrc.voapropertylinking.models.modernised.casemanagement.check.myclients.CheckCasesWithClient
 import uk.gov.hmrc.voapropertylinking.models.modernised.casemanagement.check.myorganisation.CheckCasesWithAgent
@@ -36,42 +37,42 @@ class ModernisedExternalCaseManagementApi @Inject() (
       httpClient: VoaHttpClient,
       appConfig: AppConfig
 )(implicit executionContext: ExecutionContext)
-    extends BaseVoaConnector {
+    extends BaseVoaConnector with ModernisedRequestErrorLogging {
 
   val queryParams = "?start=1&size=100"
 
   def getMyOrganisationCheckCases(
         propertyLinkSubmissionId: String
-  )(implicit request: RequestWithPrincipal[_]): Future[CheckCasesWithAgent] =
-    httpClient.getWithGGHeaders[CheckCasesWithAgent](
-      url =
-        s"${appConfig.modernisedBase}/external-case-management-api/my-organisation/property-links/$propertyLinkSubmissionId/check-cases$queryParams"
-    )
+  )(implicit request: RequestWithPrincipal[_]): Future[CheckCasesWithAgent] = {
+    val url = s"${appConfig.modernisedBase}/external-case-management-api/my-organisation/property-links/$propertyLinkSubmissionId/check-cases$queryParams"
+    val response = httpClient.getWithGGHeaders[CheckCasesWithAgent](url = url)
+    logModernisedErrorResponse(response, Seq("propertyLinkSubmissionId" -> propertyLinkSubmissionId), url)(request.principal, executionContext)
+  }
 
   def getMyClientsCheckCases(
         propertyLinkSubmissionId: String
-  )(implicit request: RequestWithPrincipal[_]): Future[CheckCasesWithClient] =
-    httpClient.getWithGGHeaders[CheckCasesWithClient](
-      url =
-        s"${appConfig.modernisedBase}/external-case-management-api/my-organisation/clients/all/property-links/$propertyLinkSubmissionId/check-cases$queryParams"
-    )
+  )(implicit request: RequestWithPrincipal[_]): Future[CheckCasesWithClient] = {
+    val url = s"${appConfig.modernisedBase}/external-case-management-api/my-organisation/clients/all/property-links/$propertyLinkSubmissionId/check-cases$queryParams"
+    val response = httpClient.getWithGGHeaders[CheckCasesWithClient](url = url)
+    logModernisedErrorResponse(response, Seq("propertyLinkSubmissionId" -> propertyLinkSubmissionId), url)(request.principal, executionContext)
+  }
 
   def canChallenge(propertyLinkSubmissionId: String, checkCaseRef: String, valuationId: Long, party: String)(implicit
         request: RequestWithPrincipal[_]
   ): Future[Option[CanChallengeResponse]] =
     party match {
       case "client" =>
-        httpClient
-          .getWithGGHeaders[HttpResponse](
-            s"${appConfig.modernisedBase}/external-case-management-api/my-organisation/property-links/$propertyLinkSubmissionId/check-cases/$checkCaseRef/canChallenge?valuationId=$valuationId"
-          )
+        val url = s"${appConfig.modernisedBase}/external-case-management-api/my-organisation/property-links/$propertyLinkSubmissionId/check-cases/$checkCaseRef/canChallenge?valuationId=$valuationId"
+        val response = httpClient
+          .getWithGGHeaders[HttpResponse](url)
           .map(handleCanChallengeResponse) recover toNone
+        logModernisedErrorResponse(response, Seq("propertyLinkSubmissionId" -> propertyLinkSubmissionId, "checkCaseRef" -> checkCaseRef, "valuationId" -> valuationId.toString), url)(request.principal, executionContext)
       case "agent" =>
-        httpClient
-          .getWithGGHeaders[HttpResponse](
-            s"${appConfig.modernisedBase}/external-case-management-api/my-organisation/clients/all/property-links/$propertyLinkSubmissionId/check-cases/$checkCaseRef/canChallenge?valuationId=$valuationId"
-          )
+        val url = s"${appConfig.modernisedBase}/external-case-management-api/my-organisation/clients/all/property-links/$propertyLinkSubmissionId/check-cases/$checkCaseRef/canChallenge?valuationId=$valuationId"
+        val response = httpClient
+          .getWithGGHeaders[HttpResponse](url)
           .map(handleCanChallengeResponse) recover toNone
+        logModernisedErrorResponse(response, Seq("propertyLinkSubmissionId" -> propertyLinkSubmissionId, "checkCaseRef" -> checkCaseRef, "valuationId" -> valuationId.toString), url)(request.principal, executionContext)
       case _ => throw new IllegalArgumentException(s"Unknown party $party")
     }
 
