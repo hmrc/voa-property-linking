@@ -25,6 +25,7 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
 import uk.gov.hmrc.voapropertylinking.config.AppConfig
 import uk.gov.hmrc.voapropertylinking.connectors.BaseVoaConnector
+import uk.gov.hmrc.voapropertylinking.connectors.errorhandler.ModernisedRequestErrorLogging
 import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
 
 import java.net.URL
@@ -38,7 +39,7 @@ class ModernisedExternalValuationManagementApi @Inject() (
       config: ServicesConfig,
       appConfig: AppConfig
 )(implicit executionContext: ExecutionContext)
-    extends BaseVoaConnector {
+    extends BaseVoaConnector with ModernisedRequestErrorLogging {
 
   lazy val appName: String = config.getConfString("appName", "voa-property-linking")
 
@@ -46,25 +47,39 @@ class ModernisedExternalValuationManagementApi @Inject() (
 
   def getDvrDocuments(valuationId: Long, uarn: Long, propertyLinkId: String)(implicit
         request: RequestWithPrincipal[_]
-  ): Future[Option[DvrDocumentFiles]] =
-    httpClient
+  ): Future[Option[DvrDocumentFiles]] = {
+    val dvrUrl = s"$url/properties/$uarn/valuations/$valuationId/files?propertyLinkId=$propertyLinkId"
+    val response = httpClient
       .getWithGGHeaders[Option[DvrDocumentFiles]](
-        url = s"$url/properties/$uarn/valuations/$valuationId/files?propertyLinkId=$propertyLinkId"
+        url = dvrUrl
       )
+    logModernisedErrorResponse(
+      response,
+      Seq("valuationId" -> valuationId.toString, "uarn" -> uarn.toString, "propertyLinkId" -> propertyLinkId),
+      dvrUrl
+    )(request.principal, executionContext)
+  }
 
   def getValuationHistory(uarn: Long, propertyLinkSubmissionId: String)(implicit
         request: RequestWithPrincipal[_]
-  ): Future[Option[ValuationHistoryResponse]] =
-    httpClient
-      .getWithGGHeaders[Option[ValuationHistoryResponse]](
-        s"${valuationHistoryUrl.replace("{uarn}", uarn.toString)}?propertyLinkId=$propertyLinkSubmissionId"
-      )
+  ): Future[Option[ValuationHistoryResponse]] = {
+    val historyUrl = valuationHistoryUrl.replace("{uarn}", uarn.toString)
+    val fullUrl = s"$historyUrl?propertyLinkId=$propertyLinkSubmissionId"
+    val response = httpClient
+      .getWithGGHeaders[Option[ValuationHistoryResponse]](fullUrl)
+    logModernisedErrorResponse(
+      response,
+      Seq("uarn" -> uarn.toString, "propertyLinkSubmissionId" -> propertyLinkSubmissionId),
+      fullUrl
+    )(request.principal, executionContext)
+  }
 
   def getDvrDocument(valuationId: Long, uarn: Long, propertyLinkId: String, fileRef: String)(implicit
         request: RequestWithPrincipal[_]
-  ): Future[HttpResponse] =
-    httpClientV2
-      .get(new URL(s"$url/properties/$uarn/valuations/$valuationId/files/$fileRef?propertyLinkId=$propertyLinkId"))
+  ): Future[HttpResponse] = {
+    val dvrUrl = s"$url/properties/$uarn/valuations/$valuationId/files/$fileRef?propertyLinkId=$propertyLinkId"
+    val response = httpClientV2
+      .get(new URL(dvrUrl))
       .setHeader(
         Seq(
           "GG-EXTERNAL-ID"            -> request.principal.externalId,
@@ -75,11 +90,23 @@ class ModernisedExternalValuationManagementApi @Inject() (
       )
       .withProxy
       .stream
-      .flatMap { response =>
-        response.status match {
+      .flatMap { result =>
+        result.status match {
           case s if is4xx(s) || is5xx(s) =>
-            Future.failed(UpstreamErrorResponse(s"Upload failed with status ${response.status}.", s, s))
-          case _ => Future.successful(response)
+            val errorResponse = UpstreamErrorResponse(s"Upload failed with status ${result.status}.", s, s)
+            logModernisedErrorResponse(
+              Future.failed(errorResponse),
+              Seq(
+                "valuationId"    -> valuationId.toString,
+                "uarn"           -> uarn.toString,
+                "fileRef"        -> fileRef,
+                "propertyLinkId" -> propertyLinkId
+              ),
+              dvrUrl
+            )(request.principal, executionContext)
+          case _ => Future.successful(result)
         }
       }
+    response
+  }
 }

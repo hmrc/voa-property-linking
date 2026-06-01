@@ -20,6 +20,7 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
 import uk.gov.hmrc.voapropertylinking.connectors.BaseVoaConnector
+import uk.gov.hmrc.voapropertylinking.connectors.errorhandler.ModernisedRequestErrorLogging
 import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
 import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation.{AgentDetails, AppointmentChangeResponse, AppointmentChangesRequest}
 
@@ -31,20 +32,26 @@ class ModernisedExternalOrganisationManagementApi @Inject() (
       @Named("voa.modernised.agentAppointmentChanges") agentAppointmentChangesUrl: String,
       @Named("voa.modernised.myAgentDetails") getAgentDetailsUrl: String
 )(implicit executionContext: ExecutionContext)
-    extends BaseVoaConnector {
+    extends BaseVoaConnector with ModernisedRequestErrorLogging {
 
   def agentAppointmentChanges(
         appointmentChangesRequest: AppointmentChangesRequest
-  )(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[AppointmentChangeResponse] =
-    httpClient.postWithGgHeaders[AppointmentChangeResponse](
+  )(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[AppointmentChangeResponse] = {
+    val response = httpClient.postWithGgHeaders[AppointmentChangeResponse](
       url = agentAppointmentChangesUrl,
       body = Json.toJsObject(appointmentChangesRequest)
     )
+    logModernisedErrorResponse(response, Seq.empty, agentAppointmentChangesUrl)(request.principal, executionContext)
+  }
 
   def getAgentDetails(
         agentCode: Long
-  )(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[Option[AgentDetails]] =
-    httpClient.getWithGGHeaders[Option[AgentDetails]](url =
-      getAgentDetailsUrl.templated("representativeCode" -> agentCode)
+  )(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[Option[AgentDetails]] = {
+    val agentUrl = getAgentDetailsUrl.templated("representativeCode" -> agentCode)
+    val response = httpClient.getWithGGHeaders[Option[AgentDetails]](url = agentUrl)
+    logModernisedErrorResponse(response, Seq("agentCode" -> agentCode.toString), agentUrl)(
+      request.principal,
+      executionContext
     )
+  }
 }

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.voapropertylinking.connectors.bst
+package uk.gov.hmrc.voapropertylinking.connectors.modernised
+
 import models.PaginationParams
 import models.modernised.externalpropertylink.myclients.{ClientPropertyLink, ClientsResponse, PropertyLinksWithClient}
 import models.modernised.externalpropertylink.myorganisations.{AgentList, OwnerPropertyLink, PropertyLinksWithAgents}
@@ -52,6 +53,7 @@ trait PropertyLinkApi {
   def getClientsPropertyLinks(searchParams: GetMyClientsPropertyLinkParameters, params: Option[PaginationParams])(
         implicit request: RequestWithPrincipal[_]
   ): Future[Option[PropertyLinksWithClient]]
+
   def getClientPropertyLinks(
         clientOrgId: Long,
         searchParams: GetClientPropertyLinksParameters,

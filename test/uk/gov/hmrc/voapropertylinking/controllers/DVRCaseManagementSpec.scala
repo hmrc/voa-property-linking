@@ -57,250 +57,118 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
     createdAt = Some(LocalDateTime.now())
   )
 
-  "If the bstDownstream feature switch is enabled" when {
+  "request detailed valuation v2 " should {
+    "create a record of the DVR in mongo and POST the DVR to modernised" in {
+      val dvrJson = Json.toJson(testDvr)
 
-    "request detailed valuation v2 " should {
-      "create a record of the DVR in mongo and POST the DVR to modernised" in {
-        val dvrJson = Json.toJson(testDvr)
+      when(mockRepo.create(testDvr)).thenReturn(Future.successful(()))
+      when(mockModernisedCCACaseManagementApi.requestDetailedValuation(any[DetailedValuationRequest]())(any()))
+        .thenReturn(Future.successful(()))
 
-        when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
-        when(mockRepo.create(testDvr)).thenReturn(Future.successful(()))
-        when(mockCCACaseManagementApi.requestDetailedValuation(any[DetailedValuationRequest]())(any()))
-          .thenReturn(Future.successful(()))
+      val res = testController.requestDetailedValuationV2()(FakeRequest().withBody(dvrJson))
 
-        val res = testController.requestDetailedValuationV2()(FakeRequest().withBody(dvrJson))
+      status(res) shouldBe OK
 
-        status(res) shouldBe OK
-
-        verify(mockRepo).create(matching(testDvr))
-        verify(mockCCACaseManagementApi).requestDetailedValuation(matching(testDvr))(any())
-      }
-      "return a 400 (Bad Request) if the body supplied is invalid" in {
-        val res =
-          testController.requestDetailedValuationV2()(FakeRequest().withBody(Json.obj("invalid" -> "dvrRequest")))
-
-        status(res) shouldBe BAD_REQUEST
-      }
-    }
-
-    "getDvrRecord" should {
-      "return OK with a record with DVR id if the DVR exists in mongo with an id" in {
-        when(mockRepo.find(anyLong(), anyLong())) thenReturn Future.successful(Some(testDvrRecordWithSubId))
-        val res = testController.getDvrRecord(1L, 3L)(FakeRequest())
-
-        status(res) shouldBe OK
-        contentAsJson(res) shouldBe Json.toJson(testDvrRecordWithSubId)
-
-        verify(mockRepo).find(matching(1L), matching(3L))
-        reset(mockRepo)
-      }
-
-      "return OK with a record with no DVR id if the DVR already exists in mongo with no id" in {
-        when(mockRepo.find(anyLong(), anyLong())) thenReturn Future.successful(Some(testDvrRecordNoSubId))
-        val res = testController.getDvrRecord(1L, 3L)(FakeRequest())
-
-        status(res) shouldBe OK
-        contentAsJson(res) shouldBe Json.toJson(testDvrRecordNoSubId)
-
-        verify(mockRepo).find(matching(1L), matching(3L))
-        reset(mockRepo)
-      }
-
-      "return NOT_FOUND with None if the DVR does not exist in mongo" in {
-        when(mockRepo.find(anyLong(), anyLong())) thenReturn Future.successful(None)
-        val res = testController.getDvrRecord(1L, 3L)(FakeRequest())
-
-        status(res) shouldBe NOT_FOUND
-        contentAsJson(res) shouldBe Json.toJson(None)
-
-        verify(mockRepo).find(matching(1L), matching(3L))
-        reset(mockRepo)
-      }
-    }
-
-    "get dvr documents" should {
-      "return 200 OK with the dvr document information" in {
-        val now = LocalDateTime.parse("2019-09-11T11:03:25.123")
-
-        when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
-        when(mockValuationManagementApi.getDvrDocuments(any(), any(), any())(any()))
-          .thenReturn(
-            Future.successful(
-              Some(
-                DvrDocumentFiles(
-                  checkForm = Document(DocumentSummary("1L", "Check Document", now)),
-                  detailedValuation = Document(DocumentSummary("2L", "Detailed Valuation Document", now))
-                )
-              )
-            )
-          )
-
-        val result = testController.getDvrDocuments(1L, 3L, "PL-12345")(FakeRequest())
-
-        status(result) shouldBe OK
-        contentAsJson(result) shouldBe
-          Json.parse(s"""
-                        |{
-                        | "checkForm": {
-                        |   "documentSummary": {
-                        |     "documentId": "1L",
-                        |     "documentName": "Check Document",
-                        |     "createDatetime": "$now"
-                        |     }
-                        | },
-                        | "detailedValuation": {
-                        |    "documentSummary": {
-                        |       "documentId": "2L",
-                        |       "documentName": "Detailed Valuation Document",
-                        |       "createDatetime": "$now"
-                        |    }
-                        | }
-                        |}
-            """.stripMargin)
-      }
-
-      "return 404 NOT_FOUND when the dvr documents dont exists" in {
-        when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
-        when(mockValuationManagementApi.getDvrDocuments(any(), any(), any())(any()))
-          .thenReturn(Future.successful(None))
-
-        val result = testController.getDvrDocuments(1L, 3L, "PL-12345")(FakeRequest())
-
-        status(result) shouldBe NOT_FOUND
-      }
-    }
-
-    "get dvr document" should {
-      "return 200 Ok with the file chunked" in {
-        val mockHttpResponse: HttpResponse = mock[HttpResponse]
-
-        when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
-        when(mockValuationManagementApi.getDvrDocument(any(), any(), any(), any())(any()))
-          .thenReturn(Future.successful(mockHttpResponse))
-        when(mockHttpResponse.headers).thenReturn(Map("header" -> Seq("value")))
-
-        val result = testController.getDvrDocument(1L, 3L, "PL-12345", "1L")(FakeRequest())
-
-        status(result) shouldBe OK
-      }
+      verify(mockRepo).create(matching(testDvr))
+      verify(mockModernisedCCACaseManagementApi).requestDetailedValuation(matching(testDvr))(any())
     }
   }
 
-  "If the bstDownstream feature switch is disabled" when {
-    "request detailed valuation v2 " should {
-      "create a record of the DVR in mongo and POST the DVR to modernised" in {
-        val dvrJson = Json.toJson(testDvr)
+  "getDvrRecord" should {
+    "return OK with a record with DVR id if the DVR exists in mongo with an id" in {
+      when(mockRepo.find(anyLong(), anyLong())) thenReturn Future.successful(Some(testDvrRecordWithSubId))
+      val res = testController.getDvrRecord(1L, 3L)(FakeRequest())
 
-        when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(false)
-        when(mockRepo.create(testDvr)).thenReturn(Future.successful(()))
-        when(mockModernisedCCACaseManagementApi.requestDetailedValuation(any[DetailedValuationRequest]())(any()))
-          .thenReturn(Future.successful(()))
+      status(res) shouldBe OK
+      contentAsJson(res) shouldBe Json.toJson(testDvrRecordWithSubId)
 
-        val res = testController.requestDetailedValuationV2()(FakeRequest().withBody(dvrJson))
-
-        status(res) shouldBe OK
-
-        verify(mockRepo).create(matching(testDvr))
-        verify(mockModernisedCCACaseManagementApi).requestDetailedValuation(matching(testDvr))(any())
-      }
+      verify(mockRepo).find(matching(1L), matching(3L))
+      reset(mockRepo)
     }
 
-    "dvr exists" should {
-      "return OK with a record with DVR id if the DVR exists in mongo with an id" in {
-        when(mockRepo.find(anyLong(), anyLong())) thenReturn Future.successful(Some(testDvrRecordWithSubId))
-        val res = testController.getDvrRecord(1L, 3L)(FakeRequest())
+    "return OK with a record with no DVR id if the DVR already exists in mongo with no id" in {
+      when(mockRepo.find(anyLong(), anyLong())) thenReturn Future.successful(Some(testDvrRecordNoSubId))
+      val res = testController.getDvrRecord(1L, 3L)(FakeRequest())
 
-        status(res) shouldBe OK
-        contentAsJson(res) shouldBe Json.toJson(testDvrRecordWithSubId)
+      status(res) shouldBe OK
+      contentAsJson(res) shouldBe Json.toJson(testDvrRecordNoSubId)
 
-        verify(mockRepo).find(matching(1L), matching(3L))
-        reset(mockRepo)
-      }
-
-      "return OK with a record with no DVR id if the DVR already exists in mongo with no id" in {
-        when(mockRepo.find(anyLong(), anyLong())) thenReturn Future.successful(Some(testDvrRecordNoSubId))
-        val res = testController.getDvrRecord(1L, 3L)(FakeRequest())
-
-        status(res) shouldBe OK
-        contentAsJson(res) shouldBe Json.toJson(testDvrRecordNoSubId)
-
-        verify(mockRepo).find(matching(1L), matching(3L))
-        reset(mockRepo)
-      }
-
-      "return NOT_FOUND with None if the DVR does not exist in mongo" in {
-        when(mockRepo.find(anyLong(), anyLong())) thenReturn Future.successful(None)
-        val res = testController.getDvrRecord(1L, 3L)(FakeRequest())
-
-        status(res) shouldBe NOT_FOUND
-        contentAsJson(res) shouldBe Json.toJson(None)
-
-        verify(mockRepo).find(matching(1L), matching(3L))
-        reset(mockRepo)
-      }
+      verify(mockRepo).find(matching(1L), matching(3L))
+      reset(mockRepo)
     }
 
-    "get dvr documents" should {
-      "return 200 OK with the dvr document information" in {
-        val now = LocalDateTime.parse("2019-09-11T11:03:25.123")
+    "return NOT_FOUND with None if the DVR does not exist in mongo" in {
+      when(mockRepo.find(anyLong(), anyLong())) thenReturn Future.successful(None)
+      val res = testController.getDvrRecord(1L, 3L)(FakeRequest())
 
-        when(mockModernisedExternalValuationManagementApi.getDvrDocuments(any(), any(), any())(any()))
-          .thenReturn(
-            Future.successful(
-              Some(
-                DvrDocumentFiles(
-                  checkForm = Document(DocumentSummary("1L", "Check Document", now)),
-                  detailedValuation = Document(DocumentSummary("2L", "Detailed Valuation Document", now))
-                )
+      status(res) shouldBe NOT_FOUND
+      contentAsJson(res) shouldBe Json.toJson(None)
+
+      verify(mockRepo).find(matching(1L), matching(3L))
+      reset(mockRepo)
+    }
+  }
+
+  "get dvr documents" should {
+    "return 200 OK with the dvr document information" in {
+      val now = LocalDateTime.parse("2019-09-11T11:03:25.123")
+
+      when(mockModernisedExternalValuationManagementApi.getDvrDocuments(any(), any(), any())(any()))
+        .thenReturn(
+          Future.successful(
+            Some(
+              DvrDocumentFiles(
+                checkForm = Document(DocumentSummary("1L", "Check Document", now)),
+                detailedValuation = Document(DocumentSummary("2L", "Detailed Valuation Document", now))
               )
             )
           )
+        )
 
-        val result = testController.getDvrDocuments(1L, 3L, "PL-12345")(FakeRequest())
+      val result = testController.getDvrDocuments(1L, 3L, "PL-12345")(FakeRequest())
 
-        status(result) shouldBe OK
-        contentAsJson(result) shouldBe Json.parse(s"""
-                                                     |{
-                                                     | "checkForm": {
-                                                     |   "documentSummary": {
-                                                     |     "documentId": "1L",
-                                                     |     "documentName": "Check Document",
-                                                     |     "createDatetime": "$now"
-                                                     |     }
-                                                     | },
-                                                     | "detailedValuation": {
-                                                     |    "documentSummary": {
-                                                     |       "documentId": "2L",
-                                                     |       "documentName": "Detailed Valuation Document",
-                                                     |       "createDatetime": "$now"
-                                                     |    }
-                                                     | }
-                                                     |}
-            """.stripMargin)
-      }
-
-      "return 404 NOT_FOUND when the dvr documents dont exists" in {
-        when(mockModernisedExternalValuationManagementApi.getDvrDocuments(any(), any(), any())(any()))
-          .thenReturn(Future.successful(None))
-
-        val result = testController.getDvrDocuments(1L, 3L, "PL-12345")(FakeRequest())
-
-        status(result) shouldBe NOT_FOUND
-      }
+      status(result) shouldBe OK
+      contentAsJson(result) shouldBe Json.parse(s"""
+                                                   |{
+                                                   | "checkForm": {
+                                                   |   "documentSummary": {
+                                                   |     "documentId": "1L",
+                                                   |     "documentName": "Check Document",
+                                                   |     "createDatetime": "$now"
+                                                   |     }
+                                                   | },
+                                                   | "detailedValuation": {
+                                                   |    "documentSummary": {
+                                                   |       "documentId": "2L",
+                                                   |       "documentName": "Detailed Valuation Document",
+                                                   |       "createDatetime": "$now"
+                                                   |    }
+                                                   | }
+                                                   |}
+              """.stripMargin)
     }
 
-    "get dvr document" should {
-      "return 200 Ok with the file chunked" in {
-        val mockHttpResponse: HttpResponse = mock[HttpResponse]
+    "return 404 NOT_FOUND when the dvr documents dont exists" in {
+      when(mockModernisedExternalValuationManagementApi.getDvrDocuments(any(), any(), any())(any()))
+        .thenReturn(Future.successful(None))
 
-        when(mockModernisedExternalValuationManagementApi.getDvrDocument(any(), any(), any(), any())(any()))
-          .thenReturn(Future.successful(mockHttpResponse))
-        when(mockHttpResponse.headers).thenReturn(Map("header" -> Seq("value")))
+      val result = testController.getDvrDocuments(1L, 3L, "PL-12345")(FakeRequest())
 
-        val result = testController.getDvrDocument(1L, 3L, "PL-12345", "1L")(FakeRequest())
+      status(result) shouldBe NOT_FOUND
+    }
+  }
 
-        status(result) shouldBe OK
-      }
+  "get dvr document" should {
+    "return 200 Ok with the file chunked" in {
+      val mockHttpResponse: HttpResponse = mock[HttpResponse]
+
+      when(mockModernisedExternalValuationManagementApi.getDvrDocument(any(), any(), any(), any())(any()))
+        .thenReturn(Future.successful(mockHttpResponse))
+      when(mockHttpResponse.headers).thenReturn(Map("header" -> Seq("value")))
+
+      val result = testController.getDvrDocument(1L, 3L, "PL-12345", "1L")(FakeRequest())
+
+      status(result) shouldBe OK
     }
   }
 
@@ -309,9 +177,6 @@ class DVRCaseManagementSpec extends BaseControllerSpec {
     authenticated = preAuthenticatedActionBuilders(),
     modernisedDvrCaseManagement = mockModernisedCCACaseManagementApi,
     modernisedValuationManagementApi = mockModernisedExternalValuationManagementApi,
-    dvrCaseManagement = mockCCACaseManagementApi,
-    valuationManagementApi = mockValuationManagementApi,
-    featureSwitch = mockFeatureSwitch,
     dvrRecordRepository = mockRepo
   )
 

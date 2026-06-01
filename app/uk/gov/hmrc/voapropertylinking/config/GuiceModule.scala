@@ -54,10 +54,6 @@ class GuiceModule(
     if (proxyEnabled) voaApiBaseUrl
     else servicesConfig.baseUrl("voa-modernised-api")
 
-  lazy val bstBaseUrl: String =
-    if (proxyEnabled) voaApiBaseUrl
-    else servicesConfig.baseUrl("voa-bst")
-
   override def configure(): Unit = {
 
     bind(classOf[ServicesConfig]).toInstance(servicesConfig)
@@ -66,7 +62,6 @@ class GuiceModule(
 
     bind(classOf[Clock]).toInstance(Clock.systemUTC())
 
-    bindBstEndpoints()
     bindModernisedEndpoints()
   }
 
@@ -74,28 +69,6 @@ class GuiceModule(
     endpoints.toList.foreach { case (boundName, configPath) =>
       bindStringWithPrefix(configPath, baseUrl, boundName)
     }
-
-  private def bindBstEndpoints(): Unit =
-    bindEndpoints(
-      Map(
-        "voa.authValuationHistoryUrl"       -> "bst.resources.externalValuationManagement.valuationHistory.path",
-        "voa.myAgentPropertyLinks"          -> "bst.resources.externalPropertyLink.myAgentPropertyLinks.path",
-        "voa.myAgentAvailablePropertyLinks" -> "bst.resources.externalPropertyLink.myAgentAvailablePropertyLinks.path",
-        "voa.myOrganisationsPropertyLinks"  -> "bst.resources.externalPropertyLink.myOrganisationsPropertyLinks.path",
-        "voa.myOrganisationsPropertyLink"   -> "bst.resources.externalPropertyLink.myOrganisationsPropertyLink.path",
-        "voa.myOrganisationsAgents"         -> "bst.resources.externalPropertyLink.myOrganisationsAgents.path",
-        "voa.myClientsPropertyLink"         -> "bst.resources.externalPropertyLink.myClientsPropertyLink.path",
-        "voa.myClientsPropertyLinks"        -> "bst.resources.externalPropertyLink.myClientsPropertyLinks.path",
-        "voa.myClientPropertyLinks"         -> "bst.resources.externalPropertyLink.myClientPropertyLinks.path",
-        "voa.myClients"                     -> "bst.resources.externalPropertyLink.myClients.path",
-        "voa.createPropertyLink"            -> "bst.resources.externalPropertyLink.createPropertyLink.path",
-        "voa.createPropertyLinkOnClientBehalf" -> "bst.resources.externalPropertyLink.createPropertyLinkOnClientBehalf.path",
-        "voa.revokeClientsPropertyLink" -> "bst.resources.externalPropertyLink.revokeMyClientsPropertyLink.path",
-        "voa.agentAppointmentChanges"   -> "bst.resources.organisationManagementApi.agentAppointmentChanges.path",
-        "voa.myAgentDetails"            -> "bst.resources.organisationManagementApi.myAgentDetails.path"
-      ),
-      bstBaseUrl
-    )
 
   private def bindModernisedEndpoints(): Unit =
     bindEndpoints(

@@ -37,9 +37,6 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
         authenticated = preAuthenticatedActionBuilders(),
         modernisedOrganisationManagementApi = mockModernisedOrganisationManagementApi,
         modernisedExternalPropertyLinkApi = mockModernisedExternalPropertyLinkApi,
-        organisationManagementApi = mockOrganisationManagementApi,
-        propertyLinkApi = mockPropertyLinkApi,
-        featureSwitch = mockFeatureSwitch,
         auditingService = mockAuditingService
       )
     protected val submissionId = "PL123"
@@ -54,163 +51,79 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
 
   def calling: AfterWord = afterWord("calling")
 
-  "If the bstDownstream feature switch is enabled" when {
-    "revoke client property" should {
-      "return 204 NoContent" when {
-        "property link submission id is provided" in new Setup {
-          when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
-          when(mockPropertyLinkApi.revokeClientProperty(any())(any()))
-            .thenReturn(Future.successful(()))
+  "revoke client property" should {
+    "return 204 NoContent" when {
+      "property link submission id is provided" in new Setup {
+        when(mockModernisedExternalPropertyLinkApi.revokeClientProperty(any())(any()))
+          .thenReturn(Future.successful(()))
 
-          val result: Future[Result] =
-            testController.revokeClientProperty("some-sumissionId")(FakeRequest())
+        val result: Future[Result] =
+          testController.revokeClientProperty("some-sumissionId")(FakeRequest())
 
-          status(result) shouldBe NO_CONTENT
-          verify(mockPropertyLinkApi).revokeClientProperty(any())(any())
-        }
-      }
-    }
-
-    "getAgentDetails" should {
-      "return OK 200" when {
-        "organisation management API returns AgentDetails for a provided agent code" in new Setup {
-          when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
-          when(mockOrganisationManagementApi.getAgentDetails(mEq(agentCode))(any(), any()))
-            .thenReturn(Future.successful(Some(agentDetails)))
-
-          val result: Future[Result] =
-            testController.getAgentDetails(agentCode)(FakeRequest())
-
-          status(result) shouldBe OK
-          contentAsJson(result) shouldBe Json.toJson(agentDetails)
-        }
-      }
-
-      "return NOT FOUND 404" when {
-        "organisation management API returns nothing for given agent code" in new Setup {
-          when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
-          when(mockOrganisationManagementApi.getAgentDetails(mEq(agentCode))(any(), any()))
-            .thenReturn(Future.successful(Option.empty[AgentDetails]))
-
-          val result: Future[Result] =
-            testController.getAgentDetails(agentCode)(FakeRequest())
-
-          status(result) shouldBe NOT_FOUND
-        }
-      }
-    }
-
-    "submitAppointmentChanges" should {
-      "return 202 Accepted" when {
-        "valid JSON payload is POSTed" in new Setup {
-          when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
-          when(mockOrganisationManagementApi.agentAppointmentChanges(any())(any(), any()))
-            .thenReturn(Future.successful(appointmentChangeResponse))
-
-          val result: Future[Result] =
-            testController.submitAppointmentChanges()(
-              FakeRequest().withBody(Json.parse("""{
-                                                  |  "agentRepresentativeCode" : 123,
-                                                  |  "action" : "APPOINT",
-                                                  |  "scope"  : "LIST_YEAR",
-                                                  |  "listYears": ["2017"]
-                                                  |}""".stripMargin))
-            )
-
-          status(result) shouldBe ACCEPTED
-        }
-      }
-      "return 400 Bad Request" when {
-        "invalid removeAgentFromOrganisation agent request is POSTed" in new Setup {
-
-          val result: Future[Result] =
-            testController.submitAppointmentChanges()(
-              FakeRequest().withBody(Json.parse("""{
-                                                  |  "agentRepresentativeCode" : 1
-                                                  |}""".stripMargin))
-            )
-
-          status(result) shouldBe BAD_REQUEST
-        }
+        status(result) shouldBe NO_CONTENT
+        verify(mockModernisedExternalPropertyLinkApi).revokeClientProperty(any())(any())
       }
     }
   }
 
-  "If the bstDownstream feature switch is disabled" when calling {
-    "revoke client property" should {
-      "return 204 NoContent" when {
-        "property link submission id is provided" in new Setup {
-          when(mockModernisedExternalPropertyLinkApi.revokeClientProperty(any())(any()))
-            .thenReturn(Future.successful(()))
+  "getAgentDetails" should {
+    "return OK 200" when {
+      "organisation management API returns AgentDetails for a provided agent code" in new Setup {
+        when(mockModernisedOrganisationManagementApi.getAgentDetails(mEq(agentCode))(any(), any()))
+          .thenReturn(Future.successful(Some(agentDetails)))
 
-          val result: Future[Result] =
-            testController.revokeClientProperty("some-sumissionId")(FakeRequest())
+        val result: Future[Result] =
+          testController.getAgentDetails(agentCode)(FakeRequest())
 
-          status(result) shouldBe NO_CONTENT
-          verify(mockModernisedExternalPropertyLinkApi).revokeClientProperty(any())(any())
-        }
+        status(result) shouldBe OK
+        contentAsJson(result) shouldBe Json.toJson(agentDetails)
       }
     }
 
-    "getAgentDetails" should {
-      "return OK 200" when {
-        "organisation management API returns AgentDetails for a provided agent code" in new Setup {
-          when(mockModernisedOrganisationManagementApi.getAgentDetails(mEq(agentCode))(any(), any()))
-            .thenReturn(Future.successful(Some(agentDetails)))
+    "return NOT FOUND 404" when {
+      "organisation management API returns nothing for given agent code" in new Setup {
+        when(mockModernisedOrganisationManagementApi.getAgentDetails(mEq(agentCode))(any(), any()))
+          .thenReturn(Future.successful(Option.empty[AgentDetails]))
 
-          val result: Future[Result] =
-            testController.getAgentDetails(agentCode)(FakeRequest())
+        val result: Future[Result] =
+          testController.getAgentDetails(agentCode)(FakeRequest())
 
-          status(result) shouldBe OK
-          contentAsJson(result) shouldBe Json.toJson(agentDetails)
-        }
-      }
-
-      "return NOT FOUND 404" when {
-        "organisation management API returns nothing for given agent code" in new Setup {
-          when(mockModernisedOrganisationManagementApi.getAgentDetails(mEq(agentCode))(any(), any()))
-            .thenReturn(Future.successful(Option.empty[AgentDetails]))
-
-          val result: Future[Result] =
-            testController.getAgentDetails(agentCode)(FakeRequest())
-
-          status(result) shouldBe NOT_FOUND
-        }
+        status(result) shouldBe NOT_FOUND
       }
     }
+  }
 
-    "submitAppointmentChanges" should {
-      "return 202 Accepted" when {
-        "valid JSON payload is POSTed" in new Setup {
+  "submitAppointmentChanges" should {
+    "return 202 Accepted" when {
+      "valid JSON payload is POSTed" in new Setup {
 
-          when(mockModernisedOrganisationManagementApi.agentAppointmentChanges(any())(any(), any()))
-            .thenReturn(Future.successful(appointmentChangeResponse))
+        when(mockModernisedOrganisationManagementApi.agentAppointmentChanges(any())(any(), any()))
+          .thenReturn(Future.successful(appointmentChangeResponse))
 
-          val result: Future[Result] =
-            testController.submitAppointmentChanges()(
-              FakeRequest().withBody(Json.parse("""{
-                                                  |  "agentRepresentativeCode" : 123,
-                                                  |  "action" : "APPOINT",
-                                                  |  "scope"  : "LIST_YEAR",
-                                                  |  "listYears": ["2017"]
-                                                  |}""".stripMargin))
-            )
+        val result: Future[Result] =
+          testController.submitAppointmentChanges()(
+            FakeRequest().withBody(Json.parse("""{
+                                                |  "agentRepresentativeCode" : 123,
+                                                |  "action" : "APPOINT",
+                                                |  "scope"  : "LIST_YEAR",
+                                                |  "listYears": ["2017"]
+                                                |}""".stripMargin))
+          )
 
-          status(result) shouldBe ACCEPTED
-        }
+        status(result) shouldBe ACCEPTED
       }
-      "return 400 Bad Request" when {
-        "invalid removeAgentFromOrganisation agent request is POSTed" in new Setup {
+    }
+    "return 400 Bad Request" when {
+      "invalid removeAgentFromOrganisation agent request is POSTed" in new Setup {
 
-          val result: Future[Result] =
-            testController.submitAppointmentChanges()(
-              FakeRequest().withBody(Json.parse("""{
-                                                  |  "agentRepresentativeCode" : 1
-                                                  |}""".stripMargin))
-            )
+        val result: Future[Result] =
+          testController.submitAppointmentChanges()(
+            FakeRequest().withBody(Json.parse("""{
+                                                |  "agentRepresentativeCode" : 1
+                                                |}""".stripMargin))
+          )
 
-          status(result) shouldBe BAD_REQUEST
-        }
+        status(result) shouldBe BAD_REQUEST
       }
     }
   }
