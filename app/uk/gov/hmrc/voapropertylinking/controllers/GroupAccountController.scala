@@ -65,7 +65,8 @@ class GroupAccountController @Inject() (
 
   def withAgentCode(agentCode: String): Action[AnyContent] =
     authenticated.async { implicit request =>
-      modernisedCustomerManagementApi.withAgentCode(agentCode)
+      modernisedCustomerManagementApi
+        .withAgentCode(agentCode)
         .map {
           case Some(a) => Ok(Json.toJson(a))
           case None    => NotFound

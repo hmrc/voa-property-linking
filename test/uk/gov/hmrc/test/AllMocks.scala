@@ -44,8 +44,7 @@ trait AllMocks extends MockitoSugar { me: BeforeAndAfterEach =>
   val mockModernisedExternalValuationManagementApi: ModernisedExternalValuationManagementApi =
     mock[ModernisedExternalValuationManagementApi]
   val mockModernisedOrganisationManagementApi: ModernisedExternalOrganisationManagementApi =
-  // ...existing code...
-
+    mock[ModernisedExternalOrganisationManagementApi]
   // MDTP connectors
   val mockBusinessRatesAuthConnector: BusinessRatesAuthConnector = mock[BusinessRatesAuthConnector]
 

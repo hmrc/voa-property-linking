@@ -76,7 +76,8 @@ class ModernisedExternalPropertyLinkApiSpec extends BaseUnitSpec {
 
     val modernisedApiBaseUrl = "http://voa-modernised-api/external-property-link-management-api"
     val agentAuthorisationsUrl = s"$modernisedApiBaseUrl/my-organisation/agents/{agentCode}/property-links"
-    val agentAvailableAuthorisationsUrl = s"$modernisedApiBaseUrl/my-organisation/agents/{agentCode}/available-property-links"
+    val agentAvailableAuthorisationsUrl =
+      s"$modernisedApiBaseUrl/my-organisation/agents/{agentCode}/available-property-links"
     val ownerAuthorisationUrl = s"$modernisedApiBaseUrl/my-organisation/property-links/{propertyLinkId}"
     val ownerAuthorisationsUrl = s"$modernisedApiBaseUrl/my-organisation/property-links"
     val clientAuthorisationUrl = s"$modernisedApiBaseUrl/my-organisation/clients/all/property-links/{propertyLinkId}"

@@ -108,10 +108,7 @@ class AssessmentServiceSpec extends BaseUnitSpec {
     val assessmentService: AssessmentService =
       new AssessmentService(
         mockModernisedPropertyLinkApi,
-        mockModernisedValuationManagementApi,
-        mockPropertyLinkApi,
-        mockValuationManagementApi,
-        mockFeatureSwitch
+        mockModernisedValuationManagementApi
       )
   }
 
@@ -141,49 +138,6 @@ class AssessmentServiceSpec extends BaseUnitSpec {
         when(mockModernisedPropertyLinkApi.getClientsPropertyLink(mEq(submissionId))(any()))
           .thenReturn(Future.successful(Some(clientPropertyLink)))
         when(mockModernisedValuationManagementApi.getValuationHistory(mEq(uarn), mEq(submissionId))(any()))
-          .thenReturn(Future.successful(Some(ValuationHistoryResponse(Seq(valuationHistory)))))
-
-        val res: OptionT[Future, Assessments] = assessmentService.getClientsAssessments(submissionId)
-
-        val expectedAssessments: Assessments = Assessments(
-          propertyLink = propertyLinkWithClient,
-          history = Seq(valuationHistory),
-          capacity = Some("OWNER")
-        )
-
-        res.value.futureValue shouldBe Some(expectedAssessments)
-      }
-    }
-  }
-
-  "If the bstDownstream feature switch is enabled" when {
-
-    "getMyOrganisationsAssessments" should {
-      "return assessments" in new Setup {
-        when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
-        when(mockPropertyLinkApi.getMyOrganisationsPropertyLink(mEq(submissionId))(any()))
-          .thenReturn(Future.successful(Some(ownerPropertyLink)))
-        when(mockValuationManagementApi.getValuationHistory(mEq(uarn), mEq(submissionId))(any()))
-          .thenReturn(Future.successful(Some(ValuationHistoryResponse(Seq(valuationHistory)))))
-
-        val res: OptionT[Future, Assessments] = assessmentService.getMyOrganisationsAssessments(submissionId)
-
-        val expectedAssessments: Assessments = Assessments(
-          propertyLink = propertyLinkWithAgents,
-          history = Seq(valuationHistory),
-          capacity = Some("OWNER")
-        )
-
-        res.value.futureValue shouldBe Some(expectedAssessments)
-      }
-    }
-
-    "getClientsAssessments" should {
-      "return assessments" in new Setup {
-        when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
-        when(mockPropertyLinkApi.getClientsPropertyLink(mEq(submissionId))(any()))
-          .thenReturn(Future.successful(Some(clientPropertyLink)))
-        when(mockValuationManagementApi.getValuationHistory(mEq(uarn), mEq(submissionId))(any()))
           .thenReturn(Future.successful(Some(ValuationHistoryResponse(Seq(valuationHistory)))))
 
         val res: OptionT[Future, Assessments] = assessmentService.getClientsAssessments(submissionId)

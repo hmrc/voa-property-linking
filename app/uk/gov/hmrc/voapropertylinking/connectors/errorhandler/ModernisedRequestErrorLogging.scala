@@ -26,10 +26,10 @@ import scala.concurrent.{ExecutionContext, Future}
 trait ModernisedRequestErrorLogging extends Logging {
 
   protected def logModernisedErrorResponse[A](
-                                               response: Future[A],
-                                               errorInfo: => Seq[(String, String)],
-                                               url: => String
-                                             )(implicit principal: Principal, executionContext: ExecutionContext): Future[A] =
+        response: Future[A],
+        errorInfo: => Seq[(String, String)],
+        url: => String
+  )(implicit principal: Principal, executionContext: ExecutionContext): Future[A] =
     response.recoverWith {
       case error: UpstreamErrorResponse =>
         logError(error.statusCode, errorInfo, url)
@@ -40,7 +40,7 @@ trait ModernisedRequestErrorLogging extends Logging {
     }
 
   private def logError(statusCode: Int, errorInfo: Seq[(String, String)], url: String)(implicit
-                                                                                       principal: Principal
+        principal: Principal
   ): Unit = {
     val errorInfoString = (Seq(
       "statusCode" -> statusCode.toString,

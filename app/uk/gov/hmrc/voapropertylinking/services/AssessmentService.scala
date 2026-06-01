@@ -38,8 +38,8 @@ class AssessmentService @Inject() (
     for {
       propertyLink <- OptionT(modernisedPropertyLinksConnector.getMyOrganisationsPropertyLink(submissionId))
       history <- OptionT(
-        modernisedValuationManagementApi.getValuationHistory(propertyLink.authorisation.uarn, submissionId)
-      )
+                   modernisedValuationManagementApi.getValuationHistory(propertyLink.authorisation.uarn, submissionId)
+                 )
     } yield Assessments(
       propertyLink.authorisation,
       history.NDRListValuationHistoryItems,
@@ -52,8 +52,8 @@ class AssessmentService @Inject() (
     for {
       propertyLink <- OptionT(modernisedPropertyLinksConnector.getClientsPropertyLink(submissionId))
       history <- OptionT(
-        modernisedValuationManagementApi.getValuationHistory(propertyLink.authorisation.uarn, submissionId)
-      )
+                   modernisedValuationManagementApi.getValuationHistory(propertyLink.authorisation.uarn, submissionId)
+                 )
     } yield Assessments(
       propertyLink = propertyLink.authorisation,
       history = history.NDRListValuationHistoryItems,

@@ -49,6 +49,9 @@ class ModernisedExternalOrganisationManagementApi @Inject() (
   )(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[Option[AgentDetails]] = {
     val agentUrl = getAgentDetailsUrl.templated("representativeCode" -> agentCode)
     val response = httpClient.getWithGGHeaders[Option[AgentDetails]](url = agentUrl)
-    logModernisedErrorResponse(response, Seq("agentCode" -> agentCode.toString), agentUrl)(request.principal, executionContext)
+    logModernisedErrorResponse(response, Seq("agentCode" -> agentCode.toString), agentUrl)(
+      request.principal,
+      executionContext
+    )
   }
 }

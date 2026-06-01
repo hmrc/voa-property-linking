@@ -31,7 +31,8 @@ import ch.qos.logback.classic.Level
 import play.api.Logger
 import uk.gov.hmrc.play.bootstrap.tools.LogCapturing
 
-class ModernisedAddressManagementApiISpec extends BaseIntegrationSpec with ModernisedAddressManagementStub with LogCapturing {
+class ModernisedAddressManagementApiISpec
+    extends BaseIntegrationSpec with ModernisedAddressManagementStub with LogCapturing {
 
   trait TestSetup {
     lazy val connector: ModernisedAddressManagementApi = app.injector.instanceOf[ModernisedAddressManagementApi]

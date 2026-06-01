@@ -53,7 +53,11 @@ class ModernisedExternalValuationManagementApi @Inject() (
       .getWithGGHeaders[Option[DvrDocumentFiles]](
         url = dvrUrl
       )
-    logModernisedErrorResponse(response, Seq("valuationId" -> valuationId.toString, "uarn" -> uarn.toString, "propertyLinkId" -> propertyLinkId), dvrUrl)(request.principal, executionContext)
+    logModernisedErrorResponse(
+      response,
+      Seq("valuationId" -> valuationId.toString, "uarn" -> uarn.toString, "propertyLinkId" -> propertyLinkId),
+      dvrUrl
+    )(request.principal, executionContext)
   }
 
   def getValuationHistory(uarn: Long, propertyLinkSubmissionId: String)(implicit
@@ -63,7 +67,11 @@ class ModernisedExternalValuationManagementApi @Inject() (
     val fullUrl = s"$historyUrl?propertyLinkId=$propertyLinkSubmissionId"
     val response = httpClient
       .getWithGGHeaders[Option[ValuationHistoryResponse]](fullUrl)
-    logModernisedErrorResponse(response, Seq("uarn" -> uarn.toString, "propertyLinkSubmissionId" -> propertyLinkSubmissionId), fullUrl)(request.principal, executionContext)
+    logModernisedErrorResponse(
+      response,
+      Seq("uarn" -> uarn.toString, "propertyLinkSubmissionId" -> propertyLinkSubmissionId),
+      fullUrl
+    )(request.principal, executionContext)
   }
 
   def getDvrDocument(valuationId: Long, uarn: Long, propertyLinkId: String, fileRef: String)(implicit
@@ -86,7 +94,16 @@ class ModernisedExternalValuationManagementApi @Inject() (
         result.status match {
           case s if is4xx(s) || is5xx(s) =>
             val errorResponse = UpstreamErrorResponse(s"Upload failed with status ${result.status}.", s, s)
-            logModernisedErrorResponse(Future.failed(errorResponse), Seq("valuationId" -> valuationId.toString, "uarn" -> uarn.toString, "fileRef" -> fileRef, "propertyLinkId" -> propertyLinkId), dvrUrl)(request.principal, executionContext)
+            logModernisedErrorResponse(
+              Future.failed(errorResponse),
+              Seq(
+                "valuationId"    -> valuationId.toString,
+                "uarn"           -> uarn.toString,
+                "fileRef"        -> fileRef,
+                "propertyLinkId" -> propertyLinkId
+              ),
+              dvrUrl
+            )(request.principal, executionContext)
           case _ => Future.successful(result)
         }
       }

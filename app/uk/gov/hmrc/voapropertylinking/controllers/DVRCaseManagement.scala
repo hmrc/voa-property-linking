@@ -55,7 +55,8 @@ class DVRCaseManagement @Inject() (
         propertyLinkId: String
   ): Action[AnyContent] =
     authenticated.async { implicit request =>
-      modernisedValuationManagementApi.getDvrDocuments(valuationId, uarn, propertyLinkId)
+      modernisedValuationManagementApi
+        .getDvrDocuments(valuationId, uarn, propertyLinkId)
         .map {
           case Some(response) =>
             logger.debug(s"dvr documents response: ${Json.prettyPrint(Json.toJson(response))}")
@@ -71,7 +72,8 @@ class DVRCaseManagement @Inject() (
         fileRef: String
   ): Action[AnyContent] =
     authenticated.async { implicit request =>
-      modernisedValuationManagementApi.getDvrDocument(valuationId, uarn, propertyLinkId, fileRef)
+      modernisedValuationManagementApi
+        .getDvrDocument(valuationId, uarn, propertyLinkId, fileRef)
         .map { document =>
           val contentType =
             document.headers.view.mapValues(_.mkString(",")).getOrElse(CONTENT_TYPE, "application/octet-stream")

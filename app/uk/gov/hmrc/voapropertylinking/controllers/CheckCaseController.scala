@@ -48,8 +48,9 @@ class CheckCaseController @Inject() (
 
   private def getMyOrganisationCheckCases(
         propertyLinkSubmissionId: String
-  )(implicit request: RequestWithPrincipal[_]): Future[Result] = {
-    modernisedExternalCaseManagementApi.getMyOrganisationCheckCases(propertyLinkSubmissionId)
+  )(implicit request: RequestWithPrincipal[_]): Future[Result] =
+    modernisedExternalCaseManagementApi
+      .getMyOrganisationCheckCases(propertyLinkSubmissionId)
       .recover { case e: Throwable =>
         logger.warn("get my organisation check cases returned unexpected exception", e)
         CheckCasesWithAgent(
@@ -61,12 +62,12 @@ class CheckCaseController @Inject() (
         ) // I believe this shouldnt be handled here. I think this should return the error it got.
       }
       .map(response => Ok(Json.toJson(response)))
-  }
 
   private def getMyClientsCheckCases(
         propertyLinkSubmissionId: String
-  )(implicit request: RequestWithPrincipal[_]): Future[Result] = {
-    modernisedExternalCaseManagementApi.getMyClientsCheckCases(propertyLinkSubmissionId)
+  )(implicit request: RequestWithPrincipal[_]): Future[Result] =
+    modernisedExternalCaseManagementApi
+      .getMyClientsCheckCases(propertyLinkSubmissionId)
       .recover { case e: Throwable =>
         logger.warn("get my clients check cases returned unexpected exception", e)
         CheckCasesWithClient(
@@ -78,6 +79,5 @@ class CheckCaseController @Inject() (
         ) // I believe this shouldnt be handled here. I think this should return the error it got.
       }
       .map(response => Ok(Json.toJson(response)))
-  }
 
 }

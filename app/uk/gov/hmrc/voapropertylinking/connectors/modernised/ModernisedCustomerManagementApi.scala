@@ -53,7 +53,10 @@ class ModernisedCustomerManagementApi @Inject() (
     val response = httpClient.putWithGgHeaders[HttpResponse](orgUrl, Json.toJsObject(account)).map { _ =>
       ()
     }
-    logModernisedErrorResponse(response, Seq("orgId" -> orgId.toString), orgUrl)(requestWithPrincipal.principal, executionContext)
+    logModernisedErrorResponse(response, Seq("orgId" -> orgId.toString), orgUrl)(
+      requestWithPrincipal.principal,
+      executionContext
+    )
   }
 
   def getDetailedGroupAccount(
@@ -63,7 +66,10 @@ class ModernisedCustomerManagementApi @Inject() (
     val response = httpClient
       .getWithGGHeaders[Option[APIDetailedGroupAccount]](url)
       .map(_.map(_.toGroupAccount))
-    logModernisedErrorResponse(response, Seq("organisationId" -> id.toString), url)(requestWithPrincipal.principal, executionContext)
+    logModernisedErrorResponse(response, Seq("organisationId" -> id.toString), url)(
+      requestWithPrincipal.principal,
+      executionContext
+    )
   }
 
   def findDetailedGroupAccountByGGID(
@@ -83,7 +89,10 @@ class ModernisedCustomerManagementApi @Inject() (
     val response = httpClient
       .getWithGGHeaders[Option[APIDetailedGroupAccount]](url)
       .map(_.map(_.toGroupAccount))
-    logModernisedErrorResponse(response, Seq("agentCode" -> agentCode), url)(requestWithPrincipal.principal, executionContext)
+    logModernisedErrorResponse(response, Seq("agentCode" -> agentCode), url)(
+      requestWithPrincipal.principal,
+      executionContext
+    )
   }
 
   def createIndividualAccount(account: IndividualAccountSubmission, time: Instant = Instant.now)(implicit
@@ -100,7 +109,10 @@ class ModernisedCustomerManagementApi @Inject() (
     val personUrl = individualUrl + s"/$personId"
     val response = httpClient
       .putWithGgHeaders[JsValue](personUrl, Json.toJsObject(account.toAPIIndividualAccount(time)))
-    logModernisedErrorResponse(response, Seq("personId" -> personId.toString), personUrl)(requestWithPrincipal.principal, executionContext)
+    logModernisedErrorResponse(response, Seq("personId" -> personId.toString), personUrl)(
+      requestWithPrincipal.principal,
+      executionContext
+    )
   }
 
   def getDetailedIndividual(
@@ -110,7 +122,10 @@ class ModernisedCustomerManagementApi @Inject() (
     val response = httpClient
       .getWithGGHeaders[Option[APIDetailedIndividualAccount]](url)
       .map(_.map(a => a.toIndividualAccount))
-    logModernisedErrorResponse(response, Seq("personId" -> id.toString), url)(requestWithPrincipal.principal, executionContext)
+    logModernisedErrorResponse(response, Seq("personId" -> id.toString), url)(
+      requestWithPrincipal.principal,
+      executionContext
+    )
   }
 
   def findDetailedIndividualAccountByGGID(

@@ -54,10 +54,7 @@ class AddressLookupController @Inject() (
   def create: Action[JsValue] =
     authenticated.async(parse.json) { implicit request =>
       withJsonBody[SimpleAddress] { address =>
-        if (featureSwitch.isBstDownstreamEnabled)
-          addresses.create(address).map(id => Created(Json.obj("id" -> id)))
-        else
-          modernisedAddresses.create(address).map(id => Created(Json.obj("id" -> id)))
+        modernisedAddresses.create(address).map(id => Created(Json.obj("id" -> id)))
       }
     }
 }

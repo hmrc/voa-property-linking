@@ -70,7 +70,6 @@ class GuiceModule(
       bindStringWithPrefix(configPath, baseUrl, boundName)
     }
 
-
   private def bindModernisedEndpoints(): Unit =
     bindEndpoints(
       Map(

@@ -43,7 +43,10 @@ class ModernisedAddressManagementApi @Inject() (
     val response = httpClient
       .getWithGGHeaders[Addresses](fullUrl)
       .map(_.addressDetails)
-    logModernisedErrorResponse(response, Seq("postcode" -> postcode), fullUrl)(requestWithPrincipal.principal, executionContext)
+    logModernisedErrorResponse(response, Seq("postcode" -> postcode), fullUrl)(
+      requestWithPrincipal.principal,
+      executionContext
+    )
   }
 
   def get(addressUnitId: Long)(implicit request: RequestWithPrincipal[_]): Future[Option[SimpleAddress]] = {
@@ -51,7 +54,10 @@ class ModernisedAddressManagementApi @Inject() (
     val response = httpClient
       .getWithGGHeaders[Addresses](addressUrl)
       .map(_.addressDetails.headOption.map(_.simplify)) recover toNone
-    logModernisedErrorResponse(response, Seq("addressUnitId" -> addressUnitId.toString), addressUrl)(request.principal, executionContext)
+    logModernisedErrorResponse(response, Seq("addressUnitId" -> addressUnitId.toString), addressUrl)(
+      request.principal,
+      executionContext
+    )
   }
 
   def create(address: SimpleAddress)(implicit request: RequestWithPrincipal[_]): Future[Long] = {
