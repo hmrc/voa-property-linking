@@ -21,10 +21,14 @@ import models.modernised.addressmanagement.{Addresses, DetailedAddress, SimpleAd
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
 import play.api.libs.json.{JsValue, Json}
+import ch.qos.logback.classic.Level
+import play.api.Logger
+import uk.gov.hmrc.http.UpstreamErrorResponse
+import uk.gov.hmrc.play.bootstrap.tools.LogCapturing
 
 import scala.concurrent.Future
 
-class ModernisedAddressManagementApiSpec extends BaseUnitSpec {
+class ModernisedAddressManagementApiSpec extends BaseUnitSpec with LogCapturing {
 
   trait Setup {
     val connector = new ModernisedAddressManagementApi(mockVoaHttpClient, mockAppConfig)
@@ -51,9 +55,7 @@ class ModernisedAddressManagementApiSpec extends BaseUnitSpec {
     )
     val addressLookupResult: Addresses = Addresses(Seq(detailedAddress))
 
-    when(mockAppConfig.proxyEnabled).thenReturn(false)
     when(mockAppConfig.apimSubscriptionKeyValue).thenReturn("subscriptionId")
-    when(mockAppConfig.voaApiBaseUrl).thenReturn("http://some/url/voa")
     when(mockServicesConfig.baseUrl(any())).thenReturn("http://localhost:9949/")
 
   }
@@ -84,6 +86,28 @@ class ModernisedAddressManagementApiSpec extends BaseUnitSpec {
           .thenReturn(Future.successful(addressLookupResult))
 
         connector.find(postcode).futureValue.loneElement shouldBe detailedAddress
+      }
+    }
+
+    "log a warning when modernised returns an error" in new Setup {
+      val upstreamError = UpstreamErrorResponse("Internal Server Error", 500)
+      when(mockVoaHttpClient.getWithGGHeaders[Addresses](any())(any(), any(), any(), any()))
+        .thenReturn(Future.failed(upstreamError))
+
+      withCaptureOfLoggingFrom(Logger(classOf[ModernisedAddressManagementApi])) { logs =>
+        connector.find(postcode).failed.futureValue shouldBe upstreamError
+
+        val warnLogs = logs.filter(_.getLevel == Level.WARN)
+        warnLogs should have size 1
+
+        val message = warnLogs.head.getMessage
+        message should include("ModernisedError")
+        message should include("statusCode=500")
+        message should include("grpId=group-id")
+        message should include("extId=external-id")
+        message should include("postcode=L4 0TH")
+        message should include("url=")
+        message should include("/address-management-api/address")
       }
     }
   }

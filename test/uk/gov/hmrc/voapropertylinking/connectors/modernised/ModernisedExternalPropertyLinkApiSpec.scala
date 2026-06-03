@@ -74,20 +74,21 @@ class ModernisedExternalPropertyLinkApiSpec extends BaseUnitSpec {
       Some(appointedToDate)
     )
 
-    val voaApiUrl = "http://voa-modernised-api/external-property-link-management-api"
-    val agentAuthorisationsUrl = s"$voaApiUrl/my-organisation/agents/{agentCode}/property-links"
-    val agentAvailableAuthorisationsUrl = s"$voaApiUrl/my-organisation/agents/{agentCode}/available-property-links"
-    val ownerAuthorisationUrl = s"$voaApiUrl/my-organisation/property-links/{propertyLinkId}"
-    val ownerAuthorisationsUrl = s"$voaApiUrl/my-organisation/property-links"
-    val clientAuthorisationUrl = s"$voaApiUrl/my-organisation/clients/all/property-links/{propertyLinkId}"
-    val clientAuthorisationsUrl = s"$voaApiUrl/my-organisation/clients/all/property-links"
-    val myClientPropertyLinksUrl = s"$voaApiUrl/my-organisation/clients/{clientId}/property-links"
-    val createPropertyLinkUrl = s"$voaApiUrl/my-organisation/property-links"
-    val createPropertyLinkOnClientBehalfUrl = s"$voaApiUrl/my-organisation/clients/{clientId}/property-links"
-    val myOrganisationsAgentsUrl = s"$voaApiUrl/my-organisation/agents"
-    val myClientsUrl = s"$voaApiUrl/my-organisation/clients"
+    val modernisedApiBaseUrl = "http://voa-modernised-api/external-property-link-management-api"
+    val agentAuthorisationsUrl = s"$modernisedApiBaseUrl/my-organisation/agents/{agentCode}/property-links"
+    val agentAvailableAuthorisationsUrl =
+      s"$modernisedApiBaseUrl/my-organisation/agents/{agentCode}/available-property-links"
+    val ownerAuthorisationUrl = s"$modernisedApiBaseUrl/my-organisation/property-links/{propertyLinkId}"
+    val ownerAuthorisationsUrl = s"$modernisedApiBaseUrl/my-organisation/property-links"
+    val clientAuthorisationUrl = s"$modernisedApiBaseUrl/my-organisation/clients/all/property-links/{propertyLinkId}"
+    val clientAuthorisationsUrl = s"$modernisedApiBaseUrl/my-organisation/clients/all/property-links"
+    val myClientPropertyLinksUrl = s"$modernisedApiBaseUrl/my-organisation/clients/{clientId}/property-links"
+    val createPropertyLinkUrl = s"$modernisedApiBaseUrl/my-organisation/property-links"
+    val createPropertyLinkOnClientBehalfUrl = s"$modernisedApiBaseUrl/my-organisation/clients/{clientId}/property-links"
+    val myOrganisationsAgentsUrl = s"$modernisedApiBaseUrl/my-organisation/agents"
+    val myClientsUrl = s"$modernisedApiBaseUrl/my-organisation/clients"
     val revokeClientsPropertyLinkUrl =
-      s"$voaApiUrl/my-organisation/clients/all/property-links/{submissionId}/appointment"
+      s"$modernisedApiBaseUrl/my-organisation/clients/all/property-links/{submissionId}/appointment"
     val httpstring = "VoaAuthedBackendHttp"
 
     val connector = new ModernisedExternalPropertyLinkApi(
@@ -113,9 +114,7 @@ class ModernisedExternalPropertyLinkApiSpec extends BaseUnitSpec {
       ("requestTotalRowCount", "true")
     )
 
-    when(mockAppConfig.proxyEnabled).thenReturn(false)
     when(mockAppConfig.apimSubscriptionKeyValue).thenReturn("subscriptionId")
-    when(mockAppConfig.voaApiBaseUrl).thenReturn("http://some/url/voa")
     when(mockServicesConfig.baseUrl(any())).thenReturn("http://localhost:9949/")
   }
 
