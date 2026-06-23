@@ -52,6 +52,9 @@ class ModernisedExternalValuationManagementApiSpec extends BaseUnitSpec with Con
       ) {
         override lazy val url: String = "http://localhost:9555"
       }
+
+    when(mockAppConfig.apimSubscriptionKeyName).thenReturn("Ocp-Apim-Subscription-Key")
+    when(mockAppConfig.apimSubscriptionKeyValue).thenReturn("subscriptionId")
   }
 
   "getting a valuation history" should {

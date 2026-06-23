@@ -113,9 +113,7 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
       ("requestTotalRowCount", "true")
     )
 
-    when(mockAppConfig.proxyEnabled).thenReturn(false)
     when(mockAppConfig.apimSubscriptionKeyValue).thenReturn("subscriptionId")
-    when(mockAppConfig.voaApiBaseUrl).thenReturn("http://some/url/voa")
     when(mockServicesConfig.baseUrl(any())).thenReturn("http://localhost:9949/")
   }
 

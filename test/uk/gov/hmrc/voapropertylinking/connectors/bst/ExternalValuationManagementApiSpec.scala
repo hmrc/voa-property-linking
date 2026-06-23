@@ -46,9 +46,8 @@ class ExternalValuationManagementApiSpec extends BaseUnitSpec with ContentTypes 
       new ExternalValuationManagementApi(httpClientV2, mockVoaHttpClient, valuationHistoryUrl, config, mockAppConfig) {
         override lazy val url: String = "http://localhost:9555"
       }
-    when(mockAppConfig.proxyEnabled).thenReturn(false)
+    when(mockAppConfig.apimSubscriptionKeyName).thenReturn("Ocp-Apim-Subscription-Key")
     when(mockAppConfig.apimSubscriptionKeyValue).thenReturn("subscriptionId")
-    when(mockAppConfig.voaApiBaseUrl).thenReturn("http://some/url/voa")
     when(mockServicesConfig.baseUrl(any())).thenReturn("http://localhost:9949/")
 
   }

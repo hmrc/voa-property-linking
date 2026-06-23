@@ -62,6 +62,7 @@ class VoaHttpClientSpec extends BaseUnitSpec {
     val mockRequestBuilderWithProxy: RequestBuilder = mock[RequestBuilder]
     val voaHttpClient = new VoaHttpClient(mockHttpClient, mockAppConfig)
 
+    when(mockAppConfig.apimSubscriptionKeyName).thenReturn("dummy-header-name")
     when(mockAppConfig.apimSubscriptionKeyValue).thenReturn("dummy-key")
   }
 
@@ -70,7 +71,7 @@ class VoaHttpClientSpec extends BaseUnitSpec {
     def checkGovernmentGatewayHeaders(headers: Map[String, String])(implicit principal: Principal): Unit = {
       headers("GG-EXTERNAL-ID") shouldBe principal.externalId
       headers("GG-GROUP-ID") shouldBe principal.groupId
-      headers should contain key "Ocp-Apim-Subscription-Key"
+      headers should contain key "dummy-header-name"
     }
 
     "preserve the existing headers when adding the extra GG headers" in new Setup {
@@ -95,7 +96,7 @@ class VoaHttpClientSpec extends BaseUnitSpec {
 
       capturedHeaders should contain("GG-EXTERNAL-ID" -> "external-id")
       capturedHeaders should contain("GG-GROUP-ID" -> "group-id")
-      capturedHeaders should contain("Ocp-Apim-Subscription-Key" -> "dummy-key")
+      capturedHeaders should contain("dummy-header-name" -> "dummy-key")
     }
 
     "enrich the GG headers when calling a DELETE" in new Setup {
@@ -124,7 +125,7 @@ class VoaHttpClientSpec extends BaseUnitSpec {
 
       capturedHeaders should contain("GG-EXTERNAL-ID" -> "external-id")
       capturedHeaders should contain("GG-GROUP-ID" -> "group-id")
-      capturedHeaders should contain("Ocp-Apim-Subscription-Key" -> "dummy-key")
+      capturedHeaders should contain("dummy-header-name" -> "dummy-key")
     }
 
     "enrich the GG headers when calling a PUT" in new Setup {
@@ -163,7 +164,7 @@ class VoaHttpClientSpec extends BaseUnitSpec {
 
       capturedHeaders should contain("GG-EXTERNAL-ID" -> "external-id")
       capturedHeaders should contain("GG-GROUP-ID" -> "group-id")
-      capturedHeaders should contain("Ocp-Apim-Subscription-Key" -> "dummy-key")
+      capturedHeaders should contain("dummy-header-name" -> "dummy-key")
     }
 
     "enrich the GG headers when calling a POST" in new Setup {
@@ -195,7 +196,7 @@ class VoaHttpClientSpec extends BaseUnitSpec {
 
       capturedHeaders should contain("GG-EXTERNAL-ID" -> "external-id")
       capturedHeaders should contain("GG-GROUP-ID" -> "group-id")
-      capturedHeaders should contain("Ocp-Apim-Subscription-Key" -> "dummy-key")
+      capturedHeaders should contain("dummy-header-name" -> "dummy-key")
     }
   }
 }
