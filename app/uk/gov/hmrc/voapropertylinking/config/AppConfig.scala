@@ -24,18 +24,14 @@ import javax.inject.Inject
 
 class AppConfig @Inject() (configuration: Configuration, servicesConfig: ServicesConfig) {
 
-  val proxyEnabled: Boolean = configuration.get[Boolean]("http-verbs.proxy.enabled")
+  val apimSubscriptionKeyName: String =
+    configuration.get[String]("microservice.services.voa-modernised-api.apiHeader.name")
 
-  val apimSubscriptionKeyValue: String = configuration.get[String]("extraHeaders.subscriptionKey.value")
+  val apimSubscriptionKeyValue: String =
+    configuration.get[String]("microservice.services.voa-modernised-api.apiHeader.value")
 
-  val voaApiBaseUrl: String = configuration.get[String]("voaApiUrl")
+  val modernisedBase: URL = new URL(servicesConfig.baseUrl("voa-modernised-api"))
 
-  val modernisedBase: URL =
-    if (proxyEnabled) new URL(voaApiBaseUrl)
-    else new URL(servicesConfig.baseUrl("voa-modernised-api"))
-
-  val bstBase: URL =
-    if (proxyEnabled) new URL(voaApiBaseUrl)
-    else new URL(servicesConfig.baseUrl("voa-bst"))
+  val bstBase: URL = new URL(servicesConfig.baseUrl("voa-bst"))
 
 }

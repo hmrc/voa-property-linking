@@ -36,9 +36,7 @@ class ExternalCaseManagementApiSpec extends BaseUnitSpec {
     val submissionId: String = "PL123AB"
     val checkCaseRef: String = "CHK123ABC"
     val valuationId: Long = 123456
-    when(mockAppConfig.proxyEnabled).thenReturn(false)
     when(mockAppConfig.apimSubscriptionKeyValue).thenReturn("subscriptionId")
-    when(mockAppConfig.voaApiBaseUrl).thenReturn("http://some/url/voa")
     when(mockServicesConfig.baseUrl(any())).thenReturn("http://localhost:9949/")
   }
 

@@ -107,9 +107,9 @@ class VoaHttpClient @Inject() (
 
   def buildHeadersWithGG(principal: Principal): Seq[(String, String)] =
     Seq(
-      "GG-EXTERNAL-ID"            -> principal.externalId,
-      "GG-GROUP-ID"               -> principal.groupId,
-      "Ocp-Apim-Subscription-Key" -> appConfig.apimSubscriptionKeyValue
+      "GG-EXTERNAL-ID"                  -> principal.externalId,
+      "GG-GROUP-ID"                     -> principal.groupId,
+      appConfig.apimSubscriptionKeyName -> appConfig.apimSubscriptionKeyValue
     )
 
   val outboundHeaderNotAllowedList: Set[String] = Set(

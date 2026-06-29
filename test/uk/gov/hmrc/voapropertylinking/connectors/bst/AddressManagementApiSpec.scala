@@ -50,9 +50,7 @@ class AddressManagementApiSpec extends BaseUnitSpec {
       postcode = postcode
     )
     val addressLookupResult: Addresses = Addresses(Seq(detailedAddress))
-    when(mockAppConfig.proxyEnabled).thenReturn(false)
     when(mockAppConfig.apimSubscriptionKeyValue).thenReturn("subscriptionId")
-    when(mockAppConfig.voaApiBaseUrl).thenReturn("http://some/url/voa")
     when(mockServicesConfig.baseUrl(any())).thenReturn("http://localhost:9949/")
   }
 

@@ -67,10 +67,10 @@ class ExternalValuationManagementApi @Inject() (
       .get(new URL(s"$url/properties/$uarn/valuations/$valuationId/files/$fileRef?propertyLinkId=$propertyLinkId"))
       .setHeader(
         Seq(
-          "GG-EXTERNAL-ID"            -> request.principal.externalId,
-          USER_AGENT                  -> appName,
-          "GG-GROUP-ID"               -> request.principal.groupId,
-          "Ocp-Apim-Subscription-Key" -> appConfig.apimSubscriptionKeyValue
+          "GG-EXTERNAL-ID"                  -> request.principal.externalId,
+          USER_AGENT                        -> appName,
+          "GG-GROUP-ID"                     -> request.principal.groupId,
+          appConfig.apimSubscriptionKeyName -> appConfig.apimSubscriptionKeyValue
         ): _*
       )
       .withProxy
