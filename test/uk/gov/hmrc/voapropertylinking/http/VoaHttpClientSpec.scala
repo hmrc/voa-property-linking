@@ -66,7 +66,7 @@ class VoaHttpClientSpec extends BaseUnitSpec {
     when(mockAppConfig.apimSubscriptionKeyValue).thenReturn("dummy-key")
   }
 
-  "using the VOA HTTP Client" should {
+  "using the VO HTTP Client" should {
 
     def checkGovernmentGatewayHeaders(headers: Map[String, String])(implicit principal: Principal): Unit = {
       headers("GG-EXTERNAL-ID") shouldBe principal.externalId
