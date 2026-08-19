@@ -58,7 +58,10 @@ class CustomerManagementApi @Inject() (
   def findDetailedGroupAccountByGGID(
         ggId: String
   )(implicit requestWithPrincipal: RequestWithPrincipal[_]): Future[Option[GroupAccount]] =
-    getOptionalJsonWithGGHeaders[APIDetailedGroupAccount](httpClient, s"$organisationUrl?governmentGatewayGroupId=$ggId")
+    getOptionalJsonWithGGHeaders[APIDetailedGroupAccount](
+      httpClient,
+      s"$organisationUrl?governmentGatewayGroupId=$ggId"
+    )
       .map(_.map(_.toGroupAccount))
 
   def withAgentCode(
@@ -94,6 +97,9 @@ class CustomerManagementApi @Inject() (
   def findDetailedIndividualAccountByGGID(
         ggId: String
   )(implicit requestWithPrincipal: RequestWithPrincipal[_]): Future[Option[IndividualAccount]] =
-    getOptionalJsonWithGGHeaders[APIDetailedIndividualAccount](httpClient, s"$individualUrl?governmentGatewayExternalId=$ggId")
+    getOptionalJsonWithGGHeaders[APIDetailedIndividualAccount](
+      httpClient,
+      s"$individualUrl?governmentGatewayExternalId=$ggId"
+    )
       .map(_.map(_.toIndividualAccount))
 }

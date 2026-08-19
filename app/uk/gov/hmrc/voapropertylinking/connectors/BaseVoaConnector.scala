@@ -67,7 +67,8 @@ abstract class BaseVoaConnector
       ec
     )
 
-  protected def postJsonWithGGHeaders[A: Reads: ClassTag](httpClient: VoaHttpClient, url: String, body: JsObject)(implicit
+  protected def postJsonWithGGHeaders[A: Reads: ClassTag](httpClient: VoaHttpClient, url: String, body: JsObject)(
+        implicit
         request: RequestWithPrincipal[_],
         ec: ExecutionContext
   ): Future[A] =
@@ -89,7 +90,8 @@ abstract class BaseVoaConnector
       ec
     )
 
-  protected def putJsonWithGGHeaders[A: Reads: ClassTag](httpClient: VoaHttpClient, url: String, body: JsObject)(implicit
+  protected def putJsonWithGGHeaders[A: Reads: ClassTag](httpClient: VoaHttpClient, url: String, body: JsObject)(
+        implicit
         request: RequestWithPrincipal[_],
         ec: ExecutionContext
   ): Future[A] =

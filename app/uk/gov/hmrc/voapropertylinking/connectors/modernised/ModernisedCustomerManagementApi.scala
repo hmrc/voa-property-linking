@@ -41,7 +41,8 @@ class ModernisedCustomerManagementApi @Inject() (
   def createGroupAccount(account: GroupAccountSubmission, time: Instant = Instant.now)(implicit
         requestWithPrincipal: RequestWithPrincipal[_]
   ): Future[GroupId] = {
-    val response = postJsonWithGGHeaders[GroupId](httpClient, organisationUrl, Json.toJsObject(account.toApiAccount(time)))
+    val response =
+      postJsonWithGGHeaders[GroupId](httpClient, organisationUrl, Json.toJsObject(account.toApiAccount(time)))
     logModernisedErrorResponse(response, Seq.empty, organisationUrl)(requestWithPrincipal.principal, executionContext)
   }
 

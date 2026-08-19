@@ -43,14 +43,16 @@ class AddressManagementApi @Inject() (
   }
 
   def get(addressUnitId: Long)(implicit requestWithPrincipal: RequestWithPrincipal[_]): Future[Option[SimpleAddress]] =
-    getJsonWithGGHeaders[Addresses](httpClient, s"$url/$addressUnitId").map(_.addressDetails.headOption.map(_.simplify)) recover toNone
+    getJsonWithGGHeaders[Addresses](httpClient, s"$url/$addressUnitId").map(
+      _.addressDetails.headOption.map(_.simplify)
+    ) recover toNone
 
   def create(address: SimpleAddress)(implicit requestWithPrincipal: RequestWithPrincipal[_]): Future[Long] =
-    postJsonWithGGHeaders[JsValue](httpClient, s"$url/non_standard_address", Json.toJsObject(address.toDetailedAddress)).map {
-      js =>
+    postJsonWithGGHeaders[JsValue](httpClient, s"$url/non_standard_address", Json.toJsObject(address.toDetailedAddress))
+      .map { js =>
         js \ "id" match {
           case JsDefined(JsNumber(n)) => n.toLong
           case _                      => throw new Exception(s"Failed to create record for address $address")
         }
-    }
+      }
 }
