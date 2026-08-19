@@ -40,9 +40,7 @@ class ModernisedAddressManagementApi @Inject() (
   def find(postcode: String)(implicit requestWithPrincipal: RequestWithPrincipal[_]): Future[Seq[DetailedAddress]] = {
     val encodedParams = URLEncoder.encode(s"""{"postcode":"$postcode"}""", StandardCharsets.UTF_8.toString)
     val fullUrl = s"$url?pageSize=100&startPoint=1&searchparams=$encodedParams"
-    val response = httpClient
-      .getWithGGHeaders[Addresses](fullUrl)
-      .map(_.addressDetails)
+    val response = getJsonWithGGHeaders[Addresses](httpClient, fullUrl).map(_.addressDetails)
     logModernisedErrorResponse(response, Seq("postcode" -> postcode), fullUrl)(
       requestWithPrincipal.principal,
       executionContext
@@ -51,8 +49,7 @@ class ModernisedAddressManagementApi @Inject() (
 
   def get(addressUnitId: Long)(implicit request: RequestWithPrincipal[_]): Future[Option[SimpleAddress]] = {
     val addressUrl = s"$url/$addressUnitId"
-    val response = httpClient
-      .getWithGGHeaders[Addresses](addressUrl)
+    val response = getJsonWithGGHeaders[Addresses](httpClient, addressUrl)
       .map(_.addressDetails.headOption.map(_.simplify)) recover toNone
     logModernisedErrorResponse(response, Seq("addressUnitId" -> addressUnitId.toString), addressUrl)(
       request.principal,
@@ -62,11 +59,11 @@ class ModernisedAddressManagementApi @Inject() (
 
   def create(address: SimpleAddress)(implicit request: RequestWithPrincipal[_]): Future[Long] = {
     val createUrl = s"$url/non_standard_address"
-    val response = httpClient
-      .postWithGgHeaders[JsValue](
-        createUrl,
-        Json.toJsObject(address.toDetailedAddress)
-      )
+    val response = postJsonWithGGHeaders[JsValue](
+      httpClient,
+      createUrl,
+      Json.toJsObject(address.toDetailedAddress)
+    )
       .map { json =>
         (json \ "id").asOpt[Long].getOrElse {
           throw new Exception(s"Failed to create record for address $address: Missing or invalid 'id'")

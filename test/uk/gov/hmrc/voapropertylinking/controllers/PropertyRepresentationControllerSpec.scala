@@ -75,7 +75,7 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
       "return OK 200" when {
         "organisation management API returns AgentDetails for a provided agent code" in new Setup {
           when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
-          when(mockOrganisationManagementApi.getAgentDetails(mEq(agentCode))(any(), any()))
+          when(mockOrganisationManagementApi.getAgentDetails(mEq(agentCode))(any()))
             .thenReturn(Future.successful(Some(agentDetails)))
 
           val result: Future[Result] =
@@ -89,7 +89,7 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
       "return NOT FOUND 404" when {
         "organisation management API returns nothing for given agent code" in new Setup {
           when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
-          when(mockOrganisationManagementApi.getAgentDetails(mEq(agentCode))(any(), any()))
+          when(mockOrganisationManagementApi.getAgentDetails(mEq(agentCode))(any()))
             .thenReturn(Future.successful(Option.empty[AgentDetails]))
 
           val result: Future[Result] =
@@ -104,7 +104,7 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
       "return 202 Accepted" when {
         "valid JSON payload is POSTed" in new Setup {
           when(mockFeatureSwitch.isBstDownstreamEnabled).thenReturn(true)
-          when(mockOrganisationManagementApi.agentAppointmentChanges(any())(any(), any()))
+          when(mockOrganisationManagementApi.agentAppointmentChanges(any())(any()))
             .thenReturn(Future.successful(appointmentChangeResponse))
 
           val result: Future[Result] =
@@ -155,7 +155,7 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
     "getAgentDetails" should {
       "return OK 200" when {
         "organisation management API returns AgentDetails for a provided agent code" in new Setup {
-          when(mockModernisedOrganisationManagementApi.getAgentDetails(mEq(agentCode))(any(), any()))
+          when(mockModernisedOrganisationManagementApi.getAgentDetails(mEq(agentCode))(any()))
             .thenReturn(Future.successful(Some(agentDetails)))
 
           val result: Future[Result] =
@@ -168,7 +168,7 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
 
       "return NOT FOUND 404" when {
         "organisation management API returns nothing for given agent code" in new Setup {
-          when(mockModernisedOrganisationManagementApi.getAgentDetails(mEq(agentCode))(any(), any()))
+          when(mockModernisedOrganisationManagementApi.getAgentDetails(mEq(agentCode))(any()))
             .thenReturn(Future.successful(Option.empty[AgentDetails]))
 
           val result: Future[Result] =
@@ -183,7 +183,7 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
       "return 202 Accepted" when {
         "valid JSON payload is POSTed" in new Setup {
 
-          when(mockModernisedOrganisationManagementApi.agentAppointmentChanges(any())(any(), any()))
+          when(mockModernisedOrganisationManagementApi.agentAppointmentChanges(any())(any()))
             .thenReturn(Future.successful(appointmentChangeResponse))
 
           val result: Future[Result] =

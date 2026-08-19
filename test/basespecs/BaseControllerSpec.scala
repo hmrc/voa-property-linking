@@ -20,7 +20,7 @@ import play.api.http.{HeaderNames, Status}
 import play.api.mvc._
 import play.api.test.{FakeRequest, Helpers, ResultExtractors}
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.play.http.ws.WSHttp
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
 import uk.gov.hmrc.voapropertylinking.auth.{Principal, RequestWithPrincipal}
 
@@ -30,8 +30,7 @@ abstract class BaseControllerSpec extends BaseUnitSpec with ResultExtractors wit
 
   implicit val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
-  val mockWS = mock[WSHttp]
-  val mockConf = mockServicesConfig
+  val mockConf: ServicesConfig = mockServicesConfig
   val baseUrl = "http://localhost:9999"
 
   def preAuthenticatedActionBuilders(

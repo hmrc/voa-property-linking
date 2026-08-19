@@ -76,7 +76,7 @@ trait AllMocks extends MockitoSugar { me: BeforeAndAfterEach =>
   val mockFeatureSwitch: FeatureSwitch = mock[FeatureSwitch]
 
   override protected def beforeEach(): Unit =
-    Seq(
+    Seq[Object](
       mockModernisedAddressManagementApi,
       mockModernisedCustomerManagementApi,
       mockModernisedExternalCaseManagementApi,

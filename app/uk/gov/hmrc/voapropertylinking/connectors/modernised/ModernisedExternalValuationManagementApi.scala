@@ -49,10 +49,7 @@ class ModernisedExternalValuationManagementApi @Inject() (
         request: RequestWithPrincipal[_]
   ): Future[Option[DvrDocumentFiles]] = {
     val dvrUrl = s"$url/properties/$uarn/valuations/$valuationId/files?propertyLinkId=$propertyLinkId"
-    val response = httpClient
-      .getWithGGHeaders[Option[DvrDocumentFiles]](
-        url = dvrUrl
-      )
+    val response = getOptionalJsonWithGGHeaders[DvrDocumentFiles](httpClient, dvrUrl)
     logModernisedErrorResponse(
       response,
       Seq("valuationId" -> valuationId.toString, "uarn" -> uarn.toString, "propertyLinkId" -> propertyLinkId),
@@ -65,8 +62,7 @@ class ModernisedExternalValuationManagementApi @Inject() (
   ): Future[Option[ValuationHistoryResponse]] = {
     val historyUrl = valuationHistoryUrl.replace("{uarn}", uarn.toString)
     val fullUrl = s"$historyUrl?propertyLinkId=$propertyLinkSubmissionId"
-    val response = httpClient
-      .getWithGGHeaders[Option[ValuationHistoryResponse]](fullUrl)
+    val response = getOptionalJsonWithGGHeaders[ValuationHistoryResponse](httpClient, fullUrl)
     logModernisedErrorResponse(
       response,
       Seq("uarn" -> uarn.toString, "propertyLinkSubmissionId" -> propertyLinkSubmissionId),

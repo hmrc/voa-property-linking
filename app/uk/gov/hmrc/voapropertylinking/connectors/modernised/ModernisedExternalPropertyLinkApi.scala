@@ -69,7 +69,7 @@ class ModernisedExternalPropertyLinkApi @Inject() (
       queryParams.map { case (key, value) => s"$key=${java.net.URLEncoder.encode(value, "UTF-8")}" }.mkString("&")
 
     val url = s"${myAgentPropertyLinksUrl.replace("{agentCode}", agentCode.toString)}?$queryString"
-    val response = httpClient.getWithGGHeaders[PropertyLinksWithAgents](url)
+    val response = getJsonWithGGHeaders[PropertyLinksWithAgents](httpClient, url)
     logModernisedErrorResponse(response, Seq("agentCode" -> agentCode.toString), url)(
       request.principal,
       executionContext
@@ -93,7 +93,7 @@ class ModernisedExternalPropertyLinkApi @Inject() (
       queryParams.map { case (key, value) => s"$key=${java.net.URLEncoder.encode(value, "UTF-8")}" }.mkString("&")
 
     val url = s"${myAgentAvailablePropertyLinks.replace("{agentCode}", agentCode.toString)}?$queryString"
-    val response = httpClient.getWithGGHeaders[PropertyLinksWithAgents](url)
+    val response = getJsonWithGGHeaders[PropertyLinksWithAgents](httpClient, url)
     logModernisedErrorResponse(response, Seq("agentCode" -> agentCode.toString), url)(
       request.principal,
       executionContext
@@ -119,7 +119,7 @@ class ModernisedExternalPropertyLinkApi @Inject() (
       queryParams.map { case (key, value) => s"$key=${java.net.URLEncoder.encode(value, "UTF-8")}" }.mkString("&")
 
     val url = s"$myOrganisationsPropertyLinksUrl?$queryString"
-    val response = httpClient.getWithGGHeaders[PropertyLinksWithAgents](url)
+    val response = getJsonWithGGHeaders[PropertyLinksWithAgents](httpClient, url)
     logModernisedErrorResponse(response, Seq.empty, url)(request.principal, executionContext)
   }
 
@@ -127,7 +127,7 @@ class ModernisedExternalPropertyLinkApi @Inject() (
         submissionId: String
   )(implicit request: RequestWithPrincipal[_]): Future[Option[OwnerPropertyLink]] = {
     val url = myOrganisationsPropertyLinkUrl.replace("{propertyLinkId}", submissionId)
-    val response = httpClient.getWithGGHeaders[Option[OwnerPropertyLink]](url)
+    val response = getOptionalJsonWithGGHeaders[OwnerPropertyLink](httpClient, url)
     logModernisedErrorResponse(response, Seq("propertyLinkId" -> submissionId), url)(
       request.principal,
       executionContext
@@ -154,8 +154,7 @@ class ModernisedExternalPropertyLinkApi @Inject() (
       queryParams.map { case (key, value) => s"$key=${java.net.URLEncoder.encode(value, "UTF-8")}" }.mkString("&")
 
     val url = s"$myClientsPropertyLinksUrl?$queryString"
-    val response = httpClient
-      .getWithGGHeaders[Option[PropertyLinksWithClient]](url)
+    val response = getOptionalJsonWithGGHeaders[PropertyLinksWithClient](httpClient, url)
     logModernisedErrorResponse(response, Seq.empty, url)(request.principal, executionContext)
   }
 
@@ -182,8 +181,7 @@ class ModernisedExternalPropertyLinkApi @Inject() (
       queryParams.map { case (key, value) => s"$key=${java.net.URLEncoder.encode(value, "UTF-8")}" }.mkString("&")
 
     val url = s"${myClientPropertyLinksUrl.replace("{clientId}", clientOrgId.toString)}?$queryString"
-    val response = httpClient
-      .getWithGGHeaders[Option[PropertyLinksWithClient]](url)
+    val response = getOptionalJsonWithGGHeaders[PropertyLinksWithClient](httpClient, url)
     logModernisedErrorResponse(response, Seq("clientId" -> clientOrgId.toString), url)(
       request.principal,
       executionContext
@@ -194,7 +192,7 @@ class ModernisedExternalPropertyLinkApi @Inject() (
         submissionId: String
   )(implicit request: RequestWithPrincipal[_]): Future[Option[ClientPropertyLink]] = {
     val url = myClientsPropertyLinkUrl.replace("{propertyLinkId}", submissionId)
-    val response = httpClient.getWithGGHeaders[Option[ClientPropertyLink]](url)
+    val response = getOptionalJsonWithGGHeaders[ClientPropertyLink](httpClient, url)
     logModernisedErrorResponse(response, Seq("propertyLinkId" -> submissionId), url)(
       request.principal,
       executionContext
@@ -217,16 +215,14 @@ class ModernisedExternalPropertyLinkApi @Inject() (
     val updatedParams = if (queryString.nonEmpty) s"?$queryString" else ""
 
     val url = s"$myClientsUrl$updatedParams"
-    val response = httpClient
-      .getWithGGHeaders[ClientsResponse](url)
+    val response = getJsonWithGGHeaders[ClientsResponse](httpClient, url)
     logModernisedErrorResponse(response, Seq.empty, url)(request.principal, executionContext)
   }
 
   def createPropertyLink(
         propertyLink: CreatePropertyLink
   )(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[HttpResponse] = {
-    val response = httpClient
-      .postWithGgHeaders[HttpResponse](createPropertyLinkUrl, Json.toJsObject(propertyLink))
+    val response = postRawWithGGHeaders(httpClient, createPropertyLinkUrl, Json.toJsObject(propertyLink))
     logModernisedErrorResponse(response, Seq.empty, createPropertyLinkUrl)(request.principal, executionContext)
   }
 
@@ -235,21 +231,19 @@ class ModernisedExternalPropertyLinkApi @Inject() (
         request: RequestWithPrincipal[_]
   ): Future[HttpResponse] = {
     val url = createPropertyLinkOnClientBehalfUrl.templated("clientId" -> clientId)
-    val response = httpClient
-      .postWithGgHeaders[HttpResponse](url, Json.toJsObject(propertyLink))
+    val response = postRawWithGGHeaders(httpClient, url, Json.toJsObject(propertyLink))
     logModernisedErrorResponse(response, Seq("clientId" -> clientId.toString), url)(request.principal, executionContext)
   }
 
   def getMyOrganisationsAgents()(implicit request: RequestWithPrincipal[_]): Future[AgentList] = {
     val url = s"$myOrganisationsAgentsUrl?requestTotalRowCount=true"
-    val response = httpClient.getWithGGHeaders[AgentList](url)
+    val response = getJsonWithGGHeaders[AgentList](httpClient, url)
     logModernisedErrorResponse(response, Seq.empty, url)(request.principal, executionContext)
   }
 
   def revokeClientProperty(plSubmissionId: String)(implicit request: RequestWithPrincipal[_]): Future[Unit] = {
     val url = revokeClientsPropertyLinkUrl.templated("submissionId" -> plSubmissionId)
-    val response = httpClient
-      .deleteWithGgHeaders[HttpResponse](url)
+    val response = deleteRawWithGGHeaders(httpClient, url)
       .map(_ => ())
     logModernisedErrorResponse(response, Seq("submissionId" -> plSubmissionId), url)(
       request.principal,

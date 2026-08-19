@@ -39,18 +39,14 @@ class AddressManagementApi @Inject() (
   def find(postcode: String)(implicit requestWithPrincipal: RequestWithPrincipal[_]): Future[Seq[DetailedAddress]] = {
     val encodedParams = URLEncoder.encode(s"""{"postcode":"$postcode"}""", StandardCharsets.UTF_8.toString)
     val fullUrl = s"$url?pageSize=100&startPoint=1&searchparams=$encodedParams"
-    httpClient
-      .getWithGGHeaders[Addresses](fullUrl)
-      .map(_.addressDetails)
+    getJsonWithGGHeaders[Addresses](httpClient, fullUrl).map(_.addressDetails)
   }
 
   def get(addressUnitId: Long)(implicit requestWithPrincipal: RequestWithPrincipal[_]): Future[Option[SimpleAddress]] =
-    httpClient
-      .getWithGGHeaders[Addresses](s"$url/$addressUnitId")
-      .map(_.addressDetails.headOption.map(_.simplify)) recover toNone
+    getJsonWithGGHeaders[Addresses](httpClient, s"$url/$addressUnitId").map(_.addressDetails.headOption.map(_.simplify)) recover toNone
 
   def create(address: SimpleAddress)(implicit requestWithPrincipal: RequestWithPrincipal[_]): Future[Long] =
-    httpClient.postWithGgHeaders[JsValue](s"$url/non_standard_address", Json.toJsObject(address.toDetailedAddress)).map {
+    postJsonWithGGHeaders[JsValue](httpClient, s"$url/non_standard_address", Json.toJsObject(address.toDetailedAddress)).map {
       js =>
         js \ "id" match {
           case JsDefined(JsNumber(n)) => n.toLong

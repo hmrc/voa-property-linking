@@ -42,14 +42,16 @@ class ExternalCaseManagementApi @Inject() (
   def getMyOrganisationCheckCases(
         propertyLinkSubmissionId: String
   )(implicit request: RequestWithPrincipal[_]): Future[CheckCasesWithAgent] =
-    httpClient.getWithGGHeaders[CheckCasesWithAgent](
+    getJsonWithGGHeaders[CheckCasesWithAgent](
+      httpClient,
       s"${appConfig.bstBase}/external-case-management-api/my-organisation/property-links/$propertyLinkSubmissionId/check-cases$queryParams"
     )
 
   def getMyClientsCheckCases(
         propertyLinkSubmissionId: String
   )(implicit request: RequestWithPrincipal[_]): Future[CheckCasesWithClient] =
-    httpClient.getWithGGHeaders[CheckCasesWithClient](
+    getJsonWithGGHeaders[CheckCasesWithClient](
+      httpClient,
       s"${appConfig.bstBase}/external-case-management-api/my-organisation/clients/all/property-links/$propertyLinkSubmissionId/check-cases$queryParams"
     )
 
@@ -58,16 +60,16 @@ class ExternalCaseManagementApi @Inject() (
   ): Future[Option[CanChallengeResponse]] =
     party match {
       case "client" =>
-        httpClient
-          .getWithGGHeaders[HttpResponse](
-            s"${appConfig.bstBase}/external-case-management-api/my-organisation/property-links/$propertyLinkSubmissionId/check-cases/$checkCaseRef/canChallenge?valuationId=$valuationId"
-          )
+        getRawWithGGHeaders(
+          httpClient,
+          s"${appConfig.bstBase}/external-case-management-api/my-organisation/property-links/$propertyLinkSubmissionId/check-cases/$checkCaseRef/canChallenge?valuationId=$valuationId"
+        )
           .map(handleCanChallengeResponse) recover toNone
       case "agent" =>
-        httpClient
-          .getWithGGHeaders[HttpResponse](
-            s"${appConfig.bstBase}/external-case-management-api/my-organisation/clients/all/property-links/$propertyLinkSubmissionId/check-cases/$checkCaseRef/canChallenge?valuationId=$valuationId"
-          )
+        getRawWithGGHeaders(
+          httpClient,
+          s"${appConfig.bstBase}/external-case-management-api/my-organisation/clients/all/property-links/$propertyLinkSubmissionId/check-cases/$checkCaseRef/canChallenge?valuationId=$valuationId"
+        )
           .map(handleCanChallengeResponse) recover toNone
       case _ => throw new IllegalArgumentException(s"Unknown party $party")
     }

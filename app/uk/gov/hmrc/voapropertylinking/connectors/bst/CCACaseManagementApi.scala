@@ -18,7 +18,6 @@ package uk.gov.hmrc.voapropertylinking.connectors.bst
 
 import models.modernised.ccacasemanagement.requests.DetailedValuationRequest
 import play.api.libs.json.Json
-import uk.gov.hmrc.http._
 import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
 import uk.gov.hmrc.voapropertylinking.config.AppConfig
 import uk.gov.hmrc.voapropertylinking.connectors.BaseVoaConnector
@@ -38,8 +37,7 @@ class CCACaseManagementApi @Inject() (
   def requestDetailedValuation(
         request: DetailedValuationRequest
   )(implicit requestWithPrincipal: RequestWithPrincipal[_]): Future[Unit] =
-    httpClient
-      .postWithGgHeaders[HttpResponse](url + "/cca_case/dvrSubmission", Json.toJsObject(request))
+    postRawWithGGHeaders(httpClient, url + "/cca_case/dvrSubmission", Json.toJsObject(request))
       .map { _ =>
         ()
       }
