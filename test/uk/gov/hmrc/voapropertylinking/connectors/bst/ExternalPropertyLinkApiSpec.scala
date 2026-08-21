@@ -352,7 +352,6 @@ class ExternalPropertyLinkApiSpec extends BaseUnitSpec {
     "call modernised createPropertyLinkOnClientBehalf endpoint" in new Setup {
 
       val mockHttpResponse: HttpResponse = mock[HttpResponse]
-      val mockVoaCreatePropertyLink: CreatePropertyLinkOnClientBehalf = mock[CreatePropertyLinkOnClientBehalf]
       val clientId = 100
 
       val date: String = "2018-09-05"

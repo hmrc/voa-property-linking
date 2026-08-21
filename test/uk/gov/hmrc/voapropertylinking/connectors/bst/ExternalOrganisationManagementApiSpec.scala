@@ -65,7 +65,7 @@ class ExternalOrganisationManagementApiSpec extends BaseUnitSpec {
       when(mockVoaHttpClient.getWithGGHeaders[Option[AgentDetails]](any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(Some(agentDetails)))
 
-      testConnector.getAgentDetails(agentCode)(hc, requestWithPrincipal).futureValue shouldBe Some(agentDetails)
+      testConnector.getAgentDetails(agentCode)(requestWithPrincipal).futureValue shouldBe Some(agentDetails)
 
       verify(mockVoaHttpClient, times(1))
         .getWithGGHeaders[Option[AgentDetails]](matching("getAgentDetailsUrl/123432"))(any(), any(), any(), any())
@@ -77,7 +77,7 @@ class ExternalOrganisationManagementApiSpec extends BaseUnitSpec {
       when(mockVoaHttpClient.getWithGGHeaders[Option[AgentDetails]](any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(None))
 
-      testConnector.getAgentDetails(agentCode)(hc, requestWithPrincipal).futureValue shouldBe None
+      testConnector.getAgentDetails(agentCode)(requestWithPrincipal).futureValue shouldBe None
 
       verify(mockVoaHttpClient, times(1))
         .getWithGGHeaders[Option[AgentDetails]](matching("getAgentDetailsUrl/123432"))(any(), any(), any(), any())

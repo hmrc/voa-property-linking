@@ -17,7 +17,6 @@
 package uk.gov.hmrc.voapropertylinking.connectors.bst
 
 import play.api.libs.json.Json
-import uk.gov.hmrc.http._
 import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
 import uk.gov.hmrc.voapropertylinking.connectors.BaseVoaConnector
 import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
@@ -35,16 +34,18 @@ class ExternalOrganisationManagementApi @Inject() (
 
   def agentAppointmentChanges(
         appointmentChangesRequest: AppointmentChangesRequest
-  )(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[AppointmentChangeResponse] =
-    httpClient.postWithGgHeaders[AppointmentChangeResponse](
-      url = agentAppointmentChangesUrl,
-      body = Json.toJsObject(appointmentChangesRequest)
+  )(implicit request: RequestWithPrincipal[_]): Future[AppointmentChangeResponse] =
+    postJsonWithGGHeaders[AppointmentChangeResponse](
+      httpClient,
+      agentAppointmentChangesUrl,
+      Json.toJsObject(appointmentChangesRequest)
     )
 
   def getAgentDetails(
         agentCode: Long
-  )(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[Option[AgentDetails]] =
-    httpClient.getWithGGHeaders[Option[AgentDetails]](url =
+  )(implicit request: RequestWithPrincipal[_]): Future[Option[AgentDetails]] =
+    getOptionalJsonWithGGHeaders[AgentDetails](
+      httpClient,
       getAgentDetailsUrl.templated("representativeCode" -> agentCode)
     )
 }

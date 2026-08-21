@@ -46,7 +46,7 @@ class ModernisedExternalCaseManagementApi @Inject() (
   )(implicit request: RequestWithPrincipal[_]): Future[CheckCasesWithAgent] = {
     val url =
       s"${appConfig.modernisedBase}/external-case-management-api/my-organisation/property-links/$propertyLinkSubmissionId/check-cases$queryParams"
-    val response = httpClient.getWithGGHeaders[CheckCasesWithAgent](url = url)
+    val response = getJsonWithGGHeaders[CheckCasesWithAgent](httpClient, url)
     logModernisedErrorResponse(response, Seq("propertyLinkSubmissionId" -> propertyLinkSubmissionId), url)(
       request.principal,
       executionContext
@@ -58,7 +58,7 @@ class ModernisedExternalCaseManagementApi @Inject() (
   )(implicit request: RequestWithPrincipal[_]): Future[CheckCasesWithClient] = {
     val url =
       s"${appConfig.modernisedBase}/external-case-management-api/my-organisation/clients/all/property-links/$propertyLinkSubmissionId/check-cases$queryParams"
-    val response = httpClient.getWithGGHeaders[CheckCasesWithClient](url = url)
+    val response = getJsonWithGGHeaders[CheckCasesWithClient](httpClient, url)
     logModernisedErrorResponse(response, Seq("propertyLinkSubmissionId" -> propertyLinkSubmissionId), url)(
       request.principal,
       executionContext
@@ -72,8 +72,7 @@ class ModernisedExternalCaseManagementApi @Inject() (
       case "client" =>
         val url =
           s"${appConfig.modernisedBase}/external-case-management-api/my-organisation/property-links/$propertyLinkSubmissionId/check-cases/$checkCaseRef/canChallenge?valuationId=$valuationId"
-        val response = httpClient
-          .getWithGGHeaders[HttpResponse](url)
+        val response = getRawWithGGHeaders(httpClient, url)
           .map(handleCanChallengeResponse) recover toNone
         logModernisedErrorResponse(
           response,
@@ -87,8 +86,7 @@ class ModernisedExternalCaseManagementApi @Inject() (
       case "agent" =>
         val url =
           s"${appConfig.modernisedBase}/external-case-management-api/my-organisation/clients/all/property-links/$propertyLinkSubmissionId/check-cases/$checkCaseRef/canChallenge?valuationId=$valuationId"
-        val response = httpClient
-          .getWithGGHeaders[HttpResponse](url)
+        val response = getRawWithGGHeaders(httpClient, url)
           .map(handleCanChallengeResponse) recover toNone
         logModernisedErrorResponse(
           response,

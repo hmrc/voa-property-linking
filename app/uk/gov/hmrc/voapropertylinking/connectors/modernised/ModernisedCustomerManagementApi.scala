@@ -18,7 +18,6 @@ package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
 import models._
 import play.api.libs.json.{JsValue, Json}
-import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
 import uk.gov.hmrc.voapropertylinking.config.AppConfig
 import uk.gov.hmrc.voapropertylinking.connectors.BaseVoaConnector
@@ -42,7 +41,8 @@ class ModernisedCustomerManagementApi @Inject() (
   def createGroupAccount(account: GroupAccountSubmission, time: Instant = Instant.now)(implicit
         requestWithPrincipal: RequestWithPrincipal[_]
   ): Future[GroupId] = {
-    val response = httpClient.postWithGgHeaders[GroupId](organisationUrl, Json.toJsObject(account.toApiAccount(time)))
+    val response =
+      postJsonWithGGHeaders[GroupId](httpClient, organisationUrl, Json.toJsObject(account.toApiAccount(time)))
     logModernisedErrorResponse(response, Seq.empty, organisationUrl)(requestWithPrincipal.principal, executionContext)
   }
 
@@ -50,7 +50,7 @@ class ModernisedCustomerManagementApi @Inject() (
         requestWithPrincipal: RequestWithPrincipal[_]
   ): Future[Unit] = {
     val orgUrl = s"$organisationUrl/$orgId"
-    val response = httpClient.putWithGgHeaders[HttpResponse](orgUrl, Json.toJsObject(account)).map { _ =>
+    val response = putRawWithGGHeaders(httpClient, orgUrl, Json.toJsObject(account)).map { _ =>
       ()
     }
     logModernisedErrorResponse(response, Seq("orgId" -> orgId.toString), orgUrl)(
@@ -63,8 +63,7 @@ class ModernisedCustomerManagementApi @Inject() (
         id: Long
   )(implicit requestWithPrincipal: RequestWithPrincipal[_]): Future[Option[GroupAccount]] = {
     val url = s"$organisationUrl?organisationId=$id"
-    val response = httpClient
-      .getWithGGHeaders[Option[APIDetailedGroupAccount]](url)
+    val response = getOptionalJsonWithGGHeaders[APIDetailedGroupAccount](httpClient, url)
       .map(_.map(_.toGroupAccount))
     logModernisedErrorResponse(response, Seq("organisationId" -> id.toString), url)(
       requestWithPrincipal.principal,
@@ -76,8 +75,7 @@ class ModernisedCustomerManagementApi @Inject() (
         ggId: String
   )(implicit requestWithPrincipal: RequestWithPrincipal[_]): Future[Option[GroupAccount]] = {
     val url = s"$organisationUrl?governmentGatewayGroupId=$ggId"
-    val response = httpClient
-      .getWithGGHeaders[Option[APIDetailedGroupAccount]](url)
+    val response = getOptionalJsonWithGGHeaders[APIDetailedGroupAccount](httpClient, url)
       .map(_.map(_.toGroupAccount))
     logModernisedErrorResponse(response, Seq("ggId" -> ggId), url)(requestWithPrincipal.principal, executionContext)
   }
@@ -86,8 +84,7 @@ class ModernisedCustomerManagementApi @Inject() (
         agentCode: String
   )(implicit requestWithPrincipal: RequestWithPrincipal[_]): Future[Option[GroupAccount]] = {
     val url = s"$organisationUrl?representativeCode=$agentCode"
-    val response = httpClient
-      .getWithGGHeaders[Option[APIDetailedGroupAccount]](url)
+    val response = getOptionalJsonWithGGHeaders[APIDetailedGroupAccount](httpClient, url)
       .map(_.map(_.toGroupAccount))
     logModernisedErrorResponse(response, Seq("agentCode" -> agentCode), url)(
       requestWithPrincipal.principal,
@@ -98,8 +95,11 @@ class ModernisedCustomerManagementApi @Inject() (
   def createIndividualAccount(account: IndividualAccountSubmission, time: Instant = Instant.now)(implicit
         requestWithPrincipal: RequestWithPrincipal[_]
   ): Future[IndividualAccountId] = {
-    val response = httpClient
-      .postWithGgHeaders[IndividualAccountId](individualUrl, Json.toJsObject(account.toAPIIndividualAccount(time)))
+    val response = postJsonWithGGHeaders[IndividualAccountId](
+      httpClient,
+      individualUrl,
+      Json.toJsObject(account.toAPIIndividualAccount(time))
+    )
     logModernisedErrorResponse(response, Seq.empty, individualUrl)(requestWithPrincipal.principal, executionContext)
   }
 
@@ -107,8 +107,11 @@ class ModernisedCustomerManagementApi @Inject() (
         implicit requestWithPrincipal: RequestWithPrincipal[_]
   ): Future[JsValue] = {
     val personUrl = individualUrl + s"/$personId"
-    val response = httpClient
-      .putWithGgHeaders[JsValue](personUrl, Json.toJsObject(account.toAPIIndividualAccount(time)))
+    val response = putJsonWithGGHeaders[JsValue](
+      httpClient,
+      personUrl,
+      Json.toJsObject(account.toAPIIndividualAccount(time))
+    )
     logModernisedErrorResponse(response, Seq("personId" -> personId.toString), personUrl)(
       requestWithPrincipal.principal,
       executionContext
@@ -119,8 +122,7 @@ class ModernisedCustomerManagementApi @Inject() (
         id: Long
   )(implicit requestWithPrincipal: RequestWithPrincipal[_]): Future[Option[IndividualAccount]] = {
     val url = s"$individualUrl?personId=$id"
-    val response = httpClient
-      .getWithGGHeaders[Option[APIDetailedIndividualAccount]](url)
+    val response = getOptionalJsonWithGGHeaders[APIDetailedIndividualAccount](httpClient, url)
       .map(_.map(a => a.toIndividualAccount))
     logModernisedErrorResponse(response, Seq("personId" -> id.toString), url)(
       requestWithPrincipal.principal,
@@ -132,8 +134,7 @@ class ModernisedCustomerManagementApi @Inject() (
         ggId: String
   )(implicit requestWithPrincipal: RequestWithPrincipal[_]): Future[Option[IndividualAccount]] = {
     val url = s"$individualUrl?governmentGatewayExternalId=$ggId"
-    val response = httpClient
-      .getWithGGHeaders[Option[APIDetailedIndividualAccount]](url)
+    val response = getOptionalJsonWithGGHeaders[APIDetailedIndividualAccount](httpClient, url)
       .map(_.map(_.toIndividualAccount))
     logModernisedErrorResponse(response, Seq("ggId" -> ggId), url)(requestWithPrincipal.principal, executionContext)
   }

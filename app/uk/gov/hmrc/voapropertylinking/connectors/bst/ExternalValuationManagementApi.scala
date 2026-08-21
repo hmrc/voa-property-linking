@@ -47,18 +47,18 @@ class ExternalValuationManagementApi @Inject() (
   def getDvrDocuments(valuationId: Long, uarn: Long, propertyLinkId: String)(implicit
         request: RequestWithPrincipal[_]
   ): Future[Option[DvrDocumentFiles]] =
-    httpClient
-      .getWithGGHeaders[Option[DvrDocumentFiles]](
-        s"$url/properties/$uarn/valuations/$valuationId/files?propertyLinkId=$propertyLinkId"
-      )
+    getOptionalJsonWithGGHeaders[DvrDocumentFiles](
+      httpClient,
+      s"$url/properties/$uarn/valuations/$valuationId/files?propertyLinkId=$propertyLinkId"
+    )
 
   def getValuationHistory(uarn: Long, propertyLinkSubmissionId: String)(implicit
         request: RequestWithPrincipal[_]
   ): Future[Option[ValuationHistoryResponse]] =
-    httpClient
-      .getWithGGHeaders[Option[ValuationHistoryResponse]](
-        s"${valuationHistoryUrl.replace("{uarn}", uarn.toString)}?propertyLinkId=$propertyLinkSubmissionId"
-      )
+    getOptionalJsonWithGGHeaders[ValuationHistoryResponse](
+      httpClient,
+      s"${valuationHistoryUrl.replace("{uarn}", uarn.toString)}?propertyLinkId=$propertyLinkSubmissionId"
+    )
 
   def getDvrDocument(valuationId: Long, uarn: Long, propertyLinkId: String, fileRef: String)(implicit
         request: RequestWithPrincipal[_]

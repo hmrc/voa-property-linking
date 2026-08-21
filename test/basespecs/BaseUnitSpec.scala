@@ -16,7 +16,6 @@
 
 package basespecs
 
-import org.mockito.Mockito.when
 import org.scalatest._
 import org.scalatest.concurrent.{PatienceConfiguration, ScalaFutures}
 import org.scalatest.matchers.should.Matchers

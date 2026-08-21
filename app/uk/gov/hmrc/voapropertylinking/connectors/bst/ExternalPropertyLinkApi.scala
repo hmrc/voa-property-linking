@@ -67,7 +67,8 @@ class ExternalPropertyLinkApi @Inject() (
     val queryString =
       queryParams.map { case (key, value) => s"$key=${java.net.URLEncoder.encode(value, "UTF-8")}" }.mkString("&")
 
-    httpClient.getWithGGHeaders[PropertyLinksWithAgents](
+    getJsonWithGGHeaders[PropertyLinksWithAgents](
+      httpClient,
       s"${myAgentPropertyLinksUrl.replace("{agentCode}", agentCode.toString)}?$queryString"
     )
   }
@@ -89,7 +90,8 @@ class ExternalPropertyLinkApi @Inject() (
     val queryString =
       queryParams.map { case (key, value) => s"$key=${java.net.URLEncoder.encode(value, "UTF-8")}" }.mkString("&")
 
-    httpClient.getWithGGHeaders[PropertyLinksWithAgents](
+    getJsonWithGGHeaders[PropertyLinksWithAgents](
+      httpClient,
       s"${myAgentAvailablePropertyLinks.replace("{agentCode}", agentCode.toString)}?$queryString"
     )
   }
@@ -112,15 +114,14 @@ class ExternalPropertyLinkApi @Inject() (
     val queryString =
       queryParams.map { case (key, value) => s"$key=${java.net.URLEncoder.encode(value, "UTF-8")}" }.mkString("&")
 
-    httpClient.getWithGGHeaders[PropertyLinksWithAgents](
-      s"$myOrganisationsPropertyLinksUrl?$queryString"
-    )
+    getJsonWithGGHeaders[PropertyLinksWithAgents](httpClient, s"$myOrganisationsPropertyLinksUrl?$queryString")
   }
 
   def getMyOrganisationsPropertyLink(
         submissionId: String
   )(implicit request: RequestWithPrincipal[_]): Future[Option[OwnerPropertyLink]] =
-    httpClient.getWithGGHeaders[Option[OwnerPropertyLink]](
+    getOptionalJsonWithGGHeaders[OwnerPropertyLink](
+      httpClient,
       myOrganisationsPropertyLinkUrl.replace("{propertyLinkId}", submissionId)
     )
 
@@ -144,10 +145,7 @@ class ExternalPropertyLinkApi @Inject() (
     val queryString =
       queryParams.map { case (key, value) => s"$key=${java.net.URLEncoder.encode(value, "UTF-8")}" }.mkString("&")
 
-    httpClient
-      .getWithGGHeaders[Option[PropertyLinksWithClient]](
-        s"$myClientsPropertyLinksUrl?$queryString"
-      )
+    getOptionalJsonWithGGHeaders[PropertyLinksWithClient](httpClient, s"$myClientsPropertyLinksUrl?$queryString")
   }
 
   def getClientPropertyLinks(
@@ -173,16 +171,17 @@ class ExternalPropertyLinkApi @Inject() (
     val queryString =
       queryParams.map { case (key, value) => s"$key=${java.net.URLEncoder.encode(value, "UTF-8")}" }.mkString("&")
 
-    httpClient
-      .getWithGGHeaders[Option[PropertyLinksWithClient]](
-        s"${myClientPropertyLinksUrl.replace("{clientId}", clientOrgId.toString)}?$queryString"
-      )
+    getOptionalJsonWithGGHeaders[PropertyLinksWithClient](
+      httpClient,
+      s"${myClientPropertyLinksUrl.replace("{clientId}", clientOrgId.toString)}?$queryString"
+    )
   }
 
   def getClientsPropertyLink(
         submissionId: String
   )(implicit request: RequestWithPrincipal[_]): Future[Option[ClientPropertyLink]] =
-    httpClient.getWithGGHeaders[Option[ClientPropertyLink]](
+    getOptionalJsonWithGGHeaders[ClientPropertyLink](
+      httpClient,
       myClientsPropertyLinkUrl.replace("{propertyLinkId}", submissionId)
     )
 
@@ -202,32 +201,29 @@ class ExternalPropertyLinkApi @Inject() (
 
     val updatedParams = if (queryString.nonEmpty) s"?$queryString" else ""
 
-    httpClient
-      .getWithGGHeaders[ClientsResponse](s"$myClientsUrl$updatedParams")
+    getJsonWithGGHeaders[ClientsResponse](httpClient, s"$myClientsUrl$updatedParams")
   }
 
   def createPropertyLink(
         propertyLink: CreatePropertyLink
   )(implicit hc: HeaderCarrier, request: RequestWithPrincipal[_]): Future[HttpResponse] =
-    httpClient
-      .postWithGgHeaders[HttpResponse](createPropertyLinkUrl, Json.toJsObject(propertyLink))
+    postRawWithGGHeaders(httpClient, createPropertyLinkUrl, Json.toJsObject(propertyLink))
 
   def createOnClientBehalf(propertyLink: CreatePropertyLinkOnClientBehalf, clientId: Long)(implicit
         hc: HeaderCarrier,
         request: RequestWithPrincipal[_]
   ): Future[HttpResponse] =
-    httpClient
-      .postWithGgHeaders[HttpResponse](
-        createPropertyLinkOnClientBehalfUrl.templated("clientId" -> clientId),
-        Json.toJsObject(propertyLink)
-      )
+    postRawWithGGHeaders(
+      httpClient,
+      createPropertyLinkOnClientBehalfUrl.templated("clientId" -> clientId),
+      Json.toJsObject(propertyLink)
+    )
 
   def getMyOrganisationsAgents()(implicit request: RequestWithPrincipal[_]): Future[AgentList] =
-    httpClient.getWithGGHeaders[AgentList](s"$myOrganisationsAgentsUrl?requestTotalRowCount=true")
+    getJsonWithGGHeaders[AgentList](httpClient, s"$myOrganisationsAgentsUrl?requestTotalRowCount=true")
 
   def revokeClientProperty(plSubmissionId: String)(implicit request: RequestWithPrincipal[_]): Future[Unit] =
-    httpClient
-      .deleteWithGgHeaders[HttpResponse](revokeClientsPropertyLinkUrl.templated("submissionId" -> plSubmissionId))
+    deleteRawWithGGHeaders(httpClient, revokeClientsPropertyLinkUrl.templated("submissionId" -> plSubmissionId))
       .map(_ => ())
 
   private def modernisedPaginationParams(params: Option[PaginationParams]): Seq[(String, String)] =
