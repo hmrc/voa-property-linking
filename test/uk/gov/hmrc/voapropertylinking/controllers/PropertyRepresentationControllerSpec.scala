@@ -17,8 +17,8 @@
 package uk.gov.hmrc.voapropertylinking.controllers
 
 import basespecs.BaseControllerSpec
-import models.searchApi.{OwnerAuthResult => ModernisedOwnerAuthResult}
 import models.PaginationParams
+import models.searchApi.{OwnerAuthResult => ModernisedOwnerAuthResult}
 import org.mockito.ArgumentMatchers.{any, eq => mEq}
 import org.mockito.Mockito._
 import play.api.libs.json.Json
@@ -39,8 +39,7 @@ class PropertyRepresentationControllerSpec extends BaseControllerSpec {
         modernisedExternalPropertyLinkApi = mockModernisedExternalPropertyLinkApi,
         organisationManagementApi = mockOrganisationManagementApi,
         propertyLinkApi = mockPropertyLinkApi,
-        featureSwitch = mockFeatureSwitch,
-        auditingService = mockAuditingService
+        featureSwitch = mockFeatureSwitch
       )
     protected val submissionId = "PL123"
     protected val agentCode = 12345L

@@ -17,6 +17,7 @@
 package uk.gov.hmrc.voapropertylinking.config
 
 import play.api.Configuration
+import uk.gov.hmrc.http.StringContextOps
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import java.net.URL
@@ -30,8 +31,13 @@ class AppConfig @Inject() (configuration: Configuration, servicesConfig: Service
   val apimSubscriptionKeyValue: String =
     configuration.get[String]("microservice.services.voa-modernised-api.apiHeader.value")
 
-  val modernisedBase: URL = new URL(servicesConfig.baseUrl("voa-modernised-api"))
+  val modernisedBase: URL = url"${servicesConfig.baseUrl("voa-modernised-api")}"
 
-  val bstBase: URL = new URL(servicesConfig.baseUrl("voa-bst"))
+  val bstBase: URL = url"${servicesConfig.baseUrl("voa-bst")}"
 
+  val dashboardFrontendBase: URL =
+    url"${servicesConfig.baseUrl("business-rates-dashboard-frontend")}/business-rates-dashboard"
+
+  val dashboardFrontendAgentHasClientsCacheSecret =
+    configuration.get[String]("microservice.services.business-rates-dashboard-frontend.agentHasClientsCacheSecret")
 }
