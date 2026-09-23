@@ -19,7 +19,6 @@ package uk.gov.hmrc.voapropertylinking.controllers
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.voapropertylinking.actions.AuthenticatedActionBuilder
-import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import uk.gov.hmrc.voapropertylinking.config.FeatureSwitch
 import uk.gov.hmrc.voapropertylinking.connectors.bst.{ExternalOrganisationManagementApi, ExternalPropertyLinkApi}
 import uk.gov.hmrc.voapropertylinking.connectors.modernised._
@@ -37,8 +36,7 @@ class PropertyRepresentationController @Inject() (
       modernisedExternalPropertyLinkApi: ModernisedExternalPropertyLinkApi,
       organisationManagementApi: ExternalOrganisationManagementApi,
       propertyLinkApi: ExternalPropertyLinkApi,
-      featureSwitch: FeatureSwitch,
-      auditingService: AuditingService
+      featureSwitch: FeatureSwitch
 )(implicit executionContext: ExecutionContext)
     extends PropertyLinkingBaseController(controllerComponents) {
 
@@ -70,7 +68,9 @@ class PropertyRepresentationController @Inject() (
           if (featureSwitch.isBstDownstreamEnabled)
             organisationManagementApi.agentAppointmentChanges(appointRequest)
           else
-            modernisedOrganisationManagementApi.agentAppointmentChanges(appointRequest)
+            modernisedOrganisationManagementApi.agentAppointmentChanges(
+              appointRequest
+            )
         agentAppointmentChanges.map { response =>
           Accepted(Json.toJson(response))
         }

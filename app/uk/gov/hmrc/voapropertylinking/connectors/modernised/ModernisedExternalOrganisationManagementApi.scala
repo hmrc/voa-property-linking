@@ -20,14 +20,16 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.voapropertylinking.auth.RequestWithPrincipal
 import uk.gov.hmrc.voapropertylinking.connectors.BaseVoaConnector
 import uk.gov.hmrc.voapropertylinking.connectors.errorhandler.ModernisedRequestErrorLogging
+import uk.gov.hmrc.voapropertylinking.connectors.mdtp.BusinessRatesDashboardFrontendConnector
 import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
-import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation.{AgentDetails, AppointmentChangeResponse, AppointmentChangesRequest}
+import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation.{AgentDetails, AppointmentAction, AppointmentChangeResponse, AppointmentChangesRequest}
 
 import javax.inject.{Inject, Named}
 import scala.concurrent.{ExecutionContext, Future}
 
 class ModernisedExternalOrganisationManagementApi @Inject() (
       httpClient: VoaHttpClient,
+      businessRatesDashboardFrontendConnector: BusinessRatesDashboardFrontendConnector,
       @Named("voa.modernised.agentAppointmentChanges") agentAppointmentChangesUrl: String,
       @Named("voa.modernised.myAgentDetails") getAgentDetailsUrl: String
 )(implicit executionContext: ExecutionContext)
@@ -42,6 +44,22 @@ class ModernisedExternalOrganisationManagementApi @Inject() (
       Json.toJsObject(appointmentChangesRequest)
     )
     logModernisedErrorResponse(response, Seq.empty, agentAppointmentChangesUrl)(request.principal, executionContext)
+      .flatMap { response =>
+        if (appointmentChangesRequest.action == AppointmentAction.REVOKE) {
+          val agentCode = appointmentChangesRequest.agentRepresentativeCode.toString
+          businessRatesDashboardFrontendConnector
+            .invalidateAgentHasClientsCache(agentCode)
+            .map(_ => response)
+            .recover { case _ =>
+              logger.warn(
+                s"Failed to invalidate agentHasClientsCache on business-rates-dashboard-frontend for agent code $agentCode"
+              )
+              response
+            }
+        } else {
+          Future.successful(response)
+        }
+      }
   }
 
   def getAgentDetails(

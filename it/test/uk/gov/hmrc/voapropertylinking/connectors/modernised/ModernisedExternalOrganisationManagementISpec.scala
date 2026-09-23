@@ -16,14 +16,17 @@
 
 package uk.gov.hmrc.voapropertylinking.connectors.modernised
 
+import com.github.tomakehurst.wiremock.client.WireMock.{equalTo, postRequestedFor, urlEqualTo, verify}
 import play.api.http.Status.{INTERNAL_SERVER_ERROR, OK}
 import play.api.libs.json.{JsObject, JsValue, Json}
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import play.api.test.Helpers.await
 import uk.gov.hmrc.http.{HeaderCarrier, JsValidationException}
-import uk.gov.hmrc.voapropertylinking.BaseIntegrationSpec
+import uk.gov.hmrc.voapropertylinking.WiremockHelper.{wiremockHost, wiremockPort}
+import uk.gov.hmrc.voapropertylinking.{BaseIntegrationSpec, WiremockMethods}
 import uk.gov.hmrc.voapropertylinking.auth.{Principal, RequestWithPrincipal}
+import uk.gov.hmrc.voapropertylinking.connectors.mdtp.BusinessRatesDashboardFrontendConnector
 import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation
 import uk.gov.hmrc.voapropertylinking.models.modernised.agentrepresentation._
 import uk.gov.hmrc.voapropertylinking.stubs.modernised.ModernisedExternalOrganisationManagementStub
@@ -31,7 +34,14 @@ import uk.gov.hmrc.voapropertylinking.stubs.modernised.ModernisedExternalOrganis
 import scala.concurrent.ExecutionContext
 
 class ModernisedExternalOrganisationManagementISpec
-    extends BaseIntegrationSpec with ModernisedExternalOrganisationManagementStub {
+    extends BaseIntegrationSpec with ModernisedExternalOrganisationManagementStub with WiremockMethods {
+
+  override def config: Map[String, String] =
+    super.config ++ Map(
+      "microservice.services.business-rates-dashboard-frontend.host"                       -> wiremockHost,
+      "microservice.services.business-rates-dashboard-frontend.port"                       -> wiremockPort.toString,
+      "microservice.services.business-rates-dashboard-frontend.agentHasClientsCacheSecret" -> "secret"
+    )
 
   trait TestSetup {
     implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
@@ -39,8 +49,43 @@ class ModernisedExternalOrganisationManagementISpec
     implicit val request: RequestWithPrincipal[AnyContentAsEmpty.type] =
       RequestWithPrincipal(FakeRequest(), Principal(externalId = "testExternalId", groupId = "testGroupId"))
 
+    val agentId: Long = 123456789L
+
     lazy val connector: ModernisedExternalOrganisationManagementApi =
       app.injector.instanceOf[ModernisedExternalOrganisationManagementApi]
+    lazy val dashboardFrontendConnector: BusinessRatesDashboardFrontendConnector =
+      app.injector.instanceOf[BusinessRatesDashboardFrontendConnector]
+
+    def appointmentChangesRequestJson(agentId: Long): JsValue =
+      Json.parse(s"""{
+                    |  "agentRepresentativeCode" : $agentId,
+                    |  "action": "REVOKE",
+                    |  "scope"  : "LIST_YEAR",
+                    |  "propertyLinks" : ["PL123FRED", "PL654CARL"],
+                    |  "listYears": ["2017", "2023"]
+                    |}""".stripMargin)
+
+    def appointmentChangesRequestModel(agentId: Long): AppointmentChangesRequest =
+      AppointmentChangesRequest(
+        agentRepresentativeCode = agentId,
+        action = AppointmentAction.REVOKE,
+        scope = AppointmentScope.LIST_YEAR,
+        propertyLinks = Some(List("PL123FRED", "PL654CARL")),
+        listYears = Some(List("2017", "2023"))
+      )
+
+    def appointmentChangesResponseJson(apptChangeId: String): JsObject =
+      Json.obj("agentAppointmentChangeId" -> apptChangeId)
+
+    def expectedAppointmentChangeResponse(apptChangeId: String): AppointmentChangeResponse =
+      AppointmentChangeResponse(appointmentChangeId = apptChangeId)
+
+    def stubInvalidateCache(agentCode: Long): Unit =
+      when(
+        POST,
+        s"/business-rates-dashboard/internal/cache/agentHasClientsCache/$agentCode/invalidate/",
+        Map("X-Cache-Endpoint-Secret" -> "secret")
+      ).thenReturn(OK)
   }
 
   "getAgentDetails" should {
@@ -80,37 +125,38 @@ class ModernisedExternalOrganisationManagementISpec
     }
   }
   "agentAppointmentChanges" should {
-    "return a valid response for the complete request " in new TestSetup {
-
-      val agentId = 123456789L
-      val requestJson: JsValue =
-        Json.parse(s"""{
-                      |  "agentRepresentativeCode" : $agentId,
-                      |  "action": "APPOINT",
-                      |  "scope"  : "LIST_YEAR",
-                      |  "propertyLinks" : ["PL123FRED", "PL654CARL"],
-                      |  "listYears": ["2017", "2023"]
-                      |}""".stripMargin)
-
-      val requestModel = AppointmentChangesRequest(
-        agentRepresentativeCode = agentId,
-        action = AppointmentAction.APPOINT,
-        scope = AppointmentScope.LIST_YEAR,
-        propertyLinks = Some(List("PL123FRED", "PL654CARL")),
-        listYears = Some(List("2017", "2023"))
-      )
-
+    "return a valid response for the complete request" in new TestSetup {
       val apptChangeId = "change-id"
-      val responseJson: JsObject = Json.obj(
-        "agentAppointmentChangeId" -> apptChangeId
-      )
-      val expectedResponse: AppointmentChangeResponse = AppointmentChangeResponse(appointmentChangeId = apptChangeId)
+      val requestJson = appointmentChangesRequestJson(agentId)
+      val requestModel = appointmentChangesRequestModel(agentId)
+      val responseJson = appointmentChangesResponseJson(apptChangeId)
+      val expectedResponse = expectedAppointmentChangeResponse(apptChangeId)
 
       stubAgentAppointmentChanges(requestJson)(OK, responseJson)
 
-      val result: AppointmentChangeResponse = await(connector.agentAppointmentChanges(requestModel))
+      val result: AppointmentChangeResponse =
+        await(connector.agentAppointmentChanges(requestModel))
 
       result shouldBe expectedResponse
+    }
+
+    "invalidate the cache for the agent when the request succeeds" in new TestSetup {
+      val apptChangeId = "change-id"
+      val requestJson = appointmentChangesRequestJson(agentId)
+      val requestModel = appointmentChangesRequestModel(agentId)
+      val responseJson = appointmentChangesResponseJson(apptChangeId)
+
+      stubInvalidateCache(agentId)
+      stubAgentAppointmentChanges(requestJson)(OK, responseJson)
+
+      await(connector.agentAppointmentChanges(requestModel))
+
+      verify(
+        postRequestedFor(
+          urlEqualTo(s"/business-rates-dashboard/internal/cache/agentHasClientsCache/$agentId/invalidate/")
+        )
+          .withHeader("X-Cache-Endpoint-Secret", equalTo("secret"))
+      )
     }
   }
 

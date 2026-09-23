@@ -28,7 +28,7 @@ import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 import uk.gov.hmrc.voapropertylinking.auditing.AuditingService
 import uk.gov.hmrc.voapropertylinking.config.{AppConfig, FeatureSwitch}
 import uk.gov.hmrc.voapropertylinking.connectors.bst._
-import uk.gov.hmrc.voapropertylinking.connectors.mdtp.BusinessRatesAuthConnector
+import uk.gov.hmrc.voapropertylinking.connectors.mdtp.{BusinessRatesAuthConnector, BusinessRatesDashboardFrontendConnector}
 import uk.gov.hmrc.voapropertylinking.connectors.modernised._
 import uk.gov.hmrc.voapropertylinking.http.VoaHttpClient
 import uk.gov.hmrc.voapropertylinking.services.{AssessmentService, PropertyLinkingService}
@@ -58,6 +58,8 @@ trait AllMocks extends MockitoSugar { me: BeforeAndAfterEach =>
 
   // MDTP connectors
   val mockBusinessRatesAuthConnector: BusinessRatesAuthConnector = mock[BusinessRatesAuthConnector]
+  val mockBusinessRatesDashboardFrontendConnector: BusinessRatesDashboardFrontendConnector =
+    mock[BusinessRatesDashboardFrontendConnector]
 
   val mockAssessmentService: AssessmentService = mock[AssessmentService]
   val mockPropertyLinkingService: PropertyLinkingService = mock[PropertyLinkingService]

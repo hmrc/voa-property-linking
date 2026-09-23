@@ -27,13 +27,13 @@ class ModernisedExternalOrganisationManagementApiSpec extends BaseUnitSpec {
 
   val testConnector = new ModernisedExternalOrganisationManagementApi(
     httpClient = mockVoaHttpClient,
+    businessRatesDashboardFrontendConnector = mockBusinessRatesDashboardFrontendConnector,
     agentAppointmentChangesUrl = "agentAppointmentChangesUrl",
     getAgentDetailsUrl = "getAgentDetailsUrl/{representativeCode}"
   )
 
   "OrganisationManagementApi.agentAppointmentChanges" should {
     "return appointmentChangeResponse for a valid appointment change request" in {
-
       when(
         mockVoaHttpClient.postWithGgHeaders[AppointmentChangeResponse](any(), any())(
           any(),
@@ -60,27 +60,23 @@ class ModernisedExternalOrganisationManagementApiSpec extends BaseUnitSpec {
 
   "OrganisationManagementApi.getAgentDetails" should {
     "return AgentDetails with the provided agentCode" in {
-      val agentCode = 123432L
-
       when(mockVoaHttpClient.getWithGGHeaders[Option[AgentDetails]](any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(Some(agentDetails)))
 
       testConnector.getAgentDetails(agentCode)(requestWithPrincipal).futureValue shouldBe Some(agentDetails)
 
       verify(mockVoaHttpClient, times(1))
-        .getWithGGHeaders[Option[AgentDetails]](matching("getAgentDetailsUrl/123432"))(any(), any(), any(), any())
+        .getWithGGHeaders[Option[AgentDetails]](matching("getAgentDetailsUrl/12345"))(any(), any(), any(), any())
     }
 
     "return an None if no AgentDetails can be found for the provided agentCode" in {
-      val agentCode = 123432L
-
       when(mockVoaHttpClient.getWithGGHeaders[Option[AgentDetails]](any())(any(), any(), any(), any()))
         .thenReturn(Future.successful(None))
 
       testConnector.getAgentDetails(agentCode)(requestWithPrincipal).futureValue shouldBe None
 
       verify(mockVoaHttpClient, times(1))
-        .getWithGGHeaders[Option[AgentDetails]](matching("getAgentDetailsUrl/123432"))(any(), any(), any(), any())
+        .getWithGGHeaders[Option[AgentDetails]](matching("getAgentDetailsUrl/12345"))(any(), any(), any(), any())
     }
   }
 
