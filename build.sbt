@@ -55,7 +55,7 @@ lazy val microservice: Project = Project(appName, file("."))
     libraryDependencies ++= compileDependencies ++ testDependencies,
     retrieveManaged := true,
     dependencyOverrides ++= Seq(
-      "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.2",
+      "org.scala-lang.modules" %% "scala-parser-combinators" % "2.5.0",
     ))
 
 lazy val it = project
@@ -71,14 +71,14 @@ scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature")
 scalacOptions += "-Wconf:src=routes/.*:s"
 scalacOptions += "-Wconf:cat=unused-imports&src=html/.*:s"
 
-val bootstrapPlayVersion = "10.7.0"
-val hmrcMongoVersion = "2.12.0"
+val bootstrapPlayVersion = "10.8.0"
+val hmrcMongoVersion = "2.14.0"
 
 val compileDependencies = Seq(
   ws,
   guice,
   "uk.gov.hmrc"        %% "bootstrap-backend-play-30" % bootstrapPlayVersion,
-  "uk.gov.hmrc"        %% "uri-template"              % "1.19.0",
+  "uk.gov.hmrc"        %% "uri-template"              % "1.22.0",
   "uk.gov.hmrc.mongo"  %% "hmrc-mongo-play-30"        % hmrcMongoVersion,
   "org.typelevel"      %% "cats-core"                 % "2.13.0",
   "ai.x"               %% "play-json-extensions"      % "0.42.0",
@@ -87,8 +87,8 @@ val compileDependencies = Seq(
 
 val testDependencies = Seq(
   "uk.gov.hmrc"            %% "bootstrap-test-play-30"  % bootstrapPlayVersion  % Test,
-  "org.mockito"            % "mockito-core"             % "5.23.0"              % Test,
-  "org.scalacheck"         %% "scalacheck"              % "1.19.0"              % Test,
+  "org.mockito"            % "mockito-core"             % "5.24.0"              % Test,
+  "org.scalacheck"         %% "scalacheck"              % "1.20.0"              % Test,
   "uk.gov.hmrc.mongo"      %% "hmrc-mongo-test-play-30" % hmrcMongoVersion      % Test
 )
 
