@@ -85,7 +85,7 @@ class DVRRepository @Inject() (mongo: MongoComponent, @Named("dvrCollectionName"
       }
 
   private def query(organisationId: Long): Bson =
-    or(equal("organisationId", organisationId), in("agents", Seq(organisationId)))
+    or(equal("organisationId", organisationId), in("agents", organisationId))
 
 }
 

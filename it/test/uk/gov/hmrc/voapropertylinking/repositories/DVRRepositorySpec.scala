@@ -45,6 +45,12 @@ class DVRRepositorySpec extends MongoSpec {
 
         await(repo.find(dvrRequest.organisationId, dvrRequest.assessmentRef)) shouldBe Some(record)
       }
+      "a dvrRecord has two agents and the second agent queries it" in new Setup {
+        val record = dvrRecord.copy(agents = Some(List(10L, 90L)))
+        repo.awaitInsert(record)
+
+        await(repo.find(90L, dvrRequest.assessmentRef)) shouldBe Some(record)
+      }
       "a dvrSubmission matches an agent orgId but not the IP orgId" in new Setup {
         repo.awaitInsert(dvrRecord)
 
